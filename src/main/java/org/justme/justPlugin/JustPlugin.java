@@ -129,6 +129,7 @@ public final class JustPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new TempBanListener(this), this);
         getServer().getPluginManager().registerEvents(new VanishListener(this), this);
+        getServer().getPluginManager().registerEvents(new GodModeListener(this), this);
 
         // Schedule temp ban cleanup every 5 minutes
         getServer().getScheduler().runTaskTimer(this, () -> temporaryBanManager.checkExpired(), 6000L, 6000L);

@@ -40,7 +40,9 @@ public class PaynoteCommand implements CommandExecutor, TabCompleter {
                 String amountStr = displayName.replace("Pay Note -", "").replace("coins", "").trim();
                 double amount = Double.parseDouble(amountStr);
                 economyManager.deposit(player.getUniqueId(), amount);
-                player.getInventory().removeItem(new ItemStack(Material.PAPER, 1));
+                // Pay notes are always single items (unique display name per value);
+                // remove the specific note from the player's main hand.
+                player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
                 player.sendMessage("§aRedeemed pay note for §e$" + String.format("%.2f", amount) + "§a. New balance: §e$" + String.format("%.2f", economyManager.getBalance(player.getUniqueId())));
             } catch (NumberFormatException e) {
                 player.sendMessage("§cInvalid pay note.");
