@@ -1,0 +1,5 @@
+discord-link: "https://discord.gg/example"
+
+motd:
+  - "&6Welcome to the server!"
+  - "&7Type &e/help &7for a list of commands."

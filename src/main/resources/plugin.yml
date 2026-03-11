@@ -2,3 +2,336 @@ name: JustPlugin
 version: '1.0-SNAPSHOT'
 main: org.justme.justPlugin.JustPlugin
 api-version: '1.21'
+description: EssentialsX-like plugin for Paper 1.21
+
+commands:
+  tpa:
+    description: Request to teleport to a player
+    usage: /tpa <player>
+    aliases: [teleportask]
+    permission: justplugin.tpa
+  tpaccept:
+    description: Accept a TPA request
+    usage: /tpaccept
+    aliases: [tpyes, tpac]
+    permission: justplugin.tpaccept
+  tpacancel:
+    description: Cancel a TPA request
+    usage: /tpacancel
+    aliases: [tpcancel]
+    permission: justplugin.tpacancel
+  tpreject:
+    description: Reject a TPA request
+    usage: /tpreject
+    aliases: [tpno, tpdeny]
+    permission: justplugin.tpreject
+  tpahere:
+    description: Request a player to teleport to you
+    usage: /tpahere <player>
+    aliases: [teleportaskhere]
+    permission: justplugin.tpahere
+  tppos:
+    description: Teleport to coordinates
+    usage: /tppos <x> <y> <z> [world]
+    aliases: [teleportposition]
+    permission: justplugin.tppos
+  tpr:
+    description: Randomly teleport
+    usage: /tpr
+    aliases: [wild, tpwild, rtp]
+    permission: justplugin.tpr
+  back:
+    description: Return to previous location
+    usage: /back
+    aliases: [return]
+    permission: justplugin.back
+  spawn:
+    description: Teleport to world spawn
+    usage: /spawn
+    permission: justplugin.spawn
+  setspawn:
+    description: Set world spawn
+    usage: /setspawn
+    permission: justplugin.setspawn
+  home:
+    description: Teleport to a home
+    usage: /home [name]
+    aliases: [homes]
+    permission: justplugin.home
+  sethome:
+    description: Set a home
+    usage: /sethome [name]
+    aliases: [createhome]
+    permission: justplugin.sethome
+  delhome:
+    description: Delete a home
+    usage: /delhome <name>
+    aliases: [removehome, deletehome]
+    permission: justplugin.delhome
+  warp:
+    description: Teleport to a warp
+    usage: /warp [name]
+    aliases: [warps]
+    permission: justplugin.warp
+  setwarp:
+    description: Set a warp
+    usage: /setwarp <name>
+    aliases: [createwarp, addwarp]
+    permission: justplugin.setwarp
+  delwarp:
+    description: Delete a warp
+    usage: /delwarp <name>
+    aliases: [removewarp, deletewarp]
+    permission: justplugin.delwarp
+  renamewarp:
+    description: Rename a warp
+    usage: /renamewarp <old> <new>
+    permission: justplugin.renamewarp
+  balance:
+    description: View your balance
+    usage: /balance [player]
+    aliases: [bal, money, eco]
+    permission: justplugin.balance
+  pay:
+    description: Pay a player
+    usage: /pay <player> <amount>
+    aliases: [transfer]
+    permission: justplugin.pay
+  paytoggle:
+    description: Toggle receiving payments
+    usage: /paytoggle
+    permission: justplugin.paytoggle
+  paynote:
+    description: Convert money to a pay note item
+    usage: /paynote [amount]
+    permission: justplugin.paynote
+  msg:
+    description: Send a private message
+    usage: /msg <player> <message>
+    aliases: [tell, whisper, m, pm, message, w]
+    permission: justplugin.msg
+  reply:
+    description: Reply to the last private message
+    usage: /reply <message>
+    aliases: [r, respond]
+    permission: justplugin.reply
+  ignore:
+    description: Ignore or unignore a player
+    usage: /ignore <player>
+    permission: justplugin.ignore
+  chat:
+    description: Switch chat channel or send a message
+    usage: /chat [all|party|team] [message]
+    aliases: [ch]
+    permission: justplugin.chat
+  team:
+    description: Team management
+    usage: /team <create|invite|join|leave|disband|info|list>
+    permission: justplugin.team
+  sharecoords:
+    description: Share your coordinates in chat
+    usage: /sharecoords [global|team|party]
+    aliases: [shcoords]
+    permission: justplugin.sharecoords
+  shareitem:
+    description: Share item in hand in chat
+    usage: /shareitem
+    aliases: [si]
+    permission: justplugin.shareitem
+  announce:
+    description: Broadcast a message
+    usage: /announce <message>
+    aliases: [broadcast, bc]
+    permission: justplugin.announce
+  discord:
+    description: Show the Discord link
+    usage: /discord
+    permission: justplugin.discord
+  ban:
+    description: Ban a player
+    usage: /ban <player> [reason]
+    permission: justplugin.ban
+  unban:
+    description: Unban a player
+    usage: /unban <player>
+    aliases: [pardon]
+    permission: justplugin.unban
+  banip:
+    description: Ban an IP address
+    usage: /banip <ip> [reason]
+    aliases: [ipban]
+    permission: justplugin.banip
+  unbanip:
+    description: Unban an IP address
+    usage: /unbanip <ip>
+    aliases: [pardonip, ipunban]
+    permission: justplugin.unbanip
+  tempban:
+    description: Temporarily ban a player
+    usage: /tempban <player> <duration> [reason]
+    aliases: [tban]
+    permission: justplugin.tempban
+  tempbanip:
+    description: Temporarily ban an IP address
+    usage: /tempbanip <ip> <duration> [reason]
+    aliases: [tbanip]
+    permission: justplugin.tempbanip
+  vanish:
+    description: Toggle vanish mode
+    usage: /vanish
+    aliases: [v]
+    permission: justplugin.vanish
+  sudo:
+    description: Force a player to run a command
+    usage: /sudo <player> <command>
+    permission: justplugin.sudo
+  invsee:
+    description: View a player inventory
+    usage: /invsee <player>
+    aliases: [inventorysee, openinv, openinventory]
+    permission: justplugin.invsee
+  echestsee:
+    description: View a player ender chest
+    usage: /echestsee <player>
+    aliases: [ecsee, enderchestsee]
+    permission: justplugin.echestsee
+  anvil:
+    description: Open a virtual anvil
+    usage: /anvil
+    aliases: [an]
+    permission: justplugin.anvil
+  grindstone:
+    description: Open a virtual grindstone
+    usage: /grindstone
+    aliases: [grind]
+    permission: justplugin.grindstone
+  enderchest:
+    description: Open your ender chest
+    usage: /enderchest
+    aliases: [echest, ec]
+    permission: justplugin.enderchest
+  craft:
+    description: Open a virtual crafting table
+    usage: /craft
+    aliases: [workbench, wb, crafting, craftingtable]
+    permission: justplugin.craft
+  stonecutter:
+    description: Open a virtual stonecutter
+    usage: /stonecutter
+    aliases: [sc]
+    permission: justplugin.stonecutter
+  loom:
+    description: Open a virtual loom
+    usage: /loom
+    permission: justplugin.loom
+  smithingtable:
+    description: Open a virtual smithing table
+    usage: /smithingtable
+    aliases: [smithing]
+    permission: justplugin.smithingtable
+  enchantingtable:
+    description: Open a virtual enchanting table
+    usage: /enchantingtable
+    aliases: [enchant, et]
+    permission: justplugin.enchantingtable
+  trade:
+    description: Initiate a trade with a player
+    usage: /trade <player|confirm|cancel>
+    aliases: [tr]
+    permission: justplugin.trade
+  exp:
+    description: Give set or show experience
+    usage: /exp [give|set|show] [player] [amount]
+    aliases: [xp, experience]
+    permission: justplugin.exp
+  fly:
+    description: Toggle fly mode
+    usage: /fly [player]
+    aliases: [flight]
+    permission: justplugin.fly
+  gm:
+    description: Change gamemode
+    usage: /gm <survival|creative|adventure|spectator> [player]
+    aliases: [gamemode, gms, gmc, gmsp, gma]
+    permission: justplugin.gamemode
+  god:
+    description: Toggle god mode
+    usage: /god [player]
+    aliases: [godmode, invincible]
+    permission: justplugin.god
+  getpos:
+    description: Get your current position
+    usage: /getpos
+    aliases: [pos, gps, whereami, position]
+    permission: justplugin.getpos
+  hat:
+    description: Put item on your head
+    usage: /hat
+    aliases: [head]
+    permission: justplugin.hat
+  skull:
+    description: Give a player skull
+    usage: /skull [player]
+    aliases: [playerhead]
+    permission: justplugin.skull
+  speed:
+    description: Set walk or fly speed
+    usage: /speed <0-10> [walk|fly] [player]
+    aliases: [flyspeed, walkspeed]
+    permission: justplugin.speed
+  weather:
+    description: Set the weather
+    usage: /weather <sun|rain|thunder>
+    aliases: [sky, wx]
+    permission: justplugin.weather
+  time:
+    description: Set or get the world time
+    usage: /time [day|night|set|add] [value]
+    permission: justplugin.time
+  itemname:
+    description: Rename the item in your hand
+    usage: /itemname <name>
+    aliases: [rename, iname]
+    permission: justplugin.itemname
+  setspawner:
+    description: Change the type of a spawner
+    usage: /setspawner <entity_type>
+    aliases: [changespawner]
+    permission: justplugin.setspawner
+  suicide:
+    description: End your own life in-game
+    usage: /suicide
+    permission: justplugin.suicide
+  clock:
+    description: Show IRL and game time
+    usage: /clock
+    aliases: [watch]
+    permission: justplugin.clock
+  date:
+    description: Show the IRL date
+    usage: /date
+    permission: justplugin.date
+  info:
+    description: Show plugin info
+    usage: /info
+    aliases: [ifo]
+    permission: justplugin.info
+  jphelp:
+    description: Show help page
+    usage: /jphelp [page]
+    aliases: [jph]
+    permission: justplugin.help
+  playerinfo:
+    description: Show player info
+    usage: /playerinfo [player]
+    aliases: [whois, pinfo]
+    permission: justplugin.playerinfo
+  list:
+    description: List online players
+    usage: /list
+    aliases: [who, playerlist, online]
+    permission: justplugin.list
+  motd:
+    description: Show message of the day
+    usage: /motd
+    permission: justplugin.motd
