@@ -1,0 +1,467 @@
+# 🔐 JustPlugin — Permissions Reference
+
+> **Version:** 1.0-SNAPSHOT  
+> **Author:** JustMe  
+> **Last Updated:** March 12, 2026
+
+---
+
+## Table of Contents
+
+- [Permission Hierarchy](#permission-hierarchy)
+- [Wildcard Permission](#-wildcard-permission-justplugin)
+- [Default Player Permission](#-default-player-permission-justpluginplayer)
+- [All Permissions (Detailed)](#all-permissions-detailed)
+  - [Teleportation](#-teleportation-permissions)
+  - [Warp](#-warp-permissions)
+  - [Home](#-home-permissions)
+  - [Economy](#-economy-permissions)
+  - [Moderation](#-moderation-permissions)
+  - [Player](#-player-permissions)
+  - [Chat](#-chat-permissions)
+  - [Virtual Inventories](#-virtual-inventory-permissions)
+  - [Info](#-info-permissions)
+  - [Items](#-items-permissions)
+  - [World](#-world-permissions)
+  - [Teams](#-teams-permissions)
+  - [Misc](#-misc-permissions)
+  - [Special](#-special-permissions)
+
+---
+
+## Permission Hierarchy
+
+```
+justplugin.*                          ← OP-only, grants EVERYTHING
+├── justplugin.player                 ← Default TRUE for all players (basic permissions)
+│   ├── justplugin.tpa
+│   ├── justplugin.tpahere
+│   ├── justplugin.wild
+│   ├── justplugin.back
+│   ├── justplugin.spawn
+│   ├── justplugin.warp
+│   ├── justplugin.home
+│   ├── justplugin.sethome
+│   ├── justplugin.delhome
+│   ├── justplugin.balance
+│   ├── justplugin.pay
+│   ├── justplugin.paytoggle
+│   ├── justplugin.paynote
+│   ├── justplugin.msg
+│   ├── justplugin.ignore
+│   ├── justplugin.sharecoords
+│   ├── justplugin.sharedeathcoords
+│   ├── justplugin.chat
+│   ├── justplugin.enderchest
+│   ├── justplugin.craft
+│   ├── justplugin.getdeathpos           ← Self only (configurable if required)
+│   ├── justplugin.shareitem
+│   ├── justplugin.team
+│   ├── justplugin.trade
+│   ├── justplugin.suicide
+│   ├── justplugin.kill                  ← Self only
+│   └── justplugin.tab
+│
+│   [No permission needed — public commands]
+│   ├── /getpos (self)                   ← Always public, no permission
+│   ├── /jpinfo, /jphelp, /plist, /motd (view), /clock, /date
+│   └── /help, /plugins, /discord
+│
+├── [Staff/Admin — must be explicitly granted]
+│   ├── justplugin.fly                ← Toggle own flight
+│   ├── justplugin.fly.others         ← Toggle flight for other players
+│   ├── justplugin.gamemode           ← Change own gamemode
+│   ├── justplugin.gamemode.others    ← Change gamemode for other players
+│   ├── justplugin.god                ← Toggle own god mode
+│   ├── justplugin.god.others         ← Toggle god mode for other players
+│   ├── justplugin.speed              ← Set own speed
+│   ├── justplugin.speed.others       ← Set speed for other players
+│   ├── justplugin.heal               ← Heal yourself
+│   ├── justplugin.heal.others        ← Heal other players
+│   ├── justplugin.feed               ← Feed yourself
+│   ├── justplugin.feed.others        ← Feed other players
+│   ├── justplugin.kill.others        ← Kill other players
+│   ├── justplugin.exp                ← Manage own XP
+│   ├── justplugin.exp.others         ← Manage other players' XP
+│   ├── justplugin.getpos.others      ← View other players' positions
+│   ├── justplugin.getdeathpos.others ← View other players' death positions
+│   ├── justplugin.vanish             ← Vanish yourself
+│   ├── justplugin.vanish.others      ← Vanish other players
+│   ├── justplugin.vanish.see         ← See vanished players in /plist
+│   ├── justplugin.balance.others     ← Check other players' balance
+│   ├── justplugin.addcash            ← Add cash to self
+│   ├── justplugin.addcash.others     ← Add cash to other players
+│   ├── justplugin.gmcheck            ← Check gamemode info
+│   ├── justplugin.hat                ← Wear item as hat
+│   ├── justplugin.skull              ← Get player heads
+│   ├── justplugin.setspawn           ← Set world spawn
+│   ├── justplugin.setwarp            ← Create warps
+│   ├── justplugin.delwarp            ← Delete warps
+│   ├── justplugin.renamewarp         ← Rename warps
+│   ├── justplugin.tppos              ← Teleport to coordinates
+│   ├── justplugin.ban                ← Ban players
+│   ├── justplugin.banip              ← Ban IPs
+│   ├── justplugin.tempban            ← Temp ban players
+│   ├── justplugin.tempbanip          ← Temp ban IPs
+│   ├── justplugin.unban              ← Unban players
+│   ├── justplugin.unbanip            ← Unban IPs
+│   ├── justplugin.sudo               ← Force player commands
+│   ├── justplugin.invsee             ← View player inventories
+│   ├── justplugin.echestsee          ← View player ender chests
+│   ├── justplugin.announce           ← Broadcast announcements
+│   ├── justplugin.playerinfo         ← View player info
+│   ├── justplugin.playerinfo.ip      ← See player IP in /playerinfo
+│   ├── justplugin.motd.set           ← Set server MOTD
+│   ├── justplugin.discord.set        ← Set Discord link
+│   ├── justplugin.itemname           ← Rename items
+│   ├── justplugin.setspawner         ← Change spawner types
+│   ├── justplugin.weather            ← Change weather
+│   ├── justplugin.time               ← Change time
+│   ├── justplugin.teleport.bypass    ← Bypass teleport delay
+│   ├── justplugin.anvil              ← Virtual anvil
+│   ├── justplugin.grindstone         ← Virtual grindstone
+│   ├── justplugin.stonecutter        ← Virtual stonecutter
+│   ├── justplugin.loom               ← Virtual loom
+│   ├── justplugin.smithingtable      ← Virtual smithing table
+│   └── justplugin.enchantingtable    ← Virtual enchanting table
+```
+
+---
+
+## ⭐ Wildcard Permission: `justplugin.*`
+
+| Property | Value |
+|----------|-------|
+| **Default** | `op` |
+| **Description** | Grants **every** JustPlugin permission. Intended for server operators only. |
+
+Includes all permissions listed in this document.
+
+---
+
+## 👤 Default Player Permission: `justplugin.player`
+
+| Property | Value |
+|----------|-------|
+| **Default** | `true` (all players) |
+| **Description** | Basic survival player permissions. Granted to all players by default. |
+
+### Included Permissions:
+
+| Permission | Description |
+|------------|-------------|
+| `justplugin.tpa` | Send teleport requests |
+| `justplugin.tpahere` | Send "teleport here" requests |
+| `justplugin.wild` | Random teleport |
+| `justplugin.back` | Return to previous location |
+| `justplugin.spawn` | Teleport to spawn |
+| `justplugin.warp` | Use and list warps |
+| `justplugin.home` | Teleport to homes |
+| `justplugin.sethome` | Set homes |
+| `justplugin.delhome` | Delete homes |
+| `justplugin.balance` | Check own balance |
+| `justplugin.pay` | Pay other players |
+| `justplugin.paytoggle` | Toggle receiving payments |
+| `justplugin.paynote` | Convert items to coins |
+| `justplugin.msg` | Send private messages |
+| `justplugin.ignore` | Ignore players |
+| `justplugin.sharecoords` | Share coordinates |
+| `justplugin.sharedeathcoords` | Share death coordinates |
+| `justplugin.chat` | Switch chat modes |
+| `justplugin.enderchest` | Open own ender chest |
+| `justplugin.craft` | Virtual crafting table |
+| `justplugin.getdeathpos` | View own death position (also configurable in config.yml) |
+| `justplugin.shareitem` | Share items in chat |
+| `justplugin.team` | Team management |
+| `justplugin.trade` | Trade with players |
+| `justplugin.suicide` | Kill yourself (/suicide) |
+| `justplugin.kill` | Kill yourself (/kill) |
+| `justplugin.tab` | Refresh tab list |
+
+### Not in `justplugin.player` — Always Public (no permission needed):
+
+| Command | Why |
+|---------|-----|
+| `/getpos` (self) | Your own position is not a secret — always public |
+| `/jpinfo` | Plugin information |
+| `/jphelp` | Help pages |
+| `/plist` | Player list |
+| `/motd` (view) | Message of the day |
+| `/clock` | Real-world time |
+| `/date` | Real-world date |
+| `/discord` | Discord link |
+| `/help` | Help override |
+| `/plugins` | Plugin list |
+
+---
+
+## All Permissions (Detailed)
+
+### 🌀 Teleportation Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.tpa` | Send teleport requests to other players | `true` (player) | `/tpa` |
+| `justplugin.tpahere` | Request a player to teleport to you | `true` (player) | `/tpahere` |
+| `justplugin.tppos` | Teleport to exact coordinates | `op` | `/tppos` |
+| `justplugin.wild` | Random teleport to a safe location | `true` (player) | `/tpr`, `/wild`, `/rtp` |
+| `justplugin.back` | Return to your last location before a teleport | `true` (player) | `/back` |
+| `justplugin.spawn` | Teleport to the world spawn point | `true` (player) | `/spawn` |
+| `justplugin.setspawn` | Set the world spawn point | `op` | `/setspawn` |
+| `justplugin.teleport.bypass` | Bypass the teleport warmup delay | `op` | All teleport commands |
+
+> **Note:** `/tpaccept`, `/tpacancel`, and `/tpreject` have no permission requirement — any player can accept/cancel/reject requests.
+
+---
+
+### 🚩 Warp Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.warp` | Teleport to warps and list them | `true` (player) | `/warp`, `/warps` |
+| `justplugin.setwarp` | Create new warps | `op` | `/setwarp` |
+| `justplugin.delwarp` | Delete existing warps | `op` | `/delwarp` |
+| `justplugin.renamewarp` | Rename existing warps | `op` | `/renamewarp` |
+
+---
+
+### 🏠 Home Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.home` | Teleport to your homes | `true` (player) | `/home` |
+| `justplugin.sethome` | Set homes (up to configured max) | `true` (player) | `/sethome` |
+| `justplugin.delhome` | Delete your homes | `true` (player) | `/delhome` |
+
+---
+
+### 💰 Economy Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.balance` | Check your own balance | `true` (player) | `/balance` |
+| `justplugin.balance.others` | Check another player's balance | `op` | `/balance <player>` |
+| `justplugin.pay` | Pay money to other players | `true` (player) | `/pay` |
+| `justplugin.paytoggle` | Toggle whether you receive payments | `true` (player) | `/paytoggle` |
+| `justplugin.paynote` | Convert items in hand to coins | `true` (player) | `/paynote` |
+| `justplugin.addcash` | Add cash to yourself | `op` | `/addcash <amount>` |
+| `justplugin.addcash.others` | Add cash to other players | `op` | `/addcash <player> <amount>` |
+
+---
+
+### 🔨 Moderation Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.ban` | Permanently ban players | `op` | `/ban` |
+| `justplugin.banip` | Ban IP addresses | `op` | `/banip` |
+| `justplugin.tempban` | Temporarily ban players | `op` | `/tempban` |
+| `justplugin.tempbanip` | Temporarily ban IP addresses | `op` | `/tempbanip` |
+| `justplugin.unban` | Unban players | `op` | `/unban` |
+| `justplugin.unbanip` | Unban IP addresses | `op` | `/unbanip` |
+| `justplugin.vanish` | Toggle vanish for yourself | `op` | `/vanish` |
+| `justplugin.vanish.others` | Toggle vanish for other players | `op` | `/vanish <player>` |
+| `justplugin.vanish.see` | See vanished players in player list | `op` | `/plist` |
+| `justplugin.sudo` | Force players to run commands or send messages | `op` | `/sudo` |
+| `justplugin.invsee` | View another player's inventory | `op` | `/invsee` |
+| `justplugin.echestsee` | View another player's ender chest | `op` | `/echestsee` |
+
+---
+
+### 🎮 Player Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.fly` | Toggle flight for yourself | `op` | `/fly` |
+| `justplugin.fly.others` | Toggle flight for other players | `op` | `/fly <player>` |
+| `justplugin.gamemode` | Change your own gamemode | `op` | `/gm`, `/gmc`, `/gms`, `/gma`, `/gmsp` |
+| `justplugin.gamemode.others` | Change gamemode for other players | `op` | `/gm <mode> <player>`, `/gmc <player>`, etc. |
+| `justplugin.gmcheck` | Check a player's gamemode information | `op` | `/gmcheck` |
+| `justplugin.god` | Toggle god mode for yourself | `op` | `/god` |
+| `justplugin.god.others` | Toggle god mode for other players | `op` | `/god <player>` |
+| `justplugin.speed` | Set your own walk/fly speed | `op` | `/speed`, `/flyspeed`, `/walkspeed` |
+| `justplugin.speed.others` | Set speed for other players | `op` | `/speed <value> <player>` |
+| `justplugin.heal` | Heal yourself (restore health, extinguish fire) | `op` | `/heal` |
+| `justplugin.heal.others` | Heal other players | `op` | `/heal <player>` |
+| `justplugin.feed` | Feed yourself (restore hunger & saturation) | `op` | `/feed` |
+| `justplugin.feed.others` | Feed other players | `op` | `/feed <player>` |
+| `justplugin.kill` | Kill yourself | `true` (player) | `/kill`, `/suicide` |
+| `justplugin.kill.others` | Kill other players | `op` | `/kill <player>` |
+| `justplugin.hat` | Wear an item as a hat | `op` | `/hat` |
+| `justplugin.exp` | Manage your own experience (set/give, levels/orbs) | `op` | `/exp`, `/xp` |
+| `justplugin.exp.others` | Manage other players' experience | `op` | `/exp ... <player>` |
+| `justplugin.skull` | Get a player's skull/head item | `op` | `/skull` |
+| `justplugin.suicide` | Kill yourself (legacy, same as justplugin.kill) | `true` (player) | `/suicide` |
+| `justplugin.getpos.others` | View another player's current position | `op` | `/getpos <player>` |
+| `justplugin.getdeathpos` | View your own death location (configurable) | `true` (player) | `/getdeathpos` |
+| `justplugin.getdeathpos.others` | View another player's death location | `op` | `/getdeathpos <player>` |
+
+> **Note:** `/getpos` (self) requires **no permission** — it is always public. Self-use permission for `/getdeathpos` is configurable via `commands.getdeathpos.require-permission-self` in `config.yml`.
+
+---
+
+### 💬 Chat Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.msg` | Send private messages and replies | `true` (player) | `/msg`, `/r` |
+| `justplugin.ignore` | Toggle ignoring other players | `true` (player) | `/ignore` |
+| `justplugin.announce` | Broadcast server-wide announcements | `op` | `/announce` |
+| `justplugin.sharecoords` | Share your coordinates in chat | `true` (player) | `/sharecoords` |
+| `justplugin.sharedeathcoords` | Share your death coordinates in chat | `true` (player) | `/sharedeathcoords` |
+| `justplugin.chat` | Switch between global and team chat modes | `true` (player) | `/chat` |
+
+---
+
+### 📦 Virtual Inventory Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.anvil` | Open a virtual anvil | `op` | `/anvil` |
+| `justplugin.grindstone` | Open a virtual grindstone | `op` | `/grindstone` |
+| `justplugin.enderchest` | Open your own ender chest | `true` (player) | `/enderchest` |
+| `justplugin.craft` | Open a virtual crafting table | `true` (player) | `/craft` |
+| `justplugin.stonecutter` | Open a virtual stonecutter | `op` | `/stonecutter` |
+| `justplugin.loom` | Open a virtual loom | `op` | `/loom` |
+| `justplugin.smithingtable` | Open a virtual smithing table | `op` | `/smithingtable` |
+| `justplugin.enchantingtable` | Open a virtual enchanting table | `op` | `/enchantingtable` |
+
+---
+
+### ℹ️ Info Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.playerinfo` | View detailed information about a player | `op` | `/playerinfo`, `/whois` |
+| `justplugin.playerinfo.ip` | See a player's IP address in `/playerinfo` | `op` | `/playerinfo` |
+| `justplugin.motd.set` | Set the server MOTD | `op` | `/motd <message>` |
+
+> **Note:** `/jpinfo`, `/jphelp`, `/plist`, `/motd` (view), `/clock`, `/date` have no permission requirement — all players can use them.
+
+---
+
+### 🎯 Items Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.itemname` | Rename items with MiniMessage formatting | `op` | `/itemname` |
+| `justplugin.shareitem` | Show your held item in chat with hover preview | `true` (player) | `/shareitem` |
+| `justplugin.setspawner` | Change the entity type of a spawner block | `op` | `/setspawner` |
+
+---
+
+### 🌍 World Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.weather` | Change the world weather | `op` | `/weather` |
+| `justplugin.time` | Set or query the world time | `op` | `/time` |
+
+---
+
+### 👥 Teams Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.team` | Full team management (create, disband, invite, join, leave, kick, info, list) | `true` (player) | `/team` |
+
+---
+
+### 🔧 Misc Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.trade` | Trade items with other players | `true` (player) | `/trade` |
+| `justplugin.discord.set` | Change the Discord link | `op` | `/discord set <link>` |
+| `justplugin.tab` | Manually refresh the tab list | `true` (player) | `/tab` |
+
+---
+
+### 🛡️ Special / ".others" Permissions
+
+These permissions control whether a command can target **other players**. The base permission allows self-use only.
+
+| Permission | Description | Default | Used By |
+|------------|-------------|---------|---------|
+| `justplugin.fly.others` | Toggle flight for other players | `op` | `/fly <player>` |
+| `justplugin.gamemode.others` | Change gamemode for other players | `op` | `/gm <mode> <player>` |
+| `justplugin.god.others` | Toggle god mode for other players | `op` | `/god <player>` |
+| `justplugin.speed.others` | Set speed for other players | `op` | `/speed <value> <player>` |
+| `justplugin.heal.others` | Heal other players | `op` | `/heal <player>` |
+| `justplugin.feed.others` | Feed other players | `op` | `/feed <player>` |
+| `justplugin.kill.others` | Kill other players | `op` | `/kill <player>` |
+| `justplugin.exp.others` | Manage other players' experience | `op` | `/exp ... <player>` |
+| `justplugin.vanish.others` | Toggle vanish for other players | `op` | `/vanish <player>` |
+| `justplugin.balance.others` | View another player's balance | `op` | `/balance <player>` |
+| `justplugin.addcash.others` | Add cash to other players | `op` | `/addcash <player> <amount>` |
+| `justplugin.getpos.others` | View another player's position | `op` | `/getpos <player>` |
+| `justplugin.getdeathpos.others` | View another player's death location | `op` | `/getdeathpos <player>` |
+
+### Other Special Permissions
+
+| Permission | Description | Default | Used By |
+|------------|-------------|---------|---------|
+| `justplugin.teleport.bypass` | Skip the teleport warmup delay entirely | `op` | All teleport commands |
+| `justplugin.vanish.see` | See vanished players in the player list (`/plist`) | `op` | `/plist` |
+| `justplugin.playerinfo.ip` | View a player's IP address in `/playerinfo` | `op` | `/playerinfo` |
+| `justplugin.motd.set` | Set the server MOTD via `/motd <message>` | `op` | `/motd` |
+| `justplugin.discord.set` | Set the Discord link via `/discord set <link>` | `op` | `/discord` |
+
+---
+
+## 📝 LuckPerms Examples
+
+### Setting up a basic player group (defaults are already granted):
+```
+/lp group default permission set justplugin.player true
+```
+
+### Creating a staff group with moderation tools:
+```
+/lp creategroup staff
+/lp group staff parent add default
+/lp group staff permission set justplugin.fly true
+/lp group staff permission set justplugin.gamemode true
+/lp group staff permission set justplugin.god true
+/lp group staff permission set justplugin.speed true
+/lp group staff permission set justplugin.heal true
+/lp group staff permission set justplugin.feed true
+/lp group staff permission set justplugin.vanish true
+/lp group staff permission set justplugin.vanish.see true
+/lp group staff permission set justplugin.hat true
+/lp group staff permission set justplugin.exp true
+/lp group staff permission set justplugin.skull true
+/lp group staff permission set justplugin.gmcheck true
+/lp group staff permission set justplugin.anvil true
+/lp group staff permission set justplugin.grindstone true
+/lp group staff permission set justplugin.craft true
+/lp group staff permission set justplugin.itemname true
+/lp group staff permission set justplugin.playerinfo true
+/lp group staff permission set justplugin.getpos.others true
+/lp group staff permission set justplugin.getdeathpos.others true
+```
+
+### Creating an admin group with full control:
+```
+/lp creategroup admin
+/lp group admin parent add staff
+/lp group admin permission set justplugin.* true
+```
+
+### Granting ".others" permissions to staff:
+```
+/lp group staff permission set justplugin.fly.others true
+/lp group staff permission set justplugin.gamemode.others true
+/lp group staff permission set justplugin.god.others true
+/lp group staff permission set justplugin.speed.others true
+/lp group staff permission set justplugin.heal.others true
+/lp group staff permission set justplugin.feed.others true
+/lp group staff permission set justplugin.kill.others true
+/lp group staff permission set justplugin.exp.others true
+/lp group staff permission set justplugin.vanish.others true
+/lp group staff permission set justplugin.balance.others true
+/lp group staff permission set justplugin.addcash true
+/lp group staff permission set justplugin.addcash.others true
+/lp group staff permission set justplugin.getpos.others true
+/lp group staff permission set justplugin.getdeathpos.others true
+```

@@ -1,0 +1,364 @@
+# ==========================================
+# JustPlugin Configuration
+# An EssentialsX-like plugin
+# ==========================================
+
+# ==========================================
+# General Settings
+# ==========================================
+
+# Message of the Day - shown to players on join.
+# Supports MiniMessage format. Use {player} for the player's name.
+motd: "<gradient:#00aaff:#00ffaa><bold>Welcome to the server, {player}!</bold></gradient>\n<gray>Type <yellow>/help</yellow> for commands."
+
+# Discord link shown by /discord. Editable in-game with /discord set <link>.
+discord-link: "https://discord.gg/example"
+
+# Timezone for /clock and /date commands (e.g. "UTC", "America/New_York", "Europe/London").
+timezone: "UTC"
+
+# ==========================================
+# Economy Settings
+# ==========================================
+economy:
+  # Starting balance for new players.
+  starting-balance: 100.0
+  # Currency symbol displayed before amounts (e.g. "$100.00").
+  currency-symbol: "$"
+
+# ==========================================
+# Teleportation Settings
+# ==========================================
+teleport:
+  # Delay in seconds before teleporting (0 = instant).
+  # Players with justplugin.teleport.bypass skip this delay.
+  # Moving during the delay cancels the teleport.
+  delay: 3
+  # How long TPA requests last before auto-expiring (seconds).
+  request-timeout: 60
+  # Maximum distance from world center for /tpr (wild/rtp).
+  wild-range: 5000
+  # Minimum distance from 0,0 for /tpr to prevent spawning too close to spawn.
+  wild-min-range: 500
+
+# ==========================================
+# Trade Settings
+# ==========================================
+trade:
+  # How long trade requests last before auto-expiring (seconds).
+  request-timeout: 60
+
+# ==========================================
+# Home Settings
+# ==========================================
+homes:
+  # Maximum number of homes per player.
+  max-homes: 5
+
+# ==========================================
+# Tab List Customization
+# ==========================================
+tab:
+  # Tab header and footer displayed above and below the player list.
+  # Supports MiniMessage. Placeholders: {player}, {online}, {max}
+  header: "\n<gradient:#00aaff:#00ffaa><bold>  JustPlugin Server  </bold></gradient>\n"
+  footer: "\n<gray>Players: <yellow>{online}<gray>/<yellow>{max}\n<gray>Type <yellow>/help</yellow> for commands.\n"
+
+# ==========================================
+# Spawn Settings
+# Set automatically by /setspawn — do not edit manually unless you know what you're doing.
+# ==========================================
+# spawn:
+#   world: "world"
+#   x: 0.0
+#   y: 64.0
+#   z: 0.0
+#   yaw: 0.0
+#   pitch: 0.0
+
+# ==========================================
+# Command-Specific Settings
+# Additional per-command configuration beyond enable/disable.
+# ==========================================
+commands:
+  getdeathpos:
+    # If true, players need justplugin.getdeathpos permission to view their OWN death location.
+    # If false, any player can view their own death location without permission.
+    # Viewing OTHER players' death locations always requires justplugin.getdeathpos.others.
+    require-permission-self: false
+
+# ==========================================
+# Command Settings
+# Enable/disable ANY command and optionally override its permission node.
+# Set "enabled: false" to completely disable a command regardless of permissions.
+# Set "permission: ''" (empty) to allow everyone to use the command.
+# ==========================================
+command-settings:
+
+  # --- Teleportation ---
+  tpa:
+    enabled: true
+    permission: "justplugin.tpa"
+  tpaccept:
+    enabled: true
+    permission: ""
+  tpacancel:
+    enabled: true
+    permission: ""
+  tpreject:
+    enabled: true
+    permission: ""
+  tppos:
+    enabled: true
+    permission: "justplugin.tppos"
+  tpr:
+    enabled: true
+    permission: "justplugin.wild"
+  tpahere:
+    enabled: true
+    permission: "justplugin.tpahere"
+  back:
+    enabled: true
+    permission: "justplugin.back"
+  spawn:
+    enabled: true
+    permission: "justplugin.spawn"
+  setspawn:
+    enabled: true
+    permission: "justplugin.setspawn"
+
+  # --- Warps ---
+  warp:
+    enabled: true
+    permission: "justplugin.warp"
+  warps:
+    enabled: true
+    permission: "justplugin.warp"
+  setwarp:
+    enabled: true
+    permission: "justplugin.setwarp"
+  delwarp:
+    enabled: true
+    permission: "justplugin.delwarp"
+  renamewarp:
+    enabled: true
+    permission: "justplugin.renamewarp"
+
+  # --- Homes ---
+  home:
+    enabled: true
+    permission: "justplugin.home"
+  sethome:
+    enabled: true
+    permission: "justplugin.sethome"
+  delhome:
+    enabled: true
+    permission: "justplugin.delhome"
+
+  # --- Economy ---
+  balance:
+    enabled: true
+    permission: "justplugin.balance"
+  pay:
+    enabled: true
+    permission: "justplugin.pay"
+  paytoggle:
+    enabled: true
+    permission: "justplugin.paytoggle"
+  paynote:
+    enabled: true
+    permission: "justplugin.paynote"
+  addcash:
+    enabled: true
+    permission: "justplugin.addcash"
+
+  # --- Moderation ---
+  ban:
+    enabled: true
+    permission: "justplugin.ban"
+  banip:
+    enabled: true
+    permission: "justplugin.banip"
+  tempban:
+    enabled: true
+    permission: "justplugin.tempban"
+  tempbanip:
+    enabled: true
+    permission: "justplugin.tempbanip"
+  unban:
+    enabled: true
+    permission: "justplugin.unban"
+  unbanip:
+    enabled: true
+    permission: "justplugin.unbanip"
+  vanish:
+    enabled: true
+    permission: "justplugin.vanish"
+  sudo:
+    enabled: true
+    permission: "justplugin.sudo"
+  invsee:
+    enabled: true
+    permission: "justplugin.invsee"
+  echestsee:
+    enabled: true
+    permission: "justplugin.echestsee"
+
+  # --- Player ---
+  fly:
+    enabled: true
+    permission: "justplugin.fly"
+  gm:
+    enabled: true
+    permission: "justplugin.gamemode"
+  god:
+    enabled: true
+    permission: "justplugin.god"
+  speed:
+    enabled: true
+    permission: "justplugin.speed"
+  hat:
+    enabled: true
+    permission: "justplugin.hat"
+  exp:
+    enabled: true
+    permission: "justplugin.exp"
+  skull:
+    enabled: true
+    permission: "justplugin.skull"
+  suicide:
+    enabled: true
+    permission: "justplugin.suicide"
+  heal:
+    enabled: true
+    permission: "justplugin.heal"
+  feed:
+    enabled: true
+    permission: "justplugin.feed"
+  kill:
+    enabled: true
+    permission: "justplugin.kill"
+  # /getpos — no base permission needed (public for self).
+  # Viewing other players' positions requires justplugin.getpos.others.
+  getpos:
+    enabled: true
+    permission: ""
+  # /getdeathpos — self permission is configurable above in "commands.getdeathpos".
+  # Viewing other players' death locations requires justplugin.getdeathpos.others.
+  getdeathpos:
+    enabled: true
+    permission: ""
+
+  # --- Chat ---
+  msg:
+    enabled: true
+    permission: "justplugin.msg"
+  r:
+    enabled: true
+    permission: "justplugin.msg"
+  ignore:
+    enabled: true
+    permission: "justplugin.ignore"
+  announce:
+    enabled: true
+    permission: "justplugin.announce"
+  sharecoords:
+    enabled: true
+    permission: "justplugin.sharecoords"
+  sharedeathcoords:
+    enabled: true
+    permission: "justplugin.sharedeathcoords"
+  chat:
+    enabled: true
+    permission: "justplugin.chat"
+  teammsg:
+    enabled: true
+    permission: "justplugin.chat"
+
+  # --- Virtual Inventories ---
+  anvil:
+    enabled: true
+    permission: "justplugin.anvil"
+  grindstone:
+    enabled: true
+    permission: "justplugin.grindstone"
+  enderchest:
+    enabled: true
+    permission: "justplugin.enderchest"
+  craft:
+    enabled: true
+    permission: "justplugin.craft"
+  stonecutter:
+    enabled: true
+    permission: "justplugin.stonecutter"
+  loom:
+    enabled: true
+    permission: "justplugin.loom"
+  smithingtable:
+    enabled: true
+    permission: "justplugin.smithingtable"
+  enchantingtable:
+    enabled: true
+    permission: "justplugin.enchantingtable"
+
+  # --- Info ---
+  jpinfo:
+    enabled: true
+    permission: "justplugin.info"
+  jphelp:
+    enabled: true
+    permission: "justplugin.help"
+  playerinfo:
+    enabled: true
+    permission: "justplugin.playerinfo"
+  plist:
+    enabled: true
+    permission: "justplugin.list"
+  motd:
+    enabled: true
+    permission: "justplugin.motd"
+  resetmotd:
+    enabled: true
+    permission: "justplugin.motd.set"
+  clock:
+    enabled: true
+    permission: "justplugin.clock"
+  date:
+    enabled: true
+    permission: "justplugin.date"
+
+  # --- Items ---
+  itemname:
+    enabled: true
+    permission: "justplugin.itemname"
+  shareitem:
+    enabled: true
+    permission: "justplugin.shareitem"
+  setspawner:
+    enabled: true
+    permission: "justplugin.setspawner"
+
+  # --- World ---
+  weather:
+    enabled: true
+    permission: "justplugin.weather"
+  time:
+    enabled: true
+    permission: "justplugin.time"
+
+  # --- Teams ---
+  team:
+    enabled: true
+    permission: "justplugin.team"
+
+  # --- Misc ---
+  trade:
+    enabled: true
+    permission: "justplugin.trade"
+  discord:
+    enabled: true
+    permission: ""
+  tab:
+    enabled: true
+    permission: "justplugin.tab"
+

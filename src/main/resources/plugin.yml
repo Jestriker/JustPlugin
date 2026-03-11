@@ -1,4 +1,543 @@
 name: JustPlugin
-version: '1.0-SNAPSHOT'
+version: '${version}'
 main: org.justme.justPlugin.JustPlugin
 api-version: '1.21'
+description: An EssentialsX-like plugin for your server.
+author: JustMe
+
+commands:
+  # === Teleportation ===
+  tpa:
+    description: Request to teleport to a player
+    usage: /tpa <player>
+    permission: justplugin.tpa
+  tpaccept:
+    description: Accept a teleport request
+    usage: /tpaccept
+    aliases: [tpyes]
+  tpacancel:
+    description: Cancel your teleport request
+    usage: /tpacancel
+  tpreject:
+    description: Reject a teleport request
+    usage: /tpreject
+    aliases: [tpdeny, tpno]
+  tppos:
+    description: Teleport to coordinates
+    usage: /tppos <x> <y> <z> [world]
+    permission: justplugin.tppos
+    aliases: [tpposition]
+  tpr:
+    description: Random teleport
+    usage: /tpr
+    permission: justplugin.wild
+    aliases: [wild, rtp]
+  tpahere:
+    description: Request a player to teleport to you
+    usage: /tpahere <player>
+    permission: justplugin.tpahere
+  back:
+    description: Return to your last location
+    usage: /back
+    permission: justplugin.back
+    aliases: [return]
+  spawn:
+    description: Teleport to spawn
+    usage: /spawn
+    permission: justplugin.spawn
+  setspawn:
+    description: Set the world spawn
+    usage: /setspawn
+    permission: justplugin.setspawn
+
+  # === Warps ===
+  warp:
+    description: Teleport to a warp or list warps
+    usage: /warp [name]
+    permission: justplugin.warp
+  warps:
+    description: List all warps
+    usage: /warps
+    permission: justplugin.warp
+    aliases: [warplist]
+  setwarp:
+    description: Create a warp
+    usage: /setwarp <name>
+    permission: justplugin.setwarp
+    aliases: [createwarp]
+  delwarp:
+    description: Delete a warp
+    usage: /delwarp <name>
+    permission: justplugin.delwarp
+    aliases: [removewarp, rmwarp]
+  renamewarp:
+    description: Rename a warp
+    usage: /renamewarp <old> <new>
+    permission: justplugin.renamewarp
+
+  # === Homes ===
+  home:
+    description: Teleport to a home
+    usage: /home [name]
+    permission: justplugin.home
+    aliases: [h]
+  sethome:
+    description: Set a home
+    usage: /sethome [name]
+    permission: justplugin.sethome
+    aliases: [sh, createhome]
+  delhome:
+    description: Delete a home
+    usage: /delhome <name>
+    permission: justplugin.delhome
+    aliases: [removehome, rmhome]
+
+  # === Economy ===
+  balance:
+    description: Check your balance
+    usage: /balance [player]
+    permission: justplugin.balance
+    aliases: [bal, money]
+  pay:
+    description: Pay a player
+    usage: /pay <player> <amount>
+    permission: justplugin.pay
+  paytoggle:
+    description: Toggle receiving payments
+    usage: /paytoggle
+    permission: justplugin.paytoggle
+  paynote:
+    description: Create a redeemable balance note from 1 paper
+    usage: /paynote <amount>
+    permission: justplugin.paynote
+  addcash:
+    description: Add cash to yourself or another player
+    usage: /addcash [player] <amount>
+    permission: justplugin.addcash
+    aliases: [givemoney, addmoney, addbal]
+
+  # === Moderation ===
+  ban:
+    description: Ban a player
+    usage: /ban <player | uuid> [reason]
+    permission: justplugin.ban
+  banip:
+    description: Ban an IP address
+    usage: /banip <ip | player> [reason]
+    permission: justplugin.banip
+    aliases: [ban-ip]
+  tempban:
+    description: Temporarily ban a player
+    usage: /tempban <player> <duration> [reason]
+    permission: justplugin.tempban
+    aliases: [tban]
+  tempbanip:
+    description: Temporarily ban an IP
+    usage: /tempbanip <ip | player> <duration> [reason]
+    permission: justplugin.tempbanip
+    aliases: [tbanip]
+  unban:
+    description: Unban a player
+    usage: /unban <player | uuid>
+    permission: justplugin.unban
+    aliases: [pardon]
+  unbanip:
+    description: Unban an IP address
+    usage: /unbanip <ip>
+    permission: justplugin.unbanip
+    aliases: [pardon-ip, unban-ip]
+  vanish:
+    description: Toggle vanish mode
+    usage: /vanish [player]
+    permission: justplugin.vanish
+    aliases: [v]
+  sudo:
+    description: Force a player to run a command
+    usage: /sudo <player> <command | message>
+    permission: justplugin.sudo
+  invsee:
+    description: View a player's inventory
+    usage: /invsee <player>
+    permission: justplugin.invsee
+    aliases: [openinv]
+  echestsee:
+    description: View a player's ender chest
+    usage: /echestsee <player>
+    permission: justplugin.echestsee
+    aliases: [openec]
+
+  # === Player ===
+  fly:
+    description: Toggle flight
+    usage: /fly [player]
+    permission: justplugin.fly
+  gm:
+    description: Change game mode
+    usage: /gm <0 | 1 | 2 | 3 | survival | creative | adventure | spectator> [player]
+    permission: justplugin.gamemode
+    aliases: [gamemode]
+  gmc:
+    description: Switch to creative mode
+    usage: /gmc [player]
+    permission: justplugin.gamemode
+  gms:
+    description: Switch to survival mode
+    usage: /gms [player]
+    permission: justplugin.gamemode
+  gma:
+    description: Switch to adventure mode
+    usage: /gma [player]
+    permission: justplugin.gamemode
+  gmsp:
+    description: Switch to spectator mode
+    usage: /gmsp [player]
+    permission: justplugin.gamemode
+  gmcheck:
+    description: Check a player's current game mode
+    usage: /gmcheck [player]
+    permission: justplugin.gmcheck
+    aliases: [checkgm, gamemodecheck]
+  god:
+    description: Toggle god mode
+    usage: /god [player]
+    permission: justplugin.god
+    aliases: [godmode, tgm]
+  speed:
+    description: Set walk/fly speed (dynamic based on state)
+    usage: /speed <0-10> [player]
+    permission: justplugin.speed
+  flyspeed:
+    description: Set fly speed
+    usage: /flyspeed <0-10> [player]
+    permission: justplugin.speed
+    aliases: [fspeed]
+  walkspeed:
+    description: Set walk speed
+    usage: /walkspeed <0-10> [player]
+    permission: justplugin.speed
+    aliases: [wspeed]
+  hat:
+    description: Wear an item as a hat
+    usage: /hat
+    permission: justplugin.hat
+  exp:
+    description: Manage experience
+    usage: /exp <set | give> <levels | orbs> <amount> [player]
+    permission: justplugin.exp
+    aliases: [xp]
+  skull:
+    description: Get a player's skull
+    usage: /skull [player]
+    permission: justplugin.skull
+    aliases: [head, playerhead]
+  suicide:
+    description: Kill yourself
+    usage: /suicide
+    permission: justplugin.suicide
+  heal:
+    description: Restore health
+    usage: /heal [player]
+    permission: justplugin.heal
+  feed:
+    description: Restore hunger
+    usage: /feed [player]
+    permission: justplugin.feed
+  kill:
+    description: Kill yourself or another player
+    usage: /kill [player]
+    permission: justplugin.kill
+  getpos:
+    description: Get your or another player's current position
+    usage: /getpos [player]
+    aliases: [whereami, position, getcoords]
+  getdeathpos:
+    description: Get your or another player's last death location
+    usage: /getdeathpos [player]
+    aliases: [getdeathcoords, deathpos]
+
+  # === Chat ===
+  msg:
+    description: Send a private message
+    usage: /msg <player> <message>
+    permission: justplugin.msg
+    aliases: [tell, whisper, w, m, pm, dm]
+  r:
+    description: Reply to last message
+    usage: /r <message>
+    aliases: [reply]
+  ignore:
+    description: Toggle ignoring a player
+    usage: /ignore <player>
+    permission: justplugin.ignore
+  announce:
+    description: Broadcast a message
+    usage: /announce <message>
+    permission: justplugin.announce
+    aliases: [broadcast, bcast]
+  sharecoords:
+    description: Share your coordinates
+    usage: /sharecoords [all | team]
+    permission: justplugin.sharecoords
+    aliases: [coords, sendcoords]
+  sharedeathcoords:
+    description: Share your last death coordinates
+    usage: /sharedeathcoords [all | team]
+    permission: justplugin.sharedeathcoords
+    aliases: [senddeathcoords, deathcoords]
+  chat:
+    description: Switch chat mode
+    usage: /chat <all | team>
+    permission: justplugin.chat
+  teammsg:
+    description: Send a one-off message to your team without changing chat mode
+    usage: /teammsg <message>
+    permission: justplugin.chat
+    aliases: [tmsg, tm]
+
+  # === Virtual Inventories ===
+  anvil:
+    description: Open a virtual anvil
+    usage: /anvil
+    permission: justplugin.anvil
+  grindstone:
+    description: Open a virtual grindstone
+    usage: /grindstone
+    permission: justplugin.grindstone
+  enderchest:
+    description: Open your ender chest
+    usage: /enderchest
+    permission: justplugin.enderchest
+    aliases: [echest, ec]
+  craft:
+    description: Open a virtual crafting table
+    usage: /craft
+    permission: justplugin.craft
+    aliases: [workbench, wb]
+  stonecutter:
+    description: Open a virtual stonecutter
+    usage: /stonecutter
+    permission: justplugin.stonecutter
+  loom:
+    description: Open a virtual loom
+    usage: /loom
+    permission: justplugin.loom
+  smithingtable:
+    description: Open a virtual smithing table
+    usage: /smithingtable
+    permission: justplugin.smithingtable
+    aliases: [smithtable]
+  enchantingtable:
+    description: Open a virtual enchanting table
+    usage: /enchantingtable
+    permission: justplugin.enchantingtable
+    aliases: [enchtable]
+
+  # === Info ===
+  jpinfo:
+    description: Plugin information
+    usage: /jpinfo
+    aliases: [about]
+  jphelp:
+    description: Show help
+    usage: /jphelp [page]
+  playerinfo:
+    description: View player info
+    usage: /playerinfo <player>
+    permission: justplugin.playerinfo
+    aliases: [whois, seen]
+  plist:
+    description: List online players
+    usage: /plist
+    aliases: [who, online, players]
+  motd:
+    description: View or set MOTD
+    usage: /motd [message]
+  resetmotd:
+    description: Reset the MOTD to plugin default
+    usage: /resetmotd
+    permission: justplugin.motd.set
+  clock:
+    description: Show current time
+    usage: /clock
+    aliases: [realtime, rltime]
+  date:
+    description: Show current date and time
+    usage: /date
+    aliases: [realdate, rldate]
+
+  # === Items ===
+  itemname:
+    description: Rename an item
+    usage: /itemname <name>
+    permission: justplugin.itemname
+    aliases: [rename, iname]
+  shareitem:
+    description: Show your held item in chat
+    usage: /shareitem
+    permission: justplugin.shareitem
+    aliases: [show, showitem]
+  setspawner:
+    description: Change a spawner's entity type
+    usage: /setspawner <type>
+    permission: justplugin.setspawner
+    aliases: [changespawner]
+
+  # === World ===
+  weather:
+    description: Set the weather
+    usage: /weather <sun | rain | thunder>
+    permission: justplugin.weather
+  time:
+    description: Set or query time
+    usage: /time <set | add | query> <value>
+    permission: justplugin.time
+
+  # === Teams ===
+  team:
+    description: Team management
+    usage: /team <create | disband | invite | join | leave | kick | info | list>
+    permission: justplugin.team
+
+  # === Misc ===
+  trade:
+    description: Trade with a player
+    usage: /trade <player | accept | deny>
+    permission: justplugin.trade
+  discord:
+    description: Show the Discord link
+    usage: /discord
+    aliases: [dc]
+  tab:
+    description: Refresh tab list
+    usage: /tab
+    permission: justplugin.tab
+
+  # === Overrides ===
+  help:
+    description: Show plugin help
+    usage: /help [page]
+    aliases: [?]
+  plugins:
+    description: Show installed plugins
+    usage: /plugins
+    aliases: [pl]
+
+permissions:
+  justplugin.*:
+    description: All JustPlugin permissions
+    default: op
+    children:
+      justplugin.tpa: true
+      justplugin.tpahere: true
+      justplugin.tppos: true
+      justplugin.wild: true
+      justplugin.back: true
+      justplugin.spawn: true
+      justplugin.setspawn: true
+      justplugin.warp: true
+      justplugin.setwarp: true
+      justplugin.delwarp: true
+      justplugin.renamewarp: true
+      justplugin.home: true
+      justplugin.sethome: true
+      justplugin.delhome: true
+      justplugin.balance: true
+      justplugin.balance.others: true
+      justplugin.pay: true
+      justplugin.paytoggle: true
+      justplugin.paynote: true
+      justplugin.ban: true
+      justplugin.banip: true
+      justplugin.tempban: true
+      justplugin.tempbanip: true
+      justplugin.unban: true
+      justplugin.unbanip: true
+      justplugin.vanish: true
+      justplugin.vanish.others: true
+      justplugin.vanish.see: true
+      justplugin.sudo: true
+      justplugin.invsee: true
+      justplugin.echestsee: true
+      justplugin.fly: true
+      justplugin.fly.others: true
+      justplugin.gamemode: true
+      justplugin.gamemode.others: true
+      justplugin.gmcheck: true
+      justplugin.god: true
+      justplugin.god.others: true
+      justplugin.speed: true
+      justplugin.speed.others: true
+      justplugin.hat: true
+      justplugin.exp: true
+      justplugin.exp.others: true
+      justplugin.skull: true
+      justplugin.suicide: true
+      justplugin.heal: true
+      justplugin.heal.others: true
+      justplugin.feed: true
+      justplugin.feed.others: true
+      justplugin.kill: true
+      justplugin.kill.others: true
+      justplugin.getpos.others: true
+      justplugin.getdeathpos: true
+      justplugin.getdeathpos.others: true
+      justplugin.msg: true
+      justplugin.ignore: true
+      justplugin.announce: true
+      justplugin.sharecoords: true
+      justplugin.sharedeathcoords: true
+      justplugin.chat: true
+      justplugin.anvil: true
+      justplugin.grindstone: true
+      justplugin.enderchest: true
+      justplugin.craft: true
+      justplugin.stonecutter: true
+      justplugin.loom: true
+      justplugin.smithingtable: true
+      justplugin.enchantingtable: true
+      justplugin.playerinfo: true
+      justplugin.playerinfo.ip: true
+      justplugin.motd.set: true
+      justplugin.itemname: true
+      justplugin.shareitem: true
+      justplugin.setspawner: true
+      justplugin.weather: true
+      justplugin.time: true
+      justplugin.team: true
+      justplugin.trade: true
+      justplugin.tab: true
+      justplugin.addcash: true
+      justplugin.addcash.others: true
+      justplugin.discord.set: true
+      justplugin.teleport.bypass: true
+  justplugin.player:
+    description: Basic player permissions
+    default: true
+    children:
+      justplugin.tpa: true
+      justplugin.back: true
+      justplugin.spawn: true
+      justplugin.warp: true
+      justplugin.home: true
+      justplugin.sethome: true
+      justplugin.delhome: true
+      justplugin.balance: true
+      justplugin.pay: true
+      justplugin.paytoggle: true
+      justplugin.paynote: true
+      justplugin.msg: true
+      justplugin.ignore: true
+      justplugin.sharecoords: true
+      justplugin.sharedeathcoords: true
+      justplugin.chat: true
+      justplugin.enderchest: true
+      justplugin.craft: true
+      justplugin.getdeathpos: true
+      justplugin.shareitem: true
+      justplugin.team: true
+      justplugin.trade: true
+      justplugin.suicide: true
+      justplugin.kill: true
+      justplugin.tab: true
+      justplugin.tpahere: true
+      justplugin.wild: true

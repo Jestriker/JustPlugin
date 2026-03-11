@@ -1,3 +1,13 @@
+// ProGuard dependency for obfuscation
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.6.1'
+    }
+}
+
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
@@ -53,3 +63,59 @@ processResources {
         expand props
     }
 }
+
+// ==========================================
+// ProGuard Obfuscation Task
+// ==========================================
+// Run with:   ./gradlew obfuscate
+// Output:     build/libs/JustPlugin-1.0-SNAPSHOT-obfuscated.jar
+// This makes the decompiled code extremely hard to read/understand.
+// ==========================================
+tasks.register('obfuscate', proguard.gradle.ProGuardTask) {
+    dependsOn 'jar'
+
+    // Input / Output
+    injars tasks.jar.archiveFile
+    outjars layout.buildDirectory.file("libs/${project.name}-${project.version}-obfuscated.jar")
+
+    // Library jars (Paper API + JDK)
+    libraryjars configurations.compileClasspath
+    libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+    libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+    libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+    libraryjars "${System.getProperty('java.home')}/jmods/java.sql.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+
+    // Keep the main plugin class (referenced in plugin.yml)
+    keep 'public class org.justme.justPlugin.JustPlugin extends org.bukkit.plugin.java.JavaPlugin { *; }'
+
+    // Keep all public/protected methods in classes extending Bukkit types
+    keep 'class * extends org.bukkit.event.Listener { @org.bukkit.event.EventHandler *; }'
+    keep 'class * implements org.bukkit.command.CommandExecutor { public boolean onCommand(...); }'
+    keep 'class * implements org.bukkit.command.TabCompleter { public java.util.List onTabComplete(...); }'
+    keep 'class * implements org.bukkit.command.TabExecutor { *; }'
+
+    // Keep annotations (important for @EventHandler etc.)
+    keepattributes '*Annotation*,Signature,InnerClasses,EnclosingMethod'
+
+    // Don't warn about Paper API references
+    dontwarn 'io.papermc.**'
+    dontwarn 'net.kyori.**'
+    dontwarn 'org.bukkit.**'
+    dontwarn 'com.destroystokyo.**'
+    dontwarn 'org.jetbrains.**'
+    dontwarn 'javax.**'
+    dontwarn 'com.google.**'
+    dontwarn 'net.minecraft.**'
+    dontwarn 'org.yaml.**'
+
+    // Obfuscation settings
+    optimizationpasses 3
+    allowaccessmodification()
+    repackageclasses 'jp'              // Moves all obfuscated classes into a flat 'jp' package
+    overloadaggressively()             // Reuse short names aggressively
+
+    // Don't remove resources
+    keepdirectories()
+    adaptresourcefilecontents 'plugin.yml'
+}
+
