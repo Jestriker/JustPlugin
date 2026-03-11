@@ -1,0 +1,4 @@
+name: JustPlugin
+version: '1.0-SNAPSHOT'
+main: org.justme.justPlugin.JustPlugin
+api-version: '1.21'
