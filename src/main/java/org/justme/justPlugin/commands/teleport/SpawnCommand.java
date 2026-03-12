@@ -28,6 +28,14 @@ public class SpawnCommand implements TabExecutor {
             return true;
         }
 
+        // Cooldown check (applies even to OPs unless explicit bypass)
+        if (!player.hasPermission("justplugin.spawn.nocooldown")
+                && plugin.getCooldownManager().isOnCooldown(player.getUniqueId(), "spawn")) {
+            int remaining = plugin.getCooldownManager().getRemainingSeconds(player.getUniqueId(), "spawn");
+            player.sendMessage(CC.error("You must wait <yellow>" + remaining + "</yellow> seconds before using this command again."));
+            return true;
+        }
+
         // Check for custom spawn in config
         String worldName = plugin.getConfig().getString("spawn.world");
         Location spawnLoc;
@@ -47,8 +55,12 @@ public class SpawnCommand implements TabExecutor {
             spawnLoc = Bukkit.getWorlds().getFirst().getSpawnLocation();
         }
 
-        plugin.getTeleportManager().teleport(player, spawnLoc);
-        player.sendMessage(CC.success("Teleporting to spawn."));
+        boolean initiated = plugin.getTeleportManager().teleportWithSafety(
+                player, spawnLoc, "justplugin.teleport.bypass", "spawn", "justplugin.spawn.unsafetp");
+        if (initiated) {
+            plugin.getCooldownManager().setCooldown(player.getUniqueId(), "spawn");
+            player.sendMessage(CC.success("Teleporting to spawn."));
+        }
         return true;
     }
 
@@ -57,4 +69,3 @@ public class SpawnCommand implements TabExecutor {
         return List.of();
     }
 }
-

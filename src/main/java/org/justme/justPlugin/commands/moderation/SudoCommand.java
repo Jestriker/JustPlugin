@@ -33,12 +33,15 @@ public class SudoCommand implements TabExecutor {
             return true;
         }
         String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+        String senderName = sender instanceof Player ? sender.getName() : "Console";
         if (message.startsWith("/")) {
             target.performCommand(message.substring(1));
             sender.sendMessage(CC.success("Forced <yellow>" + target.getName() + "</yellow> to run: <gray>" + message));
+            plugin.getLogManager().log("admin", "<yellow>" + senderName + "</yellow> forced <yellow>" + target.getName() + "</yellow> to run: <gray>" + message);
         } else {
             target.chat(message);
             sender.sendMessage(CC.success("Forced <yellow>" + target.getName() + "</yellow> to say: <gray>" + message));
+            plugin.getLogManager().log("admin", "<yellow>" + senderName + "</yellow> forced <yellow>" + target.getName() + "</yellow> to say: <gray>" + message);
         }
         return true;
     }

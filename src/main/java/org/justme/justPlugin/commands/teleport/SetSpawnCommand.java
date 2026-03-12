@@ -50,6 +50,7 @@ public class SetSpawnCommand implements TabExecutor {
         loc.getWorld().setSpawnLocation(loc);
 
         player.sendMessage(CC.success("Spawn has been set to your exact location."));
+        plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set the spawn to <yellow>" + String.format("%.1f, %.1f, %.1f", loc.getX(), loc.getY(), loc.getZ()) + "</yellow> in <yellow>" + loc.getWorld().getName() + "</yellow>");
         return true;
     }
 

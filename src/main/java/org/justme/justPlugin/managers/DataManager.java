@@ -36,6 +36,10 @@ public class DataManager {
         teamsConfig = YamlConfiguration.loadConfiguration(teamsFile);
     }
 
+    public File getPlayerDataFolder() {
+        return playerDataFolder;
+    }
+
     // --- Player Data ---
     public YamlConfiguration getPlayerData(UUID uuid) {
         File file = new File(playerDataFolder, uuid.toString() + ".yml");

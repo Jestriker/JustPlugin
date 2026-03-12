@@ -53,6 +53,7 @@ public class EchestSeeCommand implements TabExecutor, Listener {
         openSessions.put(player.getUniqueId(), target.getUniqueId());
         player.openInventory(echest);
         player.sendMessage(CC.success("Viewing <yellow>" + target.getName() + "</yellow>'s ender chest."));
+        plugin.getLogManager().log("moderation", "<yellow>" + player.getName() + "</yellow> opened <yellow>" + target.getName() + "</yellow>'s ender chest");
 
         // Start periodic refresh task (every 20 ticks = 1 second)
         // Since we're using the real ender chest inventory object, changes sync automatically

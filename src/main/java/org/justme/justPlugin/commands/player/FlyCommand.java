@@ -41,6 +41,9 @@ public class FlyCommand implements TabExecutor {
         target.sendMessage(CC.success("Flight " + status + "."));
         if (!target.equals(player)) {
             player.sendMessage(CC.success("Flight " + status + " for <yellow>" + target.getName() + "</yellow>."));
+            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (target.getAllowFlight() ? "enabled" : "disabled") + " flight for <yellow>" + target.getName() + "</yellow>");
+        } else {
+            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (target.getAllowFlight() ? "enabled" : "disabled") + " flight");
         }
         return true;
     }

@@ -1,9 +1,13 @@
 package org.justme.justPlugin.managers;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
@@ -143,7 +147,7 @@ public class TeleportManager {
         }
     }
 
-    // --- Accept: delayed teleport with move-cancel and safe landing ---
+    // --- Accept: delayed teleport with move-cancel, damage-cancel, and safe landing ---
     public void acceptRequest(UUID targetUuid) {
         TpaRequest req = getIncomingRequest(targetUuid);
         if (req == null) return;
@@ -165,10 +169,38 @@ public class TeleportManager {
             destination = senderP;
         }
 
+        String featureKey = req.senderGoesToTarget ? "tpa" : "tpahere";
+        boolean safetyEnabled = plugin.getConfig().getBoolean("teleport.safe-teleport-" + featureKey, true);
+        String safetyBypassPerm = "justplugin." + featureKey + ".unsafetp";
+
+        if (safetyEnabled) {
+            boolean playerFlying = destination.isFlying();
+            boolean unsafeLocation = !isLocationSafe(destination.getLocation());
+            boolean isUnsafe = playerFlying || unsafeLocation;
+
+            if (isUnsafe) {
+                if (teleporter.hasPermission(safetyBypassPerm)) {
+                    sendUnsafeWarning(teleporter);
+                    // Continue with teleport (bypass)
+                } else {
+                    String reason = playerFlying
+                            ? "the destination player is flying"
+                            : "hazardous blocks detected at the destination";
+                    teleporter.sendMessage(CC.error("Teleportation cancelled — " + reason + "!"));
+                    destination.sendMessage(CC.warning("Teleport request cancelled — your current location is unsafe for teleportation."));
+                    return;
+                }
+            }
+        }
+
+        boolean hasSafetyBypass = teleporter.hasPermission(safetyBypassPerm);
+
+        // Check bypass permission for teleport delay
+        String delayBypassPerm = req.senderGoesToTarget ? "justplugin.tpa.cooldownbypass" : "justplugin.tpahere.cooldownbypass";
         double delay = roundToHalf(teleportDelay);
-        if (delay <= 0 || teleporter.hasPermission("justplugin.teleport.bypass")) {
+        if (delay <= 0 || teleporter.hasPermission(delayBypassPerm)) {
             // Instant teleport
-            executeSafeTeleport(teleporter, destination.getLocation());
+            executeTeleport(teleporter, destination.getLocation(), !hasSafetyBypass || !safetyEnabled);
             return;
         }
 
@@ -176,16 +208,38 @@ public class TeleportManager {
         Location startLoc = teleporter.getLocation().clone();
         teleportStartLocations.put(teleporter.getUniqueId(), startLoc);
 
+        boolean clickable = plugin.getConfig().getBoolean("clickable-commands.tpa", true);
+        String cancelCmd = CC.clickCmd("<yellow>/tpacancel</yellow>", "/tpacancel", clickable);
+
         String delayStr = delay == (int) delay ? String.valueOf((int) delay) : String.valueOf(delay);
-        teleporter.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. <gray>Don't move!"));
-        teleporter.sendMessage(CC.info("Type <yellow>/tpacancel</yellow> to cancel."));
+        teleporter.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. <gray>Don't move or take damage!"));
+        teleporter.sendMessage(CC.info("Type " + cancelCmd + " to cancel."));
         destination.sendMessage(CC.success("<yellow>" + teleporter.getName() + "</yellow> is teleporting to you in <yellow>" + delayStr + "</yellow> seconds."));
+
+        final boolean finalSafetyEnabled = safetyEnabled;
+        final boolean finalHasBypass = hasSafetyBypass;
 
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pendingTeleports.remove(teleporter.getUniqueId());
             teleportStartLocations.remove(teleporter.getUniqueId());
             if (!teleporter.isOnline()) return;
-            executeSafeTeleport(teleporter, destination.isOnline() ? destination.getLocation() : teleporter.getLocation());
+
+            // Re-check safety before teleporting
+            Location destLoc = destination.isOnline() ? destination.getLocation() : teleporter.getLocation();
+            if (finalSafetyEnabled) {
+                boolean destFlying = destination.isOnline() && destination.isFlying();
+                boolean destUnsafe = !isLocationSafe(destLoc);
+                if (destFlying || destUnsafe) {
+                    if (finalHasBypass) {
+                        sendUnsafeWarning(teleporter);
+                    } else {
+                        teleporter.sendMessage(CC.error("Teleportation cancelled — the destination became unsafe!"));
+                        return;
+                    }
+                }
+            }
+
+            executeTeleport(teleporter, destLoc, !finalHasBypass || !finalSafetyEnabled);
         }, delayTicks);
         pendingTeleports.put(teleporter.getUniqueId(), task);
     }
@@ -207,6 +261,16 @@ public class TeleportManager {
         player.sendMessage(CC.error("Teleportation cancelled. You moved!"));
     }
 
+    /**
+     * Called from EntityDamageEvent — cancels pending teleport if damaged during warmup.
+     */
+    public void handleDamageDuringTeleport(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (!pendingTeleports.containsKey(uuid)) return;
+        cancelPendingTeleport(uuid);
+        player.sendMessage(CC.error("Teleportation cancelled. You took damage!"));
+    }
+
     public boolean isWaitingToTeleport(UUID uuid) {
         return pendingTeleports.containsKey(uuid);
     }
@@ -217,21 +281,88 @@ public class TeleportManager {
         teleportStartLocations.remove(uuid);
     }
 
-    // --- Safe Teleport ---
-    private void executeSafeTeleport(Player player, Location destination) {
-        Location safeLoc = getSafeLocation(destination);
+    // --- Teleport Execution ---
+    private void executeTeleport(Player player, Location destination, boolean useSafeLocation) {
+        Location finalLoc = useSafeLocation ? getSafeLocation(destination) : destination;
         setBackLocation(player.getUniqueId(), player.getLocation());
-        player.teleportAsync(safeLoc);
+        player.teleportAsync(finalLoc);
         player.sendMessage(CC.success("Teleported!"));
     }
 
     /**
-     * Ensures the destination has a solid non-damaging block below.
+     * Sends an unsafe destination warning with clickable creative/god mode buttons.
      */
+    private void sendUnsafeWarning(Player player) {
+        player.sendMessage(CC.warning("⚠ The destination is unsafe! Consider enabling protection:"));
+        Component buttons = CC.translate("  ")
+                .append(CC.translate("<click:run_command:'/gmc'><hover:show_text:'<gray>Click to switch to <green>Creative Mode'><gold><bold>[Creative Mode]</bold></gold></hover></click>"))
+                .append(CC.translate(" "))
+                .append(CC.translate("<click:run_command:'/god'><hover:show_text:'<gray>Click to enable <green>God Mode'><gold><bold>[God Mode]</bold></gold></hover></click>"));
+        player.sendMessage(buttons);
+    }
+
+    // ==========================================
+    // Safety Check — 3×3 area around destination
+    // ==========================================
+
+    /**
+     * Checks if a location is safe for teleportation using a 3×3 area check.
+     * Validates: standing block is solid+safe, 3 blocks below + 2 blocks player occupies
+     * are free of hazardous blocks in a 3×3 footprint.
+     */
+    public boolean isLocationSafe(Location loc) {
+        World world = loc.getWorld();
+        if (world == null) return false;
+        int cx = loc.getBlockX();
+        int cy = loc.getBlockY();
+        int cz = loc.getBlockZ();
+
+        // Standing block (directly below) must be solid and safe
+        Block standingBlock = world.getBlockAt(cx, cy - 1, cz);
+        if (!standingBlock.getType().isSolid() || isDangerousBlock(standingBlock.getType())) {
+            return false;
+        }
+
+        // Check 3×3 area around the destination
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                int x = cx + dx;
+                int z = cz + dz;
+
+                // 3 blocks below the player (y-1, y-2, y-3)
+                for (int y = cy - 3; y <= cy - 1; y++) {
+                    if (y < world.getMinHeight()) continue;
+                    if (isDangerousBlock(world.getBlockAt(x, y, z).getType())) return false;
+                }
+
+                // 2 blocks the player occupies (y, y+1)
+                for (int y = cy; y <= cy + 1; y++) {
+                    if (isDangerousBlock(world.getBlockAt(x, y, z).getType())) return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Expanded dangerous block check — includes tripwire, pressure plates, sculk sensors,
+     * pointed dripstone, and other hazardous blocks.
+     */
+    private boolean isDangerousBlock(Material mat) {
+        return mat == Material.LAVA || mat == Material.MAGMA_BLOCK || mat == Material.FIRE
+                || mat == Material.SOUL_FIRE || mat == Material.CACTUS
+                || mat == Material.SWEET_BERRY_BUSH || mat == Material.WITHER_ROSE
+                || mat == Material.CAMPFIRE || mat == Material.SOUL_CAMPFIRE
+                || mat == Material.POWDER_SNOW || mat == Material.POINTED_DRIPSTONE
+                || mat == Material.TRIPWIRE || mat == Material.TRIPWIRE_HOOK
+                || mat == Material.STRING
+                || mat == Material.SCULK_SENSOR || mat == Material.SCULK_SHRIEKER
+                || mat.name().contains("PRESSURE_PLATE");
+    }
+
     public Location getSafeLocation(Location loc) {
         Location safe = loc.clone();
         World world = safe.getWorld();
-        // Search downward from current Y, then upward, to find safe ground
         int startY = safe.getBlockY();
         for (int y = startY; y >= world.getMinHeight() + 1; y--) {
             Location check = new Location(world, safe.getX(), y, safe.getZ());
@@ -242,7 +373,6 @@ public class TeleportManager {
                 return new Location(world, safe.getX(), y, safe.getZ(), safe.getYaw(), safe.getPitch());
             }
         }
-        // Search upward
         for (int y = startY; y <= world.getMaxHeight() - 2; y++) {
             Location check = new Location(world, safe.getX(), y, safe.getZ());
             Material below = new Location(world, safe.getX(), y - 1, safe.getZ()).getBlock().getType();
@@ -252,18 +382,13 @@ public class TeleportManager {
                 return new Location(world, safe.getX(), y, safe.getZ(), safe.getYaw(), safe.getPitch());
             }
         }
-        // Fallback: highest block
         int highY = world.getHighestBlockYAt(safe.getBlockX(), safe.getBlockZ()) + 1;
         return new Location(world, safe.getX(), highY, safe.getZ(), safe.getYaw(), safe.getPitch());
     }
 
     private boolean isSolidSafe(Material mat) {
         if (!mat.isSolid()) return false;
-        // Damaging or unsafe blocks
-        return mat != Material.LAVA && mat != Material.MAGMA_BLOCK && mat != Material.FIRE
-                && mat != Material.SOUL_FIRE && mat != Material.CACTUS
-                && mat != Material.SWEET_BERRY_BUSH && mat != Material.WITHER_ROSE
-                && mat != Material.CAMPFIRE && mat != Material.SOUL_CAMPFIRE;
+        return !isDangerousBlock(mat);
     }
 
     private boolean isPassable(Material mat) {
@@ -271,7 +396,6 @@ public class TeleportManager {
                 && mat != Material.WATER && mat != Material.POWDER_SNOW;
     }
 
-    // --- Round delay to nearest 0.5 ---
     private double roundToHalf(double value) {
         if (value <= 0) return 0;
         return Math.round(value * 2.0) / 2.0;
@@ -286,11 +410,79 @@ public class TeleportManager {
         return backLocations.get(uuid);
     }
 
-    // --- Teleport with delay (non-TPA, e.g. /warp, /home, /spawn) ---
-    public void teleport(Player player, Location location) {
+    // --- Teleport with delay (non-TPA: /warp, /home, /spawn) ---
+
+    /**
+     * Teleport with safety check, delay, and bypass permissions.
+     *
+     * @param player            The player to teleport
+     * @param location          Destination location
+     * @param delayBypassPerm   Permission to bypass warmup delay
+     * @param featureKey        Feature key for config lookup (e.g., "tpa", "spawn", "warp")
+     * @param safetyBypassPerm  Permission to bypass safety check (null to skip safety)
+     * @return true if teleport was initiated, false if blocked by safety
+     */
+    public boolean teleportWithSafety(Player player, Location location, String delayBypassPerm,
+                                       String featureKey, String safetyBypassPerm) {
+        boolean safetyEnabled = plugin.getConfig().getBoolean("teleport.safe-teleport-" + featureKey, true);
+        boolean useSafeLocation = true;
+
+        if (safetyEnabled && !isLocationSafe(location)) {
+            if (safetyBypassPerm != null && player.hasPermission(safetyBypassPerm)) {
+                sendUnsafeWarning(player);
+                useSafeLocation = false; // Bypass: go to exact location
+            } else {
+                player.sendMessage(CC.error("Teleportation cancelled — the destination is unsafe!"));
+                return false;
+            }
+        }
+
         setBackLocation(player.getUniqueId(), player.getLocation());
         double delay = roundToHalf(teleportDelay);
-        if (delay <= 0 || player.hasPermission("justplugin.teleport.bypass")) {
+        if (delay <= 0 || player.hasPermission(delayBypassPerm)) {
+            Location finalLoc = useSafeLocation ? getSafeLocation(location) : location;
+            player.teleportAsync(finalLoc);
+            return true;
+        }
+
+        final boolean finalUseSafe = useSafeLocation;
+        long delayTicks = (long) (delay * 20);
+        Location startLoc = player.getLocation().clone();
+        teleportStartLocations.put(player.getUniqueId(), startLoc);
+        String delayStr = delay == (int) delay ? String.valueOf((int) delay) : String.valueOf(delay);
+        player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. Don't move or take damage!"));
+        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            pendingTeleports.remove(player.getUniqueId());
+            teleportStartLocations.remove(player.getUniqueId());
+            if (!player.isOnline()) return;
+
+            // Re-check safety
+            if (safetyEnabled && !isLocationSafe(location)) {
+                if (safetyBypassPerm != null && player.hasPermission(safetyBypassPerm)) {
+                    sendUnsafeWarning(player);
+                } else {
+                    player.sendMessage(CC.error("Teleportation cancelled — the destination became unsafe!"));
+                    return;
+                }
+            }
+
+            Location finalLoc = finalUseSafe ? getSafeLocation(location) : location;
+            setBackLocation(player.getUniqueId(), player.getLocation());
+            player.teleportAsync(finalLoc);
+            player.sendMessage(CC.success("Teleported!"));
+        }, delayTicks);
+        pendingTeleports.put(player.getUniqueId(), task);
+        return true;
+    }
+
+    /**
+     * Teleport with bypass permission — uses specific bypass permission for delay.
+     * No safety check (legacy method for backward compatibility).
+     */
+    public void teleportWithBypass(Player player, Location location, String bypassPermission) {
+        setBackLocation(player.getUniqueId(), player.getLocation());
+        double delay = roundToHalf(teleportDelay);
+        if (delay <= 0 || player.hasPermission(bypassPermission)) {
             Location safeLoc = getSafeLocation(location);
             player.teleportAsync(safeLoc);
             return;
@@ -299,7 +491,7 @@ public class TeleportManager {
         Location startLoc = player.getLocation().clone();
         teleportStartLocations.put(player.getUniqueId(), startLoc);
         String delayStr = delay == (int) delay ? String.valueOf((int) delay) : String.valueOf(delay);
-        player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. Don't move!"));
+        player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. Don't move or take damage!"));
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pendingTeleports.remove(player.getUniqueId());
             teleportStartLocations.remove(player.getUniqueId());
@@ -310,6 +502,13 @@ public class TeleportManager {
             player.sendMessage(CC.success("Teleported!"));
         }, delayTicks);
         pendingTeleports.put(player.getUniqueId(), task);
+    }
+
+    /**
+     * Legacy teleport method — uses justplugin.teleport.bypass as the bypass permission.
+     */
+    public void teleport(Player player, Location location) {
+        teleportWithBypass(player, location, "justplugin.teleport.bypass");
     }
 
     // --- Wild/Random TP ---

@@ -1,4 +1,4 @@
-package org.justme.justPlugin.commands.chat;
+package org.justme.justPlugin.commands.world;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -10,24 +10,20 @@ import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
-public class AnnounceCommand implements TabExecutor {
+public class UnfreezeGameCommand implements TabExecutor {
 
     private final JustPlugin plugin;
 
-    public AnnounceCommand(JustPlugin plugin) {
+    public UnfreezeGameCommand(JustPlugin plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
-        if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /announce <message>"));
-            return true;
-        }
-        String message = String.join(" ", args);
-        Bukkit.broadcast(CC.translate("<red><bold>[Announcement]</bold></red> <yellow>" + message));
-        String senderName = sender instanceof org.bukkit.entity.Player ? sender.getName() : "Console";
-        plugin.getLogManager().log("admin", "<yellow>" + senderName + "</yellow> announced: <gray>" + message);
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tick unfreeze");
+        sender.sendMessage(CC.success("Game has been <yellow>unfrozen</yellow>! Tick processing resumed."));
+        Bukkit.broadcast(CC.warning("The game has been <green>unfrozen</green> by <yellow>" + sender.getName() + "</yellow>."));
+        plugin.getLogManager().log("admin", "<yellow>" + sender.getName() + "</yellow> unfroze the game");
         return true;
     }
 
@@ -36,4 +32,3 @@ public class AnnounceCommand implements TabExecutor {
         return List.of();
     }
 }
-

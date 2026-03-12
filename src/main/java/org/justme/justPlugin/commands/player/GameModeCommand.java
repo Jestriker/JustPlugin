@@ -77,6 +77,11 @@ public class GameModeCommand implements TabExecutor {
         target.sendMessage(CC.success("Game mode set to <yellow>" + mode.name().toLowerCase() + "</yellow>."));
         if (!target.equals(sender)) {
             sender.sendMessage(CC.success("Set <yellow>" + target.getName() + "</yellow>'s game mode to <yellow>" + mode.name().toLowerCase() + "</yellow>."));
+            String senderName = sender instanceof Player ? sender.getName() : "Console";
+            plugin.getLogManager().log("gamemode", "<yellow>" + senderName + "</yellow> set <yellow>" + target.getName() + "</yellow>'s game mode to <yellow>" + mode.name().toLowerCase() + "</yellow>");
+        } else {
+            String senderName = sender instanceof Player ? sender.getName() : "Console";
+            plugin.getLogManager().log("gamemode", "<yellow>" + senderName + "</yellow> changed their game mode to <yellow>" + mode.name().toLowerCase() + "</yellow>");
         }
         return true;
     }

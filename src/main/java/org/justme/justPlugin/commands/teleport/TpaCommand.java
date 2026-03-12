@@ -30,8 +30,17 @@ public class TpaCommand implements TabExecutor {
             player.sendMessage(CC.error("Usage: /tpa <player>"));
             return true;
         }
+
+        // Cooldown check (applies even to OPs unless explicit bypass)
+        if (!player.hasPermission("justplugin.tpa.nocooldown")
+                && plugin.getCooldownManager().isOnCooldown(player.getUniqueId(), "tpa")) {
+            int remaining = plugin.getCooldownManager().getRemainingSeconds(player.getUniqueId(), "tpa");
+            player.sendMessage(CC.error("You must wait <yellow>" + remaining + "</yellow> seconds before using this command again."));
+            return true;
+        }
+
         Player target = Bukkit.getPlayer(args[0]);
-        if (target == null) {
+        if (target == null || (plugin.getVanishManager().isVanished(target.getUniqueId()) && !player.hasPermission("justplugin.vanish.see"))) {
             player.sendMessage(CC.error("Player not found!"));
             return true;
         }
@@ -44,6 +53,9 @@ public class TpaCommand implements TabExecutor {
             player.sendMessage(CC.error("This player is not accepting teleport requests from you."));
             return true;
         }
+
+        boolean clickable = plugin.getConfig().getBoolean("clickable-commands.tpa", true);
+
         String result = plugin.getTeleportManager().sendTpaRequest(player.getUniqueId(), target.getUniqueId());
         if (result != null) {
             if (result.equals("already_same")) {
@@ -51,22 +63,30 @@ public class TpaCommand implements TabExecutor {
             } else if (result.startsWith("already_other:")) {
                 String otherName = result.substring("already_other:".length());
                 player.sendMessage(CC.error("You already have a pending request to <yellow>" + otherName + "</yellow>."));
-                player.sendMessage(CC.info("Use <yellow>/tpacancel</yellow> to cancel it and try again."));
+                String cancelCmd = CC.clickCmd("<yellow>/tpacancel</yellow>", "/tpacancel", clickable);
+                player.sendMessage(CC.info("Use " + cancelCmd + " to cancel it and try again."));
             }
             return true;
         }
+
+        plugin.getCooldownManager().setCooldown(player.getUniqueId(), "tpa");
+
         int timeout = plugin.getTeleportManager().getRequestTimeout();
+        String cancelCmd = CC.clickCmd("<yellow>/tpacancel</yellow>", "/tpacancel", clickable);
+        String acceptCmd = CC.clickCmd("<green>/tpaccept</green>", "/tpaccept", clickable);
+        String rejectCmd = CC.clickCmd("<red>/tpreject</red>", "/tpreject", clickable);
+
         player.sendMessage(CC.success("TPA request sent to <yellow>" + target.getName() + "</yellow>. <gray>Expires in " + timeout + "s."));
-        player.sendMessage(CC.info("Type <yellow>/tpacancel</yellow> to cancel."));
+        player.sendMessage(CC.info("Type " + cancelCmd + " to cancel."));
         target.sendMessage(CC.info("<yellow>" + player.getName() + "</yellow> has requested to teleport to you."));
-        target.sendMessage(CC.info("Type <green>/tpaccept</green> to accept or <red>/tpreject</red> to deny. <gray>Expires in " + timeout + "s."));
+        target.sendMessage(CC.info("Type " + acceptCmd + " to accept or " + rejectCmd + " to deny. <gray>Expires in " + timeout + "s."));
         return true;
     }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            return Bukkit.getOnlinePlayers().stream()
+            return plugin.getVanishManager().getVisiblePlayers(sender).stream()
                     .map(Player::getName)
                     .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());

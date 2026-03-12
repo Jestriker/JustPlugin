@@ -11,6 +11,7 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class BanIpCommand implements TabExecutor {
@@ -32,14 +33,18 @@ public class BanIpCommand implements TabExecutor {
         String bannedBy = sender instanceof Player ? sender.getName() : "Console";
         String ip = args[0];
         String resolvedFrom = null;
+        UUID associatedUuid = null;
+        String associatedName = null;
 
         // Check if it's a player name rather than a raw IP
-        if (!ip.matches("\\d+\\.\\d+\\.\\d+\\.\\d+")) {
+        if (!ip.matches("\\d+\\.\\d+\\.\\d+\\.\\d+") && !ip.contains(":")) {
             // Try online player first
             Player target = Bukkit.getPlayer(args[0]);
             if (target != null && target.getAddress() != null) {
                 ip = target.getAddress().getAddress().getHostAddress();
                 resolvedFrom = target.getName();
+                associatedUuid = target.getUniqueId();
+                associatedName = target.getName();
             } else {
                 // Try offline player - look up last recorded IP
                 @SuppressWarnings("deprecation")
@@ -48,6 +53,8 @@ public class BanIpCommand implements TabExecutor {
                 if (lastIp != null) {
                     ip = lastIp;
                     resolvedFrom = offP.getName() != null ? offP.getName() : args[0];
+                    associatedUuid = offP.getUniqueId();
+                    associatedName = resolvedFrom;
                 } else {
                     sender.sendMessage(CC.error("Could not find an IP for <yellow>" + args[0] + "</yellow>. They may have never joined."));
                     return true;
@@ -61,13 +68,14 @@ public class BanIpCommand implements TabExecutor {
             return true;
         }
 
-        plugin.getBanManager().banIp(ip, reason, bannedBy);
+        plugin.getBanManager().banIp(ip, reason, bannedBy, associatedUuid, associatedName);
         if (resolvedFrom != null) {
             sender.sendMessage(CC.success("IP Banned <yellow>" + ip + "</yellow> (resolved from <yellow>" + resolvedFrom + "</yellow>). Reason: <gray>" + reason));
         } else {
             sender.sendMessage(CC.success("IP Banned <yellow>" + ip + "</yellow>. Reason: <gray>" + reason));
         }
         Bukkit.broadcast(CC.warning("IP <yellow>" + ip + "</yellow> has been IP banned by <yellow>" + bannedBy + "</yellow>. Reason: <gray>" + reason));
+        plugin.getLogManager().log("moderation", "<yellow>" + bannedBy + "</yellow> IP-banned <yellow>" + ip + "</yellow>" + (resolvedFrom != null ? " (from <yellow>" + resolvedFrom + "</yellow>)" : "") + ". Reason: <gray>" + reason);
         return true;
     }
 

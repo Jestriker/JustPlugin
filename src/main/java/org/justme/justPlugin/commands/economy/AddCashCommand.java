@@ -47,6 +47,7 @@ public class AddCashCommand implements TabExecutor {
                 }
                 plugin.getEconomyManager().addBalance(player.getUniqueId(), amount);
                 player.sendMessage(CC.success("Added <green>" + plugin.getEconomyManager().format(amount) + "</green> to your balance. New balance: <green>" + plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(player.getUniqueId())) + "</green>"));
+                plugin.getLogManager().log("economy", "<yellow>" + player.getName() + "</yellow> added <green>" + plugin.getEconomyManager().format(amount) + "</green> to their own balance");
             } catch (NumberFormatException e) {
                 player.sendMessage(CC.error("Invalid amount!"));
             }
@@ -72,6 +73,8 @@ public class AddCashCommand implements TabExecutor {
                 plugin.getEconomyManager().addBalance(target.getUniqueId(), amount);
                 sender.sendMessage(CC.success("Added <green>" + plugin.getEconomyManager().format(amount) + "</green> to <yellow>" + target.getName() + "</yellow>'s balance."));
                 target.sendMessage(CC.success("<green>" + plugin.getEconomyManager().format(amount) + "</green> has been added to your balance."));
+                String senderName = sender instanceof Player ? sender.getName() : "Console";
+                plugin.getLogManager().log("economy", "<yellow>" + senderName + "</yellow> added <green>" + plugin.getEconomyManager().format(amount) + "</green> to <yellow>" + target.getName() + "</yellow>'s balance");
                 return true;
             }
 
@@ -89,6 +92,8 @@ public class AddCashCommand implements TabExecutor {
 
             plugin.getEconomyManager().addBalance(uuid, amount);
             sender.sendMessage(CC.success("Added <green>" + plugin.getEconomyManager().format(amount) + "</green> to <yellow>" + name + "</yellow>'s balance (offline)."));
+            String senderNameOff = sender instanceof Player ? sender.getName() : "Console";
+            plugin.getLogManager().log("economy", "<yellow>" + senderNameOff + "</yellow> added <green>" + plugin.getEconomyManager().format(amount) + "</green> to <yellow>" + name + "</yellow>'s balance (offline)");
         } catch (NumberFormatException e) {
             sender.sendMessage(CC.error("Invalid amount!"));
         }

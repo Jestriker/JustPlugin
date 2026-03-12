@@ -46,7 +46,12 @@ public class ReplyCommand implements TabExecutor {
         }
         String message = String.join(" ", args);
         player.sendMessage(CC.translate("<gray>[<gold>me <gray>→ <gold>" + target.getName() + "<gray>] <white>" + message));
-        target.sendMessage(CC.translate("<gray>[<gold>" + player.getName() + " <gray>→ <gold>me<gray>] <white>" + message));
+
+        boolean replyClickable = plugin.getConfig().getBoolean("clickable-commands.msg-reply", true);
+        String replyBtn = replyClickable
+                ? " " + CC.suggestCmd("<dark_gray>[<aqua>↩ Reply<dark_gray>]", "/r ", true)
+                : "";
+        target.sendMessage(CC.translate("<gray>[<gold>" + player.getName() + " <gray>→ <gold>me<gray>] <white>" + message + replyBtn));
         plugin.getChatManager().setLastMessaged(player.getUniqueId(), target.getUniqueId());
         return true;
     }
@@ -56,5 +61,3 @@ public class ReplyCommand implements TabExecutor {
         return List.of();
     }
 }
-
-

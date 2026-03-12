@@ -49,6 +49,10 @@ commands:
     description: Set the world spawn
     usage: /setspawn
     permission: justplugin.setspawn
+  tpsafecheck:
+    description: Internal safety-checked teleport (used by /getpos buttons)
+    usage: /tpsafecheck <player>
+    permission: justplugin.tppos
 
   # === Warps ===
   warp:
@@ -115,6 +119,16 @@ commands:
     usage: /addcash [player] <amount>
     permission: justplugin.addcash
     aliases: [givemoney, addmoney, addbal]
+  baltop:
+    description: View the balance leaderboard
+    usage: /baltop
+    permission: justplugin.balance
+    aliases: [balancetop, moneytop, topbal]
+  baltophide:
+    description: Hide or show yourself on the balance leaderboard
+    usage: /baltophide
+    permission: justplugin.baltophide
+    aliases: [hidebaltop, balancetophide]
 
   # === Moderation ===
   ban:
@@ -142,8 +156,8 @@ commands:
     permission: justplugin.unban
     aliases: [pardon]
   unbanip:
-    description: Unban an IP address
-    usage: /unbanip <ip>
+    description: Unban an IP address, player name, or UUID
+    usage: /unbanip <ip | player | uuid>
     permission: justplugin.unbanip
     aliases: [pardon-ip, unban-ip]
   vanish:
@@ -151,6 +165,11 @@ commands:
     usage: /vanish [player]
     permission: justplugin.vanish
     aliases: [v]
+  supervanish:
+    description: Toggle super vanish (spectator-based full ghost mode)
+    usage: /supervanish [player]
+    permission: justplugin.supervanish
+    aliases: [sv]
   sudo:
     description: Force a player to run a command
     usage: /sudo <player> <command | message>
@@ -243,8 +262,8 @@ commands:
     usage: /feed [player]
     permission: justplugin.feed
   kill:
-    description: Kill yourself or another player
-    usage: /kill [player]
+    description: Kill yourself, a player, or mass-kill entities
+    usage: /kill [player | mobs | hostile | friendly | items | entities | players | allplayers | everything]
     permission: justplugin.kill
   getpos:
     description: Get your or another player's current position
@@ -266,8 +285,8 @@ commands:
     usage: /r <message>
     aliases: [reply]
   ignore:
-    description: Toggle ignoring a player
-    usage: /ignore <player>
+    description: Manage your ignore list
+    usage: /ignore <add|remove|list|clearlist> [player]
     permission: justplugin.ignore
   announce:
     description: Broadcast a message
@@ -349,6 +368,16 @@ commands:
     description: List online players
     usage: /plist
     aliases: [who, online, players]
+  playerlist:
+    description: Advanced player list with pagination, staff tags, and vanish indicators
+    usage: /playerlist [page]
+    permission: justplugin.playerlist
+    aliases: [pls]
+  playerlisthide:
+    description: Hide or show a player on the player list
+    usage: /playerlisthide [player]
+    permission: justplugin.playerlist.hide
+    aliases: [plhide, hideplayer]
   motd:
     description: View or set MOTD
     usage: /motd [message]
@@ -391,6 +420,16 @@ commands:
     description: Set or query time
     usage: /time <set | add | query> <value>
     permission: justplugin.time
+  freezegame:
+    description: Freeze the game (pause tick processing)
+    usage: /freezegame
+    permission: justplugin.freezegame
+    aliases: [tf]
+  unfreezegame:
+    description: Unfreeze the game (resume tick processing)
+    usage: /unfreezegame
+    permission: justplugin.unfreezegame
+    aliases: [unft]
 
   # === Teams ===
   team:
@@ -455,6 +494,8 @@ permissions:
       justplugin.vanish: true
       justplugin.vanish.others: true
       justplugin.vanish.see: true
+      justplugin.supervanish: true
+      justplugin.supervanish.others: true
       justplugin.sudo: true
       justplugin.invsee: true
       justplugin.echestsee: true
@@ -497,6 +538,20 @@ permissions:
       justplugin.enchantingtable: true
       justplugin.playerinfo: true
       justplugin.playerinfo.ip: true
+      justplugin.playerlist: true
+      justplugin.playerlist.hide: true
+      justplugin.playerlist.hide.others: true
+      justplugin.playerlist.hide.notify: true
+      justplugin.baltophide.others: true
+      justplugin.baltophide.notify: true
+      justplugin.log.moderation: true
+      justplugin.log.economy: true
+      justplugin.log.teleport: true
+      justplugin.log.vanish: true
+      justplugin.log.gamemode: true
+      justplugin.log.player: true
+      justplugin.log.admin: true
+      justplugin.log.item: true
       justplugin.motd.set: true
       justplugin.itemname: true
       justplugin.shareitem: true
@@ -510,6 +565,18 @@ permissions:
       justplugin.addcash.others: true
       justplugin.discord.set: true
       justplugin.teleport.bypass: true
+      justplugin.freezegame: true
+      justplugin.unfreezegame: true
+      justplugin.baltophide: true
+      justplugin.tpa.cooldownbypass: true
+      justplugin.tpahere.cooldownbypass: true
+      justplugin.home.cooldownbypass: true
+      justplugin.warp.cooldownbypass: true
+      justplugin.tpa.unsafetp: true
+      justplugin.tpahere.unsafetp: true
+      justplugin.warp.unsafetp: true
+      justplugin.spawn.unsafetp: true
+      justplugin.home.unsafetp: true
   justplugin.player:
     description: Basic player permissions
     default: true
@@ -541,3 +608,64 @@ permissions:
       justplugin.tab: true
       justplugin.tpahere: true
       justplugin.wild: true
+
+  # --- Cooldown bypass permissions ---
+  # These are NOT included in justplugin.* so even OPs have cooldowns.
+  # Must be explicitly granted via a permissions plugin.
+  justplugin.tpa.nocooldown:
+    description: Bypass TPA cooldown between uses
+    default: false
+  justplugin.tpahere.nocooldown:
+    description: Bypass TPAHere cooldown between uses
+    default: false
+  justplugin.warp.nocooldown:
+    description: Bypass warp cooldown between uses
+    default: false
+  justplugin.spawn.nocooldown:
+    description: Bypass spawn cooldown between uses
+    default: false
+
+  # --- Safety bypass permissions ---
+  justplugin.tpa.unsafetp:
+    description: Bypass TPA safe teleport protection (with warning)
+    default: op
+  justplugin.tpahere.unsafetp:
+    description: Bypass TPAHere safe teleport protection (with warning)
+    default: op
+  justplugin.warp.unsafetp:
+    description: Bypass warp safe teleport protection (with warning)
+    default: op
+  justplugin.spawn.unsafetp:
+    description: Bypass spawn safe teleport protection (with warning)
+    default: op
+  justplugin.home.unsafetp:
+    description: Bypass home safe teleport protection (with warning)
+    default: op
+  justplugin.staff:
+    description: Marks a player as staff (shown in /playerlist)
+    default: op
+  justplugin.supervanish:
+    description: Toggle super vanish mode
+    default: op
+  justplugin.supervanish.others:
+    description: Super vanish other players
+    default: op
+  justplugin.playerlist:
+    description: View the advanced player list
+    default: op
+  justplugin.playerlist.hide:
+    description: Hide yourself from the player list
+    default: op
+  justplugin.playerlist.hide.others:
+    description: Hide other players from the player list
+    default: op
+  justplugin.playerlist.hide.notify:
+    description: Receive notifications when players are hidden/unhidden
+    default: op
+  justplugin.baltophide.others:
+    description: Hide other players from the balance leaderboard
+    default: op
+  justplugin.baltophide.notify:
+    description: Receive notifications when players are hidden/unhidden from baltop
+    default: op
+

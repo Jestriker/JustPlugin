@@ -101,6 +101,7 @@ public class PayNoteCommand implements TabExecutor {
         hand.setItemMeta(meta);
 
         player.sendMessage(CC.success("Created a balance note worth <yellow>" + formatted + "</yellow>. Right-click to redeem!"));
+        plugin.getLogManager().log("economy", "<yellow>" + player.getName() + "</yellow> created a balance note worth <green>" + formatted + "</green>");
         return true;
     }
 

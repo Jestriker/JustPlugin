@@ -41,6 +41,49 @@ teleport:
   # Minimum distance from 0,0 for /tpr to prevent spawning too close to spawn.
   wild-min-range: 500
 
+  # --- Cooldowns (seconds between command uses) ---
+  # Applies to ALL players, even OPs.
+  # Only players with explicit nocooldown permission bypass these.
+  # Set to 0 to disable the cooldown for that feature.
+  cooldown-tpa: 30
+  cooldown-tpahere: 30
+  cooldown-warp: 10
+  cooldown-spawn: 10
+
+  # --- Safe Teleport Protection ---
+  # When enabled, teleportation is blocked if the destination is unsafe.
+  # Checks a 3×3 area around the destination for hazardous blocks
+  # (lava, fire, cactus, pressure plates, tripwire, sculk sensors, etc.)
+  # and ensures the player has solid ground to stand on.
+  # Players with *.unsafetp permission bypass these checks (with a warning).
+  safe-teleport-tpa: true
+  safe-teleport-tpahere: true
+  safe-teleport-warp: true
+  safe-teleport-spawn: true
+  safe-teleport-home: true
+
+# ==========================================
+# Clickable Commands
+# When enabled, command suggestions in chat messages become clickable buttons.
+# ==========================================
+clickable-commands:
+  # TPA-related buttons: /tpaccept, /tpreject, /tpacancel
+  tpa: true
+  # Team-related buttons: /team join <name>, /team help entries
+  team: true
+  # Trade-related buttons: /trade accept, /trade deny, /trade cancel
+  trade: true
+  # Clickable [↩ Reply] button on received private messages
+  msg-reply: true
+  # Clickable commands in /help pages (click to suggest command)
+  help: true
+  # Clickable warp names in /warps and /warp (list mode)
+  warp-list: true
+  # Clickable home names when listing homes
+  home-list: true
+  # Clickable [✕ Remove] buttons in /ignore list
+  ignore: true
+
 # ==========================================
 # Trade Settings
 # ==========================================
@@ -126,6 +169,9 @@ command-settings:
   setspawn:
     enabled: true
     permission: "justplugin.setspawn"
+  tpsafecheck:
+    enabled: true
+    permission: "justplugin.tppos"
 
   # --- Warps ---
   warp:
@@ -171,6 +217,12 @@ command-settings:
   addcash:
     enabled: true
     permission: "justplugin.addcash"
+  baltop:
+    enabled: true
+    permission: "justplugin.balance"
+  baltophide:
+    enabled: true
+    permission: "justplugin.baltophide"
 
   # --- Moderation ---
   ban:
@@ -194,6 +246,9 @@ command-settings:
   vanish:
     enabled: true
     permission: "justplugin.vanish"
+  supervanish:
+    enabled: true
+    permission: "justplugin.supervanish"
   sudo:
     enabled: true
     permission: "justplugin.sudo"
@@ -314,6 +369,12 @@ command-settings:
   plist:
     enabled: true
     permission: "justplugin.list"
+  playerlist:
+    enabled: true
+    permission: "justplugin.playerlist"
+  playerlisthide:
+    enabled: true
+    permission: "justplugin.playerlist.hide"
   motd:
     enabled: true
     permission: "justplugin.motd"
@@ -345,6 +406,12 @@ command-settings:
   time:
     enabled: true
     permission: "justplugin.time"
+  freezegame:
+    enabled: true
+    permission: "justplugin.freezegame"
+  unfreezegame:
+    enabled: true
+    permission: "justplugin.unfreezegame"
 
   # --- Teams ---
   team:

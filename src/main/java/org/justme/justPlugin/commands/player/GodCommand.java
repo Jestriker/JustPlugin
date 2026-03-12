@@ -78,9 +78,11 @@ public class GodCommand implements TabExecutor {
 
         if (target.equals(player)) {
             player.sendMessage(CC.success("God mode " + (god ? "<green>enabled" : "<red>disabled") + "."));
+            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (god ? "enabled" : "disabled") + " god mode");
         } else {
             player.sendMessage(CC.success("God mode " + (god ? "<green>enabled" : "<red>disabled") + " for <yellow>" + target.getName() + "</yellow>."));
             target.sendMessage(CC.info("God mode has been " + (god ? "<green>enabled" : "<red>disabled") + " by <yellow>" + player.getName() + "</yellow>."));
+            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (god ? "enabled" : "disabled") + " god mode for <yellow>" + target.getName() + "</yellow>");
         }
          plugin.getPlayerStateManager().saveState(target);
         return true;

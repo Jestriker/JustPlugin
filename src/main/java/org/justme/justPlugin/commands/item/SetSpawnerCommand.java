@@ -9,6 +9,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.Arrays;
@@ -16,6 +17,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SetSpawnerCommand implements TabExecutor {
+
+    private final JustPlugin plugin;
+
+    public SetSpawnerCommand(JustPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
@@ -46,6 +53,7 @@ public class SetSpawnerCommand implements TabExecutor {
         spawner.setSpawnedType(type);
         spawner.update();
         player.sendMessage(CC.success("Spawner set to <yellow>" + type.name().toLowerCase() + "</yellow>."));
+        plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> set a spawner to <yellow>" + type.name().toLowerCase() + "</yellow> at <yellow>" + target.getX() + ", " + target.getY() + ", " + target.getZ() + "</yellow>");
         return true;
     }
 
@@ -61,4 +69,3 @@ public class SetSpawnerCommand implements TabExecutor {
         return List.of();
     }
 }
-

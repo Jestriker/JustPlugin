@@ -66,6 +66,9 @@ public class SpeedCommand implements TabExecutor {
             }
             if (!target.equals(player)) {
                 player.sendMessage(CC.success("Speed set for <yellow>" + target.getName() + "</yellow>."));
+                plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> set <yellow>" + target.getName() + "</yellow>'s speed to <yellow>" + speed + "</yellow>");
+            } else {
+                plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> set their speed to <yellow>" + speed + "</yellow>");
             }
             plugin.getPlayerStateManager().saveState(target);
         } catch (NumberFormatException e) {

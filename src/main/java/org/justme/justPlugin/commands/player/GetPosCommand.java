@@ -38,7 +38,7 @@ public class GetPosCommand implements TabExecutor {
                 return true;
             }
             Player target = Bukkit.getPlayer(args[0]);
-            if (target == null) {
+            if (target == null || (plugin.getVanishManager().isVanished(target.getUniqueId()) && !player.hasPermission("justplugin.vanish.see"))) {
                 player.sendMessage(CC.error("Player not found!"));
                 return true;
             }
@@ -54,9 +54,9 @@ public class GetPosCommand implements TabExecutor {
     private void showPosition(Player viewer, Player target, boolean isOther) {
         Location loc = target.getLocation();
         String world = loc.getWorld().getName();
-        int x = (int) loc.getX();
-        int y = (int) loc.getY();
-        int z = (int) loc.getZ();
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
 
         if (isOther) {
             viewer.sendMessage(CC.info("<gold>" + target.getName() + "'s Position:"));
@@ -70,20 +70,34 @@ public class GetPosCommand implements TabExecutor {
         viewer.sendMessage(CC.line("Yaw: <yellow>" + String.format("%.1f", loc.getYaw())
                 + " <dark_gray>| <gray>Pitch: <yellow>" + String.format("%.1f", loc.getPitch())));
 
-        // If viewing another player, show clickable teleport
+        // If viewing another player, show clickable teleport options
         if (isOther && viewer.hasPermission("justplugin.tppos")) {
-            String tpCmd = "/tppos " + x + " " + y + " " + z + " " + world;
-            Component clickable = CC.translate(" <dark_gray>></dark_gray> <green><bold>[Click to Teleport]</bold></green>")
-                    .clickEvent(ClickEvent.runCommand(tpCmd))
-                    .hoverEvent(HoverEvent.showText(CC.translate("<gray>Click to run: <yellow>" + tpCmd)));
-            viewer.sendMessage(clickable);
+            // Check static coord safety
+            Location coordsLoc = new Location(loc.getWorld(), x, y, z);
+            boolean coordsSafe = plugin.getTeleportManager().isLocationSafe(coordsLoc);
+            String coordsSafetyTag = coordsSafe ? "" : " <red><bold>⚠ UNSAFE</bold></red>";
+
+            // TP to player (live location) — will check safety on click
+            String tpPlayerCmd = "/tpsafecheck " + target.getName();
+            Component tpToPlayer = CC.translate(" <dark_gray>></dark_gray> <green><bold>[TP to Player]</bold></green> <gray><italic>(checks safety on click)</italic>")
+                    .clickEvent(ClickEvent.runCommand(tpPlayerCmd))
+                    .hoverEvent(HoverEvent.showText(CC.translate("<gray>Teleport to <yellow>" + target.getName() + "</yellow>'s current location\n<gray>Safety will be checked when you click")));
+            viewer.sendMessage(tpToPlayer);
+
+            // TP to coords (snapshot at time of command)
+            String tpCoordsCmd = "/tppos " + x + " " + y + " " + z + " " + world;
+            Component tpToCoords = CC.translate(" <dark_gray>></dark_gray> <aqua><bold>[TP to Coords]</bold></aqua>" + coordsSafetyTag)
+                    .clickEvent(ClickEvent.runCommand(tpCoordsCmd))
+                    .hoverEvent(HoverEvent.showText(CC.translate("<gray>Teleport to <yellow>" + x + " " + y + " " + z + "</yellow> in <yellow>" + world + "</yellow>\n<dark_gray>(coordinates at the time of this message)" + (coordsSafe ? "" : "\n<red>⚠ Destination appears unsafe!"))));
+            viewer.sendMessage(tpToCoords);
         }
     }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1 && sender.hasPermission("justplugin.getpos.others")) {
-            return Bukkit.getOnlinePlayers().stream().map(Player::getName)
+            return plugin.getVanishManager().getVisiblePlayers(sender).stream()
+                    .map(Player::getName)
                     .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
         }
         return List.of();

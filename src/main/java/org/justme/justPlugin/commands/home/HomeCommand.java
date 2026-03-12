@@ -31,7 +31,9 @@ public class HomeCommand implements TabExecutor {
 
         Map<String, Location> homes = plugin.getHomeManager().getHomes(player.getUniqueId());
         if (homes.isEmpty()) {
-            player.sendMessage(CC.error("You have no homes set! Use <yellow>/sethome <name></yellow> to set one."));
+            boolean c = plugin.getConfig().getBoolean("clickable-commands.home-list", true);
+            String setHomeCmd = CC.suggestCmd("<yellow>/sethome <name></yellow>", "/sethome ", c);
+            player.sendMessage(CC.error("You have no homes set! Use " + setHomeCmd + " to set one."));
             return true;
         }
 
@@ -39,11 +41,17 @@ public class HomeCommand implements TabExecutor {
         Location loc = plugin.getHomeManager().getHome(player.getUniqueId(), name);
         if (loc == null) {
             player.sendMessage(CC.error("Home <yellow>" + name + "</yellow> not found!"));
-            player.sendMessage(CC.info("Your homes: <yellow>" + String.join(", ", homes.keySet())));
+            boolean clickable = plugin.getConfig().getBoolean("clickable-commands.home-list", true);
+            String homeList = homes.keySet().stream()
+                    .map(n -> CC.clickCmd("<yellow>" + n + "</yellow>", "/home " + n, clickable))
+                    .collect(java.util.stream.Collectors.joining("<gray>, "));
+            player.sendMessage(CC.translate(CC.PREFIX + "<gray>Your homes: " + homeList));
             return true;
         }
-        plugin.getTeleportManager().teleport(player, loc);
-        player.sendMessage(CC.success("Teleporting to home <yellow>" + name + "</yellow>."));
+        boolean teleported = plugin.getTeleportManager().teleportWithSafety(player, loc, "justplugin.home.cooldownbypass", "home", "justplugin.home.unsafetp");
+        if (teleported) {
+            player.sendMessage(CC.success("Teleporting to home <yellow>" + name + "</yellow>."));
+        }
         return true;
     }
 

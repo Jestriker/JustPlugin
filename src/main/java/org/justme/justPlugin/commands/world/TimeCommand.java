@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 import org.justme.justPlugin.util.TimeUtil;
 
@@ -13,6 +14,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TimeCommand implements TabExecutor {
+
+    private final JustPlugin plugin;
+
+    public TimeCommand(JustPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
@@ -40,12 +47,14 @@ public class TimeCommand implements TabExecutor {
                 }
                 player.getWorld().setTime(ticks);
                 player.sendMessage(CC.success("Time set to <yellow>" + args[1] + "</yellow> (" + ticks + " ticks)."));
+                plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set time to <yellow>" + args[1] + "</yellow> (" + ticks + " ticks)");
             }
             case "add" -> {
                 try {
                     long ticks = Long.parseLong(args[1]);
                     player.getWorld().setTime(player.getWorld().getTime() + ticks);
                     player.sendMessage(CC.success("Added <yellow>" + ticks + "</yellow> ticks to the time."));
+                    plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> added <yellow>" + ticks + "</yellow> ticks to the time");
                 } catch (NumberFormatException e) {
                     player.sendMessage(CC.error("Invalid tick amount!"));
                 }
@@ -90,4 +99,3 @@ public class TimeCommand implements TabExecutor {
         return List.of();
     }
 }
-

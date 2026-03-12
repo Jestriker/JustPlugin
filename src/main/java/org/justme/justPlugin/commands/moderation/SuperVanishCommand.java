@@ -1,7 +1,7 @@
-package org.justme.justPlugin.commands.player;
+package org.justme.justPlugin.commands.moderation;
 
 import org.bukkit.Bukkit;
-import org.bukkit.attribute.Attribute;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -13,11 +13,11 @@ import org.justme.justPlugin.util.CC;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class HealCommand implements TabExecutor {
+public class SuperVanishCommand implements TabExecutor {
 
     private final JustPlugin plugin;
 
-    public HealCommand(JustPlugin plugin) {
+    public SuperVanishCommand(JustPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -27,11 +27,10 @@ public class HealCommand implements TabExecutor {
             sender.sendMessage(CC.error("Only players can use this command."));
             return true;
         }
-
         Player target = player;
         if (args.length >= 1) {
-            if (!player.hasPermission("justplugin.heal.others")) {
-                player.sendMessage(CC.error("You don't have permission to heal other players."));
+            if (!player.hasPermission("justplugin.supervanish.others")) {
+                player.sendMessage(CC.error("You don't have permission to super-vanish other players."));
                 return true;
             }
             target = Bukkit.getPlayer(args[0]);
@@ -41,24 +40,30 @@ public class HealCommand implements TabExecutor {
             }
         }
 
-        double maxHealth = target.getAttribute(Attribute.MAX_HEALTH).getValue();
-        target.setHealth(maxHealth);
-        target.setFireTicks(0);
+        boolean wasSuperVanished = plugin.getVanishManager().isSuperVanished(target.getUniqueId());
 
-        if (target.equals(player)) {
-            player.sendMessage(CC.success("You have been healed."));
-            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> healed themselves");
+        if (wasSuperVanished) {
+            plugin.getVanishManager().unsuperVanish(target);
         } else {
-            player.sendMessage(CC.success("Healed <yellow>" + target.getName() + "</yellow>."));
-            target.sendMessage(CC.success("You have been healed by <yellow>" + player.getName() + "</yellow>."));
-            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> healed <yellow>" + target.getName() + "</yellow>");
+            plugin.getVanishManager().superVanish(target);
+        }
+
+        plugin.getPlayerStateManager().saveState(target);
+
+        // Log
+        String action = wasSuperVanished ? "un-super-vanished" : "super-vanished";
+        plugin.getLogManager().log("vanish", "<yellow>" + (sender instanceof Player ? sender.getName() : "Console") + "</yellow> " + action + " <yellow>" + target.getName() + "</yellow>");
+
+        if (!target.equals(player)) {
+            String status = wasSuperVanished ? "<green>un-super-vanished" : "<red>super-vanished";
+            player.sendMessage(CC.success("<yellow>" + target.getName() + "</yellow> has been " + status + "."));
         }
         return true;
     }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
-        if (args.length == 1 && sender.hasPermission("justplugin.heal.others")) {
+        if (args.length == 1 && sender.hasPermission("justplugin.supervanish.others")) {
             return Bukkit.getOnlinePlayers().stream().map(Player::getName)
                     .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
         }

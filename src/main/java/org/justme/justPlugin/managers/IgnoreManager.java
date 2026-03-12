@@ -31,6 +31,25 @@ public class IgnoreManager {
         saveIgnoreList(player);
     }
 
+    public boolean addIgnore(UUID player, UUID target) {
+        Set<UUID> ignored = ignoreMap.computeIfAbsent(player, k -> new HashSet<>());
+        if (!ignored.add(target)) return false;
+        saveIgnoreList(player);
+        return true;
+    }
+
+    public boolean removeIgnore(UUID player, UUID target) {
+        Set<UUID> ignored = ignoreMap.get(player);
+        if (ignored == null || !ignored.remove(target)) return false;
+        saveIgnoreList(player);
+        return true;
+    }
+
+    public void clearIgnoreList(UUID player) {
+        ignoreMap.put(player, new HashSet<>());
+        saveIgnoreList(player);
+    }
+
     public void loadPlayer(UUID uuid) {
         YamlConfiguration data = dataManager.getPlayerData(uuid);
         List<String> list = data.getStringList("ignored");

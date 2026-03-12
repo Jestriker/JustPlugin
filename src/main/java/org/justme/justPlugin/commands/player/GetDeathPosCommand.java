@@ -82,10 +82,12 @@ public class GetDeathPosCommand implements TabExecutor {
 
         // Clickable teleport for viewing others (or self with tppos permission)
         if (viewer.hasPermission("justplugin.tppos")) {
+            boolean safe = plugin.getTeleportManager().isLocationSafe(loc);
+            String safetyTag = safe ? "" : " <red><bold>⚠ UNSAFE</bold></red>";
             String tpCmd = "/tppos " + x + " " + y + " " + z + " " + world;
-            Component clickable = CC.translate(" <dark_gray>></dark_gray> <green><bold>[Click to Teleport]</bold></green>")
+            Component clickable = CC.translate(" <dark_gray>></dark_gray> <green><bold>[Click to Teleport]</bold></green>" + safetyTag)
                     .clickEvent(ClickEvent.runCommand(tpCmd))
-                    .hoverEvent(HoverEvent.showText(CC.translate("<gray>Click to run: <yellow>" + tpCmd)));
+                    .hoverEvent(HoverEvent.showText(CC.translate("<gray>Click to run: <yellow>" + tpCmd + (safe ? "" : "\n<red>⚠ Destination appears unsafe!"))));
             viewer.sendMessage(clickable);
         }
     }

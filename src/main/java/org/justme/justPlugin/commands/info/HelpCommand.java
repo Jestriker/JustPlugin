@@ -1,4 +1,4 @@
-package org.justme.justPlugin.commands.info;
+ package org.justme.justPlugin.commands.info;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -24,63 +24,68 @@ public class HelpCommand implements TabExecutor {
             try { page = Integer.parseInt(args[0]); } catch (NumberFormatException ignored) {}
         }
 
-        String[][] helpPages = {
+        boolean c = plugin.getConfig().getBoolean("clickable-commands.help", true);
+
+        // Each entry: {label, suggestCommand, description}
+        String[][][] helpPages = {
             {
-                "<gold><bold>JustPlugin Help (Page 1/4)</bold></gold>",
-                "<yellow>/tpa <player></yellow> <gray>- Request to teleport to a player",
-                "<yellow>/tpaccept</yellow> <gray>- Accept a teleport request",
-                "<yellow>/tpreject</yellow> <gray>- Reject a teleport request",
-                "<yellow>/tpahere <player></yellow> <gray>- Request a player to teleport to you",
-                "<yellow>/tpacancel</yellow> <gray>- Cancel your teleport request",
-                "<yellow>/back</yellow> <gray>- Return to your last location",
-                "<yellow>/home [name]</yellow> <gray>- Teleport to a home",
-                "<yellow>/sethome [name]</yellow> <gray>- Set a home",
-                "<yellow>/delhome <name></yellow> <gray>- Delete a home",
+                {"/tpa <player>", "/tpa ", "Request to teleport to a player"},
+                {"/tpaccept", "/tpaccept", "Accept a teleport request"},
+                {"/tpreject", "/tpreject", "Reject a teleport request"},
+                {"/tpahere <player>", "/tpahere ", "Request a player to teleport to you"},
+                {"/tpacancel", "/tpacancel", "Cancel your teleport request"},
+                {"/back", "/back", "Return to your last location"},
+                {"/home [name]", "/home ", "Teleport to a home"},
+                {"/sethome [name]", "/sethome ", "Set a home"},
+                {"/delhome <name>", "/delhome ", "Delete a home"},
             },
             {
-                "<gold><bold>JustPlugin Help (Page 2/4)</bold></gold>",
-                "<yellow>/warp [name]</yellow> <gray>- Teleport to or list warps",
-                "<yellow>/setwarp <name></yellow> <gray>- Create a warp",
-                "<yellow>/delwarp <name></yellow> <gray>- Delete a warp",
-                "<yellow>/spawn</yellow> <gray>- Teleport to spawn",
-                "<yellow>/tpr</yellow> <gray>- Random teleport",
-                "<yellow>/bal [player]</yellow> <gray>- Check balance",
-                "<yellow>/pay <player> <amount></yellow> <gray>- Pay a player",
-                "<yellow>/msg <player> <msg></yellow> <gray>- Private message",
-                "<yellow>/r <msg></yellow> <gray>- Reply to last message",
+                {"/warp [name]", "/warp ", "Teleport to or list warps"},
+                {"/setwarp <name>", "/setwarp ", "Create a warp"},
+                {"/delwarp <name>", "/delwarp ", "Delete a warp"},
+                {"/spawn", "/spawn", "Teleport to spawn"},
+                {"/tpr", "/tpr", "Random teleport"},
+                {"/bal [player]", "/bal ", "Check balance"},
+                {"/pay <player> <amount>", "/pay ", "Pay a player"},
+                {"/msg <player> <msg>", "/msg ", "Private message"},
+                {"/r <msg>", "/r ", "Reply to last message"},
             },
             {
-                "<gold><bold>JustPlugin Help (Page 3/4)</bold></gold>",
-                "<yellow>/fly [player]</yellow> <gray>- Toggle flight",
-                "<yellow>/gm <mode></yellow> <gray>- Change gamemode",
-                "<yellow>/god</yellow> <gray>- Toggle god mode",
-                "<yellow>/vanish</yellow> <gray>- Toggle vanish",
-                "<yellow>/speed <1-10></yellow> <gray>- Set speed",
-                "<yellow>/hat</yellow> <gray>- Wear item as hat",
-                "<yellow>/skull [player]</yellow> <gray>- Get a player head",
-                "<yellow>/anvil</yellow> <gray>- Open virtual anvil",
-                "<yellow>/craft</yellow> <gray>- Open virtual workbench",
+                {"/fly [player]", "/fly ", "Toggle flight"},
+                {"/gm <mode>", "/gm ", "Change gamemode"},
+                {"/god", "/god", "Toggle god mode"},
+                {"/vanish", "/vanish", "Toggle vanish"},
+                {"/speed <1-10>", "/speed ", "Set speed"},
+                {"/hat", "/hat", "Wear item as hat"},
+                {"/skull [player]", "/skull ", "Get a player head"},
+                {"/anvil", "/anvil", "Open virtual anvil"},
+                {"/craft", "/craft", "Open virtual workbench"},
             },
             {
-                "<gold><bold>JustPlugin Help (Page 4/4)</bold></gold>",
-                "<yellow>/ban <player> [reason]</yellow> <gray>- Ban a player",
-                "<yellow>/tempban <player> <time></yellow> <gray>- Temp ban",
-                "<yellow>/unban <player></yellow> <gray>- Unban a player",
-                "<yellow>/team create <name></yellow> <gray>- Create a team",
-                "<yellow>/announce <msg></yellow> <gray>- Broadcast message",
-                "<yellow>/sharecoords [all | team]</yellow> <gray>- Share location",
-                "<yellow>/chat <all | team></yellow> <gray>- Switch chat mode",
-                "<yellow>/invsee <player></yellow> <gray>- View inventory",
-                "<yellow>/sudo <player> <cmd></yellow> <gray>- Force command",
+                {"/ban <player> [reason]", "/ban ", "Ban a player"},
+                {"/tempban <player> <time>", "/tempban ", "Temp ban"},
+                {"/unban <player>", "/unban ", "Unban a player"},
+                {"/team create <name>", "/team create ", "Create a team"},
+                {"/announce <msg>", "/announce ", "Broadcast message"},
+                {"/sharecoords [all | team]", "/sharecoords ", "Share location"},
+                {"/chat <all | team>", "/chat ", "Switch chat mode"},
+                {"/invsee <player>", "/invsee ", "View inventory"},
+                {"/sudo <player> <cmd>", "/sudo ", "Force command"},
             }
         };
 
         page = Math.max(1, Math.min(page, helpPages.length));
-        for (String line : helpPages[page - 1]) {
-            sender.sendMessage(CC.translate(line));
+
+        sender.sendMessage(CC.translate("<gold><bold>JustPlugin Help (Page " + page + "/" + helpPages.length + ")</bold></gold>"));
+        for (String[] entry : helpPages[page - 1]) {
+            String cmdLabel = CC.suggestCmd("<yellow>" + entry[0] + "</yellow>", entry[1], c);
+            sender.sendMessage(CC.translate(cmdLabel + " <gray>- " + entry[2]));
         }
+
         if (page < helpPages.length) {
-            sender.sendMessage(CC.info("Type <yellow>/help " + (page + 1) + "</yellow> for the next page."));
+            int next = page + 1;
+            String nextBtn = CC.clickCmd("<yellow>/help " + next + "</yellow>", "/help " + next, c);
+            sender.sendMessage(CC.info("Type " + nextBtn + " for the next page."));
         }
         return true;
     }

@@ -35,6 +35,7 @@ public class HatCommand implements TabExecutor {
         player.getInventory().setHelmet(hand.clone());
         player.getInventory().setItemInMainHand(helmet != null ? helmet : new ItemStack(Material.AIR));
         player.sendMessage(CC.success("You are now wearing <yellow>" + hand.getType().name().toLowerCase().replace("_", " ") + "</yellow> as a hat!"));
+        plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> equipped <yellow>" + hand.getType().name().toLowerCase().replace("_", " ") + "</yellow> as a hat");
         return true;
     }
 

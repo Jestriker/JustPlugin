@@ -10,6 +10,7 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class UnbanCommand implements TabExecutor {
@@ -26,23 +27,51 @@ public class UnbanCommand implements TabExecutor {
             sender.sendMessage(CC.error("Usage: /unban <player | uuid>"));
             return true;
         }
-        UUID uuid;
-        String name;
+
+        String input = args[0];
+        boolean success;
+        String displayName;
+
+        // Try as UUID first
         try {
-            uuid = UUID.fromString(args[0]);
+            UUID uuid = UUID.fromString(input);
             OfflinePlayer offP = Bukkit.getOfflinePlayer(uuid);
-            name = offP.getName() != null ? offP.getName() : args[0];
+            displayName = offP.getName() != null ? offP.getName() : input;
+            success = plugin.getBanManager().unban(uuid);
         } catch (IllegalArgumentException e) {
+            // Try as name - first via Bukkit, then by scanning bans
             @SuppressWarnings("deprecation")
-            OfflinePlayer offP = Bukkit.getOfflinePlayer(args[0]);
-            uuid = offP.getUniqueId();
-            name = args[0];
+            OfflinePlayer offP = Bukkit.getOfflinePlayer(input);
+            UUID uuid = offP.getUniqueId();
+            displayName = input;
+
+            // Try UUID-based unban first
+            success = plugin.getBanManager().unban(uuid);
+
+            // If that didn't work, try name-based lookup in the bans config
+            if (!success) {
+                success = plugin.getBanManager().unbanByName(input);
+            }
         }
 
-        if (plugin.getBanManager().unban(uuid)) {
-            sender.sendMessage(CC.success("<yellow>" + name + "</yellow> has been unbanned."));
+        if (success) {
+            sender.sendMessage(CC.success("<yellow>" + displayName + "</yellow> has been unbanned."));
+            String unbannedBy = sender instanceof org.bukkit.entity.Player ? sender.getName() : "Console";
+            plugin.getLogManager().log("moderation", "<yellow>" + unbannedBy + "</yellow> unbanned <yellow>" + displayName + "</yellow>");
+
+            // Check if this player also has an associated IP ban
+            Map<String, Object> ipInfo = plugin.getBanManager().findIpBanByPlayer(input);
+            if (ipInfo != null) {
+                String ip = (String) ipInfo.get("ip");
+                @SuppressWarnings("unchecked")
+                List<String> names = (List<String>) ipInfo.get("associatedNames");
+                String nameList = names.isEmpty() ? "none" : String.join(", ", names);
+                sender.sendMessage(CC.warning("This player also has an <red>IP ban</red> on <yellow>" + ip + "</yellow>."));
+                sender.sendMessage(CC.warning("Associated accounts: <yellow>" + nameList + "</yellow>"));
+                sender.sendMessage(CC.warning("Use <yellow>/unbanip " + ip + "</yellow> to fully remove the IP ban."));
+            }
         } else {
-            sender.sendMessage(CC.error("<yellow>" + name + "</yellow> is not banned!"));
+            sender.sendMessage(CC.error("<yellow>" + displayName + "</yellow> is not banned!"));
         }
         return true;
     }
@@ -52,4 +81,3 @@ public class UnbanCommand implements TabExecutor {
         return List.of();
     }
 }
-

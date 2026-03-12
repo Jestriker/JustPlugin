@@ -8,11 +8,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
 public class ItemNameCommand implements TabExecutor {
+
+    private final JustPlugin plugin;
+
+    public ItemNameCommand(JustPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
@@ -34,6 +41,7 @@ public class ItemNameCommand implements TabExecutor {
         meta.displayName(CC.colorize(name));
         item.setItemMeta(meta);
         player.sendMessage(CC.success("Item renamed to: " + name));
+        plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> renamed <yellow>" + item.getType().name().toLowerCase().replace("_", " ") + "</yellow> to <gray>" + name + "</gray>");
         return true;
     }
 
@@ -42,4 +50,3 @@ public class ItemNameCommand implements TabExecutor {
         return List.of();
     }
 }
-

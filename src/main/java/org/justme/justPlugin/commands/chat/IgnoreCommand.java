@@ -1,6 +1,7 @@
 package org.justme.justPlugin.commands.chat;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -10,10 +11,13 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class IgnoreCommand implements TabExecutor {
 
+    private static final List<String> SUBCOMMANDS = List.of("add", "remove", "list", "clearlist");
     private final JustPlugin plugin;
 
     public IgnoreCommand(JustPlugin plugin) {
@@ -27,34 +31,160 @@ public class IgnoreCommand implements TabExecutor {
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /ignore <player>"));
+            sendUsage(player);
             return true;
         }
-        Player target = Bukkit.getPlayer(args[0]);
+
+        String sub = args[0].toLowerCase();
+        switch (sub) {
+            case "add" -> handleAdd(player, args);
+            case "remove" -> handleRemove(player, args);
+            case "list" -> handleList(player);
+            case "clearlist" -> handleClearList(player);
+            default -> sendUsage(player);
+        }
+        return true;
+    }
+
+    private void handleAdd(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage(CC.error("Usage: /ignore add <player>"));
+            return;
+        }
+        Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
             player.sendMessage(CC.error("Player not found!"));
-            return true;
+            return;
         }
         if (target.equals(player)) {
             player.sendMessage(CC.error("You can't ignore yourself!"));
-            return true;
+            return;
         }
-        plugin.getIgnoreManager().toggleIgnore(player.getUniqueId(), target.getUniqueId());
-        boolean ignoring = plugin.getIgnoreManager().isIgnoring(player.getUniqueId(), target.getUniqueId());
-        player.sendMessage(CC.success("You are " + (ignoring ? "now ignoring" : "no longer ignoring") + " <yellow>" + target.getName() + "</yellow>."));
-        if (ignoring) {
-            target.sendMessage(CC.warning("<yellow>" + player.getName() + "</yellow> is now ignoring you."));
-        } else {
+        if (plugin.getIgnoreManager().isIgnoring(player.getUniqueId(), target.getUniqueId())) {
+            player.sendMessage(CC.error("You are already ignoring <yellow>" + target.getName() + "</yellow>."));
+            return;
+        }
+        plugin.getIgnoreManager().addIgnore(player.getUniqueId(), target.getUniqueId());
+        player.sendMessage(CC.success("You are now ignoring <yellow>" + target.getName() + "</yellow>."));
+        target.sendMessage(CC.warning("You have been ignored by <yellow>" + player.getName() + "</yellow>."));
+    }
+
+    private void handleRemove(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage(CC.error("Usage: /ignore remove <player>"));
+            return;
+        }
+        // Try online player first, then search ignored list by name
+        Player target = Bukkit.getPlayer(args[1]);
+        UUID targetUuid = target != null ? target.getUniqueId() : null;
+        String targetName = target != null ? target.getName() : args[1];
+
+        // If player is offline, try to find them by name in the ignore list
+        if (targetUuid == null) {
+            Set<UUID> ignored = plugin.getIgnoreManager().getIgnoredPlayers(player.getUniqueId());
+            for (UUID uuid : ignored) {
+                OfflinePlayer off = Bukkit.getOfflinePlayer(uuid);
+                if (off.getName() != null && off.getName().equalsIgnoreCase(args[1])) {
+                    targetUuid = uuid;
+                    targetName = off.getName();
+                    break;
+                }
+            }
+        }
+
+        if (targetUuid == null) {
+            player.sendMessage(CC.error("Player not found in your ignore list!"));
+            return;
+        }
+        if (!plugin.getIgnoreManager().removeIgnore(player.getUniqueId(), targetUuid)) {
+            player.sendMessage(CC.error("You are not ignoring <yellow>" + targetName + "</yellow>."));
+            return;
+        }
+        player.sendMessage(CC.success("You are no longer ignoring <yellow>" + targetName + "</yellow>."));
+        if (target != null) {
             target.sendMessage(CC.info("<yellow>" + player.getName() + "</yellow> is no longer ignoring you."));
         }
-        return true;
+    }
+
+    private void handleList(Player player) {
+        Set<UUID> ignored = plugin.getIgnoreManager().getIgnoredPlayers(player.getUniqueId());
+        if (ignored.isEmpty()) {
+            player.sendMessage(CC.info("Your ignore list is empty."));
+            return;
+        }
+        boolean clickable = plugin.getConfig().getBoolean("clickable-commands.ignore", true);
+        player.sendMessage(CC.translate(""));
+        player.sendMessage(CC.info("<gold><bold>Ignored Players</bold></gold> <dark_gray>(<green>" + ignored.size() + "<dark_gray>)"));
+        int index = 1;
+        for (UUID uuid : ignored) {
+            OfflinePlayer off = Bukkit.getOfflinePlayer(uuid);
+            String name = off.getName() != null ? off.getName() : uuid.toString();
+            boolean online = off.isOnline();
+            String status = online ? "<green>online</green>" : "<red>offline</red>";
+            String removeBtn = CC.clickCmd(" <dark_gray>[<red>✕ Remove<dark_gray>]", "/ignore remove " + name, clickable);
+            player.sendMessage(CC.translate(" <dark_gray>></dark_gray> <gray>" + index + ".</gray> <yellow>" + name + "</yellow> <dark_gray>- " + status + removeBtn));
+            index++;
+        }
+        player.sendMessage(CC.translate(""));
+    }
+
+    private void handleClearList(Player player) {
+        Set<UUID> ignored = plugin.getIgnoreManager().getIgnoredPlayers(player.getUniqueId());
+        if (ignored.isEmpty()) {
+            player.sendMessage(CC.info("Your ignore list is already empty."));
+            return;
+        }
+        int count = ignored.size();
+        plugin.getIgnoreManager().clearIgnoreList(player.getUniqueId());
+        player.sendMessage(CC.success("Cleared your ignore list. <gray>(" + count + " player" + (count == 1 ? "" : "s") + " removed)</gray>"));
+    }
+
+    private void sendUsage(Player player) {
+        boolean c = plugin.getConfig().getBoolean("clickable-commands.ignore", true);
+        String add = CC.suggestCmd("<yellow>/ignore add <player></yellow>", "/ignore add ", c);
+        String remove = CC.suggestCmd("<yellow>/ignore remove <player></yellow>", "/ignore remove ", c);
+        String list = CC.clickCmd("<yellow>/ignore list</yellow>", "/ignore list", c);
+        String clear = CC.clickCmd("<yellow>/ignore clearlist</yellow>", "/ignore clearlist", c);
+        player.sendMessage(CC.info("<gold><bold>Ignore Commands:</bold></gold>"));
+        player.sendMessage(CC.translate(" <dark_gray>></dark_gray> " + add + " <gray>- Add a player to your ignore list"));
+        player.sendMessage(CC.translate(" <dark_gray>></dark_gray> " + remove + " <gray>- Remove a player from your ignore list"));
+        player.sendMessage(CC.translate(" <dark_gray>></dark_gray> " + list + " <gray>- View your ignore list"));
+        player.sendMessage(CC.translate(" <dark_gray>></dark_gray> " + clear + " <gray>- Clear your entire ignore list"));
     }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            return Bukkit.getOnlinePlayers().stream().map(Player::getName)
-                    .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
+            return SUBCOMMANDS.stream()
+                    .filter(s -> s.startsWith(args[0].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+        if (args.length == 2) {
+            String sub = args[0].toLowerCase();
+            if (sub.equals("add")) {
+                // Show visible online players (excluding vanished)
+                if (sender instanceof Player player) {
+                    return plugin.getVanishManager().getVisiblePlayers(player).stream()
+                            .filter(p -> !p.equals(player))
+                            .map(Player::getName)
+                            .filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase()))
+                            .collect(Collectors.toList());
+                }
+                return Bukkit.getOnlinePlayers().stream().map(Player::getName)
+                        .filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase()))
+                        .collect(Collectors.toList());
+            }
+            if (sub.equals("remove") && sender instanceof Player player) {
+                // Show names from the player's ignore list
+                Set<UUID> ignored = plugin.getIgnoreManager().getIgnoredPlayers(player.getUniqueId());
+                return ignored.stream()
+                        .map(uuid -> {
+                            OfflinePlayer off = Bukkit.getOfflinePlayer(uuid);
+                            return off.getName() != null ? off.getName() : uuid.toString();
+                        })
+                        .filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase()))
+                        .collect(Collectors.toList());
+            }
         }
         return List.of();
     }

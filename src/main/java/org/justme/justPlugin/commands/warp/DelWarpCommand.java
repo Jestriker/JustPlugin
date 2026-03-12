@@ -31,6 +31,7 @@ public class DelWarpCommand implements TabExecutor {
         }
         if (plugin.getWarpManager().deleteWarp(args[0])) {
             player.sendMessage(CC.success("Warp <yellow>" + args[0] + "</yellow> has been deleted."));
+            plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> deleted warp <yellow>" + args[0] + "</yellow>");
         } else {
             player.sendMessage(CC.error("Warp <yellow>" + args[0] + "</yellow> not found!"));
         }

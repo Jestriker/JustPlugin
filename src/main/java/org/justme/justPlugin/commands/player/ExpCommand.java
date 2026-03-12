@@ -62,21 +62,25 @@ public class ExpCommand implements TabExecutor {
                         target.setLevel(amount);
                         target.setExp(0);
                         player.sendMessage(CC.success("Set <yellow>" + target.getName() + "</yellow>'s level to <yellow>" + amount + "</yellow>."));
+                        plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set <yellow>" + target.getName() + "</yellow>'s level to <yellow>" + amount + "</yellow>");
                     } else {
                         target.setTotalExperience(0);
                         target.setLevel(0);
                         target.setExp(0);
                         target.giveExp(amount);
                         player.sendMessage(CC.success("Set <yellow>" + target.getName() + "</yellow>'s XP to <yellow>" + amount + "</yellow> orbs."));
+                        plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set <yellow>" + target.getName() + "</yellow>'s XP to <yellow>" + amount + "</yellow> orbs");
                     }
                 }
                 case "give", "add" -> {
                     if (isLevels) {
                         target.setLevel(target.getLevel() + amount);
                         player.sendMessage(CC.success("Gave <yellow>" + amount + "</yellow> levels to <yellow>" + target.getName() + "</yellow>. (Now level " + target.getLevel() + ")"));
+                        plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> gave <yellow>" + amount + "</yellow> levels to <yellow>" + target.getName() + "</yellow>");
                     } else {
                         target.giveExp(amount);
                         player.sendMessage(CC.success("Gave <yellow>" + amount + "</yellow> XP orbs to <yellow>" + target.getName() + "</yellow>."));
+                        plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> gave <yellow>" + amount + "</yellow> XP orbs to <yellow>" + target.getName() + "</yellow>");
                     }
                 }
                 default -> player.sendMessage(CC.error("Usage: /exp <set | give> <levels | orbs> <amount> [player]"));

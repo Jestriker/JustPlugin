@@ -1,8 +1,11 @@
 package org.justme.justPlugin.managers;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.justme.justPlugin.JustPlugin;
 
+import java.io.File;
 import java.util.*;
 
 public class EconomyManager {
@@ -14,6 +17,7 @@ public class EconomyManager {
     // Cache
     private final Map<UUID, Double> balances = new HashMap<>();
     private final Set<UUID> payToggleOff = new HashSet<>();
+    private final Set<UUID> baltopHidden = new HashSet<>();
 
     public EconomyManager(JustPlugin plugin) {
         this.plugin = plugin;
@@ -81,12 +85,16 @@ public class EconomyManager {
         if (data.getBoolean("paytoggle", false)) {
             payToggleOff.add(uuid);
         }
+        if (data.getBoolean("baltopHidden", false)) {
+            baltopHidden.add(uuid);
+        }
     }
 
     public void unloadPlayer(UUID uuid) {
         saveBalance(uuid);
         balances.remove(uuid);
         payToggleOff.remove(uuid);
+        baltopHidden.remove(uuid);
     }
 
     private void saveBalance(UUID uuid) {
@@ -99,5 +107,52 @@ public class EconomyManager {
         String symbol = plugin.getConfig().getString("economy.currency-symbol", "$");
         return symbol + String.format("%,.2f", amount);
     }
-}
 
+    // --- Baltop Hidden ---
+    public boolean isBaltopHidden(UUID uuid) {
+        if (baltopHidden.contains(uuid)) return true;
+        if (!balances.containsKey(uuid)) {
+            YamlConfiguration data = dataManager.getPlayerData(uuid);
+            return data.getBoolean("baltopHidden", false);
+        }
+        return false;
+    }
+
+    public void toggleBaltopHidden(UUID uuid) {
+        if (baltopHidden.contains(uuid)) {
+            baltopHidden.remove(uuid);
+        } else {
+            baltopHidden.add(uuid);
+        }
+        YamlConfiguration data = dataManager.getPlayerData(uuid);
+        data.set("baltopHidden", baltopHidden.contains(uuid));
+        dataManager.savePlayerData(uuid, data);
+    }
+
+    /**
+     * Scans all player data files and returns a sorted list of (UUID, balance) entries.
+     */
+    public List<Map.Entry<UUID, Double>> getAllBalancesSorted() {
+        Map<UUID, Double> all = new HashMap<>(balances);
+        // Also scan disk for offline players
+        File folder = dataManager.getPlayerDataFolder();
+        if (folder.exists()) {
+            File[] files = folder.listFiles((dir, name) -> name.endsWith(".yml"));
+            if (files != null) {
+                for (File file : files) {
+                    String fileName = file.getName().replace(".yml", "");
+                    try {
+                        UUID uuid = UUID.fromString(fileName);
+                        if (!all.containsKey(uuid)) {
+                            YamlConfiguration data = YamlConfiguration.loadConfiguration(file);
+                            all.put(uuid, data.getDouble("balance", startingBalance));
+                        }
+                    } catch (IllegalArgumentException ignored) {}
+                }
+            }
+        }
+        List<Map.Entry<UUID, Double>> sorted = new ArrayList<>(all.entrySet());
+        sorted.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+        return sorted;
+    }
+}

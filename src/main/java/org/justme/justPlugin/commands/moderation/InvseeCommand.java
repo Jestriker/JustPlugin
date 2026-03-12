@@ -64,6 +64,7 @@ public class InvseeCommand implements TabExecutor, Listener {
         Player target = Bukkit.getPlayer(args[0]);
         if (target != null) {
             openOnlineSession(player, target);
+            plugin.getLogManager().log("moderation", "<yellow>" + player.getName() + "</yellow> opened <yellow>" + target.getName() + "</yellow>'s inventory");
             return true;
         }
 
@@ -75,6 +76,8 @@ public class InvseeCommand implements TabExecutor, Listener {
             return true;
         }
 
+        String offName = offline.getName() != null ? offline.getName() : args[0];
+        plugin.getLogManager().log("moderation", "<yellow>" + player.getName() + "</yellow> opened <yellow>" + offName + "</yellow>'s inventory <gray>(offline)");
         openOfflineSession(player, offline);
         return true;
     }
@@ -228,7 +231,7 @@ public class InvseeCommand implements TabExecutor, Listener {
             if (target == null) return;
 
             ItemStack cursor = event.getCursor();
-            if (cursor == null || cursor.getType() == Material.AIR) {
+            if (cursor.getType() == Material.AIR) {
                 // Clicking with empty hand on an equipped armor piece — remove it
                 ItemStack current = getArmorPiece(target, slot);
                 if (current != null && current.getType() != Material.AIR) {
@@ -270,6 +273,27 @@ public class InvseeCommand implements TabExecutor, Listener {
         // Offhand slot
         if (slot == SLOT_OFFHAND) {
             event.setCancelled(true);
+            UUID targetUuid = openSessions.get(viewerUuid);
+            Player target = targetUuid != null ? Bukkit.getPlayer(targetUuid) : null;
+            if (target == null) return;
+
+            ItemStack cursor = event.getCursor();
+            ItemStack currentOffhand = target.getInventory().getItemInOffHand();
+
+            if (cursor.getType() == Material.AIR) {
+                // Picking up the offhand item
+                if (currentOffhand.getType() != Material.AIR) {
+                    viewer.setItemOnCursor(currentOffhand.clone());
+                    target.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
+                }
+            } else {
+                // Placing item in offhand
+                target.getInventory().setItemInOffHand(cursor.clone());
+                viewer.setItemOnCursor(null);
+                if (currentOffhand.getType() != Material.AIR) {
+                    viewer.setItemOnCursor(currentOffhand.clone());
+                }
+            }
             return;
         }
 
@@ -277,7 +301,6 @@ public class InvseeCommand implements TabExecutor, Listener {
         // Block all interaction to keep it read-only except armor
         if (slot >= 0 && slot < 36) {
             event.setCancelled(true);
-            return;
         }
     }
 

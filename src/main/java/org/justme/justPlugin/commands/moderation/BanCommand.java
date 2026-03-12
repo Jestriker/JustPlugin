@@ -55,6 +55,7 @@ public class BanCommand implements TabExecutor {
         plugin.getBanManager().ban(uuid, name, reason, bannedBy);
         sender.sendMessage(CC.success("Banned <yellow>" + name + "</yellow>. Reason: <gray>" + reason));
         Bukkit.broadcast(CC.warning("<yellow>" + name + "</yellow> has been banned by <yellow>" + bannedBy + "</yellow>. Reason: <gray>" + reason));
+        plugin.getLogManager().log("moderation", "<yellow>" + bannedBy + "</yellow> banned <yellow>" + name + "</yellow>. Reason: <gray>" + reason);
         return true;
     }
 

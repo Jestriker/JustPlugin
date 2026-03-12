@@ -58,5 +58,22 @@ public final class CC {
     public static String legacy(Component component) {
         return LegacyComponentSerializer.legacySection().serialize(component);
     }
+
+    /**
+     * Creates a MiniMessage string for a clickable command that runs when clicked.
+     * When clickable is false, returns the label as-is.
+     */
+    public static String clickCmd(String label, String command, boolean clickable) {
+        if (!clickable) return label;
+        return "<click:run_command:'" + command + "'><hover:show_text:'<gray>Click to run <yellow>" + command + "</yellow>'>" + label + "</hover></click>";
+    }
+
+    /**
+     * Creates a MiniMessage string for a clickable command suggestion that pre-fills chat.
+     */
+    public static String suggestCmd(String label, String command, boolean clickable) {
+        if (!clickable) return label;
+        return "<click:suggest_command:'" + command + "'><hover:show_text:'<gray>Click to type <yellow>" + command + "</yellow>'>" + label + "</hover></click>";
+    }
 }
 

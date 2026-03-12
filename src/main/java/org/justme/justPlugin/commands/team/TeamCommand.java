@@ -100,7 +100,9 @@ public class TeamCommand implements TabExecutor {
                 tm.invitePlayer(teamName, target.getUniqueId());
                 player.sendMessage(CC.success("Invited <yellow>" + target.getName() + "</yellow> to your team."));
                 target.sendMessage(CC.info("<yellow>" + player.getName() + "</yellow> invited you to team <yellow>" + teamName + "</yellow>!"));
-                target.sendMessage(CC.info("Type <green>/team join " + teamName + "</green> to accept."));
+                boolean clickable = plugin.getConfig().getBoolean("clickable-commands.team", true);
+                String joinCmd = CC.clickCmd("<green>/team join " + teamName + "</green>", "/team join " + teamName, clickable);
+                target.sendMessage(CC.info("Type " + joinCmd + " to accept."));
             }
             case "join" -> {
                 if (args.length < 2) {
@@ -138,7 +140,9 @@ public class TeamCommand implements TabExecutor {
                     return true;
                 }
                 if (tm.isLeader(player.getUniqueId(), teamName)) {
-                    player.sendMessage(CC.error("Leaders must disband the team. Use /team disband"));
+                    boolean c = plugin.getConfig().getBoolean("clickable-commands.team", true);
+                    String disbandCmd = CC.clickCmd("<yellow>/team disband</yellow>", "/team disband", c);
+                    player.sendMessage(CC.error("Leaders must disband the team. Use " + disbandCmd));
                     return true;
                 }
                 tm.leaveTeam(player.getUniqueId());
@@ -202,7 +206,11 @@ public class TeamCommand implements TabExecutor {
                 if (teamNames.isEmpty()) {
                     player.sendMessage(CC.info("No teams exist."));
                 } else {
-                    player.sendMessage(CC.info("<gold>Teams:</gold> <yellow>" + String.join(", ", teamNames)));
+                    boolean c = plugin.getConfig().getBoolean("clickable-commands.team", true);
+                    String teamList = teamNames.stream()
+                            .map(n -> CC.clickCmd("<yellow>" + n + "</yellow>", "/team info " + n, c))
+                            .collect(Collectors.joining("<gray>, "));
+                    player.sendMessage(CC.translate(CC.PREFIX + "<gold>Teams:</gold> " + teamList));
                 }
             }
             default -> sendHelp(player);
@@ -211,15 +219,16 @@ public class TeamCommand implements TabExecutor {
     }
 
     private void sendHelp(Player player) {
+        boolean c = plugin.getConfig().getBoolean("clickable-commands.team", true);
         player.sendMessage(CC.info("<gold><bold>Team Commands:</bold></gold>"));
-        player.sendMessage(CC.info("  <yellow>/team create <name></yellow> <gray>- Create a team"));
-        player.sendMessage(CC.info("  <yellow>/team disband</yellow> <gray>- Disband your team"));
-        player.sendMessage(CC.info("  <yellow>/team invite <player></yellow> <gray>- Invite a player"));
-        player.sendMessage(CC.info("  <yellow>/team join <name></yellow> <gray>- Join a team"));
-        player.sendMessage(CC.info("  <yellow>/team leave</yellow> <gray>- Leave your team"));
-        player.sendMessage(CC.info("  <yellow>/team kick <player></yellow> <gray>- Kick a player"));
-        player.sendMessage(CC.info("  <yellow>/team info [name]</yellow> <gray>- View team info"));
-        player.sendMessage(CC.info("  <yellow>/team list</yellow> <gray>- List all teams"));
+        player.sendMessage(CC.translate("  " + CC.suggestCmd("<yellow>/team create <name></yellow>", "/team create ", c) + " <gray>- Create a team"));
+        player.sendMessage(CC.translate("  " + CC.clickCmd("<yellow>/team disband</yellow>", "/team disband", c) + " <gray>- Disband your team"));
+        player.sendMessage(CC.translate("  " + CC.suggestCmd("<yellow>/team invite <player></yellow>", "/team invite ", c) + " <gray>- Invite a player"));
+        player.sendMessage(CC.translate("  " + CC.suggestCmd("<yellow>/team join <name></yellow>", "/team join ", c) + " <gray>- Join a team"));
+        player.sendMessage(CC.translate("  " + CC.clickCmd("<yellow>/team leave</yellow>", "/team leave", c) + " <gray>- Leave your team"));
+        player.sendMessage(CC.translate("  " + CC.suggestCmd("<yellow>/team kick <player></yellow>", "/team kick ", c) + " <gray>- Kick a player"));
+        player.sendMessage(CC.translate("  " + CC.suggestCmd("<yellow>/team info [name]</yellow>", "/team info ", c) + " <gray>- View team info"));
+        player.sendMessage(CC.translate("  " + CC.clickCmd("<yellow>/team list</yellow>", "/team list", c) + " <gray>- List all teams"));
     }
 
     @Override

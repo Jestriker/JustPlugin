@@ -38,9 +38,21 @@ public class VanishCommand implements TabExecutor {
                 return true;
             }
         }
-        boolean wasVanished = plugin.getVanishManager().isVanished(target);
-        plugin.getVanishManager().toggleVanish(target);
+        // If super vanished, toggle to regular unvanish via unsuperVanish
+        boolean wasSuperVanished = plugin.getVanishManager().isSuperVanished(target.getUniqueId());
+        boolean wasVanished = plugin.getVanishManager().isVanished(target) || wasSuperVanished;
+
+        if (wasSuperVanished) {
+            plugin.getVanishManager().unsuperVanish(target);
+        } else {
+            plugin.getVanishManager().toggleVanish(target);
+        }
         plugin.getPlayerStateManager().saveState(target);
+
+        // Log
+        String action = wasVanished ? "unvanished" : "vanished";
+        plugin.getLogManager().log("vanish", "<yellow>" + (sender instanceof Player ? sender.getName() : "Console") + "</yellow> " + action + " <yellow>" + target.getName() + "</yellow>");
+
         if (!target.equals(player)) {
             String status = wasVanished ? "<green>unvanished" : "<red>vanished";
             player.sendMessage(CC.success("<yellow>" + target.getName() + "</yellow> has been " + status + "."));

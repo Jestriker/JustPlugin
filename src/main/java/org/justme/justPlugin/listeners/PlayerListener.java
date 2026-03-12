@@ -16,6 +16,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -40,6 +41,17 @@ public class PlayerListener implements Listener {
 
     public PlayerListener(JustPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onLogin(PlayerLoginEvent event) {
+        Player player = event.getPlayer();
+        String ip = event.getAddress().getHostAddress();
+        net.kyori.adventure.text.Component kickMsg = plugin.getBanManager().checkJoinBan(
+                player.getUniqueId(), player.getName(), ip);
+        if (kickMsg != null) {
+            event.disallow(PlayerLoginEvent.Result.KICK_BANNED, kickMsg);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -200,7 +212,9 @@ public class PlayerListener implements Listener {
         event.setCancelled(true);
 
         ItemMeta meta = item.getItemMeta();
-        double value = meta.getPersistentDataContainer().get(noteKey, PersistentDataType.DOUBLE);
+        Double rawValue = meta.getPersistentDataContainer().get(noteKey, PersistentDataType.DOUBLE);
+        if (rawValue == null) return;
+        double value = rawValue;
 
         // Remove the note and replace with a normal paper
         ItemStack normalPaper = new ItemStack(Material.PAPER, 1);
@@ -222,6 +236,10 @@ public class PlayerListener implements Listener {
             if (godMode.contains(player.getUniqueId())) {
                 event.setCancelled(true);
                 player.setFireTicks(0);
+            }
+            // Cancel pending teleport if player takes damage during warmup
+            if (!event.isCancelled()) {
+                plugin.getTeleportManager().handleDamageDuringTeleport(player);
             }
         }
     }
@@ -269,6 +287,7 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
+
         ChatManager.ChatMode mode = plugin.getChatManager().getChatMode(player.getUniqueId());
 
         if (mode == ChatManager.ChatMode.TEAM) {
@@ -289,9 +308,9 @@ public class PlayerListener implements Listener {
     }
 
     // Server list ping — hide vanished players from count and hover
+    @SuppressWarnings("removal")
     @EventHandler
     public void onServerListPing(ServerListPingEvent event) {
-        int vanishedCount = plugin.getVanishManager().getVanishedCount();
         event.setMaxPlayers(event.getMaxPlayers());
         try {
             Iterator<Player> iterator = event.iterator();
@@ -303,6 +322,27 @@ public class PlayerListener implements Listener {
             }
         } catch (UnsupportedOperationException ignored) {
         }
+    }
+
+    // Prevent vanished players from appearing in tab completion for anyone
+    @EventHandler
+    public void onTabComplete(com.destroystokyo.paper.event.server.AsyncTabCompleteEvent event) {
+        if (!(event.getSender() instanceof Player viewer)) return;
+        if (viewer.hasPermission("justplugin.vanish.see")) return;
+
+        // Remove any completions that match vanished player names
+        Set<String> vanishedNames = new HashSet<>();
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (plugin.getVanishManager().isVanished(p.getUniqueId())) {
+                vanishedNames.add(p.getName().toLowerCase());
+            }
+        }
+        if (vanishedNames.isEmpty()) return;
+
+        event.completions().removeIf(completion -> {
+            String s = completion.suggestion().toLowerCase();
+            return vanishedNames.contains(s);
+        });
     }
 
     // God mode helpers

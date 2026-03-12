@@ -35,6 +35,9 @@ public final class JustPlugin extends JavaPlugin {
     private IgnoreManager ignoreManager;
     private ChatManager chatManager;
     private PlayerStateManager playerStateManager;
+    private TradeManager tradeManager;
+    private CooldownManager cooldownManager;
+    private LogManager logManager;
     private PlayerListener playerListener;
     private TabCommand tabCommand;
     private int registeredCommands = 0;
@@ -49,6 +52,7 @@ public final class JustPlugin extends JavaPlugin {
         // Initialize managers
         dataManager = new DataManager(this);
         commandSettings = new CommandSettings(this);
+        logManager = new LogManager(this);
         economyManager = new EconomyManager(this);
         warpManager = new WarpManager(this);
         homeManager = new HomeManager(this);
@@ -59,6 +63,8 @@ public final class JustPlugin extends JavaPlugin {
         ignoreManager = new IgnoreManager(this);
         chatManager = new ChatManager(this);
         playerStateManager = new PlayerStateManager(this);
+        tradeManager = new TradeManager(this);
+        cooldownManager = new CooldownManager(this);
 
         // Register listeners
         playerListener = new PlayerListener(this);
@@ -89,6 +95,7 @@ public final class JustPlugin extends JavaPlugin {
         console.sendMessage(net.kyori.adventure.text.Component.empty());
     }
 
+    @SuppressWarnings("deprecation")
     private void printBanner(long loadTimeMs) {
         var console = Bukkit.getConsoleSender();
         String version = getDescription().getVersion();
@@ -107,7 +114,7 @@ public final class JustPlugin extends JavaPlugin {
         console.sendMessage(CC.translate("  <gradient:#00aaff:#00ffaa>     ██║ ██████╔╝</gradient>    <gray>Running on <aqua>" + serverVersion));
         console.sendMessage(CC.translate("  <gradient:#00aaff:#00ffaa>██   ██║ ██╔═══╝ </gradient>    <gray>API: <aqua>" + apiVersion));
         console.sendMessage(CC.translate("  <gradient:#00aaff:#00ffaa>╚█████╔╝ ██║     </gradient>"));
-        console.sendMessage(CC.translate("  <gradient:#00aaff:#00ffaa> ╚════╝  ╚═╝     </gradient>     <green>✔</green> <gray>" + " " + registeredCommands + " commands registered"));
+        console.sendMessage(CC.translate("  <gradient:#00aaff:#00ffaa> ╚════╝  ╚═╝     </gradient>     <green>✔</green> <gray>" + " " + enabledCmds + " commands enabled"));
         if (disabledCmds > 0) {
             console.sendMessage(CC.translate("                        <red>✘</red> <gray>" + " " + disabledCmds + " commands disabled"));
         }
@@ -131,6 +138,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("back", new BackCommand(this));
         registerCmd("spawn", new SpawnCommand(this));
         registerCmd("setspawn", new SetSpawnCommand(this));
+        registerCmd("tpsafecheck", new TpSafeCheckCommand(this));
 
         // Warps
         registerCmd("warp", new WarpCommand(this));
@@ -150,6 +158,8 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("paytoggle", new PayToggleCommand(this));
         registerCmd("paynote", new PayNoteCommand(this));
         registerCmd("addcash", new AddCashCommand(this));
+        registerCmd("baltop", new BaltopCommand(this));
+        registerCmd("baltophide", new BaltopHideCommand(this));
 
         // Moderation
         registerCmd("ban", new BanCommand(this));
@@ -159,6 +169,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("unban", new UnbanCommand(this));
         registerCmd("unbanip", new UnbanIpCommand(this));
         registerCmd("vanish", new VanishCommand(this));
+        registerCmd("supervanish", new SuperVanishCommand(this));
         registerCmd("sudo", new SudoCommand(this));
         registerCmd("invsee", new InvseeCommand(this));
         registerCmd("echestsee", new EchestSeeCommand(this));
@@ -212,19 +223,23 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("jphelp", new HelpCommand(this));
         registerCmd("playerinfo", new PlayerInfoCommand(this));
         registerCmd("plist", new ListCommand(this));
+        registerCmd("playerlist", new PlayerListCommand(this));
+        registerCmd("playerlisthide", new PlayerListHideCommand(this));
         registerCmd("motd", new MotdCommand(this));
         registerCmd("resetmotd", new ResetMotdCommand(this));
         registerCmd("clock", new ClockCommand(this));
         registerCmd("date", new DateCommand(this));
 
         // Items
-        registerCmd("itemname", new ItemNameCommand());
+        registerCmd("itemname", new ItemNameCommand(this));
         registerCmd("shareitem", new ShareItemCommand());
-        registerCmd("setspawner", new SetSpawnerCommand());
+        registerCmd("setspawner", new SetSpawnerCommand(this));
 
         // World
-        registerCmd("weather", new WeatherCommand());
-        registerCmd("time", new TimeCommand());
+        registerCmd("weather", new WeatherCommand(this));
+        registerCmd("time", new TimeCommand(this));
+        registerCmd("freezegame", new FreezeGameCommand(this));
+        registerCmd("unfreezegame", new UnfreezeGameCommand(this));
 
         // Teams
         registerCmd("team", new TeamCommand(this));
@@ -289,5 +304,8 @@ public final class JustPlugin extends JavaPlugin {
     public IgnoreManager getIgnoreManager() { return ignoreManager; }
     public ChatManager getChatManager() { return chatManager; }
     public PlayerStateManager getPlayerStateManager() { return playerStateManager; }
+    public TradeManager getTradeManager() { return tradeManager; }
+    public CooldownManager getCooldownManager() { return cooldownManager; }
+    public LogManager getLogManager() { return logManager; }
     public PlayerListener getPlayerListener() { return playerListener; }
 }

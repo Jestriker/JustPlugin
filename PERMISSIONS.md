@@ -88,9 +88,26 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.vanish             ← Vanish yourself
 │   ├── justplugin.vanish.others      ← Vanish other players
 │   ├── justplugin.vanish.see         ← See vanished players in /plist
+│   ├── justplugin.supervanish        ← Super vanish yourself (spectator ghost mode)
+│   ├── justplugin.supervanish.others ← Super vanish other players
 │   ├── justplugin.balance.others     ← Check other players' balance
 │   ├── justplugin.addcash            ← Add cash to self
 │   ├── justplugin.addcash.others     ← Add cash to other players
+│   ├── justplugin.baltophide         ← Hide yourself from baltop
+│   ├── justplugin.baltophide.others  ← Hide other players from baltop
+│   ├── justplugin.baltophide.notify  ← Receive baltop hide notifications
+│   ├── justplugin.playerlist         ← Advanced player list
+│   ├── justplugin.playerlist.hide    ← Hide yourself from player list
+│   ├── justplugin.playerlist.hide.others  ← Hide other players from player list
+│   ├── justplugin.playerlist.hide.notify  ← Receive player list hide notifications
+│   ├── justplugin.staff              ← Marks as staff in /playerlist
+│   ├── justplugin.log.moderation     ← See moderation logs
+│   ├── justplugin.log.economy        ← See economy logs
+│   ├── justplugin.log.vanish         ← See vanish logs
+│   ├── justplugin.log.gamemode       ← See gamemode logs
+│   ├── justplugin.log.player         ← See player action logs
+│   ├── justplugin.log.admin          ← See admin action logs
+│   ├── justplugin.log.item           ← See item action logs
 │   ├── justplugin.gmcheck            ← Check gamemode info
 │   ├── justplugin.hat                ← Wear item as hat
 │   ├── justplugin.skull              ← Get player heads
@@ -246,6 +263,9 @@ Includes all permissions listed in this document.
 | `justplugin.paynote` | Convert items in hand to coins | `true` (player) | `/paynote` |
 | `justplugin.addcash` | Add cash to yourself | `op` | `/addcash <amount>` |
 | `justplugin.addcash.others` | Add cash to other players | `op` | `/addcash <player> <amount>` |
+| `justplugin.baltophide` | Hide yourself from the balance leaderboard | `op` | `/baltophide` |
+| `justplugin.baltophide.others` | Hide other players from the balance leaderboard | `op` | `/baltophide <player>` |
+| `justplugin.baltophide.notify` | Receive notifications when players are hidden/unhidden from baltop | `op` | `/baltophide` |
 
 ---
 
@@ -261,7 +281,9 @@ Includes all permissions listed in this document.
 | `justplugin.unbanip` | Unban IP addresses | `op` | `/unbanip` |
 | `justplugin.vanish` | Toggle vanish for yourself | `op` | `/vanish` |
 | `justplugin.vanish.others` | Toggle vanish for other players | `op` | `/vanish <player>` |
-| `justplugin.vanish.see` | See vanished players in player list | `op` | `/plist` |
+| `justplugin.vanish.see` | See vanished players in player list | `op` | `/plist`, `/playerlist` |
+| `justplugin.supervanish` | Toggle super vanish (spectator-based ghost mode) | `op` | `/supervanish` |
+| `justplugin.supervanish.others` | Toggle super vanish for other players | `op` | `/supervanish <player>` |
 | `justplugin.sudo` | Force players to run commands or send messages | `op` | `/sudo` |
 | `justplugin.invsee` | View another player's inventory | `op` | `/invsee` |
 | `justplugin.echestsee` | View another player's ender chest | `op` | `/echestsee` |
@@ -334,6 +356,11 @@ Includes all permissions listed in this document.
 |------------|-------------|---------|----------|
 | `justplugin.playerinfo` | View detailed information about a player | `op` | `/playerinfo`, `/whois` |
 | `justplugin.playerinfo.ip` | See a player's IP address in `/playerinfo` | `op` | `/playerinfo` |
+| `justplugin.playerlist` | View the advanced player list with staff tags and vanish indicators | `op` | `/playerlist` |
+| `justplugin.playerlist.hide` | Hide yourself from the player list | `op` | `/playerlisthide` |
+| `justplugin.playerlist.hide.others` | Hide other players from the player list | `op` | `/playerlisthide <player>` |
+| `justplugin.playerlist.hide.notify` | Receive notifications when players are hidden/unhidden | `op` | `/playerlisthide` |
+| `justplugin.staff` | Marks a player as staff (shown with `[Staff]` tag in `/playerlist`) | `op` | `/playerlist` |
 | `justplugin.motd.set` | Set the server MOTD | `op` | `/motd <message>` |
 
 > **Note:** `/jpinfo`, `/jphelp`, `/plist`, `/motd` (view), `/clock`, `/date` have no permission requirement — all players can use them.
@@ -392,8 +419,11 @@ These permissions control whether a command can target **other players**. The ba
 | `justplugin.kill.others` | Kill other players | `op` | `/kill <player>` |
 | `justplugin.exp.others` | Manage other players' experience | `op` | `/exp ... <player>` |
 | `justplugin.vanish.others` | Toggle vanish for other players | `op` | `/vanish <player>` |
+| `justplugin.supervanish.others` | Toggle super vanish for other players | `op` | `/supervanish <player>` |
 | `justplugin.balance.others` | View another player's balance | `op` | `/balance <player>` |
 | `justplugin.addcash.others` | Add cash to other players | `op` | `/addcash <player> <amount>` |
+| `justplugin.baltophide.others` | Hide other players from baltop | `op` | `/baltophide <player>` |
+| `justplugin.playerlist.hide.others` | Hide other players from the player list | `op` | `/playerlisthide <player>` |
 | `justplugin.getpos.others` | View another player's position | `op` | `/getpos <player>` |
 | `justplugin.getdeathpos.others` | View another player's death location | `op` | `/getdeathpos <player>` |
 
@@ -406,6 +436,44 @@ These permissions control whether a command can target **other players**. The ba
 | `justplugin.playerinfo.ip` | View a player's IP address in `/playerinfo` | `op` | `/playerinfo` |
 | `justplugin.motd.set` | Set the server MOTD via `/motd <message>` | `op` | `/motd` |
 | `justplugin.discord.set` | Set the Discord link via `/discord set <link>` | `op` | `/discord` |
+
+### 🛡️ Safe Teleport Bypass Permissions
+
+These let a player teleport to unsafe locations (with a warning).
+
+| Permission | Description | Default | Used By |
+|------------|-------------|---------|---------|
+| `justplugin.tpa.unsafetp` | Bypass TPA safe teleport protection | `op` | `/tpa` |
+| `justplugin.tpahere.unsafetp` | Bypass TPAHere safe teleport protection | `op` | `/tpahere` |
+| `justplugin.warp.unsafetp` | Bypass warp safe teleport protection | `op` | `/warp` |
+| `justplugin.spawn.unsafetp` | Bypass spawn safe teleport protection | `op` | `/spawn` |
+| `justplugin.home.unsafetp` | Bypass home safe teleport protection | `op` | `/home` |
+
+### 📋 Log Permissions
+
+These control which log categories a player sees in-game. All log actions are always printed to the server console.
+
+| Permission | Description | Default | Category |
+|------------|-------------|---------|----------|
+| `justplugin.log.moderation` | See moderation logs (bans, unbans) | `op` | `MODERATION` |
+| `justplugin.log.economy` | See economy logs (addcash, baltophide) | `op` | `ECONOMY` |
+| `justplugin.log.teleport` | See teleport logs | `op` | `TELEPORT` |
+| `justplugin.log.vanish` | See vanish logs (vanish, supervanish) | `op` | `VANISH` |
+| `justplugin.log.gamemode` | See gamemode change logs | `op` | `GAMEMODE` |
+| `justplugin.log.player` | See player action logs (fly, god, heal, feed) | `op` | `PLAYER` |
+| `justplugin.log.admin` | See admin action logs (sudo, warps, exp, spawners) | `op` | `ADMIN` |
+| `justplugin.log.item` | See item-related logs | `op` | `ITEM` |
+
+### ⏱️ Cooldown Bypass Permissions
+
+These bypass the cooldown timer between uses. **NOT included in `justplugin.*`** — must be explicitly granted. Even OPs have cooldowns unless this is set.
+
+| Permission | Description | Default | Used By |
+|------------|-------------|---------|---------|
+| `justplugin.tpa.nocooldown` | Bypass TPA cooldown between uses | `false` | `/tpa` |
+| `justplugin.tpahere.nocooldown` | Bypass TPAHere cooldown between uses | `false` | `/tpahere` |
+| `justplugin.warp.nocooldown` | Bypass warp cooldown between uses | `false` | `/warp` |
+| `justplugin.spawn.nocooldown` | Bypass spawn cooldown between uses | `false` | `/spawn` |
 
 ---
 

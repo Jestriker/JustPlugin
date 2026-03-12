@@ -31,6 +31,7 @@ public class SetWarpCommand implements TabExecutor {
         String name = args[0];
         plugin.getWarpManager().setWarp(name, player.getLocation());
         player.sendMessage(CC.success("Warp <yellow>" + name + "</yellow> has been set."));
+        plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set warp <yellow>" + name + "</yellow>");
         return true;
     }
 

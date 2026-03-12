@@ -39,6 +39,15 @@ public class PlayerStateManager {
         // Vanish
         data.set("state.vanish", plugin.getVanishManager().isVanished(uuid));
 
+        // Super Vanish
+        data.set("state.supervanish", plugin.getVanishManager().isSuperVanished(uuid));
+        if (plugin.getVanishManager().isSuperVanished(uuid)) {
+            org.bukkit.GameMode prev = plugin.getVanishManager().getPreviousGameMode(uuid);
+            if (prev != null) {
+                data.set("state.supervanish.previousGamemode", prev.name());
+            }
+        }
+
         plugin.getDataManager().savePlayerData(uuid, data);
     }
 
@@ -82,8 +91,14 @@ public class PlayerStateManager {
             }
         }
 
-        // Vanish
-        if (data.contains("state.vanish") && data.getBoolean("state.vanish")) {
+        // Super Vanish (check this BEFORE regular vanish)
+        if (data.contains("state.supervanish") && data.getBoolean("state.supervanish")) {
+            if (!plugin.getVanishManager().isSuperVanished(uuid)) {
+                plugin.getVanishManager().superVanishSilent(player);
+            }
+        }
+        // Regular Vanish
+        else if (data.contains("state.vanish") && data.getBoolean("state.vanish")) {
             if (!plugin.getVanishManager().isVanished(uuid)) {
                 plugin.getVanishManager().vanishSilent(player);
             }

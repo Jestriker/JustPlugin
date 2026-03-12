@@ -31,6 +31,7 @@ public class RenameWarpCommand implements TabExecutor {
         }
         if (plugin.getWarpManager().renameWarp(args[0], args[1])) {
             player.sendMessage(CC.success("Warp <yellow>" + args[0] + "</yellow> renamed to <yellow>" + args[1] + "</yellow>."));
+            plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> renamed warp <yellow>" + args[0] + "</yellow> to <yellow>" + args[1] + "</yellow>");
         } else {
             player.sendMessage(CC.error("Warp <yellow>" + args[0] + "</yellow> not found!"));
         }

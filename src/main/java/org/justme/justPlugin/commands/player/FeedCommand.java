@@ -45,9 +45,11 @@ public class FeedCommand implements TabExecutor {
 
         if (target.equals(player)) {
             player.sendMessage(CC.success("Your hunger has been restored."));
+            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> fed themselves");
         } else {
             player.sendMessage(CC.success("Fed <yellow>" + target.getName() + "</yellow>."));
             target.sendMessage(CC.success("Your hunger has been restored by <yellow>" + player.getName() + "</yellow>."));
+            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> fed <yellow>" + target.getName() + "</yellow>");
         }
         return true;
     }

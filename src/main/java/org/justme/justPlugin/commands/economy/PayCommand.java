@@ -87,9 +87,10 @@ public class PayCommand implements TabExecutor {
                 String formatted = plugin.getEconomyManager().format(amount);
                 String suffix = targetOnline ? "" : " <dark_gray>(offline)";
                 player.sendMessage(CC.success("You paid <yellow>" + targetName + "</yellow> <green>" + formatted + "</green>." + suffix));
-                if (targetOnline && onlineTarget != null) {
+                if (targetOnline) {
                     onlineTarget.sendMessage(CC.success("<yellow>" + player.getName() + "</yellow> paid you <green>" + formatted + "</green>."));
                 }
+                plugin.getLogManager().log("economy", "<yellow>" + player.getName() + "</yellow> paid <yellow>" + targetName + "</yellow> <green>" + formatted + "</green>");
             } else {
                 player.sendMessage(CC.error("Payment failed!"));
             }

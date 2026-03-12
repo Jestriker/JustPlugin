@@ -93,6 +93,8 @@
 | `/paytoggle` | `/paytoggle` | Toggle receiving payments on/off | `justplugin.paytoggle` | — |
 | `/paynote` | `/paynote [amount \| list]` | Convert held items into coins based on configured values | `justplugin.paynote` | — |
 | `/addcash` | `/addcash [player] <amount>` | Add cash to yourself or another player | `justplugin.addcash` | `givemoney`, `addmoney`, `addbal` |
+| `/baltop` | `/baltop` | View the balance leaderboard (top 10 richest players) | `justplugin.balance` | `balancetop`, `moneytop`, `topbal` |
+| `/baltophide` | `/baltophide [player]` | Hide yourself or another player from the balance leaderboard | `justplugin.baltophide` | `hidebaltop`, `balancetophide` |
 
 ### Details
 
@@ -102,6 +104,8 @@
 - **Pay** checks for sufficient funds (shows your balance on error), works with offline players who have ever joined.
 - **AddCash self** requires `justplugin.addcash`. **AddCash others** requires `justplugin.addcash.others`.
 - **PayNote** converts items in your main hand. Use `/paynote list` to see all convertible items and their values. Configurable item-to-coin mappings in `config.yml`.
+- **Baltop** shows the top 10 richest players with medal rankings (🥇🥈🥉). OPs can see hidden players marked `(hidden)`. Your own rank is shown at the bottom.
+- **BaltopHide** toggles your visibility on the leaderboard. `justplugin.baltophide.others` to hide other players. Players with `justplugin.baltophide.notify` receive notifications when players are hidden/unhidden. All baltop hide actions are logged.
 
 ---
 
@@ -116,6 +120,7 @@
 | `/unban` | `/unban <player \| uuid>` | Unban a player | `justplugin.unban` | `pardon` |
 | `/unbanip` | `/unbanip <ip>` | Unban an IP address | `justplugin.unbanip` | `pardon-ip`, `unban-ip` |
 | `/vanish` | `/vanish [player]` | Toggle vanish mode (invisible to other players) | `justplugin.vanish` | `v` |
+| `/supervanish` | `/supervanish [player]` | Toggle super vanish (spectator-based full ghost mode) | `justplugin.supervanish` | `sv` |
 | `/sudo` | `/sudo <player> <command \| message>` | Force a player to execute a command or send a chat message | `justplugin.sudo` | — |
 | `/invsee` | `/invsee <player>` | View a player's full inventory in a GUI (armor, offhand, all slots) | `justplugin.invsee` | `openinv` |
 | `/echestsee` | `/echestsee <player>` | View a player's ender chest | `justplugin.echestsee` | `openec` |
@@ -127,7 +132,8 @@
 - **Duration format** for temp bans: `1d2h30m` (days, hours, minutes, seconds). Tab suggests `1h`, `1d`, `7d`, `30d`.
 - **Unban/UnbanIP** will tell you if the player/IP is not currently banned.
 - **Custom ban screen** — banned players see a styled disconnect screen with reason, duration (if temp), banned-by, and appeal info.
-- **Vanish** hides you from all players. Use `justplugin.vanish.others` to vanish other players. Players with `justplugin.vanish.see` can see vanished players in `/plist`.
+- **Vanish** hides you from all players. Use `justplugin.vanish.others` to vanish other players. Players with `justplugin.vanish.see` can see vanished players in `/plist`. Grants invisibility potion effect, removes from tab list, and fakes a quit message.
+- **Super Vanish** puts you in spectator mode — a complete ghost: can't pick up/drop items, can't break/place blocks, can't trigger redstone/pressure plates/sculk sensors, can't open chests, and is invisible to other players. Use `justplugin.supervanish.others` to super-vanish other players. Previous game mode is restored on unvanish.
 - **Sudo** — if the message starts with `/`, it's executed as a command; otherwise it's sent as chat.
 - **Invsee** opens a 6-row GUI showing main inventory (slots 0-35), armor, and offhand. Refreshes every second. Armor slots show orange glass panes when empty — click with the correct armor type to equip it on the target.
 - **EchestSee** opens the target's real ender chest (live sync). Auto-closes if target logs off.
@@ -180,7 +186,7 @@
 |---------|-------|-------------|------------|---------|
 | `/msg` | `/msg <player> <message>` | Send a private message to a player | `justplugin.msg` | `tell`, `whisper`, `w`, `m`, `pm`, `dm` |
 | `/r` | `/r <message>` | Reply to the last player who messaged you | — | `reply` |
-| `/ignore` | `/ignore <player>` | Toggle ignoring a player (blocks their messages to you) | `justplugin.ignore` | — |
+| `/ignore` | `/ignore <add\|remove\|list\|clearlist> [player]` | Manage your ignore list | `justplugin.ignore` | — |
 | `/announce` | `/announce <message>` | Broadcast a server-wide announcement | `justplugin.announce` | `broadcast`, `bcast` |
 | `/sharecoords` | `/sharecoords [all \| team]` | Share your current coordinates in chat (global or team) | `justplugin.sharecoords` | `coords`, `sendcoords` |
 | `/sharedeathcoords` | `/sharedeathcoords [all \| team]` | Share your last death coordinates in chat (global or team) | `justplugin.sharedeathcoords` | `senddeathcoords`, `deathcoords` |
@@ -195,7 +201,7 @@
 - **Share coords/death coords** can be sent to global chat or team-only. Death coords use the same format as regular coords.
 - **Chat modes:** `ALL` (global) or `TEAM` (team members only). Must be in a team to use team chat.
 - **TeamMsg** sends a message to your team directly without changing your current chat mode.
-- **Ignore** blocks: `/msg`, `/r`, `/tpa`, `/tpahere`, `/trade` requests, and global chat messages from the ignored player. The ignored player is notified when they are ignored/unignored.
+- **Ignore** blocks: `/msg`, `/r`, `/tpa`, `/tpahere`, `/trade` requests, and global chat messages from the ignored player. The ignored player is notified when they are added/removed. Subcommands: `add <player>` (add to ignore list), `remove <player>` (remove from ignore list, works for offline players too), `list` (view all ignored players with online/offline status), `clearlist` (wipe the entire ignore list).
 
 ---
 
@@ -227,6 +233,8 @@
 | `/jphelp` | `/jphelp [page]` | Show paginated help (4 pages of commands) | — | — |
 | `/playerinfo` | `/playerinfo <player>` | View detailed player info (health, food, gamemode, location, balance, etc.) | `justplugin.playerinfo` | `whois`, `seen` |
 | `/plist` | `/plist` | List online players (hides vanished players unless you have `justplugin.vanish.see`) | — | `who`, `online`, `players` |
+| `/playerlist` | `/playerlist [page]` | Advanced paginated player list with staff tags, world info, and vanish indicators | `justplugin.playerlist` | `pls` |
+| `/playerlisthide` | `/playerlisthide [player]` | Hide yourself or another player from the player list | `justplugin.playerlist.hide` | `plhide`, `hideplayer` |
 | `/motd` | `/motd [message]` | View the MOTD, or set it if you have permission | — | — |
 | `/resetmotd` | `/resetmotd` | Reset the MOTD to the plugin's default | `justplugin.motd.set` | — |
 | `/clock` | `/clock` | Show current real-world time and in-game time | — | `realtime`, `rltime` |
@@ -235,6 +243,8 @@
 ### Details
 
 - **PlayerInfo** shows UUID, display name, health (e.g. `20.0/20.0`), food (e.g. `20.0/20.0`), gamemode, world, location, flying status, OP status, and balance. Players with `justplugin.playerinfo.ip` also see the target's IP address. Works for offline players too (shows UUID, last seen, first played, ban status).
+- **PlayerList** is a staff-oriented advanced player list. Shows staff tags `[Staff]`, world names, vanish indicators (`[V]` for regular vanish, `[SV]` for super vanish visible to those with `justplugin.vanish.see`). Players hidden via `/playerlisthide` are invisible to those without `justplugin.playerlist.hide`. Paginated with clickable navigation.
+- **PlayerListHide** lets you hide yourself or another player from `/playerlist`. `justplugin.playerlist.hide.others` required to hide other players. Players with `justplugin.playerlist.hide.notify` are notified when someone is hidden/unhidden.
 - **MOTD** can be set by players with `justplugin.motd.set`. Supports MiniMessage formatting and `{player}` placeholder. Shown on join.
 - **ResetMotd** resets the MOTD back to the plugin's default welcome message. Requires `justplugin.motd.set`.
 - **Clock/Date** timezone is configurable in `config.yml` (default: UTC).

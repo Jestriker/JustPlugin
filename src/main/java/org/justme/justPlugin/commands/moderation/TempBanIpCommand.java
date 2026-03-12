@@ -72,6 +72,7 @@ public class TempBanIpCommand implements TabExecutor {
         } else {
             sender.sendMessage(CC.success("Temporarily IP banned <yellow>" + ip + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>."));
         }
+        plugin.getLogManager().log("moderation", "<yellow>" + bannedBy + "</yellow> temp-IP-banned <yellow>" + ip + "</yellow>" + (resolvedFrom != null ? " (from <yellow>" + resolvedFrom + "</yellow>)" : "") + " for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>. Reason: <gray>" + reason);
         return true;
     }
 

@@ -60,6 +60,7 @@ public class TempBanCommand implements TabExecutor {
 
         plugin.getBanManager().tempBan(uuid, name, reason, bannedBy, duration);
         sender.sendMessage(CC.success("Temporarily banned <yellow>" + name + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>. Reason: <gray>" + reason));
+        plugin.getLogManager().log("moderation", "<yellow>" + bannedBy + "</yellow> temp-banned <yellow>" + name + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>. Reason: <gray>" + reason);
         return true;
     }
 

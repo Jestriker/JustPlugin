@@ -32,17 +32,34 @@ public class WarpCommand implements TabExecutor {
             if (names.isEmpty()) {
                 player.sendMessage(CC.info("No warps available."));
             } else {
-                player.sendMessage(CC.info("Warps: <yellow>" + String.join(", ", names)));
+                boolean clickable = plugin.getConfig().getBoolean("clickable-commands.warp-list", true);
+                String warpList = names.stream()
+                        .map(n -> CC.clickCmd("<yellow>" + n + "</yellow>", "/warp " + n, clickable))
+                        .collect(java.util.stream.Collectors.joining("<gray>, "));
+                player.sendMessage(CC.translate(CC.PREFIX + "Warps: " + warpList));
             }
             return true;
         }
+
+        // Cooldown check (applies even to OPs unless explicit bypass)
+        if (!player.hasPermission("justplugin.warp.nocooldown")
+                && plugin.getCooldownManager().isOnCooldown(player.getUniqueId(), "warp")) {
+            int remaining = plugin.getCooldownManager().getRemainingSeconds(player.getUniqueId(), "warp");
+            player.sendMessage(CC.error("You must wait <yellow>" + remaining + "</yellow> seconds before using this command again."));
+            return true;
+        }
+
         Location loc = plugin.getWarpManager().getWarp(args[0]);
         if (loc == null) {
             player.sendMessage(CC.error("Warp <yellow>" + args[0] + "</yellow> not found!"));
             return true;
         }
-        plugin.getTeleportManager().teleport(player, loc);
-        player.sendMessage(CC.success("Warping to <yellow>" + args[0] + "</yellow>."));
+        boolean initiated = plugin.getTeleportManager().teleportWithSafety(
+                player, loc, "justplugin.warp.cooldownbypass", "warp", "justplugin.warp.unsafetp");
+        if (initiated) {
+            plugin.getCooldownManager().setCooldown(player.getUniqueId(), "warp");
+            player.sendMessage(CC.success("Warping to <yellow>" + args[0] + "</yellow>."));
+        }
         return true;
     }
 
