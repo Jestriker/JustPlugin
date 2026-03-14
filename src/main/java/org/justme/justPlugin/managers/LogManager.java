@@ -39,6 +39,12 @@ public class LogManager {
                 p.sendMessage(CC.translate("<dark_gray>[<gradient:#ff6b6b:#ee5a24>LOG</gradient>] <gray>[<yellow>" + category.toUpperCase() + "</yellow>] " + message));
             }
         }
+
+        // 3. Send to Discord webhook if enabled
+        WebhookManager webhookManager = plugin.getWebhookManager();
+        if (webhookManager != null && webhookManager.isEnabled()) {
+            webhookManager.sendLog(category, plain, null);
+        }
     }
 }
 

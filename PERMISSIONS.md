@@ -2,7 +2,7 @@
 
 > **Version:** 1.0-SNAPSHOT  
 > **Author:** JustMe  
-> **Last Updated:** March 12, 2026
+> **Last Updated:** March 14, 2026
 
 ---
 
@@ -125,6 +125,15 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.sudo               ← Force player commands
 │   ├── justplugin.invsee             ← View player inventories
 │   ├── justplugin.echestsee          ← View player ender chests
+│   ├── justplugin.mute               ← Permanently mute players
+│   ├── justplugin.tempmute           ← Temporarily mute players
+│   ├── justplugin.unmute             ← Unmute players
+│   ├── justplugin.warn               ← Manage player warnings
+│   ├── justplugin.warn.notify        ← Receive warning notifications
+│   ├── justplugin.kick               ← Kick players
+│   ├── justplugin.setlogswebhook     ← Configure Discord webhook logging
+│   ├── justplugin.log.warn           ← See warning logs
+│   ├── justplugin.log.mute           ← See mute logs
 │   ├── justplugin.announce           ← Broadcast announcements
 │   ├── justplugin.playerinfo         ← View player info
 │   ├── justplugin.playerinfo.ip      ← See player IP in /playerinfo
@@ -287,6 +296,13 @@ Includes all permissions listed in this document.
 | `justplugin.sudo` | Force players to run commands or send messages | `op` | `/sudo` |
 | `justplugin.invsee` | View another player's inventory | `op` | `/invsee` |
 | `justplugin.echestsee` | View another player's ender chest | `op` | `/echestsee` |
+| `justplugin.mute` | Permanently mute a player (blocks chat & /msg) | `op` | `/mute` |
+| `justplugin.tempmute` | Temporarily mute a player | `op` | `/tempmute` |
+| `justplugin.unmute` | Unmute a player | `op` | `/unmute` |
+| `justplugin.warn` | Manage player warnings (add, remove, list) | `op` | `/warn` |
+| `justplugin.warn.notify` | Receive notifications about warnings | `op` | `/warn` |
+| `justplugin.kick` | Kick a player from the server | `op` | `/kick` |
+| `justplugin.setlogswebhook` | Configure Discord webhook logging | `op` | `/setlogswebhook` |
 
 ---
 
@@ -439,15 +455,16 @@ These permissions control whether a command can target **other players**. The ba
 
 ### 🛡️ Safe Teleport Bypass Permissions
 
-These let a player teleport to unsafe locations (with a warning).
+These let a player teleport to unsafe locations. Instead of auto-teleporting, a clickable **[TP Anyway]** confirmation button is shown alongside options to enable Creative Mode or God Mode.
 
 | Permission | Description | Default | Used By |
 |------------|-------------|---------|---------|
-| `justplugin.tpa.unsafetp` | Bypass TPA safe teleport protection | `op` | `/tpa` |
-| `justplugin.tpahere.unsafetp` | Bypass TPAHere safe teleport protection | `op` | `/tpahere` |
-| `justplugin.warp.unsafetp` | Bypass warp safe teleport protection | `op` | `/warp` |
-| `justplugin.spawn.unsafetp` | Bypass spawn safe teleport protection | `op` | `/spawn` |
-| `justplugin.home.unsafetp` | Bypass home safe teleport protection | `op` | `/home` |
+| `justplugin.tpa.unsafetp` | Bypass TPA safe teleport protection (with confirmation) | `op` | `/tpa` |
+| `justplugin.tpahere.unsafetp` | Bypass TPAHere safe teleport protection (with confirmation) | `op` | `/tpahere` |
+| `justplugin.warp.unsafetp` | Bypass warp safe teleport protection (with confirmation) | `op` | `/warp` |
+| `justplugin.spawn.unsafetp` | Bypass spawn safe teleport protection (with confirmation) | `op` | `/spawn` |
+| `justplugin.home.unsafetp` | Bypass home safe teleport protection (with confirmation) | `op` | `/home` |
+| `justplugin.back.unsafetp` | Bypass back safe teleport protection (with confirmation) | `op` | `/back` |
 
 ### 📋 Log Permissions
 
@@ -463,6 +480,8 @@ These control which log categories a player sees in-game. All log actions are al
 | `justplugin.log.player` | See player action logs (fly, god, heal, feed) | `op` | `PLAYER` |
 | `justplugin.log.admin` | See admin action logs (sudo, warps, exp, spawners) | `op` | `ADMIN` |
 | `justplugin.log.item` | See item-related logs | `op` | `ITEM` |
+| `justplugin.log.warn` | See warning logs (warn add, lift) | `op` | `WARN` |
+| `justplugin.log.mute` | See mute/unmute logs | `op` | `MUTE` |
 
 ### ⏱️ Cooldown Bypass Permissions
 
@@ -474,6 +493,26 @@ These bypass the cooldown timer between uses. **NOT included in `justplugin.*`**
 | `justplugin.tpahere.nocooldown` | Bypass TPAHere cooldown between uses | `false` | `/tpahere` |
 | `justplugin.warp.nocooldown` | Bypass warp cooldown between uses | `false` | `/warp` |
 | `justplugin.spawn.nocooldown` | Bypass spawn cooldown between uses | `false` | `/spawn` |
+| `justplugin.home.nocooldown` | Bypass home cooldown between uses | `false` | `/home` |
+| `justplugin.back.nocooldown` | Bypass back cooldown between uses | `false` | `/back` |
+
+### ⏳ Warmup Delay Bypass Permissions
+
+These bypass the teleport warmup delay (the X-second wait before teleporting). **Included in `justplugin.*`** for OPs.
+
+| Permission | Description | Default | Used By |
+|------------|-------------|---------|---------|
+| `justplugin.tpa.cooldownbypass` | Skip TPA teleport warmup delay | `op` | `/tpa` |
+| `justplugin.tpahere.cooldownbypass` | Skip TPAHere teleport warmup delay | `op` | `/tpahere` |
+| `justplugin.home.cooldownbypass` | Skip home teleport warmup delay | `op` | `/home` |
+| `justplugin.warp.cooldownbypass` | Skip warp teleport warmup delay | `op` | `/warp` |
+| `justplugin.back.cooldownbypass` | Skip back teleport warmup delay | `op` | `/back` |
+
+### 👁️ Visibility Permissions
+
+| Permission | Description | Default | Used By |
+|------------|-------------|---------|---------|
+| `justplugin.playerlist.seeHiddenPlayers` | See players hidden from playerlist (shows `[Hidden]` tag with hover info) | `op` | `/playerlist` |
 
 ---
 
@@ -533,3 +572,21 @@ These bypass the cooldown timer between uses. **NOT included in `justplugin.*`**
 /lp group staff permission set justplugin.getpos.others true
 /lp group staff permission set justplugin.getdeathpos.others true
 ```
+
+### Granting moderation permissions to moderators:
+```
+/lp creategroup moderator
+/lp group moderator parent add staff
+/lp group moderator permission set justplugin.mute true
+/lp group moderator permission set justplugin.tempmute true
+/lp group moderator permission set justplugin.unmute true
+/lp group moderator permission set justplugin.warn true
+/lp group moderator permission set justplugin.kick true
+/lp group moderator permission set justplugin.ban true
+/lp group moderator permission set justplugin.tempban true
+/lp group moderator permission set justplugin.unban true
+/lp group moderator permission set justplugin.log.moderation true
+/lp group moderator permission set justplugin.log.warn true
+/lp group moderator permission set justplugin.log.mute true
+```
+

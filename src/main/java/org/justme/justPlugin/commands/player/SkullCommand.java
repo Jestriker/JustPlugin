@@ -15,6 +15,7 @@ import org.justme.justPlugin.util.CC;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class SkullCommand implements TabExecutor {
 
     private final JustPlugin plugin;

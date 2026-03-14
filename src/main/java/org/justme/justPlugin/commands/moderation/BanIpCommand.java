@@ -29,7 +29,7 @@ public class BanIpCommand implements TabExecutor {
             return true;
         }
 
-        String reason = args.length >= 2 ? String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)) : "IP Banned by an operator";
+        String reason = args.length >= 2 ? String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)) : plugin.getConfig().getString("default-reasons.ban", "IP Banned by an operator");
         String bannedBy = sender instanceof Player ? sender.getName() : "Console";
         String ip = args[0];
         String resolvedFrom = null;

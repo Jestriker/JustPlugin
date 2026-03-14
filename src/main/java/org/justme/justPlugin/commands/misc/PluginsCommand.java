@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Arrays;
 
+@SuppressWarnings("NullableProblems")
 public class PluginsCommand implements TabExecutor {
 
     @Override

@@ -9,6 +9,7 @@ import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
+@SuppressWarnings("NullableProblems")
 public class MotdCommand implements TabExecutor {
 
     private final JustPlugin plugin;

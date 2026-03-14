@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class EchestSeeCommand implements TabExecutor, Listener {
 
     private final JustPlugin plugin;

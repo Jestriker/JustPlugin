@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("NullableProblems")
 public class BaltopCommand implements TabExecutor {
 
     private final JustPlugin plugin;

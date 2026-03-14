@@ -9,6 +9,7 @@ import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
+@SuppressWarnings("NullableProblems")
 public class ResetMotdCommand implements TabExecutor {
 
     private static final String DEFAULT_MOTD = "<gradient:#00aaff:#00ffaa><bold>Welcome to the server, {player}!</bold></gradient>\n<gray>Type <yellow>/help</yellow> for commands.";

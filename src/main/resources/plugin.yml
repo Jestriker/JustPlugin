@@ -53,6 +53,10 @@ commands:
     description: Internal safety-checked teleport (used by /getpos buttons)
     usage: /tpsafecheck <player>
     permission: justplugin.tppos
+  tpunsafeconfirm:
+    description: Confirm teleport to an unsafe destination (used by TP Anyway button)
+    usage: /tpunsafeconfirm
+    permission: justplugin.tppos
 
   # === Warps ===
   warp:
@@ -184,6 +188,33 @@ commands:
     usage: /echestsee <player>
     permission: justplugin.echestsee
     aliases: [openec]
+  mute:
+    description: Permanently mute a player
+    usage: /mute <player> [reason]
+    permission: justplugin.mute
+  tempmute:
+    description: Temporarily mute a player
+    usage: /tempmute <player> <duration> [reason]
+    permission: justplugin.tempmute
+    aliases: [tmute]
+  unmute:
+    description: Unmute a player
+    usage: /unmute <player>
+    permission: justplugin.unmute
+  warn:
+    description: Manage player warnings
+    usage: /warn <add | remove | list | confirm | cancel> <player> [reason | index]
+    permission: justplugin.warn
+    aliases: [warning, warnings]
+  kick:
+    description: Kick a player from the server
+    usage: /kick <player> [reason]
+    permission: justplugin.kick
+  setlogswebhook:
+    description: Configure Discord webhook for log output
+    usage: /setlogswebhook <url | disable | confirm | cancel | tryagain>
+    permission: justplugin.setlogswebhook
+    aliases: [logwebhook, webhooklog]
 
   # === Player ===
   fly:
@@ -268,11 +299,11 @@ commands:
   getpos:
     description: Get your or another player's current position
     usage: /getpos [player]
-    aliases: [whereami, position, getcoords]
+    aliases: [whereami, position, getcoords, coords]
   getdeathpos:
     description: Get your or another player's last death location
     usage: /getdeathpos [player]
-    aliases: [getdeathcoords, deathpos]
+    aliases: [getdeathcoords, deathpos, deathcoords]
 
   # === Chat ===
   msg:
@@ -294,15 +325,15 @@ commands:
     permission: justplugin.announce
     aliases: [broadcast, bcast]
   sharecoords:
-    description: Share your coordinates
+    description: Share your coordinates with chat
     usage: /sharecoords [all | team]
     permission: justplugin.sharecoords
-    aliases: [coords, sendcoords]
+    aliases: [sendcoords]
   sharedeathcoords:
-    description: Share your last death coordinates
+    description: Share your last death coordinates with chat
     usage: /sharedeathcoords [all | team]
     permission: justplugin.sharedeathcoords
-    aliases: [senddeathcoords, deathcoords]
+    aliases: [senddeathcoords]
   chat:
     description: Switch chat mode
     usage: /chat <all | team>
@@ -499,6 +530,15 @@ permissions:
       justplugin.sudo: true
       justplugin.invsee: true
       justplugin.echestsee: true
+      justplugin.mute: true
+      justplugin.tempmute: true
+      justplugin.unmute: true
+      justplugin.warn: true
+      justplugin.warn.notify: true
+      justplugin.kick: true
+      justplugin.setlogswebhook: true
+      justplugin.log.warn: true
+      justplugin.log.mute: true
       justplugin.fly: true
       justplugin.fly.others: true
       justplugin.gamemode: true
@@ -577,6 +617,9 @@ permissions:
       justplugin.warp.unsafetp: true
       justplugin.spawn.unsafetp: true
       justplugin.home.unsafetp: true
+      justplugin.back.unsafetp: true
+      justplugin.back.cooldownbypass: true
+      justplugin.playerlist.seeHiddenPlayers: true
   justplugin.player:
     description: Basic player permissions
     default: true
@@ -639,16 +682,110 @@ permissions:
     description: Bypass spawn safe teleport protection (with warning)
     default: op
   justplugin.home.unsafetp:
-    description: Bypass home safe teleport protection (with warning)
+    description: Bypass home safe teleport protection (with confirmation)
+    default: op
+  justplugin.back.unsafetp:
+    description: Bypass back safe teleport protection (with confirmation)
+    default: op
+  justplugin.back.cooldownbypass:
+    description: Bypass /back warmup delay
+    default: false
+  justplugin.back.nocooldown:
+    description: Bypass /back cooldown between uses
+    default: false
+  justplugin.home.nocooldown:
+    description: Bypass /home cooldown between uses
+    default: false
+  justplugin.playerlist.seeHiddenPlayers:
+    description: See players hidden from the player list (with hidden indicator)
     default: op
   justplugin.staff:
     description: Marks a player as staff (shown in /playerlist)
     default: op
-  justplugin.supervanish:
-    description: Toggle super vanish mode
+
+  # --- Hierarchical Permissions ---
+  # .others permissions automatically grant the base permission (self).
+  justplugin.fly.others:
+    description: Toggle flight for other players
     default: op
+    children:
+      justplugin.fly: true
+  justplugin.god.others:
+    description: Toggle god mode for other players
+    default: op
+    children:
+      justplugin.god: true
+  justplugin.heal.others:
+    description: Heal other players
+    default: op
+    children:
+      justplugin.heal: true
+  justplugin.feed.others:
+    description: Feed other players
+    default: op
+    children:
+      justplugin.feed: true
+  justplugin.speed.others:
+    description: Set speed for other players
+    default: op
+    children:
+      justplugin.speed: true
+  justplugin.gamemode.others:
+    description: Change game mode for other players
+    default: op
+    children:
+      justplugin.gamemode: true
+  justplugin.exp.others:
+    description: Manage experience for other players
+    default: op
+    children:
+      justplugin.exp: true
+  justplugin.vanish.others:
+    description: Vanish other players
+    default: op
+    children:
+      justplugin.vanish: true
   justplugin.supervanish.others:
     description: Super vanish other players
+    default: op
+    children:
+      justplugin.supervanish: true
+  justplugin.kill.others:
+    description: Kill other players
+    default: op
+    children:
+      justplugin.kill: true
+  justplugin.addcash.others:
+    description: Add cash to other players
+    default: op
+    children:
+      justplugin.addcash: true
+  justplugin.balance.others:
+    description: Check other players' balance
+    default: op
+    children:
+      justplugin.balance: true
+  justplugin.getpos.others:
+    description: Get other players' positions
+    default: op
+  justplugin.getdeathpos.others:
+    description: Get other players' death locations
+    default: op
+    children:
+      justplugin.getdeathpos: true
+  justplugin.baltophide.others:
+    description: Hide other players from the balance leaderboard
+    default: op
+    children:
+      justplugin.baltophide: true
+  justplugin.playerlist.hide.others:
+    description: Hide other players from the player list
+    default: op
+    children:
+      justplugin.playerlist.hide: true
+
+  justplugin.supervanish:
+    description: Toggle super vanish mode
     default: op
   justplugin.playerlist:
     description: View the advanced player list
@@ -656,16 +793,33 @@ permissions:
   justplugin.playerlist.hide:
     description: Hide yourself from the player list
     default: op
-  justplugin.playerlist.hide.others:
-    description: Hide other players from the player list
-    default: op
   justplugin.playerlist.hide.notify:
     description: Receive notifications when players are hidden/unhidden
     default: op
-  justplugin.baltophide.others:
-    description: Hide other players from the balance leaderboard
-    default: op
   justplugin.baltophide.notify:
     description: Receive notifications when players are hidden/unhidden from baltop
+    default: op
+
+  # --- Moderation ---
+  justplugin.mute:
+    description: Permanently mute a player
+    default: op
+  justplugin.tempmute:
+    description: Temporarily mute a player
+    default: op
+  justplugin.unmute:
+    description: Unmute a player
+    default: op
+  justplugin.warn:
+    description: Manage player warnings
+    default: op
+  justplugin.warn.notify:
+    description: Receive notifications about warnings
+    default: op
+  justplugin.kick:
+    description: Kick a player from the server
+    default: op
+  justplugin.setlogswebhook:
+    description: Configure Discord webhook logging
     default: op
 

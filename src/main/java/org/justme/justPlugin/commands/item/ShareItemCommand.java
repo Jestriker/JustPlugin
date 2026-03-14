@@ -15,6 +15,7 @@ import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
+@SuppressWarnings("NullableProblems")
 public class ShareItemCommand implements TabExecutor {
 
     @Override

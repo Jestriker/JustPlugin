@@ -11,6 +11,7 @@ import org.justme.justPlugin.util.TimeUtil;
 
 import java.util.List;
 
+@SuppressWarnings("NullableProblems")
 public class DateCommand implements TabExecutor {
 
     private final JustPlugin plugin;

@@ -19,6 +19,7 @@ import org.justme.justPlugin.util.CC;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("NullableProblems")
 public class PayNoteCommand implements TabExecutor {
 
     private final JustPlugin plugin;

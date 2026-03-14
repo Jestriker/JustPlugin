@@ -11,6 +11,7 @@ import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
+@SuppressWarnings("NullableProblems")
 public class BackCommand implements TabExecutor {
 
     private final JustPlugin plugin;
@@ -30,8 +31,21 @@ public class BackCommand implements TabExecutor {
             player.sendMessage(CC.error("No back location found!"));
             return true;
         }
-        plugin.getTeleportManager().teleport(player, back);
-        player.sendMessage(CC.success("Teleporting to your previous location."));
+
+        // Cooldown check (applies even to OPs unless explicit bypass)
+        if (!player.hasPermission("justplugin.back.nocooldown")
+                && plugin.getCooldownManager().isOnCooldown(player.getUniqueId(), "back")) {
+            int remaining = plugin.getCooldownManager().getRemainingSeconds(player.getUniqueId(), "back");
+            player.sendMessage(CC.error("You must wait <yellow>" + remaining + "</yellow> seconds before using this command again."));
+            return true;
+        }
+
+        boolean initiated = plugin.getTeleportManager().teleportWithSafety(
+                player, back, "justplugin.back.cooldownbypass", "back", "justplugin.back.unsafetp");
+        if (initiated) {
+            plugin.getCooldownManager().setCooldown(player.getUniqueId(), "back");
+            player.sendMessage(CC.success("Teleporting to your previous location."));
+        }
         return true;
     }
 

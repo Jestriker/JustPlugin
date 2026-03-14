@@ -1,8 +1,6 @@
 package org.justme.justPlugin.managers;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -113,6 +111,7 @@ public class TeleportManager {
     }
 
     // --- Query ---
+    @SuppressWarnings("unused")
     public boolean hasOutgoingRequest(UUID sender) {
         return outgoingRequests.containsKey(sender);
     }
@@ -131,13 +130,11 @@ public class TeleportManager {
     }
 
     // --- Cancel / Remove ---
-    public boolean cancelOutgoingRequest(UUID sender) {
+    public void cancelOutgoingRequest(UUID sender) {
         TpaRequest req = outgoingRequests.remove(sender);
         if (req != null) {
             incomingRequests.remove(req.target);
-            return true;
         }
-        return false;
     }
 
     public void removeRequest(UUID sender) {
@@ -172,6 +169,7 @@ public class TeleportManager {
         String featureKey = req.senderGoesToTarget ? "tpa" : "tpahere";
         boolean safetyEnabled = plugin.getConfig().getBoolean("teleport.safe-teleport-" + featureKey, true);
         String safetyBypassPerm = "justplugin." + featureKey + ".unsafetp";
+        String delayBypassPerm = req.senderGoesToTarget ? "justplugin.tpa.cooldownbypass" : "justplugin.tpahere.cooldownbypass";
 
         if (safetyEnabled) {
             boolean playerFlying = destination.isFlying();
@@ -180,8 +178,12 @@ public class TeleportManager {
 
             if (isUnsafe) {
                 if (teleporter.hasPermission(safetyBypassPerm)) {
-                    sendUnsafeWarning(teleporter);
-                    // Continue with teleport (bypass)
+                    // Store pending unsafe confirmation — do NOT teleport yet
+                    pendingUnsafeTps.put(teleporter.getUniqueId(),
+                            new PendingUnsafeTp(destination.getLocation(), delayBypassPerm, featureKey));
+                    sendUnsafeWarningWithConfirm(teleporter);
+                    destination.sendMessage(CC.warning("Teleport request cancelled — your current location is unsafe for teleportation."));
+                    return;
                 } else {
                     String reason = playerFlying
                             ? "the destination player is flying"
@@ -193,14 +195,12 @@ public class TeleportManager {
             }
         }
 
-        boolean hasSafetyBypass = teleporter.hasPermission(safetyBypassPerm);
-
+        // If we reach here, the location is safe (or safety is disabled)
         // Check bypass permission for teleport delay
-        String delayBypassPerm = req.senderGoesToTarget ? "justplugin.tpa.cooldownbypass" : "justplugin.tpahere.cooldownbypass";
         double delay = roundToHalf(teleportDelay);
         if (delay <= 0 || teleporter.hasPermission(delayBypassPerm)) {
             // Instant teleport
-            executeTeleport(teleporter, destination.getLocation(), !hasSafetyBypass || !safetyEnabled);
+            executeTeleport(teleporter, destination.getLocation(), true);
             return;
         }
 
@@ -217,7 +217,6 @@ public class TeleportManager {
         destination.sendMessage(CC.success("<yellow>" + teleporter.getName() + "</yellow> is teleporting to you in <yellow>" + delayStr + "</yellow> seconds."));
 
         final boolean finalSafetyEnabled = safetyEnabled;
-        final boolean finalHasBypass = hasSafetyBypass;
 
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pendingTeleports.remove(teleporter.getUniqueId());
@@ -230,16 +229,19 @@ public class TeleportManager {
                 boolean destFlying = destination.isOnline() && destination.isFlying();
                 boolean destUnsafe = !isLocationSafe(destLoc);
                 if (destFlying || destUnsafe) {
-                    if (finalHasBypass) {
-                        sendUnsafeWarning(teleporter);
+                    if (teleporter.hasPermission(safetyBypassPerm)) {
+                        // Store pending unsafe confirmation — do NOT teleport
+                        pendingUnsafeTps.put(teleporter.getUniqueId(),
+                                new PendingUnsafeTp(destLoc, delayBypassPerm, featureKey));
+                        sendUnsafeWarningWithConfirm(teleporter);
                     } else {
                         teleporter.sendMessage(CC.error("Teleportation cancelled — the destination became unsafe!"));
-                        return;
                     }
+                    return;
                 }
             }
 
-            executeTeleport(teleporter, destLoc, !finalHasBypass || !finalSafetyEnabled);
+            executeTeleport(teleporter, destLoc, true);
         }, delayTicks);
         pendingTeleports.put(teleporter.getUniqueId(), task);
     }
@@ -290,14 +292,28 @@ public class TeleportManager {
     }
 
     /**
-     * Sends an unsafe destination warning with clickable creative/god mode buttons.
+     * Sends an unsafe destination warning with clickable creative/god mode buttons
+     * AND a "TP Anyway" confirmation button that calls /tpunsafeconfirm.
+     * Only shows Creative/God buttons if the player has the appropriate permissions.
      */
-    private void sendUnsafeWarning(Player player) {
-        player.sendMessage(CC.warning("⚠ The destination is unsafe! Consider enabling protection:"));
-        Component buttons = CC.translate("  ")
-                .append(CC.translate("<click:run_command:'/gmc'><hover:show_text:'<gray>Click to switch to <green>Creative Mode'><gold><bold>[Creative Mode]</bold></gold></hover></click>"))
-                .append(CC.translate(" "))
-                .append(CC.translate("<click:run_command:'/god'><hover:show_text:'<gray>Click to enable <green>God Mode'><gold><bold>[God Mode]</bold></gold></hover></click>"));
+    private void sendUnsafeWarningWithConfirm(Player player) {
+        boolean hasGm = player.hasPermission("justplugin.gamemode");
+        boolean hasGod = player.hasPermission("justplugin.god");
+
+        if (hasGm || hasGod) {
+            player.sendMessage(CC.warning("⚠ The destination is unsafe! It is suggested to enable protection before teleporting:"));
+        } else {
+            player.sendMessage(CC.warning("⚠ The destination is unsafe!"));
+        }
+
+        Component buttons = CC.translate("  ");
+        if (hasGm) {
+            buttons = buttons.append(CC.translate("<click:run_command:'/gmc'><hover:show_text:'<gray>Click to switch to <green>Creative Mode'><gold><bold>[Creative Mode]</bold></gold></hover></click> "));
+        }
+        if (hasGod) {
+            buttons = buttons.append(CC.translate("<click:run_command:'/god'><hover:show_text:'<gray>Click to enable <green>God Mode'><gold><bold>[God Mode]</bold></gold></hover></click> "));
+        }
+        buttons = buttons.append(CC.translate("<click:run_command:'/tpunsafeconfirm'><hover:show_text:'<gray>Click to teleport anyway\n<red>⚠ The destination is unsafe!'><red><bold>[TP Anyway]</bold></red></hover></click>"));
         player.sendMessage(buttons);
     }
 
@@ -410,10 +426,73 @@ public class TeleportManager {
         return backLocations.get(uuid);
     }
 
-    // --- Teleport with delay (non-TPA: /warp, /home, /spawn) ---
+    // --- Pending unsafe override confirmations ---
+    private final Map<UUID, PendingUnsafeTp> pendingUnsafeTps = new ConcurrentHashMap<>();
+
+    public static class PendingUnsafeTp {
+        public final Location destination;
+        public final String delayBypassPerm;
+        public final String featureKey;
+        public final long timestamp;
+
+        public PendingUnsafeTp(Location destination, String delayBypassPerm, String featureKey) {
+            this.destination = destination;
+            this.delayBypassPerm = delayBypassPerm;
+            this.featureKey = featureKey;
+            this.timestamp = System.currentTimeMillis();
+        }
+    }
+
+    /**
+     * Confirms an unsafe teleport after the player clicked "TP Anyway".
+     * Performs the teleport with delay (if applicable), skipping safety checks.
+     */
+    public void confirmUnsafeTeleport(Player player) {
+        PendingUnsafeTp pending = pendingUnsafeTps.remove(player.getUniqueId());
+        if (pending == null) {
+            player.sendMessage(CC.error("No pending unsafe teleport to confirm."));
+            return;
+        }
+        // Expire after 30 seconds
+        if (System.currentTimeMillis() - pending.timestamp > 30_000) {
+            player.sendMessage(CC.error("The unsafe teleport confirmation has expired."));
+            return;
+        }
+
+        setBackLocation(player.getUniqueId(), player.getLocation());
+        double delay = roundToHalf(teleportDelay);
+        if (delay <= 0 || player.hasPermission(pending.delayBypassPerm)) {
+            player.teleportAsync(pending.destination);
+            player.sendMessage(CC.success("Teleported! <red>(unsafe destination)"));
+            return;
+        }
+
+        long delayTicks = (long) (delay * 20);
+        Location startLoc = player.getLocation().clone();
+        teleportStartLocations.put(player.getUniqueId(), startLoc);
+        String delayStr = delay == (int) delay ? String.valueOf((int) delay) : String.valueOf(delay);
+        player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. <gray>Don't move or take damage!"));
+
+        final Location dest = pending.destination;
+        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            pendingTeleports.remove(player.getUniqueId());
+            teleportStartLocations.remove(player.getUniqueId());
+            if (!player.isOnline()) return;
+            setBackLocation(player.getUniqueId(), player.getLocation());
+            player.teleportAsync(dest);
+            player.sendMessage(CC.success("Teleported! <red>(unsafe destination)"));
+        }, delayTicks);
+        pendingTeleports.put(player.getUniqueId(), task);
+    }
+
+    // --- Teleport with delay (non-TPA: /warp, /home, /spawn, /back) ---
 
     /**
      * Teleport with safety check, delay, and bypass permissions.
+     * When the destination is unsafe:
+     *   - If the player has the safety bypass permission, a clickable "TP Anyway" confirmation
+     *     is shown instead of teleporting immediately.
+     *   - If not, teleportation is simply cancelled.
      *
      * @param player            The player to teleport
      * @param location          Destination location
@@ -425,48 +504,49 @@ public class TeleportManager {
     public boolean teleportWithSafety(Player player, Location location, String delayBypassPerm,
                                        String featureKey, String safetyBypassPerm) {
         boolean safetyEnabled = plugin.getConfig().getBoolean("teleport.safe-teleport-" + featureKey, true);
-        boolean useSafeLocation = true;
 
         if (safetyEnabled && !isLocationSafe(location)) {
             if (safetyBypassPerm != null && player.hasPermission(safetyBypassPerm)) {
-                sendUnsafeWarning(player);
-                useSafeLocation = false; // Bypass: go to exact location
+                // Store pending confirmation — do NOT teleport yet
+                pendingUnsafeTps.put(player.getUniqueId(), new PendingUnsafeTp(location, delayBypassPerm, featureKey));
+                sendUnsafeWarningWithConfirm(player);
             } else {
                 player.sendMessage(CC.error("Teleportation cancelled — the destination is unsafe!"));
-                return false;
             }
+            return false;
         }
 
         setBackLocation(player.getUniqueId(), player.getLocation());
         double delay = roundToHalf(teleportDelay);
         if (delay <= 0 || player.hasPermission(delayBypassPerm)) {
-            Location finalLoc = useSafeLocation ? getSafeLocation(location) : location;
+            Location finalLoc = getSafeLocation(location);
             player.teleportAsync(finalLoc);
             return true;
         }
 
-        final boolean finalUseSafe = useSafeLocation;
         long delayTicks = (long) (delay * 20);
         Location startLoc = player.getLocation().clone();
         teleportStartLocations.put(player.getUniqueId(), startLoc);
         String delayStr = delay == (int) delay ? String.valueOf((int) delay) : String.valueOf(delay);
         player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. Don't move or take damage!"));
+        final boolean finalSafetyEnabled = safetyEnabled;
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pendingTeleports.remove(player.getUniqueId());
             teleportStartLocations.remove(player.getUniqueId());
             if (!player.isOnline()) return;
 
-            // Re-check safety
-            if (safetyEnabled && !isLocationSafe(location)) {
+            // Re-check safety before actually teleporting
+            if (finalSafetyEnabled && !isLocationSafe(location)) {
                 if (safetyBypassPerm != null && player.hasPermission(safetyBypassPerm)) {
-                    sendUnsafeWarning(player);
+                    pendingUnsafeTps.put(player.getUniqueId(), new PendingUnsafeTp(location, delayBypassPerm, featureKey));
+                    sendUnsafeWarningWithConfirm(player);
                 } else {
                     player.sendMessage(CC.error("Teleportation cancelled — the destination became unsafe!"));
-                    return;
                 }
+                return;
             }
 
-            Location finalLoc = finalUseSafe ? getSafeLocation(location) : location;
+            Location finalLoc = getSafeLocation(location);
             setBackLocation(player.getUniqueId(), player.getLocation());
             player.teleportAsync(finalLoc);
             player.sendMessage(CC.success("Teleported!"));

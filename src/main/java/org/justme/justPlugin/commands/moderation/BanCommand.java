@@ -29,7 +29,7 @@ public class BanCommand implements TabExecutor {
             return true;
         }
 
-        String reason = args.length >= 2 ? String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)) : "Banned by an operator";
+        String reason = args.length >= 2 ? String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)) : plugin.getConfig().getString("default-reasons.ban", "Banned by an operator");
         String bannedBy = sender instanceof Player ? sender.getName() : "Console";
 
         // Try UUID first

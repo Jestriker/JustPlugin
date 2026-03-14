@@ -2,7 +2,7 @@
 
 > **Version:** 1.0-SNAPSHOT  
 > **Author:** JustMe  
-> **Last Updated:** March 12, 2026
+> **Last Updated:** March 14, 2026
 
 ---
 
@@ -44,9 +44,11 @@
 
 - **TPA requests** expire after a configurable timeout (default: 60s). Players are notified on send, accept, reject, and cancel.
 - **TPA Here** sends a request for the *target* to teleport to *you*.
-- **Teleport delay** is configurable (default: 3s). Movement cancels the teleport. Players with `justplugin.teleport.bypass` skip the delay.
+- **Teleport delay** is configurable (default: 3s). Movement or damage cancels the teleport. Players with `justplugin.teleport.bypass` skip the delay.
+- **Safe teleport protection** applies to all teleportation methods (TPA, TPAHere, Warp, Spawn, Home, Back). When the destination is unsafe, teleportation is cancelled. Players with `*.unsafetp` permission get a clickable **[TP Anyway]** confirmation button along with **[Creative Mode]** and **[God Mode]** options.
+- **Cooldowns** apply to `/tpa`, `/tpahere`, `/warp`, `/spawn`, `/home`, and `/back` — even for OPs. Only explicit `*.nocooldown` permissions bypass them.
 - **Random teleport** (`/tpr`) finds a safe location within the configured wild range (default: 5000 blocks, min 500 from 0,0). Loads chunks asynchronously.
-- **Back** stores your location before each teleport. Only one back location is saved at a time.
+- **Back** stores your location before each teleport and death. Now uses safety checks and cooldown like all other teleport features.
 - **SetSpawn** validates that the block below is solid and safe (no lava, magma, cactus, fire, etc.).
 
 ---
@@ -124,6 +126,12 @@
 | `/sudo` | `/sudo <player> <command \| message>` | Force a player to execute a command or send a chat message | `justplugin.sudo` | — |
 | `/invsee` | `/invsee <player>` | View a player's full inventory in a GUI (armor, offhand, all slots) | `justplugin.invsee` | `openinv` |
 | `/echestsee` | `/echestsee <player>` | View a player's ender chest | `justplugin.echestsee` | `openec` |
+| `/mute` | `/mute <player> [reason]` | Permanently mute a player (blocks chat & /msg) | `justplugin.mute` | — |
+| `/tempmute` | `/tempmute <player> <duration> [reason]` | Temporarily mute a player | `justplugin.tempmute` | `tmute` |
+| `/unmute` | `/unmute <player>` | Unmute a player | `justplugin.unmute` | — |
+| `/warn` | `/warn <add\|remove\|list\|confirm\|cancel> <player> [reason\|index]` | Manage player warnings with auto-punishment | `justplugin.warn` | `warning`, `warnings` |
+| `/kick` | `/kick <player> [reason]` | Kick a player from the server | `justplugin.kick` | — |
+| `/setlogswebhook` | `/setlogswebhook <url\|disable\|confirm\|cancel\|tryagain>` | Configure Discord webhook for log output | `justplugin.setlogswebhook` | `logwebhook`, `webhooklog` |
 
 ### Details
 
@@ -137,6 +145,17 @@
 - **Sudo** — if the message starts with `/`, it's executed as a command; otherwise it's sent as chat.
 - **Invsee** opens a 6-row GUI showing main inventory (slots 0-35), armor, and offhand. Refreshes every second. Armor slots show orange glass panes when empty — click with the correct armor type to equip it on the target.
 - **EchestSee** opens the target's real ender chest (live sync). Auto-closes if target logs off.
+- **Mute** permanently blocks a player from using chat and `/msg`/`/r`. Muted players see the mute reason. Default reason is configurable in `config.yml`.
+- **TempMute** temporarily blocks chat and `/msg`/`/r`. Duration format: `5m`, `1h`, `1d`, etc. Auto-expires. Default reason is configurable.
+- **Unmute** lifts mutes (both permanent and temporary). Works by name or UUID.
+- **Warn** manages a warning system with configurable auto-punishments per warning level:
+  - `/warn add <player> [reason]` — Issues a warning and auto-executes the configured punishment.
+  - `/warn remove <player> <index> [reason]` — Lifts a warning (keeps in history, doesn't count toward future punishments). Requires confirmation.
+  - `/warn list <player>` — Shows all warnings (active & lifted) with details.
+  - Default punishment escalation: 1st=ChatMessage, 2nd=Kick, 3rd=TempBan 5m, 4th=TempBan 1d, 5th=TempBan 30d, 6th=TempBan 1y, 7th=Permanent Ban. All configurable in `config.yml`.
+  - Supported punishment types: `ChatMessage`, `Kick`, `TempBan <duration>`, `Ban`, `ChatMute`, `ChatTempMute <duration>`, `NoPunishment`.
+- **Kick** disconnects a player with a styled kick screen. Default reason is configurable.
+- **SetLogsWebhook** configures a Discord webhook URL for receiving all plugin logs as Discord embeds. Tests the URL before confirming. Rate-limited retries (10s interval). Color-coded embeds by category (red=moderation, green=economy, etc.).
 
 ---
 
@@ -162,8 +181,8 @@
 | `/kill` | `/kill [player]` | Kill yourself or another player (overrides vanilla) | `justplugin.kill` | — |
 | `/heal` | `/heal [player]` | Restore full health and extinguish fire | `justplugin.heal` | — |
 | `/feed` | `/feed [player]` | Restore full hunger and saturation | `justplugin.feed` | — |
-| `/getpos` | `/getpos [player]` | Display current coordinates, world, yaw, and pitch | — (public for self) | `whereami`, `position`, `getcoords` |
-| `/getdeathpos` | `/getdeathpos [player]` | Display last death location | Configurable for self | `getdeathcoords`, `deathpos` |
+| `/getpos` | `/getpos [player]` | Display current coordinates, world, yaw, and pitch | — (public for self) | `whereami`, `position`, `getcoords`, `coords` |
+| `/getdeathpos` | `/getdeathpos [player]` | Display last death location | Configurable for self | `getdeathcoords`, `deathpos`, `deathcoords` |
 
 ### Details
 
@@ -188,8 +207,8 @@
 | `/r` | `/r <message>` | Reply to the last player who messaged you | — | `reply` |
 | `/ignore` | `/ignore <add\|remove\|list\|clearlist> [player]` | Manage your ignore list | `justplugin.ignore` | — |
 | `/announce` | `/announce <message>` | Broadcast a server-wide announcement | `justplugin.announce` | `broadcast`, `bcast` |
-| `/sharecoords` | `/sharecoords [all \| team]` | Share your current coordinates in chat (global or team) | `justplugin.sharecoords` | `coords`, `sendcoords` |
-| `/sharedeathcoords` | `/sharedeathcoords [all \| team]` | Share your last death coordinates in chat (global or team) | `justplugin.sharedeathcoords` | `senddeathcoords`, `deathcoords` |
+| `/sharecoords` | `/sharecoords [all \| team]` | Share your current coordinates in chat (global or team) | `justplugin.sharecoords` | `sendcoords` |
+| `/sharedeathcoords` | `/sharedeathcoords [all \| team]` | Share your last death coordinates in chat (global or team) | `justplugin.sharedeathcoords` | `senddeathcoords` |
 | `/chat` | `/chat <all \| team>` | Switch your chat mode between global and team chat | `justplugin.chat` | — |
 | `/teammsg` | `/teammsg <message>` | Send a one-off message to your team (doesn't change chat mode) | `justplugin.chat` | `tmsg`, `tm` |
 
@@ -359,4 +378,56 @@ commands:
     # If false (default), any player can view their own death location.
     require-permission-self: false
 ```
+
+---
+
+## 🔌 Plugin API / Ecosystem
+
+JustPlugin exposes an API for other plugins to interact with its economy, punishment, and vanish systems.
+
+### Accessing the API
+
+```java
+JustPluginAPI api = JustPluginProvider.get();
+if (api != null) {
+    // Economy
+    double balance = api.getEconomyAPI().getBalance(playerUuid);
+    api.getEconomyAPI().addBalance(playerUuid, 100.0);
+    
+    // Punishments
+    boolean banned = api.getPunishmentAPI().isBanned(playerUuid);
+    boolean muted = api.getPunishmentAPI().isMuted(playerUuid);
+    int warns = api.getPunishmentAPI().getActiveWarnCount(playerUuid);
+    
+    // Vanish
+    boolean vanished = api.getVanishAPI().isVanished(playerUuid);
+}
+```
+
+### Available APIs
+
+| API | Methods |
+|-----|---------|
+| `EconomyAPI` | `getBalance`, `setBalance`, `addBalance`, `removeBalance`, `pay`, `format`, `hasBalance` |
+| `PunishmentAPI` | `isBanned`, `ban`, `tempBan`, `unban`, `isMuted`, `mute`, `tempMute`, `unmute`, `getMuteReason`, `getActiveWarnCount`, `getTotalWarnCount`, `addWarn`, `liftWarn` |
+| `VanishAPI` | `isVanished`, `isSuperVanished` |
+
+---
+
+## 📡 Discord Webhook Logging
+
+When configured via `/setlogswebhook <url>`, all plugin logs are sent to Discord as rich embeds:
+
+| Category | Color | Includes |
+|----------|-------|----------|
+| `moderation` | 🔴 Red | Bans, unbans, kicks, mutes, unmutes |
+| `economy` | 🟢 Green | Payments, cash additions, balance changes |
+| `teleport` | 🔵 Blue | Teleportation events |
+| `vanish` | 🟣 Purple | Vanish/super vanish toggles |
+| `gamemode` | 🟠 Orange | Gamemode changes |
+| `player` | 🟡 Yellow | Player state changes (fly, god, speed) |
+| `admin` | 🩷 Pink | Administrative actions |
+| `item` | 🩵 Teal | Item operations |
+| `warn` | 🟧 Dark Orange | Warning additions/lifts |
+| `mute` | 🟥 Dark Red | Mute/unmute actions |
 

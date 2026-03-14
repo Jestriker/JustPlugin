@@ -49,6 +49,8 @@ teleport:
   cooldown-tpahere: 30
   cooldown-warp: 10
   cooldown-spawn: 10
+  cooldown-back: 10
+  cooldown-home: 10
 
   # --- Safe Teleport Protection ---
   # When enabled, teleportation is blocked if the destination is unsafe.
@@ -61,6 +63,7 @@ teleport:
   safe-teleport-warp: true
   safe-teleport-spawn: true
   safe-teleport-home: true
+  safe-teleport-back: true
 
 # ==========================================
 # Clickable Commands
@@ -97,6 +100,44 @@ trade:
 homes:
   # Maximum number of homes per player.
   max-homes: 5
+
+# ==========================================
+# Warning System
+# Configurable punishments per warning level.
+# Supported actions: ChatMessage, Kick, TempBan <duration>, Ban, ChatMute, ChatTempMute <duration>, NoPunishment
+# Duration examples: 5m, 1h, 1d, 7d, 30d, 365d
+# ==========================================
+warns:
+  punishments:
+    1: "ChatMessage"
+    2: "Kick"
+    3: "TempBan 5m"
+    4: "TempBan 1d"
+    5: "TempBan 30d"
+    6: "TempBan 365d"
+    7: "Ban"
+  # Text shown to players in warnings/bans about where to appeal.
+  # Defaults to the value of discord-link if not set.
+  appeal-source: ""
+
+# ==========================================
+# Default Reasons
+# Default punishment reasons when no reason is specified.
+# ==========================================
+default-reasons:
+  ban: "Banned by an operator"
+  tempban: "Temporarily banned"
+  kick: "Kicked by an operator"
+  mute: "Muted by an operator"
+  tempmute: "Temporarily muted"
+
+# ==========================================
+# Discord Webhook Logging
+# Configure with /setlogswebhook <url>
+# ==========================================
+discord-webhook:
+  enabled: true
+  url: ""
 
 # ==========================================
 # Tab List Customization
@@ -170,6 +211,9 @@ command-settings:
     enabled: true
     permission: "justplugin.setspawn"
   tpsafecheck:
+    enabled: true
+    permission: "justplugin.tppos"
+  tpunsafeconfirm:
     enabled: true
     permission: "justplugin.tppos"
 
@@ -258,6 +302,24 @@ command-settings:
   echestsee:
     enabled: true
     permission: "justplugin.echestsee"
+  mute:
+    enabled: true
+    permission: "justplugin.mute"
+  tempmute:
+    enabled: true
+    permission: "justplugin.tempmute"
+  unmute:
+    enabled: true
+    permission: "justplugin.unmute"
+  warn:
+    enabled: true
+    permission: "justplugin.warn"
+  kick:
+    enabled: true
+    permission: "justplugin.kick"
+  setlogswebhook:
+    enabled: true
+    permission: "justplugin.setlogswebhook"
 
   # --- Player ---
   fly:

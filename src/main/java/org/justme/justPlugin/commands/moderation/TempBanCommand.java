@@ -38,7 +38,7 @@ public class TempBanCommand implements TabExecutor {
             return true;
         }
 
-        String reason = args.length >= 3 ? String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length)) : "Temporarily banned";
+        String reason = args.length >= 3 ? String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length)) : plugin.getConfig().getString("default-reasons.tempban", "Temporarily banned");
 
         UUID uuid;
         String name;

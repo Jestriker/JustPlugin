@@ -1,5 +1,7 @@
 package org.justme.justPlugin.commands.info;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -10,8 +12,8 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class PlayerListCommand implements TabExecutor {
 
     private final JustPlugin plugin;
@@ -36,13 +38,15 @@ public class PlayerListCommand implements TabExecutor {
 
         // Gather visible players
         List<Player> allPlayers = new ArrayList<>();
+        boolean canSeeVanished = sender instanceof Player sp && sp.hasPermission("justplugin.vanish.see");
+        boolean canSeeHidden = sender instanceof Player sp2 && sp2.hasPermission("justplugin.playerlist.seeHiddenPlayers");
         for (Player p : Bukkit.getOnlinePlayers()) {
             // Hide vanished from non-permitted
-            if (plugin.getVanishManager().isVanished(p.getUniqueId()) && !(sender instanceof Player sp && sp.hasPermission("justplugin.vanish.see"))) {
+            if (plugin.getVanishManager().isVanished(p.getUniqueId()) && !canSeeVanished) {
                 continue;
             }
             // Hide playerlist-hidden from non-permitted
-            if (plugin.getVanishManager().isPlayerListHidden(p.getUniqueId()) && !(sender instanceof Player sp && sp.hasPermission("justplugin.playerlist.hide"))) {
+            if (plugin.getVanishManager().isPlayerListHidden(p.getUniqueId()) && !canSeeHidden) {
                 continue;
             }
             allPlayers.add(p);
@@ -76,6 +80,7 @@ public class PlayerListCommand implements TabExecutor {
                 boolean isStaff = p.hasPermission("justplugin.staff");
                 boolean isVanished = plugin.getVanishManager().isVanished(p.getUniqueId());
                 boolean isSuperVanished = plugin.getVanishManager().isSuperVanished(p.getUniqueId());
+                boolean isListHidden = plugin.getVanishManager().isPlayerListHidden(p.getUniqueId());
                 String world = p.getWorld().getName();
 
                 StringBuilder entry = new StringBuilder();
@@ -84,14 +89,24 @@ public class PlayerListCommand implements TabExecutor {
                 }
                 entry.append("<yellow>").append(p.getName()).append("</yellow>");
                 entry.append(" <dark_gray>- <gray>").append(world);
-                if (isVanished && sender.hasPermission("justplugin.vanish.see")) {
+                if (isVanished && canSeeVanished) {
                     if (isSuperVanished) {
                         entry.append(" <dark_gray>[<dark_purple>SV</dark_purple>]");
                     } else {
                         entry.append(" <dark_gray>[<gray>V</gray>]");
                     }
                 }
-                sender.sendMessage(CC.line(entry.toString()));
+
+                if (isListHidden && canSeeHidden) {
+                    // Show hidden indicator with hover text
+                    Component entryComponent = CC.translate(" <dark_gray>></dark_gray> <gray>" + entry);
+                    Component hiddenTag = CC.translate(" <dark_gray>[<red>Hidden</red>]")
+                            .hoverEvent(HoverEvent.showText(CC.translate(
+                                    "<gray>This player used <yellow>/playerlisthide</yellow> to hide themselves.\n<gray>Players without <yellow>justplugin.playerlist.seeHiddenPlayers</yellow>\n<gray>cannot see this entry.")));
+                    sender.sendMessage(entryComponent.append(hiddenTag));
+                } else {
+                    sender.sendMessage(CC.line(entry.toString()));
+                }
             }
         }
 

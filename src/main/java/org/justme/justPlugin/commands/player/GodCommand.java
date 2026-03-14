@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class GodCommand implements TabExecutor {
 
     private final JustPlugin plugin;

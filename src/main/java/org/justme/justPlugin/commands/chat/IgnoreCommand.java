@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class IgnoreCommand implements TabExecutor {
 
     private static final List<String> SUBCOMMANDS = List.of("add", "remove", "list", "clearlist");

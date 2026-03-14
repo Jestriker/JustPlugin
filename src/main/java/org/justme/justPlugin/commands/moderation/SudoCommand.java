@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class SudoCommand implements TabExecutor {
 
     private final JustPlugin plugin;

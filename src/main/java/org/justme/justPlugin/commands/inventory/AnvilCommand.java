@@ -9,6 +9,7 @@ import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
+@SuppressWarnings("NullableProblems")
 public class AnvilCommand implements TabExecutor {
 
     @Override

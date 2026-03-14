@@ -14,6 +14,7 @@ import org.justme.justPlugin.util.CC;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("NullableProblems")
 public class KillCommand implements TabExecutor {
 
     private final JustPlugin plugin;

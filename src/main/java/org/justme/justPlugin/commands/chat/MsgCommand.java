@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class MsgCommand implements TabExecutor {
 
     private final JustPlugin plugin;
@@ -29,6 +30,12 @@ public class MsgCommand implements TabExecutor {
         }
         if (args.length < 2) {
             player.sendMessage(CC.error("Usage: /msg <player> <message>"));
+            return true;
+        }
+
+        // Mute check
+        if (plugin.getMuteManager().isMuted(player.getUniqueId())) {
+            player.sendMessage(CC.error("You are muted and cannot send private messages."));
             return true;
         }
         Player target = Bukkit.getPlayer(args[0]);

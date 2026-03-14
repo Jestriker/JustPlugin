@@ -17,6 +17,8 @@ import org.justme.justPlugin.commands.team.*;
 import org.justme.justPlugin.commands.teleport.*;
 import org.justme.justPlugin.commands.warp.*;
 import org.justme.justPlugin.commands.world.*;
+import org.justme.justPlugin.api.JustPluginAPIImpl;
+import org.justme.justPlugin.api.JustPluginProvider;
 import org.justme.justPlugin.listeners.PlayerListener;
 import org.justme.justPlugin.managers.*;
 import org.justme.justPlugin.util.CC;
@@ -38,9 +40,11 @@ public final class JustPlugin extends JavaPlugin {
     private TradeManager tradeManager;
     private CooldownManager cooldownManager;
     private LogManager logManager;
+    private MuteManager muteManager;
+    private WarnManager warnManager;
+    private WebhookManager webhookManager;
     private PlayerListener playerListener;
     private TabCommand tabCommand;
-    private int registeredCommands = 0;
 
     @Override
     public void onEnable() {
@@ -65,6 +69,9 @@ public final class JustPlugin extends JavaPlugin {
         playerStateManager = new PlayerStateManager(this);
         tradeManager = new TradeManager(this);
         cooldownManager = new CooldownManager(this);
+        muteManager = new MuteManager(this);
+        warnManager = new WarnManager(this);
+        webhookManager = new WebhookManager(this);
 
         // Register listeners
         playerListener = new PlayerListener(this);
@@ -78,12 +85,21 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("tab", tabCommand);
         Bukkit.getScheduler().runTaskTimer(this, () -> tabCommand.applyTabToAll(), 20L * 5, 20L * 30);
 
+        // Initialize API for external plugins
+        JustPluginProvider.set(new JustPluginAPIImpl(this));
+
+        // Check dependency warnings
+        checkDependencies();
+
         long elapsed = System.currentTimeMillis() - startTime;
         printBanner(elapsed);
     }
 
     @Override
     public void onDisable() {
+        // Clear API
+        JustPluginProvider.clear();
+
         // Save all player states before shutdown
         if (playerStateManager != null) {
             playerStateManager.saveAll();
@@ -121,6 +137,19 @@ public final class JustPlugin extends JavaPlugin {
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Economy system loaded"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Team system loaded"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Warp system loaded <dark_gray>(" + warpManager.getWarpNames().size() + " warps)"));
+        console.sendMessage(CC.translate("                        <green>✔</green> <gray> Punishment system loaded <dark_gray>(bans, mutes, warns)"));
+        if (webhookManager.isEnabled()) {
+            String url = webhookManager.getWebhookUrl();
+            if (url != null && !url.isEmpty()) {
+                console.sendMessage(CC.translate("                        <green>✔</green> <gray> Discord webhook logging <green>active</green>"));
+            } else {
+                console.sendMessage(CC.translate("                        <yellow> ○</yellow> <gray> Discord webhook logging <yellow>not set up yet</yellow>"));
+                console.sendMessage(CC.translate("                          <dark_gray>Use <yellow>/setlogswebhook <url></yellow> to configure it."));
+            }
+        } else {
+            console.sendMessage(CC.translate("                        <red>✘</red> <dark_gray> Discord webhook logging <red>disabled</red> <dark_gray>(enable in config)"));
+        }
+        console.sendMessage(CC.translate("                        <green>✔</green> <gray> API ecosystem loaded"));
         console.sendMessage(net.kyori.adventure.text.Component.empty());
         console.sendMessage(CC.translate("  <gradient:#00aaff:#00ffaa>Successfully enabled.</gradient> <gray>(took " + loadTimeMs + "ms)"));
         console.sendMessage(net.kyori.adventure.text.Component.empty());
@@ -139,6 +168,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("spawn", new SpawnCommand(this));
         registerCmd("setspawn", new SetSpawnCommand(this));
         registerCmd("tpsafecheck", new TpSafeCheckCommand(this));
+        registerCmd("tpunsafeconfirm", new TpUnsafeConfirmCommand(this));
 
         // Warps
         registerCmd("warp", new WarpCommand(this));
@@ -173,6 +203,12 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("sudo", new SudoCommand(this));
         registerCmd("invsee", new InvseeCommand(this));
         registerCmd("echestsee", new EchestSeeCommand(this));
+        registerCmd("mute", new MuteCommand(this));
+        registerCmd("tempmute", new TempMuteCommand(this));
+        registerCmd("unmute", new UnmuteCommand(this));
+        registerCmd("warn", new WarnCommand(this));
+        registerCmd("kick", new KickCommand(this));
+        registerCmd("setlogswebhook", new SetLogsWebhookCommand(this));
 
         // Player
         registerCmd("fly", new FlyCommand(this));
@@ -288,11 +324,41 @@ public final class JustPlugin extends JavaPlugin {
         if (executor instanceof TabCompleter tc) {
             cmd.setTabCompleter(tc);
         }
-        registeredCommands++;
+    }
+
+    // === Dependency Warnings ===
+    private void checkDependencies() {
+        var console = Bukkit.getConsoleSender();
+        boolean anyWarning = false;
+
+        // Pay requires balance
+        if (commandSettings.isEnabled("pay") && !commandSettings.isEnabled("balance")) {
+            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/pay</yellow> <gray>is enabled but <yellow>/balance</yellow> is disabled! Economy features may not work properly."));
+            anyWarning = true;
+        }
+        // Trade requires economy
+        if (commandSettings.isEnabled("trade") && !commandSettings.isEnabled("balance")) {
+            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/trade</yellow> <gray>is enabled but <yellow>/balance</yellow> is disabled! Trade currency features won't work."));
+            anyWarning = true;
+        }
+        // TeamMsg requires team
+        if (commandSettings.isEnabled("teammsg") && !commandSettings.isEnabled("team")) {
+            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/teammsg</yellow> <gray>is enabled but <yellow>/team</yellow> is disabled!"));
+            anyWarning = true;
+        }
+        // Mute blocking /msg requires msg to be enabled
+        if (commandSettings.isEnabled("mute") && !commandSettings.isEnabled("msg")) {
+            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/mute</yellow> <gray>is enabled but <yellow>/msg</yellow> is disabled. Muted players won't be blocked from DMs."));
+            anyWarning = true;
+        }
+        if (anyWarning) {
+            console.sendMessage(CC.translate("  <gray>These are recommendations only — the plugin will still work."));
+        }
     }
 
     // === Getters ===
     public DataManager getDataManager() { return dataManager; }
+    @SuppressWarnings("unused") // Public API for external plugins
     public CommandSettings getCommandSettings() { return commandSettings; }
     public EconomyManager getEconomyManager() { return economyManager; }
     public WarpManager getWarpManager() { return warpManager; }
@@ -307,5 +373,8 @@ public final class JustPlugin extends JavaPlugin {
     public TradeManager getTradeManager() { return tradeManager; }
     public CooldownManager getCooldownManager() { return cooldownManager; }
     public LogManager getLogManager() { return logManager; }
+    public MuteManager getMuteManager() { return muteManager; }
+    public WarnManager getWarnManager() { return warnManager; }
+    public WebhookManager getWebhookManager() { return webhookManager; }
     public PlayerListener getPlayerListener() { return playerListener; }
 }

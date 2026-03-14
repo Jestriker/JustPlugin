@@ -15,6 +15,7 @@ import org.justme.justPlugin.util.CC;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("NullableProblems")
 public class ShareCoordsCommand implements TabExecutor {
 
     private final JustPlugin plugin;

@@ -11,6 +11,7 @@ import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
+@SuppressWarnings("NullableProblems")
 public class TprCommand implements TabExecutor {
 
     private final JustPlugin plugin;

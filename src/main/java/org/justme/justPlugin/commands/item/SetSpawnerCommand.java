@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class SetSpawnerCommand implements TabExecutor {
 
     private final JustPlugin plugin;

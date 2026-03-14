@@ -14,6 +14,7 @@ import org.justme.justPlugin.util.TimeUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class TempBanIpCommand implements TabExecutor {
 
     private final JustPlugin plugin;
@@ -36,7 +37,7 @@ public class TempBanIpCommand implements TabExecutor {
             return true;
         }
 
-        String reason = args.length >= 3 ? String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length)) : "Temporarily IP banned";
+        String reason = args.length >= 3 ? String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length)) : plugin.getConfig().getString("default-reasons.tempban", "Temporarily IP banned");
         String ip = args[0];
         String resolvedFrom = null;
 
@@ -47,7 +48,6 @@ public class TempBanIpCommand implements TabExecutor {
                 ip = target.getAddress().getAddress().getHostAddress();
                 resolvedFrom = target.getName();
             } else {
-                @SuppressWarnings("deprecation")
                 OfflinePlayer offP = Bukkit.getOfflinePlayer(args[0]);
                 String lastIp = plugin.getBanManager().getLastIp(offP.getUniqueId());
                 if (lastIp != null) {

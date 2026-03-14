@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("NullableProblems")
 public class WarpListCommand implements TabExecutor {
 
     private final JustPlugin plugin;

@@ -14,6 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -27,8 +28,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.ChatManager;
+import org.justme.justPlugin.managers.MuteManager;
 import org.justme.justPlugin.managers.TeleportManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.TimeUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -149,6 +152,17 @@ public class PlayerListener implements Listener {
         // Persist immediately
         saveBackLocation(player.getUniqueId());
         saveDeathLocation(player.getUniqueId());
+    }
+
+    // --- Advancement hiding for vanished/super-vanished players ---
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onAdvancement(PlayerAdvancementDoneEvent event) {
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+        // If vanished or super-vanished, suppress the advancement broadcast message
+        if (plugin.getVanishManager().isVanished(uuid) || plugin.getVanishManager().isSuperVanished(uuid)) {
+            event.message(null);
+        }
     }
 
     @EventHandler
@@ -284,9 +298,26 @@ public class PlayerListener implements Listener {
                 || type == org.bukkit.potion.PotionEffectType.INSTANT_DAMAGE;
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
+
+        // --- Mute check ---
+        if (plugin.getMuteManager().isMuted(player.getUniqueId())) {
+            event.setCancelled(true);
+            MuteManager.MuteEntry muteEntry = plugin.getMuteManager().getMuteEntry(player.getUniqueId());
+            if (muteEntry != null) {
+                player.sendMessage(CC.error("You are muted!"));
+                player.sendMessage(CC.line("Reason: <white>" + muteEntry.reason));
+                if (muteEntry.expires != -1L) {
+                    long remaining = muteEntry.getRemainingMs();
+                    player.sendMessage(CC.line("Remaining: <yellow>" + TimeUtil.formatDuration(remaining)));
+                } else {
+                    player.sendMessage(CC.line("Duration: <red>Permanent"));
+                }
+            }
+            return;
+        }
 
         ChatManager.ChatMode mode = plugin.getChatManager().getChatMode(player.getUniqueId());
 

@@ -12,6 +12,7 @@ import org.justme.justPlugin.util.CC;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("NullableProblems")
 public class ReplyCommand implements TabExecutor {
 
     private final JustPlugin plugin;
@@ -28,6 +29,12 @@ public class ReplyCommand implements TabExecutor {
         }
         if (args.length < 1) {
             player.sendMessage(CC.error("Usage: /r <message>"));
+            return true;
+        }
+
+        // Mute check
+        if (plugin.getMuteManager().isMuted(player.getUniqueId())) {
+            player.sendMessage(CC.error("You are muted and cannot send private messages."));
             return true;
         }
         UUID lastUuid = plugin.getChatManager().getLastMessaged(player.getUniqueId());

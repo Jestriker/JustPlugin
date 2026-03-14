@@ -18,6 +18,7 @@ import java.util.List;
  * Checks the target's current (live) location safety before teleporting.
  * If unsafe, warns the staff member and offers god/creative mode.
  */
+@SuppressWarnings("NullableProblems")
 public class TpSafeCheckCommand implements TabExecutor {
 
     private final JustPlugin plugin;
@@ -49,18 +50,27 @@ public class TpSafeCheckCommand implements TabExecutor {
         boolean destFlying = target.isFlying();
 
         if (!safe || destFlying) {
-            // Destination is unsafe — warn staff, offer god/creative
+            // Destination is unsafe — warn, offer options based on permissions
             player.sendMessage(CC.warning("⚠ <yellow>" + target.getName() + "</yellow>'s current location is unsafe!"));
             if (destFlying) {
                 player.sendMessage(CC.line("<gray>The player is currently flying."));
             }
 
-            Component buttons = CC.translate("  ")
-                    .append(CC.translate("<click:run_command:'/gmc'><hover:show_text:'<gray>Click to switch to <green>Creative Mode'><gold><bold>[Creative Mode]</bold></gold></hover></click>"))
-                    .append(CC.translate(" "))
-                    .append(CC.translate("<click:run_command:'/god'><hover:show_text:'<gray>Click to enable <green>God Mode'><gold><bold>[God Mode]</bold></gold></hover></click>"))
-                    .append(CC.translate(" "))
-                    .append(CC.translate("<click:run_command:'/tp " + target.getName() + "'><hover:show_text:'<gray>Click to teleport anyway'><red><bold>[TP Anyway]</bold></red></hover></click>"));
+            boolean hasGm = player.hasPermission("justplugin.gamemode");
+            boolean hasGod = player.hasPermission("justplugin.god");
+
+            if (hasGm || hasGod) {
+                player.sendMessage(CC.info("Consider enabling protection before teleporting:"));
+            }
+
+            Component buttons = CC.translate("  ");
+            if (hasGm) {
+                buttons = buttons.append(CC.translate("<click:run_command:'/gmc'><hover:show_text:'<gray>Click to switch to <green>Creative Mode'><gold><bold>[Creative Mode]</bold></gold></hover></click> "));
+            }
+            if (hasGod) {
+                buttons = buttons.append(CC.translate("<click:run_command:'/god'><hover:show_text:'<gray>Click to enable <green>God Mode'><gold><bold>[God Mode]</bold></gold></hover></click> "));
+            }
+            buttons = buttons.append(CC.translate("<click:run_command:'/tp " + target.getName() + "'><hover:show_text:'<gray>Click to teleport anyway'><red><bold>[TP Anyway]</bold></red></hover></click>"));
             player.sendMessage(buttons);
         } else {
             // Safe — teleport directly
