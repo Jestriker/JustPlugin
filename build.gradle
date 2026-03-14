@@ -84,9 +84,15 @@ tasks.register('obfuscate', proguard.gradle.ProGuardTask) {
     libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
     libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
     libraryjars "${System.getProperty('java.home')}/jmods/java.sql.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+    libraryjars "${System.getProperty('java.home')}/jmods/java.net.http.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
 
     // Keep the main plugin class (referenced in plugin.yml)
     keep 'public class org.justme.justPlugin.JustPlugin extends org.bukkit.plugin.java.JavaPlugin { *; }'
+
+    // Keep the entire public API package so external/add-on plugins can use it
+    keep 'public interface org.justme.justPlugin.api.** { *; }'
+    keep 'public class org.justme.justPlugin.api.JustPluginProvider { *; }'
+    keep 'public class org.justme.justPlugin.api.JustPluginAPIImpl { *; }'
 
     // Keep all public/protected methods in classes extending Bukkit types
     keep 'class * extends org.bukkit.event.Listener { @org.bukkit.event.EventHandler *; }'
