@@ -3,6 +3,8 @@ package org.justme.justPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.justme.justPlugin.commands.chat.*;
 import org.justme.justPlugin.commands.economy.*;
@@ -20,8 +22,12 @@ import org.justme.justPlugin.commands.world.*;
 import org.justme.justPlugin.api.JustPluginAPIImpl;
 import org.justme.justPlugin.api.JustPluginProvider;
 import org.justme.justPlugin.listeners.PlayerListener;
+import org.justme.justPlugin.listeners.VanillaCommandLogger;
 import org.justme.justPlugin.managers.*;
 import org.justme.justPlugin.util.CC;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public final class JustPlugin extends JavaPlugin {
 
@@ -43,8 +49,11 @@ public final class JustPlugin extends JavaPlugin {
     private MuteManager muteManager;
     private WarnManager warnManager;
     private WebhookManager webhookManager;
+    private DeathInventoryManager deathInventoryManager;
+    private EntityClearManager entityClearManager;
     private PlayerListener playerListener;
     private TabCommand tabCommand;
+    private WebEditorManager webEditorManager;
 
     @Override
     public void onEnable() {
@@ -52,6 +61,9 @@ public final class JustPlugin extends JavaPlugin {
 
         // Save default config
         saveDefaultConfig();
+
+        // Migrate config - add any missing keys from the default config while preserving existing values
+        migrateConfig();
 
         // Initialize managers
         dataManager = new DataManager(this);
@@ -72,10 +84,16 @@ public final class JustPlugin extends JavaPlugin {
         muteManager = new MuteManager(this);
         warnManager = new WarnManager(this);
         webhookManager = new WebhookManager(this);
+        deathInventoryManager = new DeathInventoryManager(this);
+        entityClearManager = new EntityClearManager(this);
+        entityClearManager.start();
+        webEditorManager = new WebEditorManager(this);
+        webEditorManager.start();
 
         // Register listeners
         playerListener = new PlayerListener(this);
         Bukkit.getPluginManager().registerEvents(playerListener, this);
+        Bukkit.getPluginManager().registerEvents(new VanillaCommandLogger(this), this);
 
         // Register commands
         registerCommands();
@@ -99,6 +117,11 @@ public final class JustPlugin extends JavaPlugin {
     public void onDisable() {
         // Clear API
         JustPluginProvider.clear();
+
+        // Stop web editor
+        if (webEditorManager != null) {
+            webEditorManager.stop();
+        }
 
         // Save all player states before shutdown
         if (playerStateManager != null) {
@@ -150,6 +173,13 @@ public final class JustPlugin extends JavaPlugin {
             console.sendMessage(CC.translate("                        <red>✘</red> <dark_gray> Discord webhook logging <red>disabled</red> <dark_gray>(enable in config)"));
         }
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> API ecosystem loaded"));
+        if (webEditorManager != null && webEditorManager.isRunning()) {
+            console.sendMessage(CC.translate("                        <green>✔</green> <gray> Web editor <green>active</green> <dark_gray>(port " + webEditorManager.getPort() + ")"));
+        } else if (getConfig().getBoolean("web-editor.enabled", false)) {
+            console.sendMessage(CC.translate("                        <red>✘</red> <gray> Web editor <red>failed to start</red>"));
+        } else {
+            console.sendMessage(CC.translate("                        <dark_gray>○</dark_gray> <dark_gray> Web editor <gray>disabled</gray> <dark_gray>(enable in config: web-editor.enabled)"));
+        }
         console.sendMessage(net.kyori.adventure.text.Component.empty());
         console.sendMessage(CC.translate("  <gradient:#00aaff:#00ffaa>Successfully enabled.</gradient> <gray>(took " + loadTimeMs + "ms)"));
         console.sendMessage(net.kyori.adventure.text.Component.empty());
@@ -209,6 +239,9 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("warn", new WarnCommand(this));
         registerCmd("kick", new KickCommand(this));
         registerCmd("setlogswebhook", new SetLogsWebhookCommand(this));
+        registerCmd("deathitems", new DeathItemsCommand(this));
+        registerCmd("oplist", new OpListCommand(this));
+        registerCmd("banlist", new BanListCommand(this));
 
         // Player
         registerCmd("fly", new FlyCommand(this));
@@ -276,6 +309,9 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("time", new TimeCommand(this));
         registerCmd("freezegame", new FreezeGameCommand(this));
         registerCmd("unfreezegame", new UnfreezeGameCommand(this));
+        registerCmd("clearentities", new ClearEntitiesCommand(this));
+        registerCmd("friendlyfire", new FriendlyFireCommand(this));
+        registerCmd("clearchat", new ClearChatCommand(this));
 
         // Teams
         registerCmd("team", new TeamCommand(this));
@@ -283,6 +319,7 @@ public final class JustPlugin extends JavaPlugin {
         // Misc
         registerCmd("trade", new TradeCommand(this));
         registerCmd("discord", new DiscordCommand(this));
+        registerCmd("applyedits", new ApplyEditsCommand(this));
 
         // Overrides (replace vanilla commands)
         registerCmd("help", new HelpCommand(this));
@@ -323,6 +360,39 @@ public final class JustPlugin extends JavaPlugin {
         cmd.setExecutor(wrapped);
         if (executor instanceof TabCompleter tc) {
             cmd.setTabCompleter(tc);
+        }
+    }
+
+    // === Config Migration ===
+    /**
+     * Merges any missing keys from the default config (inside the JAR) into the
+     * server's existing config.yml, preserving all current values.
+     * This ensures that upgrading the plugin version automatically adds new settings
+     * without wiping existing configuration.
+     */
+    private void migrateConfig() {
+        InputStream defaultStream = getResource("config.yml");
+        if (defaultStream == null) return;
+
+        YamlConfiguration defaults = YamlConfiguration.loadConfiguration(new InputStreamReader(defaultStream));
+        boolean changed = false;
+        int added = 0;
+
+        for (String key : defaults.getKeys(true)) {
+            // Only add leaf keys (actual values, not section headers)
+            if (defaults.isConfigurationSection(key)) continue;
+
+            if (!getConfig().contains(key, true)) {
+                getConfig().set(key, defaults.get(key));
+                changed = true;
+                added++;
+                getLogger().info("[Config Migration] Added missing key: " + key);
+            }
+        }
+
+        if (changed) {
+            saveConfig();
+            getLogger().info("[Config Migration] Added " + added + " new config key(s). Existing settings preserved.");
         }
     }
 
@@ -376,5 +446,8 @@ public final class JustPlugin extends JavaPlugin {
     public MuteManager getMuteManager() { return muteManager; }
     public WarnManager getWarnManager() { return warnManager; }
     public WebhookManager getWebhookManager() { return webhookManager; }
+    public DeathInventoryManager getDeathInventoryManager() { return deathInventoryManager; }
+    public EntityClearManager getEntityClearManager() { return entityClearManager; }
+    public WebEditorManager getWebEditorManager() { return webEditorManager; }
     public PlayerListener getPlayerListener() { return playerListener; }
 }

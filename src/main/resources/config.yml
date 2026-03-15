@@ -132,12 +132,82 @@ default-reasons:
   tempmute: "Temporarily muted"
 
 # ==========================================
+# Web Editor
+# Self-hosted config editor accessible via a web browser.
+# When enabled, the plugin runs a lightweight HTTP server that serves
+# a beautiful config editing page. Changes made in the editor are staged
+# and require running /applyedits <code> in-game (highest permission).
+#
+# SECURITY NOTE: The web editor has no authentication - anyone who can
+# reach the port can view and propose config changes. However, changes
+# are NEVER applied automatically; they require an in-game command by
+# a player with justplugin.applyedits permission. For public servers,
+# bind to localhost and use a reverse proxy with authentication.
+# ==========================================
+web-editor:
+  # Enable or disable the web editor server.
+  enabled: false
+  # Port the web editor listens on.
+  port: 8585
+  # Bind address. Use "0.0.0.0" for all interfaces, "127.0.0.1" for localhost only.
+  bind-address: "0.0.0.0"
+
+# ==========================================
 # Discord Webhook Logging
 # Configure with /setlogswebhook <url>
 # ==========================================
 discord-webhook:
   enabled: true
   url: ""
+
+# ==========================================
+# Vanilla Command Logging
+# Logs specified vanilla Minecraft commands to staff chat and Discord webhook.
+# Players see these logs with the justplugin.log.vanilla permission.
+# Console always sees them. Disable by setting enabled to false.
+# The commands list below can be customized - add or remove command names.
+# ==========================================
+vanilla-command-log:
+  enabled: true
+  # Commands to log. Add/remove as needed. Do not include the leading slash.
+  commands:
+    - op
+    - deop
+    - stop
+    - restart
+    - reload
+    - kick
+    - ban
+    - ban-ip
+    - pardon
+    - pardon-ip
+    - banlist
+    - whitelist
+    - give
+    - item
+    - gamemode
+    - xp
+    - experience
+    - tp
+    - teleport
+    - summon
+    - kill
+    - gamerule
+    - time
+    - weather
+    - setworldspawn
+    - setblock
+    - fill
+    - fillbiome
+    - clearspawnpoint
+    - setmaxplayers
+    - seed
+    - tick
+    - say
+    - locate
+    - advancement
+    - execute
+    - ops
 
 # ==========================================
 # Tab List Customization
@@ -320,6 +390,15 @@ command-settings:
   setlogswebhook:
     enabled: true
     permission: "justplugin.setlogswebhook"
+  deathitems:
+    enabled: true
+    permission: "justplugin.deathitems"
+  oplist:
+    enabled: true
+    permission: "justplugin.oplist"
+  banlist:
+    enabled: true
+    permission: "justplugin.banlist"
 
   # --- Player ---
   fly:
@@ -474,6 +553,15 @@ command-settings:
   unfreezegame:
     enabled: true
     permission: "justplugin.unfreezegame"
+  clearentities:
+    enabled: true
+    permission: "justplugin.clearentities"
+  friendlyfire:
+    enabled: true
+    permission: "justplugin.friendlyfire"
+  clearchat:
+    enabled: true
+    permission: "justplugin.clearchat"
 
   # --- Teams ---
   team:
@@ -487,6 +575,9 @@ command-settings:
   discord:
     enabled: true
     permission: ""
+  applyedits:
+    enabled: true
+    permission: "justplugin.applyedits"
   tab:
     enabled: true
     permission: "justplugin.tab"

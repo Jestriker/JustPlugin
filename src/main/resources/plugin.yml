@@ -512,6 +512,11 @@ commands:
     description: Show the Discord link
     usage: /discord
     aliases: [dc]
+  applyedits:
+    description: Apply pending config changes from the web editor
+    usage: /applyedits <code>
+    permission: justplugin.applyedits
+    aliases: [configapply, webapply]
   tab:
     description: Refresh tab list
     usage: /tab
@@ -630,6 +635,7 @@ permissions:
       justplugin.log.player: true
       justplugin.log.admin: true
       justplugin.log.item: true
+      justplugin.log.vanilla: true
       justplugin.motd.set: true
       justplugin.itemname: true
       justplugin.shareitem: true
@@ -653,6 +659,7 @@ permissions:
       justplugin.deathitems.others: true
       justplugin.oplist: true
       justplugin.banlist: true
+      justplugin.applyedits: true
       justplugin.announce.ban: true
       justplugin.announce.banip: true
       justplugin.announce.tempban: true
@@ -873,6 +880,10 @@ permissions:
     default: op
   justplugin.setlogswebhook:
     description: Configure Discord webhook logging
+    default: op
+
+  justplugin.applyedits:
+    description: Apply config changes from the web editor (highest-level permission)
     default: op
 
   # --- New Features ---

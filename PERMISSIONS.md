@@ -1,6 +1,6 @@
 # 🔐 JustPlugin — Permissions Reference
 
-> **Version:** 1.0.1  
+> **Version:** 1.1  
 > **Author:** JustMe  
 > **Last Updated:** March 15, 2026
 
@@ -134,6 +134,7 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.warn.notify        ← Receive warning notifications
 │   ├── justplugin.kick               ← Kick players
 │   ├── justplugin.setlogswebhook     ← Configure Discord webhook logging
+│   ├── justplugin.applyedits         ← Apply web editor config changes (HIGHEST level)
 │   ├── justplugin.log.warn           ← See warning logs
 │   ├── justplugin.log.mute           ← See mute logs
 │   ├── justplugin.announce           ← Broadcast announcements
@@ -323,6 +324,7 @@ Includes all permissions listed in this document.
 | `justplugin.warn.notify` | Receive notifications about warnings | `op` | `/warn` |
 | `justplugin.kick` | Kick a player from the server | `op` | `/kick` |
 | `justplugin.setlogswebhook` | Configure Discord webhook logging | `op` | `/setlogswebhook` |
+| `justplugin.applyedits` | Apply config changes from the web editor (**highest-level** admin permission) | `op` | `/applyedits` |
 
 ---
 
@@ -436,6 +438,7 @@ Includes all permissions listed in this document.
 |------------|-------------|---------|----------|
 | `justplugin.trade` | Trade items with other players | `true` (player) | `/trade` |
 | `justplugin.discord.set` | Change the Discord link | `op` | `/discord set <link>` |
+| `justplugin.applyedits` | Apply config changes from the web editor (**highest-level**) | `op` | `/applyedits` |
 | `justplugin.tab` | Manually refresh the tab list | `true` (player) | `/tab` |
 
 ---
