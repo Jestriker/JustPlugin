@@ -72,6 +72,18 @@ public class TempBanIpCommand implements TabExecutor {
         } else {
             sender.sendMessage(CC.success("Temporarily IP banned <yellow>" + ip + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>."));
         }
+
+        // Configurable announcement
+        net.kyori.adventure.text.Component announcement = CC.warning("IP <yellow>" + ip + "</yellow> has been temporarily IP banned by <yellow>" + bannedBy + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>.");
+        if (plugin.getConfig().getBoolean("punishment-announcements.tempbanip", false)) {
+            Bukkit.broadcast(announcement);
+        } else {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.hasPermission("justplugin.announce.tempbanip")) {
+                    p.sendMessage(announcement);
+                }
+            }
+        }
         plugin.getLogManager().log("moderation", "<yellow>" + bannedBy + "</yellow> temp-IP-banned <yellow>" + ip + "</yellow>" + (resolvedFrom != null ? " (from <yellow>" + resolvedFrom + "</yellow>)" : "") + " for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>. Reason: <gray>" + reason);
         return true;
     }

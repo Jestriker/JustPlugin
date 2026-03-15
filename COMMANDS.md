@@ -1,8 +1,8 @@
 # 📋 JustPlugin — Command Reference
 
-> **Version:** 1.0-SNAPSHOT  
+> **Version:** 1.0.1  
 > **Author:** JustMe  
-> **Last Updated:** March 14, 2026
+> **Last Updated:** March 15, 2026
 
 ---
 
@@ -130,8 +130,12 @@
 | `/tempmute` | `/tempmute <player> <duration> [reason]` | Temporarily mute a player | `justplugin.tempmute` | `tmute` |
 | `/unmute` | `/unmute <player>` | Unmute a player | `justplugin.unmute` | — |
 | `/warn` | `/warn <add\|remove\|list\|confirm\|cancel> <player> [reason\|index]` | Manage player warnings with auto-punishment | `justplugin.warn` | `warning`, `warnings` |
-| `/kick` | `/kick <player> [reason]` | Kick a player from the server | `justplugin.kick` | — |
+| `/kick` | `/kick <player> [reason]` | Kick a player from the server | `justplugin.kick` | - |
 | `/setlogswebhook` | `/setlogswebhook <url\|disable\|confirm\|cancel\|tryagain>` | Configure Discord webhook for log output | `justplugin.setlogswebhook` | `logwebhook`, `webhooklog` |
+| `/deathitems` | `/deathitems [player]` | View or restore items from a player's last death | `justplugin.deathitems` | `di`, `deathinv` |
+| `/oplist` | `/oplist` | List all server operators | `justplugin.oplist` | `ops`, `operators` |
+| `/banlist` | `/banlist [page]` | View the ban list with pagination | `justplugin.banlist` | `bans` |
+| `/baniplist` | `/baniplist [page]` | View the IP ban list with pagination | `justplugin.banlist` | `ipbans`, `ipbanlist` |
 
 ### Details
 
@@ -156,6 +160,11 @@
   - Supported punishment types: `ChatMessage`, `Kick`, `TempBan <duration>`, `Ban`, `ChatMute`, `ChatTempMute <duration>`, `NoPunishment`.
 - **Kick** disconnects a player with a styled kick screen. Default reason is configurable.
 - **SetLogsWebhook** configures a Discord webhook URL for receiving all plugin logs as Discord embeds. Tests the URL before confirming. Rate-limited retries (10s interval). Color-coded embeds by category (red=moderation, green=economy, etc.).
+- **DeathItems** opens a GUI showing the items the player had when they last died (only if items were dropped, not if keepInventory kept them). `justplugin.deathitems` for self, `justplugin.deathitems.others` for other players. Includes a clickable **[Restore Items]** button to give items back to the player.
+- **OpList** lists all server operators with online/offline status indicators.
+- **BanList** shows all name/UUID bans with reason, banned-by, date, and duration. Paginated (8 per page) with clickable navigation.
+- **BanIPList** shows all IP bans with associated player names, UUIDs, reason, banned-by, date, and duration. Paginated with clickable navigation.
+- **Punishment Announcements:** By default, punishments (bans, kicks, mutes, warns) are NOT broadcast to all players. Only staff with `justplugin.announce.<type>` permissions see the announcement. This is configurable per punishment type in `config.yml` under `punishment-announcements`.
 
 ---
 
@@ -211,6 +220,7 @@
 | `/sharedeathcoords` | `/sharedeathcoords [all \| team]` | Share your last death coordinates in chat (global or team) | `justplugin.sharedeathcoords` | `senddeathcoords` |
 | `/chat` | `/chat <all \| team>` | Switch your chat mode between global and team chat | `justplugin.chat` | — |
 | `/teammsg` | `/teammsg <message>` | Send a one-off message to your team (doesn't change chat mode) | `justplugin.chat` | `tmsg`, `tm` |
+| `/clearchat` | `/clearchat [reason]` | Clear the chat for all online players | `justplugin.clearchat` | `cc`, `chatclear` |
 
 ### Details
 
@@ -221,6 +231,7 @@
 - **Chat modes:** `ALL` (global) or `TEAM` (team members only). Must be in a team to use team chat.
 - **TeamMsg** sends a message to your team directly without changing your current chat mode.
 - **Ignore** blocks: `/msg`, `/r`, `/tpa`, `/tpahere`, `/trade` requests, and global chat messages from the ignored player. The ignored player is notified when they are added/removed. Subcommands: `add <player>` (add to ignore list), `remove <player>` (remove from ignore list, works for offline players too), `list` (view all ignored players with online/offline status), `clearlist` (wipe the entire ignore list).
+- **ClearChat** sends 100 blank lines to every online player, then optionally shows a configurable post-clear message. Logs to staff and webhook with the executor and reason (if provided).
 
 ---
 
@@ -290,14 +301,21 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/weather` | `/weather <sun \| rain \| thunder>` | Set the weather in your current world | `justplugin.weather` | — |
-| `/time` | `/time <set \| add \| query> <value>` | Set, add, or query the world time | `justplugin.time` | — |
+| `/weather` | `/weather <sun \| rain \| thunder>` | Set the weather in your current world | `justplugin.weather` | - |
+| `/time` | `/time <set \| add \| query> <value>` | Set, add, or query the world time | `justplugin.time` | - |
+| `/freezegame` | `/freezegame` | Freeze the game (pause tick processing) | `justplugin.freezegame` | `tf` |
+| `/unfreezegame` | `/unfreezegame` | Unfreeze the game (resume tick processing) | `justplugin.unfreezegame` | `unft` |
+| `/clearentities` | `/clearentities` | Manually clear ground items and mobs | `justplugin.clearentities` | `ce`, `entityclear`, `clearlag` |
+| `/friendlyfire` | `/friendlyfire <enable \| disable>` | Toggle PvP on/off server-wide | `justplugin.friendlyfire` | `ff`, `pvp`, `pvptoggle` |
 
 ### Details
 
 - **Weather** values: `sun`/`clear`, `rain`/`storm`, `thunder`/`thunderstorm`.
 - **Time set** values: `day` (1000), `noon`/`midday` (6000), `sunset`/`dusk` (12000), `night` (13000), `midnight` (18000), `sunrise`/`dawn` (23000), or any tick number.
 - **Time query** shows the current game time with human-readable format and tick count.
+- **FreezeGame/UnfreezeGame** are shortcuts for `/tick freeze` and `/tick unfreeze` with custom plugin-style output.
+- **ClearEntities** manually triggers an entity clear (same as the automatic system). Shows counts of items and mobs removed. Can also be run automatically at a configurable interval (default: 5 minutes) - see `entity-clear` in `config.yml`.
+- **FriendlyFire** sets PvP on or off for all worlds. Shows current status if already set. Logs old and new status to staff/webhook. Configurable public announcement in `config.yml` (disabled by default).
 
 ---
 
@@ -430,4 +448,22 @@ When configured via `/setlogswebhook <url>`, all plugin logs are sent to Discord
 | `item` | 🩵 Teal | Item operations |
 | `warn` | 🟧 Dark Orange | Warning additions/lifts |
 | `mute` | 🟥 Dark Red | Mute/unmute actions |
+
+### Vanilla Command Logging
+
+Vanilla Minecraft commands are also logged to staff chat and the Discord webhook. The default list includes: `/op`, `/deop`, `/give`, `/gamemode`, `/kick`, `/whitelist`, `/stop`, `/restart`, `/tp`, `/teleport`, `/summon`, `/setworldspawn`, `/gamerule`, `/execute`, `/ban`, `/ban-ip`, `/pardon`, `/pardon-ip`, and more. The full list is configurable in `config.yml` under `vanilla-command-log`.
+
+---
+
+## 🧹 Entity Clear System
+
+JustPlugin includes a built-in ClearLag-like system that automatically clears ground items (and optionally mobs) at a configurable interval.
+
+- **Automatic clearing** every 5 minutes (configurable via `entity-clear.interval`)
+- **Warning messages** sent to all players before each clear (configurable timing and message)
+- **Staff notifications** for excessive entities per chunk (mobs, armor stands, item frames)
+- **Manual trigger** via `/clearentities`
+- **Configurable** what to clear: items, hostile mobs, friendly mobs
+- Named entities, tamed animals, and persistent entities are never cleared
+- Enable/disable the entire system in `config.yml`
 

@@ -60,6 +60,18 @@ public class TempBanCommand implements TabExecutor {
 
         plugin.getBanManager().tempBan(uuid, name, reason, bannedBy, duration);
         sender.sendMessage(CC.success("Temporarily banned <yellow>" + name + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>. Reason: <gray>" + reason));
+
+        // Configurable announcement
+        net.kyori.adventure.text.Component announcement = CC.warning("<yellow>" + name + "</yellow> has been temporarily banned by <yellow>" + bannedBy + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>. Reason: <gray>" + reason);
+        if (plugin.getConfig().getBoolean("punishment-announcements.tempban", false)) {
+            Bukkit.broadcast(announcement);
+        } else {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.hasPermission("justplugin.announce.tempban")) {
+                    p.sendMessage(announcement);
+                }
+            }
+        }
         plugin.getLogManager().log("moderation", "<yellow>" + bannedBy + "</yellow> temp-banned <yellow>" + name + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>. Reason: <gray>" + reason);
         return true;
     }

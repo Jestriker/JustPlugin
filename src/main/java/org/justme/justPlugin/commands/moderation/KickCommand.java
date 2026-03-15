@@ -48,7 +48,18 @@ public class KickCommand implements TabExecutor {
         target.kick(CC.translate(screen.toString()));
 
         sender.sendMessage(CC.success("Kicked <yellow>" + target.getName() + "</yellow>. Reason: <gray>" + reason));
-        Bukkit.broadcast(CC.warning("<yellow>" + target.getName() + "</yellow> has been kicked by <yellow>" + kickedBy + "</yellow>. Reason: <gray>" + reason));
+
+        // Configurable announcement
+        net.kyori.adventure.text.Component announcement = CC.warning("<yellow>" + target.getName() + "</yellow> has been kicked by <yellow>" + kickedBy + "</yellow>. Reason: <gray>" + reason);
+        if (plugin.getConfig().getBoolean("punishment-announcements.kick", false)) {
+            Bukkit.broadcast(announcement);
+        } else {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.hasPermission("justplugin.announce.kick")) {
+                    p.sendMessage(announcement);
+                }
+            }
+        }
         plugin.getLogManager().log("moderation", "<yellow>" + kickedBy + "</yellow> kicked <yellow>" + target.getName() + "</yellow>. Reason: <gray>" + reason);
         return true;
     }

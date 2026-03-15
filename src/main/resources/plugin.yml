@@ -215,6 +215,26 @@ commands:
     usage: /setlogswebhook <url | disable | confirm | cancel | tryagain>
     permission: justplugin.setlogswebhook
     aliases: [logwebhook, webhooklog]
+  deathitems:
+    description: View or restore a player's items from their last death
+    usage: /deathitems [player]
+    permission: justplugin.deathitems
+    aliases: [di, deathinv, deathitems]
+  oplist:
+    description: List all server operators
+    usage: /oplist
+    permission: justplugin.oplist
+    aliases: [ops, operators]
+  banlist:
+    description: View the ban list with pagination
+    usage: /banlist [page]
+    permission: justplugin.banlist
+    aliases: [bans]
+  baniplist:
+    description: View the IP ban list with pagination
+    usage: /baniplist [page]
+    permission: justplugin.banlist
+    aliases: [ipbans, ipbanlist]
 
   # === Player ===
   fly:
@@ -343,6 +363,11 @@ commands:
     usage: /teammsg <message>
     permission: justplugin.chat
     aliases: [tmsg, tm]
+  clearchat:
+    description: Clear the chat for all players
+    usage: /clearchat [reason]
+    permission: justplugin.clearchat
+    aliases: [cc, chatclear]
 
   # === Virtual Inventories ===
   anvil:
@@ -461,6 +486,16 @@ commands:
     usage: /unfreezegame
     permission: justplugin.unfreezegame
     aliases: [unft]
+  clearentities:
+    description: Manually clear ground items and mobs
+    usage: /clearentities
+    permission: justplugin.clearentities
+    aliases: [ce, entityclear, clearlag]
+  friendlyfire:
+    description: Toggle PvP on or off server-wide
+    usage: /friendlyfire <enable | disable>
+    permission: justplugin.friendlyfire
+    aliases: [ff, pvp, pvptoggle]
 
   # === Teams ===
   team:
@@ -487,6 +522,9 @@ commands:
     description: Show plugin help
     usage: /help [page]
     aliases: [?]
+  "?":
+    description: Show plugin help (alias for /help)
+    usage: /? [page]
   plugins:
     description: Show installed plugins
     usage: /plugins
@@ -608,6 +646,21 @@ permissions:
       justplugin.freezegame: true
       justplugin.unfreezegame: true
       justplugin.baltophide: true
+      justplugin.clearentities: true
+      justplugin.clearchat: true
+      justplugin.friendlyfire: true
+      justplugin.deathitems: true
+      justplugin.deathitems.others: true
+      justplugin.oplist: true
+      justplugin.banlist: true
+      justplugin.announce.ban: true
+      justplugin.announce.banip: true
+      justplugin.announce.tempban: true
+      justplugin.announce.tempbanip: true
+      justplugin.announce.mute: true
+      justplugin.announce.tempmute: true
+      justplugin.announce.warn: true
+      justplugin.announce.kick: true
       justplugin.tpa.cooldownbypass: true
       justplugin.tpahere.cooldownbypass: true
       justplugin.home.cooldownbypass: true
@@ -651,6 +704,8 @@ permissions:
       justplugin.tab: true
       justplugin.tpahere: true
       justplugin.wild: true
+      justplugin.playerlist: true
+      justplugin.deathitems: true
 
   # --- Cooldown bypass permissions ---
   # These are NOT included in justplugin.* so even OPs have cooldowns.
@@ -787,9 +842,6 @@ permissions:
   justplugin.supervanish:
     description: Toggle super vanish mode
     default: op
-  justplugin.playerlist:
-    description: View the advanced player list
-    default: op
   justplugin.playerlist.hide:
     description: Hide yourself from the player list
     default: op
@@ -821,5 +873,60 @@ permissions:
     default: op
   justplugin.setlogswebhook:
     description: Configure Discord webhook logging
+    default: op
+
+  # --- New Features ---
+  justplugin.deathitems:
+    description: View and restore your own death items
+    default: true
+  justplugin.deathitems.others:
+    description: View and restore other players' death items
+    default: op
+    children:
+      justplugin.deathitems: true
+  justplugin.oplist:
+    description: View the list of server operators
+    default: op
+  justplugin.banlist:
+    description: View ban and IP ban lists
+    default: op
+  justplugin.clearentities:
+    description: Manually trigger entity clearing
+    default: op
+  justplugin.clearchat:
+    description: Clear the server chat
+    default: op
+  justplugin.friendlyfire:
+    description: Toggle PvP on/off server-wide
+    default: op
+  justplugin.playerlist:
+    description: View the advanced player list
+    default: true
+
+  # --- Punishment Announcement Permissions ---
+  # Staff with these permissions see punishment announcements even when public announcements are disabled.
+  justplugin.announce.ban:
+    description: See ban announcements (when public announcements are disabled)
+    default: op
+  justplugin.announce.banip:
+    description: See IP ban announcements
+    default: op
+  justplugin.announce.tempban:
+    description: See temp ban announcements
+    default: op
+  justplugin.announce.tempbanip:
+    description: See temp IP ban announcements
+    default: op
+  justplugin.announce.mute:
+    description: See mute announcements
+    default: op
+  justplugin.announce.tempmute:
+    description: See temp mute announcements
+    default: op
+  justplugin.announce.warn:
+    description: See warning announcements
+    default: op
+  justplugin.announce.kick:
+    description: See kick announcements
     default: op
 

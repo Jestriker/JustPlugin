@@ -47,7 +47,18 @@ public class MuteCommand implements TabExecutor {
         plugin.getMuteManager().mute(uuid, name, reason, mutedBy);
         sender.sendMessage(CC.success("Permanently muted <yellow>" + name + "</yellow>."));
         sender.sendMessage(CC.line("Reason: <white>" + reason));
-        Bukkit.broadcast(CC.warning("<yellow>" + name + "</yellow> has been muted by <yellow>" + mutedBy + "</yellow>. Reason: <gray>" + reason));
+
+        // Configurable announcement
+        net.kyori.adventure.text.Component announcement = CC.warning("<yellow>" + name + "</yellow> has been muted by <yellow>" + mutedBy + "</yellow>. Reason: <gray>" + reason);
+        if (plugin.getConfig().getBoolean("punishment-announcements.mute", false)) {
+            Bukkit.broadcast(announcement);
+        } else {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.hasPermission("justplugin.announce.mute")) {
+                    p.sendMessage(announcement);
+                }
+            }
+        }
         plugin.getLogManager().log("mute", "<yellow>" + mutedBy + "</yellow> muted <yellow>" + name + "</yellow>. Reason: <gray>" + reason);
         return true;
     }

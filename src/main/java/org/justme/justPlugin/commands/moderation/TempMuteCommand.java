@@ -53,7 +53,18 @@ public class TempMuteCommand implements TabExecutor {
         plugin.getMuteManager().tempMute(uuid, name, reason, mutedBy, durationMs);
         sender.sendMessage(CC.success("Temporarily muted <yellow>" + name + "</yellow> for <yellow>" + TimeUtil.formatDuration(durationMs) + "</yellow>."));
         sender.sendMessage(CC.line("Reason: <white>" + reason));
-        Bukkit.broadcast(CC.warning("<yellow>" + name + "</yellow> has been temporarily muted by <yellow>" + mutedBy + "</yellow> for <yellow>" + TimeUtil.formatDuration(durationMs) + "</yellow>. Reason: <gray>" + reason));
+
+        // Configurable announcement
+        net.kyori.adventure.text.Component announcement = CC.warning("<yellow>" + name + "</yellow> has been temporarily muted by <yellow>" + mutedBy + "</yellow> for <yellow>" + TimeUtil.formatDuration(durationMs) + "</yellow>. Reason: <gray>" + reason);
+        if (plugin.getConfig().getBoolean("punishment-announcements.tempmute", false)) {
+            Bukkit.broadcast(announcement);
+        } else {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.hasPermission("justplugin.announce.tempmute")) {
+                    p.sendMessage(announcement);
+                }
+            }
+        }
         plugin.getLogManager().log("mute", "<yellow>" + mutedBy + "</yellow> temp-muted <yellow>" + name + "</yellow> for <yellow>" + TimeUtil.formatDuration(durationMs) + "</yellow>. Reason: <gray>" + reason);
         return true;
     }

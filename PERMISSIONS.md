@@ -1,8 +1,8 @@
 # 🔐 JustPlugin — Permissions Reference
 
-> **Version:** 1.0-SNAPSHOT  
+> **Version:** 1.0.1  
 > **Author:** JustMe  
-> **Last Updated:** March 14, 2026
+> **Last Updated:** March 15, 2026
 
 ---
 
@@ -60,7 +60,9 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.trade
 │   ├── justplugin.suicide
 │   ├── justplugin.kill                  ← Self only
-│   └── justplugin.tab
+│   ├── justplugin.tab
+│   ├── justplugin.playerlist            ← View advanced player list
+│   └── justplugin.deathitems            ← View/restore own death items
 │
 │   [No permission needed — public commands]
 │   ├── /getpos (self)                   ← Always public, no permission
@@ -149,7 +151,23 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.stonecutter        ← Virtual stonecutter
 │   ├── justplugin.loom               ← Virtual loom
 │   ├── justplugin.smithingtable      ← Virtual smithing table
-│   └── justplugin.enchantingtable    ← Virtual enchanting table
+│   ├── justplugin.enchantingtable    ← Virtual enchanting table
+│   ├── justplugin.freezegame         ← Freeze game tick
+│   ├── justplugin.unfreezegame       ← Unfreeze game tick
+│   ├── justplugin.clearentities      ← Manual entity clear
+│   ├── justplugin.clearchat          ← Clear server chat
+│   ├── justplugin.friendlyfire       ← Toggle PvP
+│   ├── justplugin.deathitems.others  ← View/restore other players' death items
+│   ├── justplugin.oplist             ← View server operators
+│   ├── justplugin.banlist            ← View ban/IP ban lists
+│   ├── justplugin.announce.ban       ← See ban announcements (when not public)
+│   ├── justplugin.announce.banip     ← See IP ban announcements
+│   ├── justplugin.announce.tempban   ← See temp ban announcements
+│   ├── justplugin.announce.tempbanip ← See temp IP ban announcements
+│   ├── justplugin.announce.mute      ← See mute announcements
+│   ├── justplugin.announce.tempmute  ← See temp mute announcements
+│   ├── justplugin.announce.warn      ← See warning announcements
+│   └── justplugin.announce.kick      ← See kick announcements
 ```
 
 ---
@@ -203,6 +221,8 @@ Includes all permissions listed in this document.
 | `justplugin.suicide` | Kill yourself (/suicide) |
 | `justplugin.kill` | Kill yourself (/kill) |
 | `justplugin.tab` | Refresh tab list |
+| `justplugin.playerlist` | View advanced player list |
+| `justplugin.deathitems` | View and restore own death items |
 
 ### Not in `justplugin.player` — Always Public (no permission needed):
 
@@ -588,5 +608,55 @@ These bypass the teleport warmup delay (the X-second wait before teleporting). *
 /lp group moderator permission set justplugin.log.moderation true
 /lp group moderator permission set justplugin.log.warn true
 /lp group moderator permission set justplugin.log.mute true
+/lp group moderator permission set justplugin.announce.ban true
+/lp group moderator permission set justplugin.announce.kick true
+/lp group moderator permission set justplugin.announce.mute true
+/lp group moderator permission set justplugin.announce.warn true
+/lp group moderator permission set justplugin.banlist true
+/lp group moderator permission set justplugin.oplist true
+/lp group moderator permission set justplugin.deathitems.others true
 ```
+
+---
+
+## New v1.0.1 Permissions
+
+### 🪓 Death Items Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.deathitems` | View and restore your own death items | `true` (player) | `/deathitems` |
+| `justplugin.deathitems.others` | View and restore other players' death items | `op` | `/deathitems <player>` |
+
+> `.others` automatically grants `.deathitems` (self).
+
+### 🛡️ Moderation List Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.oplist` | View the server operator list | `op` | `/oplist`, `/ops` |
+| `justplugin.banlist` | View ban and IP ban lists | `op` | `/banlist`, `/baniplist` |
+
+### 🧹 Entity Clear & World Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.clearentities` | Manually trigger entity clearing | `op` | `/clearentities` |
+| `justplugin.clearchat` | Clear the server chat | `op` | `/clearchat` |
+| `justplugin.friendlyfire` | Toggle PvP on/off server-wide | `op` | `/friendlyfire`, `/ff` |
+
+### 📢 Punishment Announcement Permissions
+
+When public punishment announcements are **disabled** (default), only staff with these permissions see the announcement. These are separate from log permissions.
+
+| Permission | Description | Default |
+|------------|-------------|---------|
+| `justplugin.announce.ban` | See ban announcements | `op` |
+| `justplugin.announce.banip` | See IP ban announcements | `op` |
+| `justplugin.announce.tempban` | See temp ban announcements | `op` |
+| `justplugin.announce.tempbanip` | See temp IP ban announcements | `op` |
+| `justplugin.announce.mute` | See mute announcements | `op` |
+| `justplugin.announce.tempmute` | See temp mute announcements | `op` |
+| `justplugin.announce.warn` | See warning announcements | `op` |
+| `justplugin.announce.kick` | See kick announcements | `op` |
 
