@@ -4,7 +4,7 @@
 
 JustPlugin is a lightweight, fully configurable server management plugin that replaces dozens of separate plugins with a single JAR. Economy, teleportation, moderation, teams, trading, vanish, warnings, mutes, and over 90 commands - all built from scratch with performance and simplicity in mind.
 
-Every command can be individually enabled or disabled. Every permission is granular and hierarchical. Every feature just works.
+Every command can be turned on or off individually. Every permission is granular and hierarchical. Every feature just works.
 
 ---
 
@@ -22,7 +22,7 @@ Every command can be individually enabled or disabled. Every permission is granu
 - `/tpa`, `/tpahere`, `/tpaccept`, `/tpreject`, `/tpacancel`
 - `/spawn`, `/setspawn`, `/back`, `/tppos`, `/tpr` (random wild teleport)
 - Configurable request timeout (default 60s), teleport warmup delay (default 3s), and per-feature cooldowns
-- **Safe teleport protection** - every teleport (TPA, TPAHere, warp, spawn, home, back) checks a 3x3 area around the destination for hazardous blocks (lava, fire, magma, cactus, pressure plates, tripwire, sculk sensors, pointed dripstone, strings connected to tripwire hooks, and more). Checks the standing block, the two blocks the player occupies, and surrounding blocks. If unsafe, teleportation is blocked entirely
+- **Safe teleport protection** - every teleport (TPA, TPAHere, warp, spawn, home, back) checks a 3x3 area around the destination for hazardous blocks (lava, fire, magma, cactus, pressure plates, tripwire, sculk sensors, pointed dripstone, strings connected to tripwire hooks, and more). Checks the standing block, the two blocks the player occupies, and the surrounding blocks. If unsafe, teleportation is blocked entirely
 - Staff with bypass permissions get clickable **[TP Anyway]**, **[Creative Mode]**, and **[God Mode]** buttons - only shown to those with the matching permissions. Non-staff are simply told the destination is unsafe
 - Movement or taking damage during the warmup cancels the teleport
 - Cooldowns apply to everyone, including OPs - only explicit bypass permissions skip them
@@ -37,19 +37,19 @@ Every command can be individually enabled or disabled. Every permission is granu
 ### Homes
 - `/home`, `/sethome`, `/delhome` with a configurable max homes limit per player
 - Safety checks, warmup delays, and cooldowns
-- Homes persist across server restarts and player relogs
+- Homes persist across server restarts, and player relogs
 
 ### Moderation
-- `/ban`, `/tempban`, `/unban` - bans by both UUID and username simultaneously so players can't evade by changing names
-- `/banip`, `/tempbanip`, `/unbanip` - IP bans with automatic name/UUID/IP lookup. Works with offline players using their last recorded IP. Also bans the UUID and username so changing IP alone won't help. Localhost IPs are handled intelligently
+- `/ban`, `/tempban`, `/unban` - bans by both UUID and username simultaneously, so players can't evade by changing names
+- `/banip`, `/tempbanip`, `/unbanip` - IP bans with automatic name/UUID/IP lookup. Works with offline players using their last recorded IP. Also, it bans UUIDs and usernames, so changing the IP alone won't help. Localhost IPs are handled intelligently
 - `/mute`, `/tempmute`, `/unmute` - muted players can't use chat or `/msg`/`/r`. Default reasons configurable
-- `/warn add/remove/list` - progressive warning system with fully configurable punishments per level. Default escalation: chat warning, kick, 5-minute temp ban, 1-day temp ban, 30-day temp ban, 1-year temp ban, permanent ban. Every level's action is customizable (ChatMessage, Kick, TempBan, Ban, ChatMute, ChatTempMute, NoPunishment). Warning removal requires clickable confirmation buttons and keeps full history for documentation
+- `/warn add/remove/list` - progressive warning system with fully configurable punishments per level. Default escalation: chat warning, kick, 5-minute temp ban, 1-day temp ban, 30-day temp ban, 1-year temp ban, permanent ban. Every level's action is customizable (ChatMessage, Kick, TempBan, Ban, ChatMute, ChatTempMute, NoPunishment). Warning removal requires clickable confirmation buttons and keeps a full history for documentation
 - `/kick`, `/sudo`, `/invsee`, `/echestsee`
 - `/deathitems` - view and restore items from a player's last death (only if items were dropped, not if keepInventory kept them). Separate permissions for self vs. others
 - `/oplist` - list all server operators with online/offline status
 - `/banlist`, `/baniplist` - paginated ban and IP ban lists with full details (reason, banned-by, date, duration)
 - Custom ban screens with appeal information (links to your Discord or any URL)
-- **Punishment announcements** - by default, punishments are only visible to staff with the matching permission (e.g. `justplugin.announce.ban`). Public announcements can be enabled per-punishment type in config
+- **Punishment announcements** - by default, punishments are only visible to staff with the matching permission (e.g., `justplugin.announce.ban`). Public announcements can be enabled per-punishment type in the config
 
 ### Vanish
 - `/vanish` - invisible, hidden from tab list, player count, name autocomplete, and server player list (even external pings). Fake quit message on enable, fake join on disable. Vanished players can't be targeted by `/tpa`, `/trade`, `/msg`, or tab-completed by other players
