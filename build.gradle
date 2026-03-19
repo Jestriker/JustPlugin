@@ -126,7 +126,8 @@ tasks.register('obfuscate', proguard.gradle.ProGuardTask) {
     optimizationpasses 3
     allowaccessmodification()
     repackageclasses 'jp'              // Moves all obfuscated classes into a flat 'jp' package
-    overloadaggressively()             // Reuse short names aggressively
+    // NOTE: overloadaggressively() removed — it causes Paper's AutoRenamingTool to crash
+    // with "Duplicate key" errors when two fields share the same obfuscated name but differ in type.
 
     // Don't remove resources
     keepdirectories()
