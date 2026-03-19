@@ -1,5 +1,13 @@
 # JustPlugin - All-in-One Server Essentials
 
+![Version](https://img.shields.io/badge/version-1.1-blue?style=for-the-badge)
+![Minecraft](https://img.shields.io/badge/minecraft-1.21.11+-green?style=for-the-badge&logo=minecraft&logoColor=white)
+![Platform](https://img.shields.io/badge/platform-Paper-blue?style=for-the-badge)
+![Java](https://img.shields.io/badge/java-21+-orange?style=for-the-badge&logo=openjdk&logoColor=white)
+![Commands](https://img.shields.io/badge/commands-90+-purple?style=for-the-badge)
+![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=for-the-badge)
+![Vault](https://img.shields.io/badge/vault-supported-yellow?style=for-the-badge)
+
 **The only essentials plugin you'll ever need for Paper 1.21.11+**
 
 JustPlugin is a lightweight, fully configurable server management plugin that replaces dozens of separate plugins with a single JAR. Economy, teleportation, moderation, teams, trading, vanish, warnings, mutes, and over 90 commands - all built from scratch with performance and simplicity in mind.
