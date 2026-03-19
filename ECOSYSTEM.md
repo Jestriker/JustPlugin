@@ -123,6 +123,8 @@ VanishAPI vanish = api.getVanishAPI();
 
 The `EconomyAPI` interface provides full access to player balances.
 
+> **Vault Support:** JustPlugin optionally delegates to Vault's economy API when `economy.provider` is set to `"vault"` in `config.yml`. Your add-on plugin does **not** need to care about this — the `EconomyAPI` interface works identically regardless of the backend. All calls are transparently routed to either JustPlugin's built-in system or Vault.
+
 ### Interface
 
 ```java

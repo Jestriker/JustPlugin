@@ -1,7 +1,5 @@
 package org.justme.justPlugin.managers;
 
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.justme.justPlugin.JustPlugin;
 
@@ -14,7 +12,11 @@ public class EconomyManager {
     private final DataManager dataManager;
     private final double startingBalance;
 
-    // Cache
+    // Vault bridge — null if not using Vault
+    private VaultEconomyBridge vaultBridge;
+    private boolean usingVault = false;
+
+    // Cache (used only when provider is "justplugin")
     private final Map<UUID, Double> balances = new HashMap<>();
     private final Set<UUID> payToggleOff = new HashSet<>();
     private final Set<UUID> baltopHidden = new HashSet<>();
@@ -25,7 +27,50 @@ public class EconomyManager {
         this.startingBalance = plugin.getConfig().getDouble("economy.starting-balance", 100.0);
     }
 
+    /**
+     * Attempt to hook into Vault if configured.
+     * Call this AFTER the plugin is fully enabled (so Vault is loaded).
+     * @return true if Vault was hooked successfully.
+     */
+    public boolean setupVault() {
+        String provider = plugin.getConfig().getString("economy.provider", "justplugin").toLowerCase();
+        if (!"vault".equals(provider)) {
+            usingVault = false;
+            return false;
+        }
+        vaultBridge = new VaultEconomyBridge(plugin);
+        if (vaultBridge.setup()) {
+            usingVault = true;
+            return true;
+        } else {
+            plugin.getLogger().warning("[Economy] Vault provider configured but Vault or an economy plugin was not found. Falling back to JustPlugin's built-in economy.");
+            vaultBridge = null;
+            usingVault = false;
+            return false;
+        }
+    }
+
+    /**
+     * @return true if the economy is currently using Vault.
+     */
+    public boolean isUsingVault() {
+        return usingVault;
+    }
+
+    /**
+     * @return the name of the active economy provider ("JustPlugin" or the Vault provider name).
+     */
+    public String getProviderName() {
+        if (usingVault && vaultBridge != null) {
+            return "Vault (" + vaultBridge.getProviderName() + ")";
+        }
+        return "JustPlugin";
+    }
+
     public double getBalance(UUID uuid) {
+        if (usingVault && vaultBridge != null) {
+            return vaultBridge.getBalance(uuid);
+        }
         if (balances.containsKey(uuid)) return balances.get(uuid);
         YamlConfiguration data = dataManager.getPlayerData(uuid);
         double bal = data.getDouble("balance", startingBalance);
@@ -34,15 +79,26 @@ public class EconomyManager {
     }
 
     public void setBalance(UUID uuid, double amount) {
+        if (usingVault && vaultBridge != null) {
+            vaultBridge.setBalance(uuid, amount);
+            return;
+        }
         balances.put(uuid, amount);
         saveBalance(uuid);
     }
 
     public void addBalance(UUID uuid, double amount) {
+        if (usingVault && vaultBridge != null) {
+            vaultBridge.addBalance(uuid, amount);
+            return;
+        }
         setBalance(uuid, getBalance(uuid) + amount);
     }
 
     public boolean removeBalance(UUID uuid, double amount) {
+        if (usingVault && vaultBridge != null) {
+            return vaultBridge.removeBalance(uuid, amount);
+        }
         double current = getBalance(uuid);
         if (current < amount) return false;
         setBalance(uuid, current - amount);
@@ -51,8 +107,11 @@ public class EconomyManager {
 
     public boolean pay(UUID from, UUID to, double amount) {
         if (amount <= 0) return false;
-        if (getBalance(from) < amount) return false;
         if (isPayToggleOff(to)) return false;
+        if (usingVault && vaultBridge != null) {
+            return vaultBridge.pay(from, to, amount);
+        }
+        if (getBalance(from) < amount) return false;
         removeBalance(from, amount);
         addBalance(to, amount);
         return true;
@@ -81,7 +140,10 @@ public class EconomyManager {
 
     public void loadPlayer(UUID uuid) {
         YamlConfiguration data = dataManager.getPlayerData(uuid);
-        balances.put(uuid, data.getDouble("balance", startingBalance));
+        // Only cache balance locally when using built-in economy (Vault handles its own storage)
+        if (!usingVault) {
+            balances.put(uuid, data.getDouble("balance", startingBalance));
+        }
         if (data.getBoolean("paytoggle", false)) {
             payToggleOff.add(uuid);
         }
@@ -91,7 +153,10 @@ public class EconomyManager {
     }
 
     public void unloadPlayer(UUID uuid) {
-        saveBalance(uuid);
+        // Only save balance locally when using built-in economy
+        if (!usingVault) {
+            saveBalance(uuid);
+        }
         balances.remove(uuid);
         payToggleOff.remove(uuid);
         baltopHidden.remove(uuid);
@@ -104,6 +169,9 @@ public class EconomyManager {
     }
 
     public String format(double amount) {
+        if (usingVault && vaultBridge != null) {
+            return vaultBridge.format(amount);
+        }
         String symbol = plugin.getConfig().getString("economy.currency-symbol", "$");
         return symbol + String.format("%,.2f", amount);
     }
@@ -131,8 +199,12 @@ public class EconomyManager {
 
     /**
      * Scans all player data files and returns a sorted list of (UUID, balance) entries.
+     * When using Vault, queries Vault for each known player's balance.
      */
     public List<Map.Entry<UUID, Double>> getAllBalancesSorted() {
+        if (usingVault && vaultBridge != null) {
+            return vaultBridge.getAllBalancesSorted(dataManager);
+        }
         Map<UUID, Double> all = new HashMap<>(balances);
         // Also scan disk for offline players
         File folder = dataManager.getPlayerDataFolder();

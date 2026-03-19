@@ -54,6 +54,8 @@ public final class JustPlugin extends JavaPlugin {
     private PlayerListener playerListener;
     private TabCommand tabCommand;
     private WebEditorManager webEditorManager;
+    private MotdManager motdManager;
+    private ScoreboardManager scoreboardManager;
 
     @Override
     public void onEnable() {
@@ -87,8 +89,15 @@ public final class JustPlugin extends JavaPlugin {
         deathInventoryManager = new DeathInventoryManager(this);
         entityClearManager = new EntityClearManager(this);
         entityClearManager.start();
+        motdManager = new MotdManager(this);
         webEditorManager = new WebEditorManager(this);
         webEditorManager.start();
+
+        // Try to hook into Vault if configured
+        economyManager.setupVault();
+
+        // Initialize scoreboard system (needs all managers ready)
+        scoreboardManager = new ScoreboardManager(this);
 
         // Register listeners
         playerListener = new PlayerListener(this);
@@ -102,6 +111,9 @@ public final class JustPlugin extends JavaPlugin {
         tabCommand = new TabCommand(this);
         registerCmd("tab", tabCommand);
         Bukkit.getScheduler().runTaskTimer(this, () -> tabCommand.applyTabToAll(), 20L * 5, 20L * 30);
+
+        // Start scoreboard update task
+        scoreboardManager.start();
 
         // Initialize API for external plugins
         JustPluginProvider.set(new JustPluginAPIImpl(this));
@@ -121,6 +133,11 @@ public final class JustPlugin extends JavaPlugin {
         // Stop web editor
         if (webEditorManager != null) {
             webEditorManager.stop();
+        }
+
+        // Stop scoreboard
+        if (scoreboardManager != null) {
+            scoreboardManager.stop();
         }
 
         // Save all player states before shutdown
@@ -157,7 +174,7 @@ public final class JustPlugin extends JavaPlugin {
         if (disabledCmds > 0) {
             console.sendMessage(CC.translate("                        <red>✘</red> <gray>" + " " + disabledCmds + " commands disabled"));
         }
-        console.sendMessage(CC.translate("                        <green>✔</green> <gray> Economy system loaded"));
+        console.sendMessage(CC.translate("                        <green>✔</green> <gray> Economy system loaded <dark_gray>(" + economyManager.getProviderName() + ")"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Team system loaded"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Warp system loaded <dark_gray>(" + warpManager.getWarpNames().size() + " warps)"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Punishment system loaded <dark_gray>(bans, mutes, warns)"));
@@ -173,6 +190,11 @@ public final class JustPlugin extends JavaPlugin {
             console.sendMessage(CC.translate("                        <red>✘</red> <dark_gray> Discord webhook logging <red>disabled</red> <dark_gray>(enable in config)"));
         }
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> API ecosystem loaded"));
+        if (scoreboardManager != null && scoreboardManager.isEnabled()) {
+            console.sendMessage(CC.translate("                        <green>✔</green> <gray> Scoreboard system <green>active</green>"));
+        } else {
+            console.sendMessage(CC.translate("                        <dark_gray>○</dark_gray> <dark_gray> Scoreboard system <gray>disabled</gray> <dark_gray>(enable in scoreboard.yml)"));
+        }
         if (webEditorManager != null && webEditorManager.isRunning()) {
             console.sendMessage(CC.translate("                        <green>✔</green> <gray> Web editor <green>active</green> <dark_gray>(port " + webEditorManager.getPort() + ")"));
         } else if (getConfig().getBoolean("web-editor.enabled", false)) {
@@ -320,6 +342,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("trade", new TradeCommand(this));
         registerCmd("discord", new DiscordCommand(this));
         registerCmd("applyedits", new ApplyEditsCommand(this));
+        registerCmd("scoreboard", new ScoreboardCommand(this));
 
         // Overrides (replace vanilla commands)
         registerCmd("help", new HelpCommand(this));
@@ -401,6 +424,14 @@ public final class JustPlugin extends JavaPlugin {
         var console = Bukkit.getConsoleSender();
         boolean anyWarning = false;
 
+        // Vault configured but not hooked
+        String ecoProvider = getConfig().getString("economy.provider", "justplugin").toLowerCase();
+        if ("vault".equals(ecoProvider) && !economyManager.isUsingVault()) {
+            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>economy.provider</yellow> <gray>is set to <yellow>vault</yellow> but Vault or an economy plugin was not found!"));
+            console.sendMessage(CC.translate("    <gray>Falling back to JustPlugin's built-in economy system."));
+            anyWarning = true;
+        }
+
         // Pay requires balance
         if (commandSettings.isEnabled("pay") && !commandSettings.isEnabled("balance")) {
             console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/pay</yellow> <gray>is enabled but <yellow>/balance</yellow> is disabled! Economy features may not work properly."));
@@ -449,5 +480,7 @@ public final class JustPlugin extends JavaPlugin {
     public DeathInventoryManager getDeathInventoryManager() { return deathInventoryManager; }
     public EntityClearManager getEntityClearManager() { return entityClearManager; }
     public WebEditorManager getWebEditorManager() { return webEditorManager; }
+    public MotdManager getMotdManager() { return motdManager; }
+    public ScoreboardManager getScoreboardManager() { return scoreboardManager; }
     public PlayerListener getPlayerListener() { return playerListener; }
 }

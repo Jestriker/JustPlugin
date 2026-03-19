@@ -1,0 +1,113 @@
+# ==========================================
+# JustPlugin - Scoreboard Configuration
+# ==========================================
+#
+# A fully configurable sidebar scoreboard with 50+ placeholder variables.
+# Each line supports emojis, MiniMessage formatting, and placeholders.
+#
+# See SCOREBOARD.md for the full list of available placeholders,
+# configuration options, and examples.
+#
+# ==========================================
+
+# Enable or disable the sidebar scoreboard.
+enabled: true
+
+# How often the scoreboard updates, in ticks (20 ticks = 1 second).
+# Lower values = smoother but slightly more resource usage.
+# Recommended: 20 (every 1 second).
+update-interval: 20
+
+# Global emoji toggle. When false, no emojis are shown on any line
+# regardless of per-line settings. When true, per-line "show-emoji" controls each line.
+global-emojis: true
+
+# Sidebar title. Supports MiniMessage and all placeholders.
+title: "<gradient:#00aaff:#00ffaa><bold>  JustPlugin  </bold></gradient>"
+
+# ==========================================
+# Lines Configuration
+# ==========================================
+# Each line has:
+#   text:       The text to display. Supports MiniMessage tags and {placeholder} variables.
+#               Use {emoji} in the text to place the emoji where you want it.
+#   emoji:      The default emoji for this line. Can be changed to any text/symbol.
+#   show-emoji: Whether to show the emoji for this specific line (respects global-emojis too).
+#
+# IMPORTANT: The sidebar supports a maximum of 15 lines.
+# Lines are displayed in the order listed below (top to bottom).
+#
+# Use {empty} or {blank} for empty space.
+# Use {line} for a separator line (━━━━━━━).
+# ==========================================
+
+lines:
+  # --- Header separator ---
+  - text: "<gray>━━━━━━━━━━━━━━━━━━━━"
+    emoji: ""
+    show-emoji: false
+
+  # --- Player Info ---
+  - text: "{emoji} <white>{player}"
+    emoji: "👤"
+    show-emoji: true
+
+  - text: "{emoji} <red>{health}<gray>/<red>{max_health} <dark_gray>HP"
+    emoji: "❤"
+    show-emoji: true
+
+  - text: "{emoji} <gold>{food}<gray>/20 <dark_gray>Hunger"
+    emoji: "🍖"
+    show-emoji: true
+
+  # --- Separator ---
+  - text: "<dark_gray>"
+    emoji: ""
+    show-emoji: false
+
+  # --- Economy ---
+  - text: "{emoji} <green>{balance}"
+    emoji: "💰"
+    show-emoji: true
+
+  - text: "{emoji} <yellow>{kills} <dark_gray>Kills <gray>| <yellow>{deaths} <dark_gray>Deaths"
+    emoji: "⚔"
+    show-emoji: true
+
+  # --- Separator ---
+  - text: "<dark_gray>"
+    emoji: ""
+    show-emoji: false
+
+  # --- Location ---
+  - text: "{emoji} <aqua>{x}<gray>, <aqua>{y}<gray>, <aqua>{z}"
+    emoji: "📍"
+    show-emoji: true
+
+  - text: "{emoji} <white>{world} <dark_gray>({direction})"
+    emoji: "🌍"
+    show-emoji: true
+
+  # --- Separator ---
+  - text: "<dark_gray>"
+    emoji: ""
+    show-emoji: false
+
+  # --- Server Info ---
+  - text: "{emoji} <white>{online}<gray>/<white>{max_players} <dark_gray>Players"
+    emoji: "👥"
+    show-emoji: true
+
+  - text: "{emoji} <white>{ping}<dark_gray>ms"
+    emoji: "📶"
+    show-emoji: true
+
+  # --- Footer separator ---
+  - text: "<gray>━━━━━━━━━━━━━━━━━━━━"
+    emoji: ""
+    show-emoji: false
+
+  - text: " <dark_gray>{real_time} | TPS: {tps}"
+    emoji: ""
+    show-emoji: false
+

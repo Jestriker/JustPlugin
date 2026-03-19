@@ -7,9 +7,7 @@
 # General Settings
 # ==========================================
 
-# Message of the Day - shown to players on join.
-# Supports MiniMessage format. Use {player} for the player's name.
-motd: "<gradient:#00aaff:#00ffaa><bold>Welcome to the server, {player}!</bold></gradient>\n<gray>Type <yellow>/help</yellow> for commands."
+# MOTD is now configured in motd.yml (separate file).
 
 # Discord link shown by /discord. Editable in-game with /discord set <link>.
 discord-link: "https://discord.gg/example"
@@ -21,9 +19,18 @@ timezone: "UTC"
 # Economy Settings
 # ==========================================
 economy:
-  # Starting balance for new players.
+  # Economy provider to use.
+  # "justplugin" — uses JustPlugin's built-in economy system (default).
+  # "vault" — uses Vault's economy API. Requires the Vault plugin and an economy
+  #           provider (e.g. EssentialsX Economy, CMI, etc.) installed on the server.
+  #           All JustPlugin economy commands (/balance, /pay, /baltop, /addcash,
+  #           /paynote, /trade coins, etc.) will read/write through Vault instead.
+  #           If Vault is not found or has no economy provider, it falls back to JustPlugin's system.
+  provider: "justplugin"
+  # Starting balance for new players (only used when provider is "justplugin").
   starting-balance: 100.0
   # Currency symbol displayed before amounts (e.g. "$100.00").
+  # When provider is "vault", this is ignored — Vault's economy plugin provides formatting.
   currency-symbol: "$"
 
 # ==========================================
@@ -581,4 +588,7 @@ command-settings:
   tab:
     enabled: true
     permission: "justplugin.tab"
+  scoreboard:
+    enabled: true
+    permission: "justplugin.scoreboard"
 

@@ -62,7 +62,8 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.kill                  ← Self only
 │   ├── justplugin.tab
 │   ├── justplugin.playerlist            ← View advanced player list
-│   └── justplugin.deathitems            ← View/restore own death items
+│   ├── justplugin.deathitems            ← View/restore own death items
+│   └── justplugin.scoreboard            ← Toggle sidebar scoreboard
 │
 │   [No permission needed — public commands]
 │   ├── /getpos (self)                   ← Always public, no permission
@@ -111,6 +112,7 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.log.admin          ← See admin action logs
 │   ├── justplugin.log.item           ← See item action logs
 │   ├── justplugin.gmcheck            ← Check gamemode info
+│   ├── justplugin.scoreboard.reload  ← Reload scoreboard config
 │   ├── justplugin.hat                ← Wear item as hat
 │   ├── justplugin.skull              ← Get player heads
 │   ├── justplugin.setspawn           ← Set world spawn
@@ -440,6 +442,8 @@ Includes all permissions listed in this document.
 | `justplugin.discord.set` | Change the Discord link | `op` | `/discord set <link>` |
 | `justplugin.applyedits` | Apply config changes from the web editor (**highest-level**) | `op` | `/applyedits` |
 | `justplugin.tab` | Manually refresh the tab list | `true` (player) | `/tab` |
+| `justplugin.scoreboard` | Toggle the sidebar scoreboard on/off | `true` (player) | `/scoreboard` |
+| `justplugin.scoreboard.reload` | Reload the scoreboard configuration from disk | `op` | `/scoreboard reload` |
 
 ---
 

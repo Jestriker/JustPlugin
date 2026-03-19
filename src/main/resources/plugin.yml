@@ -4,6 +4,7 @@ main: org.justme.justPlugin.JustPlugin
 api-version: '1.21'
 description: An EssentialsX-like plugin for your server.
 author: JustMe
+softdepend: [Vault]
 
 commands:
   # === Teleportation ===
@@ -435,11 +436,11 @@ commands:
     permission: justplugin.playerlist.hide
     aliases: [plhide, hideplayer]
   motd:
-    description: View or set MOTD
-    usage: /motd [message]
+    description: View or set the server list MOTD and join MOTD
+    usage: /motd [server|join] [message]
   resetmotd:
-    description: Reset the MOTD to plugin default
-    usage: /resetmotd
+    description: Reset one or both MOTDs to plugin defaults
+    usage: /resetmotd [server|join]
     permission: justplugin.motd.set
   clock:
     description: Show current time
@@ -521,6 +522,11 @@ commands:
     description: Refresh tab list
     usage: /tab
     permission: justplugin.tab
+  scoreboard:
+    description: Toggle the sidebar scoreboard or reload its config
+    usage: /scoreboard [reload]
+    permission: justplugin.scoreboard
+    aliases: [sb]
 
   # === Overrides ===
   help:
@@ -680,6 +686,8 @@ permissions:
       justplugin.back.unsafetp: true
       justplugin.back.cooldownbypass: true
       justplugin.playerlist.seeHiddenPlayers: true
+      justplugin.scoreboard: true
+      justplugin.scoreboard.reload: true
   justplugin.player:
     description: Basic player permissions
     default: true
@@ -713,6 +721,7 @@ permissions:
       justplugin.wild: true
       justplugin.playerlist: true
       justplugin.deathitems: true
+      justplugin.scoreboard: true
 
   # --- Cooldown bypass permissions ---
   # These are NOT included in justplugin.* so even OPs have cooldowns.
@@ -884,6 +893,14 @@ permissions:
 
   justplugin.applyedits:
     description: Apply config changes from the web editor (highest-level permission)
+    default: op
+
+  # --- Scoreboard ---
+  justplugin.scoreboard:
+    description: Toggle the sidebar scoreboard on/off
+    default: true
+  justplugin.scoreboard.reload:
+    description: Reload the scoreboard configuration
     default: op
 
   # --- New Features ---

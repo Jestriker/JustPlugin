@@ -12,6 +12,7 @@ Every command can be turned on or off individually. Every permission is granular
 
 ### Economy
 - Full balance system with configurable starting amount and currency symbol
+- **Vault support** - optionally use Vault's economy API instead of the built-in system. Set `economy.provider: "vault"` in config and all JustPlugin economy commands will read/write through Vault. Requires a Vault-compatible economy plugin (e.g. EssentialsX Economy, CMI). Falls back to JustPlugin's built-in system if Vault is not found
 - `/balance`, `/pay`, `/paytoggle`, `/baltop`, `/addcash`
 - **PayNotes** - enchanted paper items that act as redeemable balance vouchers. Hold a single paper, run the command, and it becomes a glowing right-clickable note worth the amount you set. Right-click to redeem the note and add the balance to your account
 - Offline player support - pay, check, and modify balances even when players are offline
@@ -45,9 +46,11 @@ Every command can be turned on or off individually. Every permission is granular
 - `/mute`, `/tempmute`, `/unmute` - muted players can't use chat or `/msg`/`/r`. Default reasons configurable
 - `/warn add/remove/list` - progressive warning system with fully configurable punishments per level. Default escalation: chat warning, kick, 5-minute temp ban, 1-day temp ban, 30-day temp ban, 1-year temp ban, permanent ban. Every level's action is customizable (ChatMessage, Kick, TempBan, Ban, ChatMute, ChatTempMute, NoPunishment). Warning removal requires clickable confirmation buttons and keeps a full history for documentation
 - `/kick`, `/sudo`, `/invsee`, `/echestsee`
+- `/invsee` - view and manipulate a player's full inventory including armor slots and offhand. Works on offline players too. Armor slots show orange glass indicators when empty and allow placing/removing armor. Updates in real-time
+- `/echestsee` - view and manipulate a player's ender chest. Updates in real-time
 - `/deathitems` - view and restore items from a player's last death (only if items were dropped, not if keepInventory kept them). Separate permissions for self vs. others
 - `/oplist` - list all server operators with online/offline status
-- `/banlist`, `/baniplist` - paginated ban and IP ban lists with full details (reason, banned-by, date, duration)
+- `/banlist`, `/baniplist` - paginated ban and IP ban lists with full details (reason, banned-by, date, duration, IP, UUID)
 - Custom ban screens with appeal information (links to your Discord or any URL)
 - **Punishment announcements** - by default, punishments are only visible to staff with the matching permission (e.g., `justplugin.announce.ban`). Public announcements can be enabled per-punishment type in the config
 
@@ -92,13 +95,17 @@ Every command can be turned on or off individually. Every permission is granular
 - `/itemname` - rename your held item with MiniMessage and `&` color code support
 - `/teammsg` - send a one-off message to your team without changing your current chat mode
 
+### Items
+- `/shareitem` - show your currently held item in chat for all players to see (with hover details)
+- `/setspawner` - change a mob spawner's entity type by looking at it
+
 ### Info and Utilities
 - `/help` and `/?` - paginated command list with clickable command suggestions (overrides vanilla `/help`)
 - `/playerlist` - paginated player list sorted with staff first, vanish and hidden indicators for staff, and clickable page navigation. Staff with the right permission see hidden entries marked with a **[Hidden]** hover tag
 - `/playerlisthide` - hide yourself or others from the player list. Staff-only with separate permissions for self vs. others
 - `/playerinfo` - shows health (20.0/20.0), food (20.0/20.0), IP, gamemode, world, coordinates, balance, and more. Works for offline players too (shows UUID, last seen, first played, ban status)
 - `/clock`, `/date` - real-world and in-game time in your configured timezone
-- `/motd`, `/resetmotd` - view or reset the message of the day
+- `/motd`, `/resetmotd` - view, set, or reset the MOTDs. Two separate MOTDs: **server-motd** (shown in the Minecraft server list / multiplayer screen) and **join-motd** (shown to players in chat when they join). Both support MiniMessage formatting and placeholders (`{player}`, `{online}`, `{max}`). Set with `/motd server <text>` or `/motd join <text>`. Reset with `/resetmotd server`, `/resetmotd join`, or `/resetmotd` (both)
 - `/discord` - display or set the server's Discord link (separate permission for setting)
 - `/plist`, `/plugins` - custom formatted to match the plugin's style (overrides vanilla `/plugins`)
 - `/jpinfo` - plugin version and author info
@@ -113,6 +120,12 @@ Every command can be turned on or off individually. Every permission is granular
 ### Virtual Inventories
 Open crafting stations anywhere without placing blocks:
 - `/anvil`, `/grindstone`, `/craft`, `/stonecutter`, `/loom`, `/smithingtable`, `/enchantingtable`, `/enderchest`
+
+### Tab List
+- Custom tab list header and footer with MiniMessage formatting and `{player}`, `{online}`, `{max}` placeholders
+- Configurable in `config.yml` under `tab.header` and `tab.footer`
+- Auto-applied on join and refreshed every 30 seconds
+- `/tab` - manually refresh the tab header/footer
 
 ### Entity Clear System (ClearLag replacement)
 - Automatic clearing of ground items and optionally mobs at a configurable interval (default: 5 minutes)
@@ -139,6 +152,18 @@ Open crafting stations anywhere without placing blocks:
 - Session codes expire after 10 minutes for security
 - No external dependencies - runs entirely within the plugin
 
+### Scoreboard System
+- Fully configurable sidebar scoreboard with **50+ placeholder variables**
+- Dedicated `scoreboard.yml` config file with deep customization options
+- Per-player data: balance, health, food, coordinates, biome, ping, kills, deaths, K/D, playtime, team, and more
+- Server data: TPS, online players, memory usage, uptime, weather, real-world time/date
+- Configurable emoji system with global and per-line toggles, custom emoji per line
+- Configurable title, line order, footer, update interval (default: 1 second)
+- Per-player toggle with `/scoreboard` or `/sb` (preference saved across sessions and restarts)
+- Admin reload with `/scoreboard reload`
+- Performance-optimized with caching for expensive stat lookups
+- Full reference guide in `SCOREBOARD.md`
+
 ### Developer API (Ecosystem)
 - Public API for add-on plugins to integrate with JustPlugin's economy, punishment, and vanish systems
 - **EconomyAPI** - `getBalance`, `setBalance`, `addBalance`, `removeBalance`, `pay`, `format`, `hasBalance`
@@ -146,16 +171,27 @@ Open crafting stations anywhere without placing blocks:
 - **VanishAPI** - `isVanished`, `isSuperVanished`
 - Build chest shops, auction houses, voting rewards, or any plugin that needs to interact with balances, bans, mutes, warns, or vanish. Full developer guide included in `ECOSYSTEM.md`
 
+### Startup and Console
+- Distinctive LuckPerms-style ASCII art banner in the console on startup showing version, server info, command count, and status of every system (economy provider, teams, warps, punishments, webhook, web editor, scoreboard)
+- Automatic dependency warnings at startup if related features are enabled but their dependencies are disabled (e.g. `/pay` enabled but `/balance` disabled, or Vault configured but not found)
+- Load time displayed on startup
+
 ---
 
 ## Configuration
 
-Everything is controlled through a single `config.yml` that auto-migrates when the plugin updates - new settings are added automatically while preserving all existing values:
+Everything is controlled through multiple config files. `config.yml` auto-migrates when the plugin updates - new settings are added automatically while preserving all existing values:
+
+- **`config.yml`** - Main configuration for commands, economy, teleportation, trade, homes, warnings, web editor, webhook, tab list, vanilla command logging, clickable commands, punishment announcements, and per-command enable/disable and permission overrides
+- **`motd.yml`** - Two separate MOTDs: `server-motd` (server list) and `join-motd` (player join message). Auto-migrated from old config.yml or old single-motd format on first load
+- **`scoreboard.yml`** - Sidebar scoreboard configuration with title, lines, emoji settings, and update interval
+
+Key config features:
 
 - **Enable or disable any command** individually, regardless of permissions
 - **Override permission nodes** per command
 - **Teleport settings** - warmup delay, request timeout, per-feature cooldowns, safe teleport toggles per feature (TPA, TPAHere, warp, spawn, home, back)
-- **Economy** - starting balance, currency symbol
+- **Economy** - starting balance, currency symbol, economy provider (`justplugin` or `vault`)
 - **Warning punishments** - define the action for each warning level with full customization
 - **Clickable commands** - toggle clickable chat buttons for TPA, teams, trades, warps, homes, help, ignore, and private message replies
 - **Tab list** - custom header and footer with `{player}`, `{online}`, and `{max}` placeholders
@@ -167,6 +203,8 @@ Everything is controlled through a single `config.yml` that auto-migrates when t
 - **Discord link** - shown by `/discord`, editable in-game
 - **Webhook** - URL, enable/disable
 - **Web editor** - enable/disable, port, bind address
+- **Scoreboard** - enable/disable, update interval, global emoji toggle, title, lines with per-line emoji and placeholder config
+- **MOTD** - separate server list MOTD and player join MOTD, both with MiniMessage and placeholders
 
 ---
 
@@ -189,10 +227,12 @@ Full permission documentation with hierarchy tree is included in `PERMISSIONS.md
 ## Installation
 
 1. Drop `JustPlugin.jar` into your server's `plugins/` folder
-2. Start the server - the config file is generated automatically with full comments
-3. Customize `config.yml` to fit your server
-4. Set up permissions with [LuckPerms](https://luckperms.net/) or any permissions plugin
-5. Optionally configure Discord webhook logging with `/setlogswebhook <url>`
+2. Start the server - config files are generated automatically (`config.yml`, `motd.yml`, `scoreboard.yml`) with full comments
+3. Customize `config.yml` for commands, economy, teleportation, and general settings
+4. Customize `scoreboard.yml` for the sidebar scoreboard (title, lines, emojis, placeholders)
+5. Customize `motd.yml` for the server list MOTD and player join message
+6. Set up permissions with [LuckPerms](https://luckperms.net/) or any permissions plugin
+7. Optionally configure Discord webhook logging with `/setlogswebhook <url>`
 
 ---
 
@@ -200,7 +240,13 @@ Full permission documentation with hierarchy tree is included in `PERMISSIONS.md
 
 - **Paper** 1.21.11 or newer
 - **Java** 21 or newer
-- No external dependencies - everything is self-contained
+- No required external dependencies - everything is self-contained
+
+## Optional Dependencies
+
+| Plugin | Purpose |
+|--------|---------|
+| [Vault](https://www.spigotmc.org/resources/vault.34315/) | Use an external economy provider (e.g. EssentialsX Economy, CMI) instead of JustPlugin's built-in balance system. Set `economy.provider: "vault"` in config. |
 
 ## Supported Platforms
 

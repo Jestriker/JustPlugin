@@ -22,10 +22,15 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
+    maven {
+        name = "jitpack"
+        url = "https://jitpack.io"
+    }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
 }
 
 tasks {
@@ -114,6 +119,7 @@ tasks.register('obfuscate', proguard.gradle.ProGuardTask) {
     dontwarn 'com.google.**'
     dontwarn 'net.minecraft.**'
     dontwarn 'org.yaml.**'
+    dontwarn 'net.milkbowl.**'
 
     // Obfuscation settings
     optimizationpasses 3

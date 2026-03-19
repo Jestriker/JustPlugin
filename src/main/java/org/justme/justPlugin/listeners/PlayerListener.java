@@ -31,6 +31,7 @@ import org.justme.justPlugin.managers.ChatManager;
 import org.justme.justPlugin.managers.MuteManager;
 import org.justme.justPlugin.managers.TeleportManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.PlaceholderResolver;
 import org.justme.justPlugin.util.TimeUtil;
 
 import java.util.*;
@@ -87,11 +88,25 @@ public class PlayerListener implements Listener {
             plugin.getVanishManager().handleVanishedPlayerJoin(player);
         }
 
-        // MOTD
-        String motd = plugin.getConfig().getString("motd", "");
-        if (!motd.isEmpty()) {
-            player.sendMessage(CC.translate(motd.replace("{player}", player.getName())));
+        // Join MOTD (player join message)
+        String joinMotd = plugin.getMotdManager().getJoinMotd();
+        if (joinMotd != null && !joinMotd.isEmpty()) {
+            String resolved = joinMotd
+                    .replace("{player}", player.getName())
+                    .replace("{online}", String.valueOf(Bukkit.getOnlinePlayers().size()))
+                    .replace("{max}", String.valueOf(Bukkit.getMaxPlayers()));
+            player.sendMessage(CC.translate(resolved));
         }
+
+        // Track session playtime for scoreboard placeholders
+        PlaceholderResolver.recordJoin(player.getUniqueId());
+
+        // Show scoreboard (delayed slightly so the player is fully loaded)
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                plugin.getScoreboardManager().show(player);
+            }
+        }, 10L);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -114,6 +129,8 @@ public class PlayerListener implements Listener {
         plugin.getEconomyManager().unloadPlayer(uuid);
         plugin.getIgnoreManager().unloadPlayer(uuid);
         plugin.getChatManager().removePlayer(uuid);
+        plugin.getScoreboardManager().handleQuit(uuid);
+        PlaceholderResolver.recordQuit(uuid);
         godMode.remove(uuid);
 
         // Cancel TPA requests and notify counterpart
@@ -338,10 +355,19 @@ public class PlayerListener implements Listener {
         }
     }
 
-    // Server list ping — hide vanished players from count and hover
+    // Server list ping — set server MOTD and hide vanished players from count and hover
     @SuppressWarnings("removal")
     @EventHandler
     public void onServerListPing(ServerListPingEvent event) {
+        // Set the server list MOTD if configured
+        String serverMotd = plugin.getMotdManager().getServerMotd();
+        if (serverMotd != null && !serverMotd.isEmpty()) {
+            String resolved = serverMotd
+                    .replace("{online}", String.valueOf(Bukkit.getOnlinePlayers().size()))
+                    .replace("{max}", String.valueOf(Bukkit.getMaxPlayers()));
+            event.motd(CC.translate(resolved));
+        }
+
         event.setMaxPlayers(event.getMaxPlayers());
         try {
             Iterator<Player> iterator = event.iterator();
