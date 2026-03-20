@@ -35,7 +35,7 @@
 | `/tpreject` | `/tpreject` | Reject an incoming teleport request | — | `tpdeny`, `tpno` |
 | `/tpahere` | `/tpahere <player>` | Request a player to teleport to you | `justplugin.tpahere` | — |
 | `/tppos` | `/tppos <x> <y> <z> [world]` | Teleport to exact coordinates | `justplugin.tppos` | `tpposition` |
-| `/tpr` | `/tpr` | Random teleport to a safe location | `justplugin.wild` | `wild`, `rtp` |
+| `/tpr` | `/tpr` | Opens the Random Teleport GUI with dimension selection (Overworld, Nether, End) | `justplugin.wild` | `wild`, `rtp` |
 | `/back` | `/back` | Return to your last location before teleporting | `justplugin.back` | `return` |
 | `/spawn` | `/spawn` | Teleport to the world spawn | `justplugin.spawn` | — |
 | `/setspawn` | `/setspawn` | Set the world spawn to your current location (requires safe block below) | `justplugin.setspawn` | — |
@@ -44,11 +44,11 @@
 
 - **TPA requests** expire after a configurable timeout (default: 60s). Players are notified on send, accept, reject, and cancel.
 - **TPA Here** sends a request for the *target* to teleport to *you*.
-- **Teleport delay** is configurable (default: 3s). Movement or damage cancels the teleport. Players with `justplugin.teleport.bypass` skip the delay.
-- **Safe teleport protection** applies to all teleportation methods (TPA, TPAHere, Warp, Spawn, Home, Back). When the destination is unsafe, teleportation is cancelled. Players with `*.unsafetp` permission get a clickable **[TP Anyway]** confirmation button along with **[Creative Mode]** and **[God Mode]** options.
-- **Cooldowns** apply to `/tpa`, `/tpahere`, `/warp`, `/spawn`, `/home`, and `/back` — even for OPs. Only explicit `*.nocooldown` permissions bypass them.
-- **Random teleport** (`/tpr`) finds a safe location within the configured wild range (default: 5000 blocks, min 500 from 0,0). Loads chunks asynchronously.
-- **Back** stores your location before each teleport and death. Now uses safety checks and cooldown like all other teleport features.
+- **Cooldown** (pre-teleport countdown) is configurable per command (e.g. `/tpa` = 3s, `/warp` = 5s). Movement or damage cancels it. OPs also wait for cooldowns unless they have the explicit `*.cooldownbypass` permission.
+- **Delay** (time between uses) is configurable per command (e.g. `/tpa` = 3 minutes, `/wild` = 30 minutes). OPs auto-skip delays. Non-OPs need `*.delaybypass` permissions.
+- **Safe teleport protection** applies to all teleportation methods (TPA, TPAHere, Warp, Spawn, Home, Back, Wild). When the destination is unsafe, teleportation is cancelled. Players with `*.unsafetp` permission get a clickable **[TP Anyway]** confirmation button along with **[Creative Mode]** and **[God Mode]** options.
+- **Random teleport** (`/tpr`) opens a GUI with three dimension options: Overworld (grass block), Nether (netherrack), and The End (end stone). Nether requires `justplugin.wild.nether`, End requires `justplugin.wild.end`. Finds a safe location within the configured wild range (default: 5000 blocks, min 500 from 0,0). Loads chunks asynchronously. Multiple retry attempts for safe locations.
+- **Back** stores your location before each teleport and death. Uses safety checks, cooldown countdown, and delay like all other teleport features.
 - **SetSpawn** validates that the block below is solid and safe (no lava, magma, cactus, fire, etc.).
 
 ---
@@ -74,12 +74,18 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/home` | `/home [name]` | Teleport to a home (defaults to first home if no name given) | `justplugin.home` | `h` |
+| `/home` | `/home [name]` | Opens the Homes GUI (no args) or teleports to a specific home | `justplugin.home` | `h` |
 | `/sethome` | `/sethome [name]` | Set a home at your location (defaults to "home" if no name) | `justplugin.sethome` | `sh`, `createhome` |
 | `/delhome` | `/delhome <name>` | Delete a home | `justplugin.delhome` | `removehome`, `rmhome` |
 
 ### Details
 
+- **Home GUI** — running `/home` without arguments opens a 4-row inventory:
+  - **Row 1**: Spawn banner + up to 5 home bed slots
+  - **Row 2**: Action dyes — yellow (set home), red (delete with confirmation), black (unavailable/locked)
+  - Green beds = defined homes (click to teleport), gray beds = empty available slots, red beds = over max limit
+  - All actions respect permissions, cooldowns, and safe teleport protection
+- Running `/home <name>` still directly teleports to that home (bypasses GUI)
 - Maximum homes per player is configurable (default: 5).
 - Homes are persistent and stored per-player.
 - Tab completion lists your existing home names.
@@ -95,7 +101,7 @@
 | `/paytoggle` | `/paytoggle` | Toggle receiving payments on/off | `justplugin.paytoggle` | — |
 | `/paynote` | `/paynote [amount \| list]` | Convert held items into coins based on configured values | `justplugin.paynote` | — |
 | `/addcash` | `/addcash [player] <amount>` | Add cash to yourself or another player | `justplugin.addcash` | `givemoney`, `addmoney`, `addbal` |
-| `/baltop` | `/baltop` | View the balance leaderboard (top 10 richest players) | `justplugin.balance` | `balancetop`, `moneytop`, `topbal` |
+| `/baltop` | `/baltop` | Opens the Balance Leaderboard GUI with top 10 player heads | `justplugin.balance` | `balancetop`, `moneytop`, `topbal` |
 | `/baltophide` | `/baltophide [player]` | Hide yourself or another player from the balance leaderboard | `justplugin.baltophide` | `hidebaltop`, `balancetophide` |
 
 ### Details
@@ -350,7 +356,7 @@
 | `/discord` | `/discord [set <link>]` | Show the server's Discord link, or set it with permission | - | `dc` |
 | `/applyedits` | `/applyedits <code>` | Apply pending config changes from the web editor | `justplugin.applyedits` | `configapply`, `webapply` |
 | `/tab` | `/tab` | Manually refresh the tab list header/footer | `justplugin.tab` | - |
-| `/scoreboard` | `/scoreboard [reload]` | Toggle the sidebar scoreboard on/off, or reload its config | `justplugin.scoreboard` | `sb` |
+| `/reloadscoreboard` | `/reloadscoreboard` | Reload the scoreboard config and refresh for all players (staff only) | `justplugin.scoreboard.reload` | `reloadsb` |
 
 ### Details
 
@@ -358,7 +364,7 @@
 - **Discord set** requires `justplugin.discord.set`. The link is clickable in chat.
 - **Apply Edits** requires a session code generated by the self-hosted web config editor. Enable the web editor in `config.yml` under `web-editor.enabled`, then open `http://localhost:8585` in your browser. Edit settings, click "Save & Generate Code", and run `/applyedits <code>` in-game. Session codes expire after 10 minutes. This is the **highest-level** admin permission in the plugin.
 - **Tab** header/footer is configurable in `config.yml` with MiniMessage and `{player}`, `{online}`, `{max}` placeholders. Auto-applied on join.
-- **Scoreboard** shows a sidebar with configurable lines and 50+ placeholders. Configuration lives in `scoreboard.yml`. `/scoreboard reload` requires `justplugin.scoreboard.reload`. Player toggle preference is saved across sessions. See `SCOREBOARD.md` for full placeholder reference.
+- **Scoreboard** shows a sidebar with configurable lines and 50+ placeholders. Configuration lives in `scoreboard.yml`. Use `/reloadscoreboard` (staff only, requires `justplugin.scoreboard.reload`) to apply config changes to all online players. The scoreboard is always visible to all players when enabled in config. See `SCOREBOARD.md` for full placeholder reference.
 
 ---
 

@@ -7,6 +7,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
@@ -32,11 +33,11 @@ public class TpaHereCommand implements TabExecutor {
             return true;
         }
 
-        // Cooldown check (applies even to OPs unless explicit bypass)
-        if (!player.hasPermission("justplugin.tpahere.nocooldown")
-                && plugin.getCooldownManager().isOnCooldown(player.getUniqueId(), "tpahere")) {
-            int remaining = plugin.getCooldownManager().getRemainingSeconds(player.getUniqueId(), "tpahere");
-            player.sendMessage(CC.error("You must wait <yellow>" + remaining + "</yellow> seconds before using this command again."));
+        // Delay check (time between uses) — OPs auto-skip, or explicit delaybypass permission
+        if (!player.isOp() && !player.hasPermission("justplugin.tpahere.delaybypass")
+                && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "tpahere")) {
+            int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "tpahere");
+            player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
             return true;
         }
 
@@ -70,7 +71,7 @@ public class TpaHereCommand implements TabExecutor {
             return true;
         }
 
-        plugin.getCooldownManager().setCooldown(player.getUniqueId(), "tpahere");
+        plugin.getCooldownManager().setDelayStart(player.getUniqueId(), "tpahere");
 
         int timeout = plugin.getTeleportManager().getRequestTimeout();
         String cancelCmd = CC.clickCmd("<yellow>/tpacancel</yellow>", "/tpacancel", clickable);

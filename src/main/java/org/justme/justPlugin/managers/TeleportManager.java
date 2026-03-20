@@ -50,12 +50,10 @@ public class TeleportManager {
     private final Map<UUID, Location> backLocations = new ConcurrentHashMap<>();
 
     private final int requestTimeout;
-    private final double teleportDelay;
 
     public TeleportManager(JustPlugin plugin) {
         this.plugin = plugin;
         this.requestTimeout = plugin.getConfig().getInt("teleport.request-timeout", 60);
-        this.teleportDelay = plugin.getConfig().getDouble("teleport.delay", 3.0);
         startExpiryTask();
     }
 
@@ -196,22 +194,22 @@ public class TeleportManager {
         }
 
         // If we reach here, the location is safe (or safety is disabled)
-        // Check bypass permission for teleport delay
-        double delay = roundToHalf(teleportDelay);
-        if (delay <= 0 || teleporter.hasPermission(delayBypassPerm)) {
+        // Check bypass permission for teleport cooldown (pre-TP countdown)
+        double cooldown = roundToHalf(plugin.getCooldownManager().getCooldownSeconds(featureKey));
+        if (cooldown <= 0 || teleporter.hasPermission(delayBypassPerm)) {
             // Instant teleport
             executeTeleport(teleporter, destination.getLocation(), true);
             return;
         }
 
-        long delayTicks = (long) (delay * 20);
+        long delayTicks = (long) (cooldown * 20);
         Location startLoc = teleporter.getLocation().clone();
         teleportStartLocations.put(teleporter.getUniqueId(), startLoc);
 
         boolean clickable = plugin.getConfig().getBoolean("clickable-commands.tpa", true);
         String cancelCmd = CC.clickCmd("<yellow>/tpacancel</yellow>", "/tpacancel", clickable);
 
-        String delayStr = delay == (int) delay ? String.valueOf((int) delay) : String.valueOf(delay);
+        String delayStr = cooldown == (int) cooldown ? String.valueOf((int) cooldown) : String.valueOf(cooldown);
         teleporter.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. <gray>Don't move or take damage!"));
         teleporter.sendMessage(CC.info("Type " + cancelCmd + " to cancel."));
         destination.sendMessage(CC.success("<yellow>" + teleporter.getName() + "</yellow> is teleporting to you in <yellow>" + delayStr + "</yellow> seconds."));
@@ -460,17 +458,17 @@ public class TeleportManager {
         }
 
         setBackLocation(player.getUniqueId(), player.getLocation());
-        double delay = roundToHalf(teleportDelay);
-        if (delay <= 0 || player.hasPermission(pending.delayBypassPerm)) {
+        double cooldown = roundToHalf(plugin.getCooldownManager().getCooldownSeconds(pending.featureKey));
+        if (cooldown <= 0 || player.hasPermission(pending.delayBypassPerm)) {
             player.teleportAsync(pending.destination);
             player.sendMessage(CC.success("Teleported! <red>(unsafe destination)"));
             return;
         }
 
-        long delayTicks = (long) (delay * 20);
+        long delayTicks = (long) (cooldown * 20);
         Location startLoc = player.getLocation().clone();
         teleportStartLocations.put(player.getUniqueId(), startLoc);
-        String delayStr = delay == (int) delay ? String.valueOf((int) delay) : String.valueOf(delay);
+        String delayStr = cooldown == (int) cooldown ? String.valueOf((int) cooldown) : String.valueOf(cooldown);
         player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. <gray>Don't move or take damage!"));
 
         final Location dest = pending.destination;
@@ -517,17 +515,17 @@ public class TeleportManager {
         }
 
         setBackLocation(player.getUniqueId(), player.getLocation());
-        double delay = roundToHalf(teleportDelay);
-        if (delay <= 0 || player.hasPermission(delayBypassPerm)) {
+        double cooldown = roundToHalf(plugin.getCooldownManager().getCooldownSeconds(featureKey));
+        if (cooldown <= 0 || player.hasPermission(delayBypassPerm)) {
             Location finalLoc = getSafeLocation(location);
             player.teleportAsync(finalLoc);
             return true;
         }
 
-        long delayTicks = (long) (delay * 20);
+        long delayTicks = (long) (cooldown * 20);
         Location startLoc = player.getLocation().clone();
         teleportStartLocations.put(player.getUniqueId(), startLoc);
-        String delayStr = delay == (int) delay ? String.valueOf((int) delay) : String.valueOf(delay);
+        String delayStr = cooldown == (int) cooldown ? String.valueOf((int) cooldown) : String.valueOf(cooldown);
         player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. Don't move or take damage!"));
         final boolean finalSafetyEnabled = safetyEnabled;
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -556,21 +554,28 @@ public class TeleportManager {
     }
 
     /**
-     * Teleport with bypass permission — uses specific bypass permission for delay.
+     * Teleport with bypass permission — uses specific bypass permission for cooldown.
      * No safety check (legacy method for backward compatibility).
      */
     public void teleportWithBypass(Player player, Location location, String bypassPermission) {
+        teleportWithBypass(player, location, bypassPermission, "tpa");
+    }
+
+    /**
+     * Teleport with bypass permission and feature key for per-command cooldown lookup.
+     */
+    public void teleportWithBypass(Player player, Location location, String bypassPermission, String featureKey) {
         setBackLocation(player.getUniqueId(), player.getLocation());
-        double delay = roundToHalf(teleportDelay);
-        if (delay <= 0 || player.hasPermission(bypassPermission)) {
+        double cooldown = roundToHalf(plugin.getCooldownManager().getCooldownSeconds(featureKey));
+        if (cooldown <= 0 || player.hasPermission(bypassPermission)) {
             Location safeLoc = getSafeLocation(location);
             player.teleportAsync(safeLoc);
             return;
         }
-        long delayTicks = (long) (delay * 20);
+        long delayTicks = (long) (cooldown * 20);
         Location startLoc = player.getLocation().clone();
         teleportStartLocations.put(player.getUniqueId(), startLoc);
-        String delayStr = delay == (int) delay ? String.valueOf((int) delay) : String.valueOf(delay);
+        String delayStr = cooldown == (int) cooldown ? String.valueOf((int) cooldown) : String.valueOf(cooldown);
         player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. Don't move or take damage!"));
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pendingTeleports.remove(player.getUniqueId());
@@ -597,7 +602,7 @@ public class TeleportManager {
         int range = plugin.getConfig().getInt("teleport.wild-range", 5000);
         int minRange = plugin.getConfig().getInt("teleport.wild-min-range", 500);
         int attempts = 0;
-        while (attempts < 20) {
+        while (attempts < 50) {
             int x = random.nextInt(range * 2) - range;
             int z = random.nextInt(range * 2) - range;
             if (Math.abs(x) < minRange && Math.abs(z) < minRange) {
@@ -609,17 +614,83 @@ public class TeleportManager {
                 attempts++;
                 continue;
             }
+            Block groundBlock = world.getBlockAt(x, y, z);
+            Material groundMat = groundBlock.getType();
+
+            // Validate ground block is appropriate for this world type
+            if (!isValidRtpGround(world, groundMat, x, y, z)) {
+                attempts++;
+                continue;
+            }
+
             Location loc = new Location(world, x + 0.5, y + 1, z + 0.5);
             if (!loc.getBlock().getType().isAir()) {
                 attempts++;
                 continue;
             }
+            // Also check head space
+            if (!world.getBlockAt(x, y + 2, z).getType().isAir()) {
+                attempts++;
+                continue;
+            }
             return loc;
         }
+        // Fallback: keep trying with less strict attempts
         int x = random.nextInt(range * 2) - range;
         int z = random.nextInt(range * 2) - range;
         int y = world.getHighestBlockYAt(x, z) + 1;
         return new Location(world, x + 0.5, y, z + 0.5);
+    }
+
+    /**
+     * Checks if the ground block is valid for RTP based on the world environment.
+     * <ul>
+     *   <li>Overworld: grass_block, podzol, mycelium, sand (non-floating only), dirt variants</li>
+     *   <li>Nether: netherrack, soul_sand, soul_soil</li>
+     *   <li>End: end_stone only</li>
+     * </ul>
+     * All worlds reject ice types, chorus blocks, end rods, water, lava, magma.
+     */
+    private boolean isValidRtpGround(World world, Material mat, int x, int y, int z) {
+        // Universal rejects: ice types, chorus, end rods, water, lava, magma
+        if (isRtpBannedBlock(mat)) return false;
+
+        World.Environment env = world.getEnvironment();
+        return switch (env) {
+            case NORMAL -> {
+                // Only allow grass-type blocks, podzol, mycelium, sand (non-floating), dirt variants
+                if (mat == Material.GRASS_BLOCK || mat == Material.PODZOL || mat == Material.MYCELIUM
+                        || mat == Material.DIRT || mat == Material.COARSE_DIRT || mat == Material.ROOTED_DIRT
+                        || mat == Material.DIRT_PATH || mat == Material.MUD || mat == Material.MUDDY_MANGROVE_ROOTS
+                        || mat == Material.MOSS_BLOCK) {
+                    yield true;
+                }
+                // Sand is allowed only if not floating (block below must also be solid)
+                if (mat == Material.SAND || mat == Material.RED_SAND) {
+                    Material below = world.getBlockAt(x, y - 1, z).getType();
+                    yield below.isSolid() && below != Material.SAND && below != Material.RED_SAND;
+                }
+                yield false;
+            }
+            case NETHER -> mat == Material.NETHERRACK || mat == Material.SOUL_SAND || mat == Material.SOUL_SOIL;
+            case THE_END -> mat == Material.END_STONE;
+            default -> mat.isSolid() && !isRtpBannedBlock(mat);
+        };
+    }
+
+    /**
+     * Blocks that should never be valid RTP ground in any world.
+     */
+    private boolean isRtpBannedBlock(Material mat) {
+        return mat == Material.WATER || mat == Material.LAVA
+                || mat == Material.MAGMA_BLOCK
+                || mat == Material.ICE || mat == Material.PACKED_ICE || mat == Material.BLUE_ICE
+                || mat == Material.FROSTED_ICE
+                || mat == Material.CHORUS_PLANT || mat == Material.CHORUS_FLOWER
+                || mat == Material.END_ROD
+                || mat == Material.FIRE || mat == Material.SOUL_FIRE
+                || mat == Material.CACTUS || mat == Material.SWEET_BERRY_BUSH
+                || mat == Material.POWDER_SNOW;
     }
 
     public int getRequestTimeout() {

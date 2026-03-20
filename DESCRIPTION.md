@@ -16,7 +16,7 @@ Every command can be turned on or off individually. Every permission is granular
 - `/balance`, `/pay`, `/paytoggle`, `/baltop`, `/addcash`
 - **PayNotes** - enchanted paper items that act as redeemable balance vouchers. Hold a single paper, run the command, and it becomes a glowing right-clickable note worth the amount you set. Right-click to redeem the note and add the balance to your account
 - Offline player support - pay, check, and modify balances even when players are offline
-- Baltop leaderboard with top 10 players, medal rankings, and options to hide yourself or others from the rankings
+- **Baltop GUI** - `/baltop` opens a 4-row inventory with player head skulls for the top 10 richest players. Hover over a head to see name, balance, and rank. Medal icons for #1 gold, #2 silver, #3 bronze. Your own rank is shown in the bottom row. Hidden players appear as barriers with obfuscated names for regular users, while staff with the `baltop.viewhidden` permission see their real info. Console gets a text-based fallback
 - Separate permissions for self vs. others on balance checking, cash adding, and leaderboard hiding
 
 ### Teleportation
@@ -27,7 +27,7 @@ Every command can be turned on or off individually. Every permission is granular
 - Staff with bypass permissions get clickable **[TP Anyway]**, **[Creative Mode]**, and **[God Mode]** buttons - only shown to those with the matching permissions. Non-staff are simply told the destination is unsafe
 - Movement or taking damage during the warmup cancels the teleport
 - Cooldowns apply to everyone, including OPs - only explicit bypass permissions skip them
-- Random teleport (`/tpr`) finds a safe, solid block within the configurable wild range - never water, lava, magma, or air
+- Random teleport (`/tpr`) opens a **dimension selection GUI** - choose between Overworld (grass block), Nether (netherrack), and The End (end stone). Each dimension requires its own permission, and disabled dimensions are shown as unavailable. Finds a safe, solid block within the configurable wild range - never water, lava, magma, or air. Includes cooldowns and multiple retry attempts for safe locations
 
 ### Warps
 - `/warp`, `/setwarp`, `/delwarp`, `/renamewarp`, `/warps`
@@ -37,8 +37,10 @@ Every command can be turned on or off individually. Every permission is granular
 
 ### Homes
 - `/home`, `/sethome`, `/delhome` with a configurable max homes limit per player
+- **Interactive GUI** - running `/home` without arguments opens a 4-row inventory with your spawn point, all your home slots (green beds for set homes, gray for available, red for locked), and action dyes below each slot (yellow to set, red to delete with confirmation, black for unavailable). Click a green bed to teleport, click the spawn banner to go to spawn - all with cooldowns and safety checks built in
+- Running `/home <name>` still directly teleports to that home
 - Safety checks, warmup delays, and cooldowns
-- Homes persist across server restarts, and player relogs
+- Homes persist across server restarts and player relogs
 
 ### Moderation
 - `/ban`, `/tempban`, `/unban` - bans by both UUID and username simultaneously, so players can't evade by changing names
@@ -155,12 +157,17 @@ Open crafting stations anywhere without placing blocks:
 ### Scoreboard System
 - Fully configurable sidebar scoreboard with **50+ placeholder variables**
 - Dedicated `scoreboard.yml` config file with deep customization options
+- **Default design** inspired by popular SMP servers: Money (green), Kills (red), Deaths (orange), Playtime (yellow), Team (blue, only shown if player is in a team), and a footer with ping and time
+- **Compact number formatting** - `{balance_short}`, `{kills_short}`, `{deaths_short}` format numbers with K, M, B suffixes (e.g. 25.70K, 1.50M, 2.30B)
+- **Conditional lines** - lines can have a `condition` field (e.g. `has_team`) so they only display when the condition is met. Team line automatically hides if you're not in a team
+- **Configurable time format** - `time-format` setting in scoreboard.yml supports any Java DateTimeFormatter pattern: `HH:mm`, `HH:mm:ss`, `hh:mm a`, `dd/MM/YYYY`, `MM/dd/YYYY`, and more
+- Session-based playtime that resets when you reconnect (separate from total playtime)
 - Per-player data: balance, health, food, coordinates, biome, ping, kills, deaths, K/D, playtime, team, and more
 - Server data: TPS, online players, memory usage, uptime, weather, real-world time/date
 - Configurable emoji system with global and per-line toggles, custom emoji per line
 - Configurable title, line order, footer, update interval (default: 1 second)
-- Per-player toggle with `/scoreboard` or `/sb` (preference saved across sessions and restarts)
-- Admin reload with `/scoreboard reload`
+- Always visible to all players when enabled in config (no per-player toggle)
+- Staff-only reload with `/reloadscoreboard` or `/reloadsb` to apply config changes live
 - Performance-optimized with caching for expensive stat lookups
 - Full reference guide in `SCOREBOARD.md`
 

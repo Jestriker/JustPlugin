@@ -501,7 +501,7 @@ commands:
   # === Teams ===
   team:
     description: Team management
-    usage: /team <create | disband | invite | join | leave | kick | info | list>
+    usage: /team <create | disband | invite | join | leave | kick | promote | demote | sethome | delhome | home | info | list>
     permission: justplugin.team
 
   # === Misc ===
@@ -522,11 +522,11 @@ commands:
     description: Refresh tab list
     usage: /tab
     permission: justplugin.tab
-  scoreboard:
-    description: Toggle the sidebar scoreboard or reload its config
-    usage: /scoreboard [reload]
-    permission: justplugin.scoreboard
-    aliases: [sb]
+  reloadscoreboard:
+    description: Reload the scoreboard configuration and refresh for all players (staff only)
+    usage: /reloadscoreboard
+    permission: justplugin.scoreboard.reload
+    aliases: [reloadsb]
 
   # === Overrides ===
   help:
@@ -550,6 +550,9 @@ permissions:
       justplugin.tpahere: true
       justplugin.tppos: true
       justplugin.wild: true
+      justplugin.wild.nether: true
+      justplugin.wild.end: true
+      justplugin.baltop.viewhidden: true
       justplugin.back: true
       justplugin.spawn: true
       justplugin.setspawn: true
@@ -678,16 +681,28 @@ permissions:
       justplugin.tpahere.cooldownbypass: true
       justplugin.home.cooldownbypass: true
       justplugin.warp.cooldownbypass: true
+      justplugin.spawn.cooldownbypass: true
+      justplugin.back.cooldownbypass: true
+      justplugin.wild.cooldownbypass: true
+      justplugin.tpa.delaybypass: true
+      justplugin.tpahere.delaybypass: true
+      justplugin.home.delaybypass: true
+      justplugin.warp.delaybypass: true
+      justplugin.spawn.delaybypass: true
+      justplugin.back.delaybypass: true
+      justplugin.wild.delaybypass: true
       justplugin.tpa.unsafetp: true
       justplugin.tpahere.unsafetp: true
       justplugin.warp.unsafetp: true
       justplugin.spawn.unsafetp: true
       justplugin.home.unsafetp: true
       justplugin.back.unsafetp: true
-      justplugin.back.cooldownbypass: true
       justplugin.playerlist.seeHiddenPlayers: true
-      justplugin.scoreboard: true
       justplugin.scoreboard.reload: true
+      justplugin.team.list: true
+      justplugin.teamhome.cooldownbypass: true
+      justplugin.teamhome.delaybypass: true
+      justplugin.teamhome.unsafetp: true
   justplugin.player:
     description: Basic player permissions
     default: true
@@ -721,22 +736,56 @@ permissions:
       justplugin.wild: true
       justplugin.playerlist: true
       justplugin.deathitems: true
-      justplugin.scoreboard: true
 
   # --- Cooldown bypass permissions ---
-  # These are NOT included in justplugin.* so even OPs have cooldowns.
+  # Cooldown = countdown timer BEFORE the teleport executes (e.g., 3 seconds standing still).
+  # These are NOT included in justplugin.* — even OPs wait for cooldowns unless explicitly granted.
   # Must be explicitly granted via a permissions plugin.
-  justplugin.tpa.nocooldown:
-    description: Bypass TPA cooldown between uses
+  justplugin.tpa.cooldownbypass:
+    description: Bypass TPA pre-teleport countdown
     default: false
-  justplugin.tpahere.nocooldown:
-    description: Bypass TPAHere cooldown between uses
+  justplugin.tpahere.cooldownbypass:
+    description: Bypass TPAHere pre-teleport countdown
     default: false
-  justplugin.warp.nocooldown:
-    description: Bypass warp cooldown between uses
+  justplugin.warp.cooldownbypass:
+    description: Bypass warp pre-teleport countdown
     default: false
-  justplugin.spawn.nocooldown:
-    description: Bypass spawn cooldown between uses
+  justplugin.spawn.cooldownbypass:
+    description: Bypass spawn pre-teleport countdown
+    default: false
+  justplugin.home.cooldownbypass:
+    description: Bypass home pre-teleport countdown
+    default: false
+  justplugin.back.cooldownbypass:
+    description: Bypass /back pre-teleport countdown
+    default: false
+  justplugin.wild.cooldownbypass:
+    description: Bypass wild/RTP pre-teleport countdown
+    default: false
+
+  # --- Delay bypass permissions ---
+  # Delay = minimum time between successive uses of the same command (e.g., 3 minutes).
+  # OPs auto-skip delays. Non-OPs need these permissions to bypass.
+  justplugin.tpa.delaybypass:
+    description: Bypass TPA delay between uses
+    default: false
+  justplugin.tpahere.delaybypass:
+    description: Bypass TPAHere delay between uses
+    default: false
+  justplugin.warp.delaybypass:
+    description: Bypass warp delay between uses
+    default: false
+  justplugin.spawn.delaybypass:
+    description: Bypass spawn delay between uses
+    default: false
+  justplugin.home.delaybypass:
+    description: Bypass home delay between uses
+    default: false
+  justplugin.back.delaybypass:
+    description: Bypass /back delay between uses
+    default: false
+  justplugin.wild.delaybypass:
+    description: Bypass wild/RTP delay between uses
     default: false
 
   # --- Safety bypass permissions ---
@@ -758,15 +807,6 @@ permissions:
   justplugin.back.unsafetp:
     description: Bypass back safe teleport protection (with confirmation)
     default: op
-  justplugin.back.cooldownbypass:
-    description: Bypass /back warmup delay
-    default: false
-  justplugin.back.nocooldown:
-    description: Bypass /back cooldown between uses
-    default: false
-  justplugin.home.nocooldown:
-    description: Bypass /home cooldown between uses
-    default: false
   justplugin.playerlist.seeHiddenPlayers:
     description: See players hidden from the player list (with hidden indicator)
     default: op
@@ -896,11 +936,8 @@ permissions:
     default: op
 
   # --- Scoreboard ---
-  justplugin.scoreboard:
-    description: Toggle the sidebar scoreboard on/off
-    default: true
   justplugin.scoreboard.reload:
-    description: Reload the scoreboard configuration
+    description: Reload the scoreboard configuration and refresh for all players (staff only)
     default: op
 
   # --- New Features ---
@@ -956,5 +993,38 @@ permissions:
     default: op
   justplugin.announce.kick:
     description: See kick announcements
+    default: op
+
+  # --- RTP Dimension Permissions ---
+  justplugin.wild.nether:
+    description: Random teleport in the Nether
+    default: op
+    children:
+      justplugin.wild: true
+  justplugin.wild.end:
+    description: Random teleport in The End
+    default: op
+    children:
+      justplugin.wild: true
+
+  # --- Baltop ---
+  justplugin.baltop.viewhidden:
+    description: See hidden players in the balance leaderboard GUI
+    default: op
+
+  # --- Team ---
+  justplugin.team.list:
+    description: List all teams on the server (/team list)
+    default: op
+
+  # --- Team Home Bypass Permissions ---
+  justplugin.teamhome.cooldownbypass:
+    description: Bypass team home pre-teleport countdown
+    default: false
+  justplugin.teamhome.delaybypass:
+    description: Bypass team home delay between uses
+    default: false
+  justplugin.teamhome.unsafetp:
+    description: Bypass team home safe teleport protection (with confirmation)
     default: op
 

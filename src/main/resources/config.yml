@@ -32,32 +32,47 @@ economy:
   # Currency symbol displayed before amounts (e.g. "$100.00").
   # When provider is "vault", this is ignored — Vault's economy plugin provides formatting.
   currency-symbol: "$"
+  # Whether to show the currency symbol in the scoreboard's {balance_short} placeholder.
+  # When false, scoreboard shows "25.70K" instead of "$25.70K".
+  show-symbol-scoreboard: false
 
 # ==========================================
 # Teleportation Settings
 # ==========================================
 teleport:
-  # Delay in seconds before teleporting (0 = instant).
-  # Players with justplugin.teleport.bypass skip this delay.
-  # Moving during the delay cancels the teleport.
-  delay: 3
   # How long TPA requests last before auto-expiring (seconds).
   request-timeout: 60
   # Maximum distance from world center for /tpr (wild/rtp).
-  wild-range: 5000
+  wild-range: 50000
   # Minimum distance from 0,0 for /tpr to prevent spawning too close to spawn.
   wild-min-range: 500
 
-  # --- Cooldowns (seconds between command uses) ---
-  # Applies to ALL players, even OPs.
-  # Only players with explicit nocooldown permission bypass these.
-  # Set to 0 to disable the cooldown for that feature.
-  cooldown-tpa: 30
-  cooldown-tpahere: 30
-  cooldown-warp: 10
-  cooldown-spawn: 10
-  cooldown-back: 10
-  cooldown-home: 10
+  # --- Cooldowns (countdown before teleport executes) ---
+  # After running a TP command, the player must wait this many seconds
+  # before the teleportation actually happens. Moving or taking damage cancels it.
+  # OPs ALSO wait for cooldowns unless they have the explicit cooldownbypass permission.
+  # Set to 0 for instant teleportation (no countdown).
+  cooldown-tpa: 3
+  cooldown-tpahere: 3
+  cooldown-warp: 5
+  cooldown-spawn: 5
+  cooldown-back: 5
+  cooldown-home: 3
+  cooldown-teamhome: 3
+  cooldown-wild: 5
+
+  # --- Delays (minimum time between successive uses of the same command) ---
+  # After using a TP command, the player must wait this long before they can use
+  # the same command again. OPs auto-skip delays.
+  # Values in seconds. Set to 0 to disable the delay for that feature.
+  delay-tpa: 180          # 3 minutes
+  delay-tpahere: 180      # 3 minutes
+  delay-warp: 900         # 15 minutes
+  delay-spawn: 300        # 5 minutes
+  delay-back: 1800        # 30 minutes
+  delay-home: 300         # 5 minutes
+  delay-teamhome: 300     # 5 minutes
+  delay-wild: 1800        # 30 minutes
 
   # --- Safe Teleport Protection ---
   # When enabled, teleportation is blocked if the destination is unsafe.
@@ -70,7 +85,9 @@ teleport:
   safe-teleport-warp: true
   safe-teleport-spawn: true
   safe-teleport-home: true
+  safe-teleport-teamhome: true
   safe-teleport-back: true
+  safe-teleport-wild: true
 
 # ==========================================
 # Clickable Commands
@@ -106,7 +123,7 @@ trade:
 # ==========================================
 homes:
   # Maximum number of homes per player.
-  max-homes: 5
+  max-homes: 3
 
 # ==========================================
 # Warning System
@@ -224,6 +241,32 @@ tab:
   # Supports MiniMessage. Placeholders: {player}, {online}, {max}
   header: "\n<gradient:#00aaff:#00ffaa><bold>  JustPlugin Server  </bold></gradient>\n"
   footer: "\n<gray>Players: <yellow>{online}<gray>/<yellow>{max}\n<gray>Type <yellow>/help</yellow> for commands.\n"
+
+# ==========================================
+# Entity Clear System (ClearLag replacement)
+# Automatically clears ground items and optionally mobs at set intervals.
+# ==========================================
+entity-clear:
+  # Enable or disable the automatic entity clearing system.
+  enabled: true
+  # Interval between clears, in seconds. Default: 900 (15 minutes).
+  interval: 900
+  # How many seconds before a clear to send a warning message. Set to 0 to disable.
+  warning-before: 30
+  # What to clear:
+  clear-items: true
+  clear-hostile: false
+  clear-friendly: false
+  # Whether to announce clears and warnings to all players (true) or staff only (false).
+  announce-to-all: true
+  # Warning message before a clear. Use %seconds% for the countdown.
+  warning-message: "<yellow>⚠ Ground items will be cleared in %seconds% seconds!</yellow>"
+  # Message shown after a clear. Use %items%, %mobs%, %total%.
+  clear-message: "<gray>[<gradient:#00aaff:#00ffaa>EntityClear</gradient>] <green>Cleared %items% items and %mobs% mobs.</green>"
+  # Excessive entity thresholds per chunk (staff notifications).
+  excessive-mob-threshold: 50
+  excessive-armorstand-threshold: 30
+  excessive-itemframe-threshold: 30
 
 # ==========================================
 # Spawn Settings
@@ -590,5 +633,5 @@ command-settings:
     permission: "justplugin.tab"
   scoreboard:
     enabled: true
-    permission: "justplugin.scoreboard"
+    reload-permission: "justplugin.scoreboard.reload"
 

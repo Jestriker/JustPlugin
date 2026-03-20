@@ -1,7 +1,5 @@
 package org.justme.justPlugin.commands.economy;
 
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -11,8 +9,6 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @SuppressWarnings("NullableProblems")
 public class BaltopCommand implements TabExecutor {
@@ -25,8 +21,20 @@ public class BaltopCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
+        if (!(sender instanceof Player player)) {
+            // Console fallback: show text-based output
+            showTextBaltop(sender);
+            return true;
+        }
+
+        // Open the Baltop GUI for players
+        plugin.getBaltopGui().open(player);
+        return true;
+    }
+
+    private void showTextBaltop(CommandSender sender) {
         boolean isOp = sender.isOp();
-        List<Map.Entry<UUID, Double>> sorted = plugin.getEconomyManager().getAllBalancesSorted();
+        var sorted = plugin.getEconomyManager().getAllBalancesSorted();
 
         sender.sendMessage(CC.translate("<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
         sender.sendMessage(CC.translate("  <gold><bold>💰 Balance Top</bold></gold>"));
@@ -34,25 +42,23 @@ public class BaltopCommand implements TabExecutor {
 
         int rank = 0;
         int displayCount = 0;
-        for (Map.Entry<UUID, Double> entry : sorted) {
+        for (var entry : sorted) {
             if (displayCount >= 10) break;
-            UUID uuid = entry.getKey();
+            java.util.UUID uuid = entry.getKey();
             double balance = entry.getValue();
             boolean hidden = plugin.getEconomyManager().isBaltopHidden(uuid);
 
-            OfflinePlayer offP = Bukkit.getOfflinePlayer(uuid);
+            org.bukkit.OfflinePlayer offP = org.bukkit.Bukkit.getOfflinePlayer(uuid);
             String name = offP.getName() != null ? offP.getName() : uuid.toString().substring(0, 8);
 
             rank++;
 
             if (hidden) {
                 if (isOp) {
-                    // OPs see hidden players but with an indicator
                     String medal = getMedal(rank);
                     sender.sendMessage(CC.translate("  " + medal + " <gray>" + name + " <dark_gray>(hidden) <gray>- <yellow>" + plugin.getEconomyManager().format(balance)));
                     displayCount++;
                 }
-                // Non-OPs skip hidden players entirely — don't count toward displayed
                 continue;
             }
 
@@ -66,19 +72,6 @@ public class BaltopCommand implements TabExecutor {
         }
 
         sender.sendMessage(CC.translate("<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-
-        // Show sender's own rank if they're a player
-        if (sender instanceof Player player) {
-            int playerRank = 1;
-            for (Map.Entry<UUID, Double> entry : sorted) {
-                if (entry.getKey().equals(player.getUniqueId())) break;
-                playerRank++;
-            }
-            double myBal = plugin.getEconomyManager().getBalance(player.getUniqueId());
-            sender.sendMessage(CC.translate("  <gray>Your rank: <gold>#" + playerRank + " <gray>- <yellow>" + plugin.getEconomyManager().format(myBal)));
-        }
-
-        return true;
     }
 
     private String getMedal(int rank) {
@@ -95,4 +88,3 @@ public class BaltopCommand implements TabExecutor {
         return List.of();
     }
 }
-

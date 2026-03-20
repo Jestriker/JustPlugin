@@ -23,6 +23,9 @@ import org.justme.justPlugin.api.JustPluginAPIImpl;
 import org.justme.justPlugin.api.JustPluginProvider;
 import org.justme.justPlugin.listeners.PlayerListener;
 import org.justme.justPlugin.listeners.VanillaCommandLogger;
+import org.justme.justPlugin.gui.BaltopGui;
+import org.justme.justPlugin.gui.HomeGui;
+import org.justme.justPlugin.gui.RtpGui;
 import org.justme.justPlugin.managers.*;
 import org.justme.justPlugin.util.CC;
 
@@ -56,6 +59,9 @@ public final class JustPlugin extends JavaPlugin {
     private WebEditorManager webEditorManager;
     private MotdManager motdManager;
     private ScoreboardManager scoreboardManager;
+    private HomeGui homeGui;
+    private BaltopGui baltopGui;
+    private RtpGui rtpGui;
 
     @Override
     public void onEnable() {
@@ -103,6 +109,14 @@ public final class JustPlugin extends JavaPlugin {
         playerListener = new PlayerListener(this);
         Bukkit.getPluginManager().registerEvents(playerListener, this);
         Bukkit.getPluginManager().registerEvents(new VanillaCommandLogger(this), this);
+
+        // Initialize and register GUI listeners
+        homeGui = new HomeGui(this);
+        baltopGui = new BaltopGui(this);
+        rtpGui = new RtpGui(this);
+        Bukkit.getPluginManager().registerEvents(homeGui, this);
+        Bukkit.getPluginManager().registerEvents(baltopGui, this);
+        Bukkit.getPluginManager().registerEvents(rtpGui, this);
 
         // Register commands
         registerCommands();
@@ -342,7 +356,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("trade", new TradeCommand(this));
         registerCmd("discord", new DiscordCommand(this));
         registerCmd("applyedits", new ApplyEditsCommand(this));
-        registerCmd("scoreboard", new ScoreboardCommand(this));
+        registerCmd("reloadscoreboard", new ReloadScoreboardCommand(this));
 
         // Overrides (replace vanilla commands)
         registerCmd("help", new HelpCommand(this));
@@ -483,4 +497,7 @@ public final class JustPlugin extends JavaPlugin {
     public MotdManager getMotdManager() { return motdManager; }
     public ScoreboardManager getScoreboardManager() { return scoreboardManager; }
     public PlayerListener getPlayerListener() { return playerListener; }
+    public HomeGui getHomeGui() { return homeGui; }
+    public BaltopGui getBaltopGui() { return baltopGui; }
+    public RtpGui getRtpGui() { return rtpGui; }
 }

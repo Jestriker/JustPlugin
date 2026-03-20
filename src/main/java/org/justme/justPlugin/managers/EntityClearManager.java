@@ -26,7 +26,7 @@ public class EntityClearManager {
     public void start() {
         if (!isEnabled()) return;
 
-        int intervalSeconds = plugin.getConfig().getInt("entity-clear.interval", 300);
+        int intervalSeconds = plugin.getConfig().getInt("entity-clear.interval", 900);
         int warningSeconds = plugin.getConfig().getInt("entity-clear.warning-before", 30);
 
         long intervalTicks = intervalSeconds * 20L;

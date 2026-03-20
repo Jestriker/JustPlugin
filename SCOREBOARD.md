@@ -32,8 +32,8 @@ The scoreboard updates every second by default (configurable) and each player se
 
 1. The scoreboard is **enabled by default** when JustPlugin is installed
 2. The config file `scoreboard.yml` is auto-generated in the plugin folder
-3. Players can toggle it with `/scoreboard` (or `/sb`)
-4. Admins can reload the config with `/scoreboard reload`
+3. The scoreboard is always visible to all players when enabled
+4. Staff can reload the config live with `/reloadscoreboard` (or `/reloadsb`)
 
 ---
 
@@ -125,6 +125,7 @@ Use `{placeholder_name}` in any line text or in the title. All placeholders are 
 | Placeholder | Aliases | Description | Default Emoji |
 |-------------|---------|-------------|---------------|
 | `{balance}` | `{bal}`, `{money}` | Formatted balance (e.g. `$1,234.56`) | 💰 |
+| `{balance_short}` | `{bal_short}`, `{money_short}` | Compact balance with K/M/B suffix (e.g. `25.70K`, `1.50M`). Currency symbol controlled by `economy.show-symbol-scoreboard` | 💰 |
 | `{balance_raw}` | `{bal_raw}` | Raw balance number (e.g. `1234.56`) | 💰 |
 | `{balance_rank}` | `{balrank}` | Player's rank in balance leaderboard (e.g. `#3`) | 🏆 |
 
@@ -135,7 +136,9 @@ Use `{placeholder_name}` in any line text or in the title. All placeholders are 
 | Placeholder | Aliases | Description | Default Emoji |
 |-------------|---------|-------------|---------------|
 | `{kills}` | `{player_kills}` | Total player kills | ⚔ |
+| `{kills_short}` | | Compact kills with K/M suffix (e.g. `1.50K`) | ⚔ |
 | `{deaths}` | | Total deaths | 💀 |
+| `{deaths_short}` | | Compact deaths with K/M suffix (e.g. `1.50K`) | 💀 |
 | `{kdr}` | `{kd}` | Kill/death ratio (e.g. `2.50`) | ⚔ |
 | `{mobs_killed}` | `{mobkills}` | Total mobs killed | 🐛 |
 | `{blocks_broken}` | `{blocksbroken}` | Total blocks mined | ⛏ |
@@ -163,6 +166,7 @@ Use `{placeholder_name}` in any line text or in the title. All placeholders are 
 | Placeholder | Aliases | Description | Default Emoji |
 |-------------|---------|-------------|---------------|
 | `{team}` | `{team_name}` | Player's team name (or "None") | 🏴 |
+| `{has_team}` | | Returns "true" if player is in a team, "false" otherwise. Used for conditional lines | |
 | `{team_members}` | `{team_size}` | Number of members in the team | 👥 |
 | `{team_leader}` | | Team leader's name | 👑 |
 
@@ -200,7 +204,7 @@ Use `{placeholder_name}` in any line text or in the title. All placeholders are 
 | Placeholder | Aliases | Description | Default Emoji |
 |-------------|---------|-------------|---------------|
 | `{weather}` | | Current weather: Clear, Rain, or Thunder | 🌤 |
-| `{real_time}` | `{irl_time}`, `{clock}` | Real-world time (HH:mm:ss, uses config timezone) | 🕐 |
+| `{real_time}` | `{irl_time}`, `{clock}` | Real-world time formatted using `time-format` from scoreboard.yml (default: HH:mm). Uses config timezone | 🕐 |
 | `{real_date}` | `{irl_date}`, `{date}` | Real-world date (yyyy-MM-dd, uses config timezone) | 📅 |
 | `{game_time}` | `{world_time}` | In-game time (24h format, e.g. `14:30`) | 🌙 |
 
@@ -215,14 +219,49 @@ Use `{placeholder_name}` in any line text or in the title. All placeholders are 
 
 ## Line Configuration
 
-Each line in the `lines` list has three properties:
+Each line in the `lines` list has four properties:
 
 ```yaml
 lines:
   - text: "{emoji} <green>{balance}"    # The display text with MiniMessage + placeholders
     emoji: "💰"                          # The emoji to use when {emoji} is in the text
     show-emoji: true                     # Whether to show the emoji for THIS line
+    condition: ""                        # Optional: condition to show this line (empty = always show)
 ```
+
+### Conditional Lines
+
+Lines can have an optional `condition` field. When set, the line is only displayed if the condition evaluates to a truthy value. Supported conditions:
+
+| Condition | Description |
+|-----------|-------------|
+| `has_team` | Only show this line if the player is currently in a team |
+
+Example - Team line that only shows when the player is in a team:
+```yaml
+  - text: "{emoji} <white>Team <aqua>{team}"
+    emoji: "<aqua>⚡"
+    show-emoji: true
+    condition: "has_team"
+```
+
+### Time Format
+
+The `time-format` setting in `scoreboard.yml` controls how `{real_time}` is displayed in the scoreboard. It uses Java's `DateTimeFormatter` patterns:
+
+| Pattern | Example Output | Description |
+|---------|---------------|-------------|
+| `HH:mm` | `14:30` | 24-hour hours and minutes |
+| `HH:mm:ss` | `14:30:05` | 24-hour with seconds |
+| `hh:mm a` | `02:30 PM` | 12-hour with AM/PM |
+| `dd/MM` | `25/12` | Day and month |
+| `dd/MM/YY` | `25/12/26` | Day, month, 2-digit year |
+| `dd/MM/YYYY` | `25/12/2026` | Day, month, 4-digit year |
+| `MM/dd/YYYY` | `12/25/2026` | US-style date |
+| `EEEE` | `Wednesday` | Full day name |
+| `EEE` | `Wed` | Short day name |
+
+You can combine patterns: `dd/MM HH:mm`, `EEE HH:mm`, etc.
 
 ### How `{emoji}` works in text
 
@@ -257,8 +296,7 @@ Each line's `emoji` can be customized to any text or Unicode character.
 
 | Command | Aliases | Description | Permission |
 |---------|---------|-------------|------------|
-| `/scoreboard` | `/sb` | Toggle the sidebar scoreboard on/off for yourself | `justplugin.scoreboard` |
-| `/scoreboard reload` | `/sb reload` | Reload `scoreboard.yml` from disk | `justplugin.scoreboard.reload` |
+| `/reloadscoreboard` | `/reloadsb` | Reload `scoreboard.yml` from disk and refresh for all players (staff only) | `justplugin.scoreboard.reload` |
 
 ---
 
@@ -383,6 +421,6 @@ lines:
 - **Line limit:** Sidebar supports max 15 lines. Lines beyond 15 are silently ignored.
 - **Empty lines:** Use `text: "<dark_gray>"` with `show-emoji: false` as a spacer between sections.
 - **Separator lines:** Use `text: "<gray>━━━━━━━━━━━━━━━━━━━━"` for visual separators.
-- **Disable per-player:** Players can toggle the scoreboard with `/scoreboard` and the preference is saved across sessions and restarts.
+- **Disable per-player:** Not supported. The scoreboard is always visible to all players when enabled. Staff can disable it globally via `enabled: false` in `scoreboard.yml` and then `/reloadscoreboard`.
 - **MiniMessage:** All text fields support full MiniMessage formatting - gradients, colors, bold, italic, etc. See `FORMATTING.md` for details.
 

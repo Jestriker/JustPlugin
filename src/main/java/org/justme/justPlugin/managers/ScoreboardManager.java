@@ -10,6 +10,7 @@ import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
+import io.papermc.paper.scoreboard.numbers.NumberFormat;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 import org.justme.justPlugin.util.PlaceholderResolver;
@@ -35,10 +36,11 @@ public class ScoreboardManager {
     private int updateInterval; // ticks
     private boolean globalEmojis;
     private String title;
+    private String timeFormat;
+    private String playtimeFormat;
     private List<LineEntry> lines = new ArrayList<>();
 
     private BukkitTask updateTask;
-    private final Set<UUID> disabled = new HashSet<>(); // players who toggled it off
     private final Map<UUID, Scoreboard> playerBoards = new HashMap<>();
 
     public ScoreboardManager(JustPlugin plugin) {
@@ -94,7 +96,9 @@ public class ScoreboardManager {
         enabled = config.getBoolean("enabled", true);
         updateInterval = config.getInt("update-interval", 20);
         globalEmojis = config.getBoolean("global-emojis", true);
-        title = config.getString("title", "<gradient:#00aaff:#00ffaa><bold>JustPlugin</bold></gradient>");
+        title = config.getString("title", "<gradient:#00aaff:#00ffaa><bold>JustServer</bold></gradient>");
+        timeFormat = config.getString("time-format", "HH:mm");
+        playtimeFormat = config.getString("playtime-format", "compact");
 
         // Load lines
         lines.clear();
@@ -103,10 +107,12 @@ public class ScoreboardManager {
             Object textObj = rawLine.get("text");
             Object emojiObj = rawLine.get("emoji");
             Object showObj = rawLine.get("show-emoji");
+            Object condObj = rawLine.get("condition");
             String text = textObj != null ? String.valueOf(textObj) : "";
             String emoji = emojiObj != null ? String.valueOf(emojiObj) : "";
             boolean showEmoji = showObj instanceof Boolean ? (Boolean) showObj : true;
-            lines.add(new LineEntry(text, emoji, showEmoji));
+            String condition = condObj != null ? String.valueOf(condObj) : "";
+            lines.add(new LineEntry(text, emoji, showEmoji, condition));
         }
     }
 
@@ -124,11 +130,9 @@ public class ScoreboardManager {
     public void reload() {
         stop();
         loadConfig();
-        // Re-load disabled states from player data
+        // Show scoreboard to all online players
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!disabled.contains(p.getUniqueId())) {
-                show(p);
-            }
+            show(p);
         }
         start();
     }
@@ -142,15 +146,6 @@ public class ScoreboardManager {
         if (!enabled) return;
         UUID uuid = player.getUniqueId();
 
-        // Check if player has disabled it
-        if (disabled.contains(uuid)) return;
-
-        // Load preference from disk if not in cache
-        YamlConfiguration data = plugin.getDataManager().getPlayerData(uuid);
-        if (data.getBoolean("scoreboard-disabled", false)) {
-            disabled.add(uuid);
-            return;
-        }
 
         Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
         playerBoards.put(uuid, board);
@@ -170,31 +165,6 @@ public class ScoreboardManager {
     }
 
     /**
-     * Toggle the scoreboard on/off for a player.
-     * @return true if the scoreboard is now visible.
-     */
-    public boolean toggle(Player player) {
-        UUID uuid = player.getUniqueId();
-        if (disabled.contains(uuid)) {
-            disabled.remove(uuid);
-            // Persist
-            YamlConfiguration data = plugin.getDataManager().getPlayerData(uuid);
-            data.set("scoreboard-disabled", false);
-            plugin.getDataManager().savePlayerData(uuid, data);
-            show(player);
-            return true;
-        } else {
-            disabled.add(uuid);
-            // Persist
-            YamlConfiguration data = plugin.getDataManager().getPlayerData(uuid);
-            data.set("scoreboard-disabled", true);
-            plugin.getDataManager().savePlayerData(uuid, data);
-            hide(player);
-            return false;
-        }
-    }
-
-    /**
      * Clean up when player quits.
      */
     public void handleQuit(UUID uuid) {
@@ -205,9 +175,10 @@ public class ScoreboardManager {
         return enabled;
     }
 
-    public boolean isDisabledForPlayer(UUID uuid) {
-        return disabled.contains(uuid);
+    public String getPlaytimeFormat() {
+        return playtimeFormat;
     }
+
 
     // =========== Update Logic ===========
 
@@ -235,12 +206,25 @@ public class ScoreboardManager {
         Component titleComponent = CC.translate(resolvedTitle);
         Objective objective = board.registerNewObjective("jp_sidebar", Criteria.DUMMY, titleComponent);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        objective.numberFormat(NumberFormat.blank());
+
+        // Filter lines based on conditions
+        List<LineEntry> visibleLines = new ArrayList<>();
+        for (LineEntry entry : lines) {
+            if (!entry.condition.isEmpty()) {
+                String condValue = PlaceholderResolver.resolve(player, plugin, "{" + entry.condition + "}");
+                if ("false".equalsIgnoreCase(condValue) || condValue.equals("{" + entry.condition + "}")) {
+                    continue; // Condition not met, skip this line
+                }
+            }
+            visibleLines.add(entry);
+        }
 
         // Bukkit sidebar shows lines in descending score order.
-        // We assign scores from lines.size() down to 1.
-        int maxLines = Math.min(lines.size(), 15); // Sidebar supports max 15 lines
+        // We assign scores from visibleLines.size() down to 1.
+        int maxLines = Math.min(visibleLines.size(), 15); // Sidebar supports max 15 lines
         for (int i = 0; i < maxLines; i++) {
-            LineEntry entry = lines.get(i);
+            LineEntry entry = visibleLines.get(i);
             String lineText = entry.text;
 
             // Resolve emoji
@@ -248,6 +232,18 @@ public class ScoreboardManager {
                 lineText = lineText.replace("{emoji}", entry.emoji);
             } else {
                 lineText = lineText.replace("{emoji}", "");
+            }
+
+            // Replace {real_time} with custom format before general resolution
+            if (lineText.contains("{real_time}")) {
+                try {
+                    String tz = plugin.getConfig().getString("timezone", "UTC");
+                    String formattedTime = java.time.LocalTime.now(java.time.ZoneId.of(tz))
+                            .format(java.time.format.DateTimeFormatter.ofPattern(timeFormat));
+                    lineText = lineText.replace("{real_time}", formattedTime);
+                } catch (Exception e) {
+                    lineText = lineText.replace("{real_time}", "??:??");
+                }
             }
 
             // Resolve placeholders
@@ -274,6 +270,15 @@ public class ScoreboardManager {
 
             objective.getScore(fakeEntry).setScore(maxLines - i);
         }
+
+        // Clean up extra teams from previous renders that are no longer needed
+        for (int i = maxLines; i < 15; i++) {
+            String teamName = "jp_l" + i;
+            var team = board.getTeam(teamName);
+            if (team != null) {
+                team.unregister();
+            }
+        }
     }
 
     /**
@@ -297,11 +302,17 @@ public class ScoreboardManager {
         public final String text;
         public final String emoji;
         public final boolean showEmoji;
+        public final String condition;
 
-        public LineEntry(String text, String emoji, boolean showEmoji) {
+        public LineEntry(String text, String emoji, boolean showEmoji, String condition) {
             this.text = text;
             this.emoji = emoji;
             this.showEmoji = showEmoji;
+            this.condition = condition != null ? condition : "";
+        }
+
+        public LineEntry(String text, String emoji, boolean showEmoji) {
+            this(text, emoji, showEmoji, "");
         }
     }
 }

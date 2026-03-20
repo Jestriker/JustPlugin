@@ -158,6 +158,13 @@ public final class PlaceholderResolver {
             // ===== Economy =====
             case "balance", "bal", "money" -> plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(uuid));
             case "balance_raw", "bal_raw" -> String.format("%.2f", plugin.getEconomyManager().getBalance(uuid));
+            case "balance_short", "bal_short", "money_short" -> {
+                double bal = plugin.getEconomyManager().getBalance(uuid);
+                String symbol = plugin.getConfig().getString("economy.currency-symbol", "$");
+                boolean showSymbol = plugin.getConfig().getBoolean("economy.show-symbol-scoreboard", false);
+                String prefix = showSymbol ? symbol : "";
+                yield prefix + formatCompact(bal);
+            }
             case "balance_rank", "balrank" -> {
                 var sorted = plugin.getEconomyManager().getAllBalancesSorted();
                 int rank = 1;
@@ -170,7 +177,9 @@ public final class PlaceholderResolver {
 
             // ===== Statistics =====
             case "kills", "player_kills" -> String.valueOf(player.getStatistic(Statistic.PLAYER_KILLS));
+            case "kills_short" -> formatCompact(player.getStatistic(Statistic.PLAYER_KILLS));
             case "deaths" -> String.valueOf(player.getStatistic(Statistic.DEATHS));
+            case "deaths_short" -> formatCompact(player.getStatistic(Statistic.DEATHS));
             case "kdr", "kd" -> {
                 int kills = player.getStatistic(Statistic.PLAYER_KILLS);
                 int deaths = player.getStatistic(Statistic.DEATHS);
@@ -193,16 +202,40 @@ public final class PlaceholderResolver {
             case "times_slept", "slept" -> String.valueOf(player.getStatistic(Statistic.SLEEP_IN_BED));
 
             // ===== Time & Playtime =====
-            case "total_playtime", "playtime" -> formatDuration(player.getStatistic(Statistic.PLAY_ONE_MINUTE) * 50L);
+            case "total_playtime", "playtime" -> {
+                String fmt = plugin.getScoreboardManager() != null
+                        ? plugin.getScoreboardManager().getPlaytimeFormat() : "compact";
+                yield formatDurationWithFormat(player.getStatistic(Statistic.PLAY_ONE_MINUTE) * 50L, fmt);
+            }
             case "session_playtime", "session" -> {
                 Long joinTime = sessionJoinTimes.get(uuid);
+                if (joinTime == null) yield "0m";
+                String fmt = plugin.getScoreboardManager() != null
+                        ? plugin.getScoreboardManager().getPlaytimeFormat() : "compact";
+                yield formatDurationWithFormat(System.currentTimeMillis() - joinTime, fmt);
+            }
+            // Explicit format variants (always available regardless of config)
+            case "total_playtime_detailed", "playtime_detailed" ->
+                    formatDuration(player.getStatistic(Statistic.PLAY_ONE_MINUTE) * 50L);
+            case "total_playtime_compact", "playtime_compact" ->
+                    formatDurationCompact(player.getStatistic(Statistic.PLAY_ONE_MINUTE) * 50L);
+            case "session_playtime_detailed", "session_detailed" -> {
+                Long joinTime = sessionJoinTimes.get(uuid);
                 yield joinTime != null ? formatDuration(System.currentTimeMillis() - joinTime) : "0s";
+            }
+            case "session_playtime_compact", "session_compact" -> {
+                Long joinTime = sessionJoinTimes.get(uuid);
+                yield joinTime != null ? formatDurationCompact(System.currentTimeMillis() - joinTime) : "< 1m";
             }
 
             // ===== Team =====
             case "team", "team_name" -> {
                 String teamName = plugin.getTeamManager().getPlayerTeam(uuid);
                 yield teamName != null ? teamName : "None";
+            }
+            case "has_team" -> {
+                String teamName = plugin.getTeamManager().getPlayerTeam(uuid);
+                yield teamName != null ? "true" : "false";
             }
             case "team_members", "team_size" -> {
                 String teamName = plugin.getTeamManager().getPlayerTeam(uuid);
@@ -214,9 +247,14 @@ public final class PlaceholderResolver {
                 String teamName = plugin.getTeamManager().getPlayerTeam(uuid);
                 if (teamName == null) yield "None";
                 TeamManager.TeamData data = plugin.getTeamManager().getTeam(teamName);
-                if (data == null) yield "None";
-                var leader = Bukkit.getOfflinePlayer(data.leader);
-                yield leader.getName() != null ? leader.getName() : "Unknown";
+                if (data == null || data.leaders.isEmpty()) yield "None";
+                StringBuilder sb = new StringBuilder();
+                for (UUID leaderUuid : data.leaders) {
+                    var leader = Bukkit.getOfflinePlayer(leaderUuid);
+                    if (!sb.isEmpty()) sb.append(", ");
+                    sb.append(leader.getName() != null ? leader.getName() : "Unknown");
+                }
+                yield sb.toString();
             }
 
             // ===== Home & Warp =====
@@ -334,6 +372,56 @@ public final class PlaceholderResolver {
         if (hours < 24) return hours + "h " + (minutes % 60) + "m";
         long days = hours / 24;
         return days + "d " + (hours % 24) + "h";
+    }
+
+    /**
+     * Format duration without seconds (compact mode).
+     * Shows minimum of "1m" even for durations under 1 minute.
+     */
+    private static String formatDurationCompact(long millis) {
+        long totalMinutes = millis / 60000;
+        if (totalMinutes < 1) return "< 1m";
+        if (totalMinutes < 60) return totalMinutes + "m";
+        long hours = totalMinutes / 60;
+        if (hours < 24) return hours + "h " + (totalMinutes % 60) + "m";
+        long days = hours / 24;
+        return days + "d " + (hours % 24) + "h";
+    }
+
+    /**
+     * Format duration as hours and minutes only (no day rollover).
+     */
+    private static String formatDurationHoursOnly(long millis) {
+        long totalMinutes = millis / 60000;
+        long hours = totalMinutes / 60;
+        long mins = totalMinutes % 60;
+        return hours + "h " + mins + "m";
+    }
+
+    /**
+     * Format duration using the specified format name.
+     * @param millis duration in milliseconds
+     * @param format "compact", "detailed", or "hours_only"
+     */
+    private static String formatDurationWithFormat(long millis, String format) {
+        return switch (format.toLowerCase()) {
+            case "detailed" -> formatDuration(millis);
+            case "hours_only" -> formatDurationHoursOnly(millis);
+            default -> formatDurationCompact(millis); // "compact" is default
+        };
+    }
+
+    /**
+     * Format a number compactly with K, M, B suffixes.
+     * e.g. 1500 -> "1.5K", 2500000 -> "2.5M", 999 -> "999"
+     */
+    public static String formatCompact(double value) {
+        if (value < 0) return "-" + formatCompact(-value);
+        if (value >= 1_000_000_000) return String.format("%.2fB", value / 1_000_000_000);
+        if (value >= 1_000_000) return String.format("%.2fM", value / 1_000_000);
+        if (value >= 1_000) return String.format("%.2fK", value / 1_000);
+        if (value == (long) value) return String.valueOf((long) value);
+        return String.format("%.2f", value);
     }
 
     /**

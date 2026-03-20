@@ -23,7 +23,37 @@ update-interval: 20
 global-emojis: true
 
 # Sidebar title. Supports MiniMessage and all placeholders.
-title: "<gradient:#00aaff:#00ffaa><bold>  JustPlugin  </bold></gradient>"
+title: "<gradient:#00aaff:#00ffaa><bold>  JustServer  </bold></gradient>"
+
+# ==========================================
+# Time Format
+# ==========================================
+# The format used for {real_time} in the scoreboard footer.
+# Supported patterns (Java DateTimeFormatter):
+#   HH:mm         - 24-hour hours and minutes (e.g. 14:30)
+#   HH:mm:ss      - 24-hour with seconds (e.g. 14:30:05)
+#   hh:mm a       - 12-hour with AM/PM (e.g. 02:30 PM)
+#   dd/MM          - Day and month (e.g. 25/12)
+#   dd/MM/YY       - Day, month, 2-digit year (e.g. 25/12/26)
+#   dd/MM/YYYY     - Day, month, 4-digit year (e.g. 25/12/2026)
+#   MM/dd/YYYY     - US-style date (e.g. 12/25/2026)
+#   YYYY           - Year only (e.g. 2026)
+#   YY             - 2-digit year (e.g. 26)
+#   EEEE           - Full day name (e.g. Wednesday)
+#   EEE            - Short day name (e.g. Wed)
+#   Or any combination of the above!
+time-format: "HH:mm"
+
+# ==========================================
+# Playtime Format
+# ==========================================
+# Controls how {session_playtime} and {total_playtime} are displayed.
+# Available formats:
+#   compact    - No seconds shown, rounds to minutes (e.g. 1m, 5m, 2h 1m, 3d 5h)
+#   detailed   - Includes seconds at all levels (e.g. 45s, 5m 30s, 2h 1m, 3d 5h)
+#   hours_only - Only hours and minutes (e.g. 0h 1m, 0h 5m, 2h 1m, 50h 30m)
+# Default is "compact" to avoid constant scoreboard updates every second.
+playtime-format: "compact"
 
 # ==========================================
 # Lines Configuration
@@ -33,81 +63,58 @@ title: "<gradient:#00aaff:#00ffaa><bold>  JustPlugin  </bold></gradient>"
 #               Use {emoji} in the text to place the emoji where you want it.
 #   emoji:      The default emoji for this line. Can be changed to any text/symbol.
 #   show-emoji: Whether to show the emoji for this specific line (respects global-emojis too).
+#   condition:  Optional condition to show this line. Supported: "has_team" (only shows if player is in a team).
+#               Leave empty or omit to always show the line.
 #
 # IMPORTANT: The sidebar supports a maximum of 15 lines.
 # Lines are displayed in the order listed below (top to bottom).
 #
 # Use {empty} or {blank} for empty space.
 # Use {line} for a separator line (━━━━━━━).
+#
+# Compact number formats: {balance_short}, {kills_short}, {deaths_short}
+# These format numbers with K, M, B suffixes (e.g. 25.70K, 1.50M).
 # ==========================================
 
 lines:
-  # --- Header separator ---
-  - text: "<gray>━━━━━━━━━━━━━━━━━━━━"
+  # --- Blank spacer ---
+  - text: " "
     emoji: ""
     show-emoji: false
 
-  # --- Player Info ---
-  - text: "{emoji} <white>{player}"
-    emoji: "👤"
+  # --- Money ---
+  - text: "{emoji} <white>Money <green>{balance_short}"
+    emoji: "<green>$"
     show-emoji: true
 
-  - text: "{emoji} <red>{health}<gray>/<red>{max_health} <dark_gray>HP"
-    emoji: "❤"
+  # --- Kills ---
+  - text: "{emoji} <white>Kills <red>{kills_short}"
+    emoji: "<red>🗡"
     show-emoji: true
 
-  - text: "{emoji} <gold>{food}<gray>/20 <dark_gray>Hunger"
-    emoji: "🍖"
+  # --- Deaths ---
+  - text: "{emoji} <white>Deaths <#ff8800>{deaths_short}"
+    emoji: "<#ff8800>☠"
     show-emoji: true
 
-  # --- Separator ---
-  - text: "<dark_gray>"
+  # --- Playtime (session-based, resets on reconnect) ---
+  - text: "{emoji} <white>Playtime <yellow>{session_playtime}"
+    emoji: "<yellow>⏳"
+    show-emoji: true
+
+  # --- Team (only shown if player is in a team) ---
+  - text: "{emoji} <white>Team <aqua>{team}"
+    emoji: "<aqua>🛡"
+    show-emoji: true
+    condition: "has_team"
+
+  # --- Footer spacer ---
+  - text: " "
     emoji: ""
     show-emoji: false
 
-  # --- Economy ---
-  - text: "{emoji} <green>{balance}"
-    emoji: "💰"
-    show-emoji: true
-
-  - text: "{emoji} <yellow>{kills} <dark_gray>Kills <gray>| <yellow>{deaths} <dark_gray>Deaths"
-    emoji: "⚔"
-    show-emoji: true
-
-  # --- Separator ---
-  - text: "<dark_gray>"
-    emoji: ""
-    show-emoji: false
-
-  # --- Location ---
-  - text: "{emoji} <aqua>{x}<gray>, <aqua>{y}<gray>, <aqua>{z}"
-    emoji: "📍"
-    show-emoji: true
-
-  - text: "{emoji} <white>{world} <dark_gray>({direction})"
-    emoji: "🌍"
-    show-emoji: true
-
-  # --- Separator ---
-  - text: "<dark_gray>"
-    emoji: ""
-    show-emoji: false
-
-  # --- Server Info ---
-  - text: "{emoji} <white>{online}<gray>/<white>{max_players} <dark_gray>Players"
-    emoji: "👥"
-    show-emoji: true
-
-  - text: "{emoji} <white>{ping}<dark_gray>ms"
-    emoji: "📶"
-    show-emoji: true
-
-  # --- Footer separator ---
-  - text: "<gray>━━━━━━━━━━━━━━━━━━━━"
-    emoji: ""
-    show-emoji: false
-
-  - text: " <dark_gray>{real_time} | TPS: {tps}"
+  # --- Footer: ping + time ---
+  - text: "    <#0368cf>{ping}ms <white>| <#0368cf>{real_time}"
     emoji: ""
     show-emoji: false
 

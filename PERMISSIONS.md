@@ -62,8 +62,7 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.kill                  ← Self only
 │   ├── justplugin.tab
 │   ├── justplugin.playerlist            ← View advanced player list
-│   ├── justplugin.deathitems            ← View/restore own death items
-│   └── justplugin.scoreboard            ← Toggle sidebar scoreboard
+│   └── justplugin.deathitems            ← View/restore own death items
 │
 │   [No permission needed — public commands]
 │   ├── /getpos (self)                   ← Always public, no permission
@@ -99,6 +98,9 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.baltophide         ← Hide yourself from baltop
 │   ├── justplugin.baltophide.others  ← Hide other players from baltop
 │   ├── justplugin.baltophide.notify  ← Receive baltop hide notifications
+│   ├── justplugin.baltop.viewhidden ← See hidden players in Baltop GUI
+│   ├── justplugin.wild.nether       ← Random teleport in Nether (grants .wild)
+│   ├── justplugin.wild.end          ← Random teleport in The End (grants .wild)
 │   ├── justplugin.playerlist         ← Advanced player list
 │   ├── justplugin.playerlist.hide    ← Hide yourself from player list
 │   ├── justplugin.playerlist.hide.others  ← Hide other players from player list
@@ -253,11 +255,13 @@ Includes all permissions listed in this document.
 | `justplugin.tpa` | Send teleport requests to other players | `true` (player) | `/tpa` |
 | `justplugin.tpahere` | Request a player to teleport to you | `true` (player) | `/tpahere` |
 | `justplugin.tppos` | Teleport to exact coordinates | `op` | `/tppos` |
-| `justplugin.wild` | Random teleport to a safe location | `true` (player) | `/tpr`, `/wild`, `/rtp` |
+| `justplugin.wild` | Random teleport to a safe location (Overworld) | `true` (player) | `/tpr`, `/wild`, `/rtp` |
+| `justplugin.wild.nether` | Random teleport in the Nether (grants `.wild`) | `op` | `/tpr` (Nether option) |
+| `justplugin.wild.end` | Random teleport in The End (grants `.wild`) | `op` | `/tpr` (End option) |
 | `justplugin.back` | Return to your last location before a teleport | `true` (player) | `/back` |
 | `justplugin.spawn` | Teleport to the world spawn point | `true` (player) | `/spawn` |
 | `justplugin.setspawn` | Set the world spawn point | `op` | `/setspawn` |
-| `justplugin.teleport.bypass` | Bypass the teleport warmup delay | `op` | All teleport commands |
+| `justplugin.teleport.bypass` | Legacy bypass for teleport warmup (use per-command `.cooldownbypass` instead) | `op` | All teleport commands |
 
 > **Note:** `/tpaccept`, `/tpacancel`, and `/tpreject` have no permission requirement — any player can accept/cancel/reject requests.
 
@@ -298,6 +302,7 @@ Includes all permissions listed in this document.
 | `justplugin.baltophide` | Hide yourself from the balance leaderboard | `op` | `/baltophide` |
 | `justplugin.baltophide.others` | Hide other players from the balance leaderboard | `op` | `/baltophide <player>` |
 | `justplugin.baltophide.notify` | Receive notifications when players are hidden/unhidden from baltop | `op` | `/baltophide` |
+| `justplugin.baltop.viewhidden` | See hidden players in the Balance Leaderboard GUI | `op` | `/baltop` |
 
 ---
 
@@ -442,8 +447,7 @@ Includes all permissions listed in this document.
 | `justplugin.discord.set` | Change the Discord link | `op` | `/discord set <link>` |
 | `justplugin.applyedits` | Apply config changes from the web editor (**highest-level**) | `op` | `/applyedits` |
 | `justplugin.tab` | Manually refresh the tab list | `true` (player) | `/tab` |
-| `justplugin.scoreboard` | Toggle the sidebar scoreboard on/off | `true` (player) | `/scoreboard` |
-| `justplugin.scoreboard.reload` | Reload the scoreboard configuration from disk | `op` | `/scoreboard reload` |
+| `justplugin.scoreboard.reload` | Reload the scoreboard config and refresh for all players (staff only) | `op` | `/reloadscoreboard` |
 
 ---
 
@@ -512,28 +516,31 @@ These control which log categories a player sees in-game. All log actions are al
 
 ### ⏱️ Cooldown Bypass Permissions
 
-These bypass the cooldown timer between uses. **NOT included in `justplugin.*`** — must be explicitly granted. Even OPs have cooldowns unless this is set.
+Cooldown = the countdown timer BEFORE the teleport executes (e.g. 3 seconds standing still). **NOT included in `justplugin.*`** — even OPs wait for cooldowns unless this permission is explicitly granted.
 
 | Permission | Description | Default | Used By |
 |------------|-------------|---------|---------|
-| `justplugin.tpa.nocooldown` | Bypass TPA cooldown between uses | `false` | `/tpa` |
-| `justplugin.tpahere.nocooldown` | Bypass TPAHere cooldown between uses | `false` | `/tpahere` |
-| `justplugin.warp.nocooldown` | Bypass warp cooldown between uses | `false` | `/warp` |
-| `justplugin.spawn.nocooldown` | Bypass spawn cooldown between uses | `false` | `/spawn` |
-| `justplugin.home.nocooldown` | Bypass home cooldown between uses | `false` | `/home` |
-| `justplugin.back.nocooldown` | Bypass back cooldown between uses | `false` | `/back` |
+| `justplugin.tpa.cooldownbypass` | Skip TPA pre-teleport countdown | `false` | `/tpa` |
+| `justplugin.tpahere.cooldownbypass` | Skip TPAHere pre-teleport countdown | `false` | `/tpahere` |
+| `justplugin.warp.cooldownbypass` | Skip warp pre-teleport countdown | `false` | `/warp` |
+| `justplugin.spawn.cooldownbypass` | Skip spawn pre-teleport countdown | `false` | `/spawn` |
+| `justplugin.home.cooldownbypass` | Skip home pre-teleport countdown | `false` | `/home` |
+| `justplugin.back.cooldownbypass` | Skip back pre-teleport countdown | `false` | `/back` |
+| `justplugin.wild.cooldownbypass` | Skip wild/RTP pre-teleport countdown | `false` | `/tpr` |
 
-### ⏳ Warmup Delay Bypass Permissions
+### ⏳ Delay Bypass Permissions
 
-These bypass the teleport warmup delay (the X-second wait before teleporting). **Included in `justplugin.*`** for OPs.
+Delay = minimum time between successive uses of the same command (e.g. 3 minutes). OPs auto-skip delays. Non-OPs need these permissions to bypass.
 
 | Permission | Description | Default | Used By |
 |------------|-------------|---------|---------|
-| `justplugin.tpa.cooldownbypass` | Skip TPA teleport warmup delay | `op` | `/tpa` |
-| `justplugin.tpahere.cooldownbypass` | Skip TPAHere teleport warmup delay | `op` | `/tpahere` |
-| `justplugin.home.cooldownbypass` | Skip home teleport warmup delay | `op` | `/home` |
-| `justplugin.warp.cooldownbypass` | Skip warp teleport warmup delay | `op` | `/warp` |
-| `justplugin.back.cooldownbypass` | Skip back teleport warmup delay | `op` | `/back` |
+| `justplugin.tpa.delaybypass` | Bypass TPA delay between uses | `false` | `/tpa` |
+| `justplugin.tpahere.delaybypass` | Bypass TPAHere delay between uses | `false` | `/tpahere` |
+| `justplugin.warp.delaybypass` | Bypass warp delay between uses | `false` | `/warp` |
+| `justplugin.spawn.delaybypass` | Bypass spawn delay between uses | `false` | `/spawn` |
+| `justplugin.home.delaybypass` | Bypass home delay between uses | `false` | `/home` |
+| `justplugin.back.delaybypass` | Bypass back delay between uses | `false` | `/back` |
+| `justplugin.wild.delaybypass` | Bypass wild/RTP delay between uses | `false` | `/tpr` |
 
 ### 👁️ Visibility Permissions
 

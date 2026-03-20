@@ -9,6 +9,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
@@ -29,11 +30,11 @@ public class SpawnCommand implements TabExecutor {
             return true;
         }
 
-        // Cooldown check (applies even to OPs unless explicit bypass)
-        if (!player.hasPermission("justplugin.spawn.nocooldown")
-                && plugin.getCooldownManager().isOnCooldown(player.getUniqueId(), "spawn")) {
-            int remaining = plugin.getCooldownManager().getRemainingSeconds(player.getUniqueId(), "spawn");
-            player.sendMessage(CC.error("You must wait <yellow>" + remaining + "</yellow> seconds before using this command again."));
+        // Delay check (time between uses) — OPs auto-skip, or explicit delaybypass permission
+        if (!player.isOp() && !player.hasPermission("justplugin.spawn.delaybypass")
+                && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "spawn")) {
+            int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "spawn");
+            player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
             return true;
         }
 
@@ -59,7 +60,7 @@ public class SpawnCommand implements TabExecutor {
         boolean initiated = plugin.getTeleportManager().teleportWithSafety(
                 player, spawnLoc, "justplugin.teleport.bypass", "spawn", "justplugin.spawn.unsafetp");
         if (initiated) {
-            plugin.getCooldownManager().setCooldown(player.getUniqueId(), "spawn");
+            plugin.getCooldownManager().setDelayStart(player.getUniqueId(), "spawn");
             player.sendMessage(CC.success("Teleporting to spawn."));
         }
         return true;

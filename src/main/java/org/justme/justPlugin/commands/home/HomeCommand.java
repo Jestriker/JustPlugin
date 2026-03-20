@@ -7,10 +7,10 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,37 +30,33 @@ public class HomeCommand implements TabExecutor {
             return true;
         }
 
-        Map<String, Location> homes = plugin.getHomeManager().getHomes(player.getUniqueId());
-        if (homes.isEmpty()) {
-            boolean c = plugin.getConfig().getBoolean("clickable-commands.home-list", true);
-            String setHomeCmd = CC.suggestCmd("<yellow>/sethome <name></yellow>", "/sethome ", c);
-            player.sendMessage(CC.error("You have no homes set! Use " + setHomeCmd + " to set one."));
+        // If no args, open the Home GUI
+        if (args.length == 0) {
+            plugin.getHomeGui().open(player);
             return true;
         }
 
-        String name = args.length >= 1 ? args[0] : homes.keySet().iterator().next();
+        // If arg provided, try to teleport directly to that home
+        String name = args[0];
         Location loc = plugin.getHomeManager().getHome(player.getUniqueId(), name);
         if (loc == null) {
-            player.sendMessage(CC.error("Home <yellow>" + name + "</yellow> not found!"));
-            boolean clickable = plugin.getConfig().getBoolean("clickable-commands.home-list", true);
-            String homeList = homes.keySet().stream()
-                    .map(n -> CC.clickCmd("<yellow>" + n + "</yellow>", "/home " + n, clickable))
-                    .collect(java.util.stream.Collectors.joining("<gray>, "));
-            player.sendMessage(CC.translate(CC.PREFIX + "<gray>Your homes: " + homeList));
+            // Home not found — open GUI instead
+            player.sendMessage(CC.error("Home <yellow>" + name + "</yellow> not found! Opening homes menu..."));
+            plugin.getHomeGui().open(player);
             return true;
         }
 
-        // Cooldown check (applies even to OPs unless explicit bypass)
-        if (!player.hasPermission("justplugin.home.nocooldown")
-                && plugin.getCooldownManager().isOnCooldown(player.getUniqueId(), "home")) {
-            int remaining = plugin.getCooldownManager().getRemainingSeconds(player.getUniqueId(), "home");
-            player.sendMessage(CC.error("You must wait <yellow>" + remaining + "</yellow> seconds before using this command again."));
+        // Delay check (time between uses) — OPs auto-skip, or explicit delaybypass permission
+        if (!player.isOp() && !player.hasPermission("justplugin.home.delaybypass")
+                && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "home")) {
+            int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "home");
+            player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
             return true;
         }
 
         boolean teleported = plugin.getTeleportManager().teleportWithSafety(player, loc, "justplugin.home.cooldownbypass", "home", "justplugin.home.unsafetp");
         if (teleported) {
-            plugin.getCooldownManager().setCooldown(player.getUniqueId(), "home");
+            plugin.getCooldownManager().setDelayStart(player.getUniqueId(), "home");
             player.sendMessage(CC.success("Teleporting to home <yellow>" + name + "</yellow>."));
         }
         return true;

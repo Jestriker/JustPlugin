@@ -7,6 +7,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
@@ -42,11 +43,11 @@ public class WarpCommand implements TabExecutor {
             return true;
         }
 
-        // Cooldown check (applies even to OPs unless explicit bypass)
-        if (!player.hasPermission("justplugin.warp.nocooldown")
-                && plugin.getCooldownManager().isOnCooldown(player.getUniqueId(), "warp")) {
-            int remaining = plugin.getCooldownManager().getRemainingSeconds(player.getUniqueId(), "warp");
-            player.sendMessage(CC.error("You must wait <yellow>" + remaining + "</yellow> seconds before using this command again."));
+        // Delay check (time between uses) — OPs auto-skip, or explicit delaybypass permission
+        if (!player.isOp() && !player.hasPermission("justplugin.warp.delaybypass")
+                && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "warp")) {
+            int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "warp");
+            player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
             return true;
         }
 
@@ -58,7 +59,7 @@ public class WarpCommand implements TabExecutor {
         boolean initiated = plugin.getTeleportManager().teleportWithSafety(
                 player, loc, "justplugin.warp.cooldownbypass", "warp", "justplugin.warp.unsafetp");
         if (initiated) {
-            plugin.getCooldownManager().setCooldown(player.getUniqueId(), "warp");
+            plugin.getCooldownManager().setDelayStart(player.getUniqueId(), "warp");
             player.sendMessage(CC.success("Warping to <yellow>" + args[0] + "</yellow>."));
         }
         return true;
