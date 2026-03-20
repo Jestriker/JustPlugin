@@ -26,6 +26,7 @@ import org.justme.justPlugin.listeners.VanillaCommandLogger;
 import org.justme.justPlugin.gui.BaltopGui;
 import org.justme.justPlugin.gui.HomeGui;
 import org.justme.justPlugin.gui.RtpGui;
+import org.justme.justPlugin.gui.rank.RankGuiManager;
 import org.justme.justPlugin.managers.*;
 import org.justme.justPlugin.util.CC;
 
@@ -62,6 +63,8 @@ public final class JustPlugin extends JavaPlugin {
     private HomeGui homeGui;
     private BaltopGui baltopGui;
     private RtpGui rtpGui;
+    private RankGuiManager rankGuiManager;
+    private boolean luckPermsAvailable = false;
 
     @Override
     public void onEnable() {
@@ -114,17 +117,25 @@ public final class JustPlugin extends JavaPlugin {
         homeGui = new HomeGui(this);
         baltopGui = new BaltopGui(this);
         rtpGui = new RtpGui(this);
+        rankGuiManager = new RankGuiManager(this);
         Bukkit.getPluginManager().registerEvents(homeGui, this);
         Bukkit.getPluginManager().registerEvents(baltopGui, this);
         Bukkit.getPluginManager().registerEvents(rtpGui, this);
+        Bukkit.getPluginManager().registerEvents(rankGuiManager, this);
+
+        // Detect LuckPerms
+        luckPermsAvailable = Bukkit.getPluginManager().getPlugin("LuckPerms") != null;
 
         // Register commands
         registerCommands();
 
-        // Tab list update task (every 30 seconds)
+        // Tab list update task (configurable interval, default every 5 seconds)
         tabCommand = new TabCommand(this);
         registerCmd("tab", tabCommand);
-        Bukkit.getScheduler().runTaskTimer(this, () -> tabCommand.applyTabToAll(), 20L * 5, 20L * 30);
+        int tabRefresh = tabCommand.getRefreshInterval();
+        if (tabRefresh > 0) {
+            Bukkit.getScheduler().runTaskTimer(this, () -> tabCommand.applyTabToAll(), 20L * 5, 20L * tabRefresh);
+        }
 
         // Start scoreboard update task
         scoreboardManager.start();
@@ -357,6 +368,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("discord", new DiscordCommand(this));
         registerCmd("applyedits", new ApplyEditsCommand(this));
         registerCmd("reloadscoreboard", new ReloadScoreboardCommand(this));
+        registerCmd("rank", new RankCommand(this));
 
         // Overrides (replace vanilla commands)
         registerCmd("help", new HelpCommand(this));
@@ -466,6 +478,12 @@ public final class JustPlugin extends JavaPlugin {
             console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/mute</yellow> <gray>is enabled but <yellow>/msg</yellow> is disabled. Muted players won't be blocked from DMs."));
             anyWarning = true;
         }
+        // Ranks requires LuckPerms
+        if (commandSettings.isEnabled("rank") && !luckPermsAvailable) {
+            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/rank</yellow> <gray>is enabled but <yellow>LuckPerms</yellow> is not installed!"));
+            console.sendMessage(CC.translate("    <gray>Players using /rank will be told that LuckPerms is missing."));
+            anyWarning = true;
+        }
         if (anyWarning) {
             console.sendMessage(CC.translate("  <gray>These are recommendations only — the plugin will still work."));
         }
@@ -500,4 +518,6 @@ public final class JustPlugin extends JavaPlugin {
     public HomeGui getHomeGui() { return homeGui; }
     public BaltopGui getBaltopGui() { return baltopGui; }
     public RtpGui getRtpGui() { return rtpGui; }
+    public RankGuiManager getRankGuiManager() { return rankGuiManager; }
+    public boolean isLuckPermsAvailable() { return luckPermsAvailable; }
 }

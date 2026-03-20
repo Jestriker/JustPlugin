@@ -214,6 +214,19 @@ public final class PlaceholderResolver {
                         ? plugin.getScoreboardManager().getPlaytimeFormat() : "compact";
                 yield formatDurationWithFormat(System.currentTimeMillis() - joinTime, fmt);
             }
+            case "playtime_display" -> {
+                // Dynamic placeholder: resolves to total or session based on scoreboard config
+                String mode = plugin.getScoreboardManager() != null
+                        ? plugin.getScoreboardManager().getDefaultPlaytimeMode() : "total";
+                String fmt = plugin.getScoreboardManager() != null
+                        ? plugin.getScoreboardManager().getPlaytimeFormat() : "compact";
+                if ("session".equalsIgnoreCase(mode)) {
+                    Long joinTime = sessionJoinTimes.get(uuid);
+                    yield joinTime != null ? formatDurationWithFormat(System.currentTimeMillis() - joinTime, fmt) : "0m";
+                } else {
+                    yield formatDurationWithFormat(player.getStatistic(Statistic.PLAY_ONE_MINUTE) * 50L, fmt);
+                }
+            }
             // Explicit format variants (always available regardless of config)
             case "total_playtime_detailed", "playtime_detailed" ->
                     formatDuration(player.getStatistic(Statistic.PLAY_ONE_MINUTE) * 50L);
@@ -307,6 +320,13 @@ public final class PlaceholderResolver {
 
             // ===== Ping =====
             case "ping", "latency" -> String.valueOf(player.getPing());
+
+            // ===== Discord =====
+            case "discord", "discord_link" -> {
+                String link = plugin.getConfig().getString("discord-link", "");
+                yield (link == null || link.isEmpty() || link.equalsIgnoreCase("https://discord.gg/example"))
+                        ? "Undefined Discord Link" : link;
+            }
 
             // ===== Misc =====
             case "empty", "blank" -> "";

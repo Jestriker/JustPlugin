@@ -1,6 +1,9 @@
 package org.justme.justPlugin.listeners;
 
+import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -319,6 +322,16 @@ public class PlayerListener implements Listener {
     public void onChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
 
+        // --- Rank GUI chat input callback ---
+        if (plugin.getRankGuiManager() != null && plugin.getRankGuiManager().hasPendingInput(player.getUniqueId())) {
+            event.setCancelled(true);
+            String message = PlainTextComponentSerializer.plainText().serialize(event.message());
+            Bukkit.getScheduler().runTask(plugin, () ->
+                    plugin.getRankGuiManager().handleChatInput(player, message)
+            );
+            return;
+        }
+
         // --- Mute check ---
         if (plugin.getMuteManager().isMuted(player.getUniqueId())) {
             event.setCancelled(true);
@@ -334,6 +347,24 @@ public class PlayerListener implements Listener {
                 }
             }
             return;
+        }
+
+        // --- LuckPerms prefix in chat ---
+        if (plugin.isLuckPermsAvailable()) {
+            String separator = plugin.getConfig().getString("chat.separator", "<dark_gray> » <reset>");
+            event.renderer(ChatRenderer.viewerUnaware((source, sourceDisplayName, message) -> {
+                String prefix = getLuckPermsPrefix(source);
+                String suffix = getLuckPermsSuffix(source);
+                Component prefixComponent = (prefix != null && !prefix.isEmpty())
+                        ? CC.colorize(prefix) : Component.empty();
+                Component suffixComponent = (suffix != null && !suffix.isEmpty())
+                        ? CC.colorize(suffix) : Component.empty();
+                return prefixComponent
+                        .append(sourceDisplayName)
+                        .append(suffixComponent)
+                        .append(CC.translate(separator))
+                        .append(message);
+            }));
         }
 
         ChatManager.ChatMode mode = plugin.getChatManager().getChatMode(player.getUniqueId());
@@ -413,6 +444,46 @@ public class PlayerListener implements Listener {
         } else {
             godMode.add(uuid);
         }
+    }
+
+    // --- LuckPerms helpers ---
+
+    /**
+     * Get the player's highest-priority prefix from LuckPerms.
+     * Uses the user's cached metadata which already resolves priority
+     * across all groups (including inheritance) and player-specific nodes.
+     * The prefix with the highest weight wins automatically.
+     */
+    private String getLuckPermsPrefix(Player player) {
+        try {
+            net.luckperms.api.LuckPerms lp = net.luckperms.api.LuckPermsProvider.get();
+            net.luckperms.api.model.user.User user = lp.getUserManager().getUser(player.getUniqueId());
+            if (user == null) {
+                // User not loaded yet — try loading synchronously from cache
+                user = lp.getUserManager().loadUser(player.getUniqueId()).join();
+            }
+            if (user != null) {
+                return user.getCachedData().getMetaData().getPrefix();
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    /**
+     * Get the player's highest-priority suffix from LuckPerms.
+     */
+    private String getLuckPermsSuffix(Player player) {
+        try {
+            net.luckperms.api.LuckPerms lp = net.luckperms.api.LuckPermsProvider.get();
+            net.luckperms.api.model.user.User user = lp.getUserManager().getUser(player.getUniqueId());
+            if (user == null) {
+                user = lp.getUserManager().loadUser(player.getUniqueId()).join();
+            }
+            if (user != null) {
+                return user.getCachedData().getMetaData().getSuffix();
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     // Death location helpers

@@ -26,6 +26,30 @@ global-emojis: true
 title: "<gradient:#00aaff:#00ffaa><bold>  JustServer  </bold></gradient>"
 
 # ==========================================
+# Wave Gradient Animation
+# ==========================================
+# When enabled, the gradient colors in the title will smoothly wave/shift
+# through the color spectrum every interval, creating an animated effect.
+# The two colors define the gradient endpoints that will oscillate.
+wave-title:
+  # Enable or disable the wave animation on the title gradient.
+  enabled: true
+  # The two gradient colors that will wave back and forth.
+  color1: "#00aaff"
+  color2: "#00ffaa"
+  # Speed of the animation in ticks (20 ticks = 1 second).
+  # Lower = faster wave. Default: 20 (shifts every 1 second).
+  speed: 20
+
+# ==========================================
+# Ping Refresh
+# ==========================================
+# How often to check if a player's ping has changed, in ticks.
+# If the ping value changes, the scoreboard is immediately updated for that player.
+# Default: 100 (every 5 seconds). Set lower for faster updates (more CPU usage).
+ping-refresh-interval: 100
+
+# ==========================================
 # Time Format
 # ==========================================
 # The format used for {real_time} in the scoreboard footer.
@@ -47,13 +71,24 @@ time-format: "HH:mm"
 # ==========================================
 # Playtime Format
 # ==========================================
-# Controls how {session_playtime} and {total_playtime} are displayed.
+# Controls how {session_playtime}, {total_playtime}, and {playtime_display} are displayed.
 # Available formats:
 #   compact    - No seconds shown, rounds to minutes (e.g. 1m, 5m, 2h 1m, 3d 5h)
 #   detailed   - Includes seconds at all levels (e.g. 45s, 5m 30s, 2h 1m, 3d 5h)
 #   hours_only - Only hours and minutes (e.g. 0h 1m, 0h 5m, 2h 1m, 50h 30m)
 # Default is "compact" to avoid constant scoreboard updates every second.
 playtime-format: "compact"
+
+# ==========================================
+# Default Playtime Mode
+# ==========================================
+# Controls what the {playtime_display} placeholder resolves to.
+# This is the recommended placeholder for the scoreboard Playtime line.
+#   "total"   - Total playtime across all sessions (never resets). DEFAULT.
+#   "session" - Session playtime since the player's last login (resets on reconnect).
+# You can always use {total_playtime} or {session_playtime} directly
+# in any line to bypass this setting.
+default-playtime: "total"
 
 # ==========================================
 # Lines Configuration
@@ -83,28 +118,28 @@ lines:
     show-emoji: false
 
   # --- Money ---
-  - text: "{emoji} <white>Money <green>{balance_short}"
-    emoji: "<green>$"
+  - text: "{emoji}  <white>Money <green>{balance_short}"
+    emoji: "<bold><green>$</bold>"
     show-emoji: true
 
   # --- Kills ---
-  - text: "{emoji} <white>Kills <red>{kills_short}"
-    emoji: "<red>🗡"
+  - text: "{emoji}<white>Kills <red>{kills_short}"
+    emoji: "<bold><red>🗡 </bold>"
     show-emoji: true
 
   # --- Deaths ---
-  - text: "{emoji} <white>Deaths <#ff8800>{deaths_short}"
+  - text: "{emoji}  <white>Deaths <#ff8800>{deaths_short}"
     emoji: "<#ff8800>☠"
     show-emoji: true
 
-  # --- Playtime (session-based, resets on reconnect) ---
-  - text: "{emoji} <white>Playtime <yellow>{session_playtime}"
+  # --- Playtime (controlled by "default-playtime" setting: total or session) ---
+  - text: "{emoji}  <white>Playtime <yellow>{playtime_display}"
     emoji: "<yellow>⏳"
     show-emoji: true
 
   # --- Team (only shown if player is in a team) ---
-  - text: "{emoji} <white>Team <aqua>{team}"
-    emoji: "<aqua>🛡"
+  - text: "{emoji}  <white>Team <aqua>{team}"
+    emoji: "<bold><aqua>🛡</bold>"
     show-emoji: true
     condition: "has_team"
 

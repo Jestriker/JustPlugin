@@ -16,6 +16,15 @@ discord-link: "https://discord.gg/example"
 timezone: "UTC"
 
 # ==========================================
+# Chat Format Settings
+# ==========================================
+chat:
+  # The separator between the player name and their message in global chat.
+  # Supports MiniMessage. Common options: "»", ":", ">", "-", ">>", "|"
+  # Set to empty string "" for no separator.
+  separator: "<dark_gray> » <reset>"
+
+# ==========================================
 # Economy Settings
 # ==========================================
 economy:
@@ -238,9 +247,13 @@ vanilla-command-log:
 # ==========================================
 tab:
   # Tab header and footer displayed above and below the player list.
-  # Supports MiniMessage. Placeholders: {player}, {online}, {max}
+  # Supports MiniMessage. Placeholders: {player}, {online}, {max}, {tps}, {ping}
   header: "\n<gradient:#00aaff:#00ffaa><bold>  JustPlugin Server  </bold></gradient>\n"
-  footer: "\n<gray>Players: <yellow>{online}<gray>/<yellow>{max}\n<gray>Type <yellow>/help</yellow> for commands.\n"
+  footer: "\n<gray>Players: <yellow>{online}<gray>/<yellow>{max} <gray>| <gray>Ping: <yellow>{ping}ms <gray>| <gray>TPS: <yellow>{tps}\n<gray>Type <yellow>/help</yellow> for commands.\n"
+  # How often the tab header/footer refreshes, in seconds.
+  # Lower values keep TPS and Ping more up-to-date but use slightly more resources.
+  # Default: 5 (every 5 seconds). Set to 0 to disable periodic updates (only on join).
+  refresh-interval: 5
 
 # ==========================================
 # Entity Clear System (ClearLag replacement)
@@ -631,7 +644,35 @@ command-settings:
   tab:
     enabled: true
     permission: "justplugin.tab"
+  plugins:
+    enabled: true
+    permission: "justplugin.plugins"
   scoreboard:
     enabled: true
     reload-permission: "justplugin.scoreboard.reload"
+
+  # --- Ranks (LuckPerms Integration) ---
+  rank:
+    enabled: false
+    permission: "justplugin.rank"
+
+# ==========================================
+# Ranks System (LuckPerms Integration)
+# ==========================================
+# This system is DISABLED by default. Enable it above in commands.rank.enabled.
+# Requires LuckPerms to be installed on the server.
+# If enabled without LuckPerms, players will be notified that LuckPerms is missing.
+#
+# The /rank command opens a management GUI with two sections:
+#   - Groups: View, create, delete, rename, change prefix/suffix, set parents,
+#             and manage permission nodes for LuckPerms groups.
+#   - Players: View known players, add/remove from groups, and manage
+#              individual permission nodes.
+#
+# All data is read from and written to LuckPerms in real-time.
+# No additional configuration is needed here — groups and players are
+# discovered dynamically from LuckPerms.
+#
+# Every action requires its own permission (justplugin.rank.groups.*,
+# justplugin.rank.players.*). See PERMISSIONS.md for the full list.
 

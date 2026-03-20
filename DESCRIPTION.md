@@ -109,7 +109,8 @@ Every command can be turned on or off individually. Every permission is granular
 - `/clock`, `/date` - real-world and in-game time in your configured timezone
 - `/motd`, `/resetmotd` - view, set, or reset the MOTDs. Two separate MOTDs: **server-motd** (shown in the Minecraft server list / multiplayer screen) and **join-motd** (shown to players in chat when they join). Both support MiniMessage formatting and placeholders (`{player}`, `{online}`, `{max}`). Set with `/motd server <text>` or `/motd join <text>`. Reset with `/resetmotd server`, `/resetmotd join`, or `/resetmotd` (both)
 - `/discord` - display or set the server's Discord link (separate permission for setting)
-- `/plist`, `/plugins` - custom formatted to match the plugin's style (overrides vanilla `/plugins`)
+- `/plist` - custom formatted to match the plugin's style
+- `/plugins` - staff-only plugin list with enable/disable status (overrides vanilla `/plugins`)
 - `/jpinfo` - plugin version and author info
 
 ### World
@@ -124,9 +125,11 @@ Open crafting stations anywhere without placing blocks:
 - `/anvil`, `/grindstone`, `/craft`, `/stonecutter`, `/loom`, `/smithingtable`, `/enchantingtable`, `/enderchest`
 
 ### Tab List
-- Custom tab list header and footer with MiniMessage formatting and `{player}`, `{online}`, `{max}` placeholders
-- Configurable in `config.yml` under `tab.header` and `tab.footer`
-- Auto-applied on join and refreshed every 30 seconds
+- Custom tab list header and footer with MiniMessage formatting and `{player}`, `{online}`, `{max}`, `{tps}`, `{ping}` placeholders
+- Default footer shows **Players**, **TPS**, and **Ping** in a clean format
+- Configurable refresh interval (default 5 seconds) to keep TPS and Ping up-to-date
+- Configurable in `config.yml` under `tab.header`, `tab.footer`, and `tab.refresh-interval`
+- Auto-applied on join and refreshed at the configured interval
 - `/tab` - manually refresh the tab header/footer
 
 ### Entity Clear System (ClearLag replacement)
@@ -157,11 +160,15 @@ Open crafting stations anywhere without placing blocks:
 ### Scoreboard System
 - Fully configurable sidebar scoreboard with **50+ placeholder variables**
 - Dedicated `scoreboard.yml` config file with deep customization options
+- **Animated wave gradient title** - the scoreboard title gradient smoothly shifts its colors back and forth, creating a dynamic wave effect. Configurable colors, speed (default 1 frame per second), and can be disabled for a static title
 - **Default design** inspired by popular SMP servers: Money (green), Kills (red), Deaths (orange), Playtime (yellow), Team (blue, only shown if player is in a team), and a footer with ping and time
 - **Compact number formatting** - `{balance_short}`, `{kills_short}`, `{deaths_short}` format numbers with K, M, B suffixes (e.g. 25.70K, 1.50M, 2.30B)
+- **Discord link variable** - use `{discord}` or `{discord_link}` on any line to display the server's Discord invite link. Shows "Undefined Discord Link" if not configured
 - **Conditional lines** - lines can have a `condition` field (e.g. `has_team`) so they only display when the condition is met. Team line automatically hides if you're not in a team
 - **Configurable time format** - `time-format` setting in scoreboard.yml supports any Java DateTimeFormatter pattern: `HH:mm`, `HH:mm:ss`, `hh:mm a`, `dd/MM/YYYY`, `MM/dd/YYYY`, and more
+- **Fast ping refresh** - ping values are checked every 5 seconds (configurable) on a separate interval from the main scoreboard update. If a player's ping changes, their scoreboard is immediately refreshed
 - Session-based playtime that resets when you reconnect (separate from total playtime)
+- **Playtime mode toggle** - `{playtime_display}` placeholder resolves to either total or session playtime based on `default-playtime` setting in scoreboard.yml. Default is total playtime. Use `{total_playtime}` or `{session_playtime}` directly to bypass the setting
 - Per-player data: balance, health, food, coordinates, biome, ping, kills, deaths, K/D, playtime, team, and more
 - Server data: TPS, online players, memory usage, uptime, weather, real-world time/date
 - Configurable emoji system with global and per-line toggles, custom emoji per line
@@ -177,6 +184,17 @@ Open crafting stations anywhere without placing blocks:
 - **PunishmentAPI** - `isBanned`, `ban`, `tempBan`, `unban`, `isMuted`, `mute`, `tempMute`, `unmute`, `getMuteReason`, `getActiveWarnCount`, `getTotalWarnCount`, `addWarn`, `liftWarn`
 - **VanishAPI** - `isVanished`, `isSuperVanished`
 - Build chest shops, auction houses, voting rewards, or any plugin that needs to interact with balances, bans, mutes, warns, or vanish. Full developer guide included in `ECOSYSTEM.md`
+
+### Ranks System (LuckPerms Integration)
+- **Disabled by default** - opt-in feature, LuckPerms is completely optional
+- `/rank` opens a full management GUI with two tabs: **Groups** and **Players**
+- **Groups tab** - browse, search, and manage all LuckPerms groups. Default group is pinned to the top. Actions include: Create, Delete, Rename (display name), Change Prefix, Change Suffix, Set/Remove Parent (inheritance), and full Permission Node management (add, toggle, remove, search/filter)
+- **Players tab** - browse and search all known LuckPerms users. Actions include: Add to Group, Remove from Group (default group is protected), View Groups, and full Permission Node management
+- **Chat prefix/suffix integration** - LuckPerms prefixes and suffixes automatically display in chat. Only the highest-priority prefix/suffix is shown (resolved from all groups, inheritance, and player-specific nodes). Configurable chat separator (`»`, `:`, `>`, `-`, etc.) in `config.yml`
+- Type `clear` when editing a prefix, suffix, or display name to remove it. Type `cancel` to keep the old value
+- Every action has its own granular permission (25+ rank management permissions, all `op`-default)
+- If LuckPerms is not installed, players are informed when they try to use `/rank`
+- Startup console warning if the system is enabled but LuckPerms is missing
 
 ### Startup and Console
 - Distinctive LuckPerms-style ASCII art banner in the console on startup showing version, server info, command count, and status of every system (economy provider, teams, warps, punishments, webhook, web editor, scoreboard)
@@ -201,8 +219,9 @@ Key config features:
 - **Economy** - starting balance, currency symbol, economy provider (`justplugin` or `vault`)
 - **Warning punishments** - define the action for each warning level with full customization
 - **Clickable commands** - toggle clickable chat buttons for TPA, teams, trades, warps, homes, help, ignore, and private message replies
-- **Tab list** - custom header and footer with `{player}`, `{online}`, and `{max}` placeholders
+- **Tab list** - custom header and footer with `{player}`, `{online}`, `{max}`, `{tps}`, `{ping}` placeholders and configurable refresh interval
 - **Default reasons** - configurable default reasons for bans, kicks, mutes, and temp bans
+- **Chat format** - configurable separator between player name and message (default `»`, supports MiniMessage)
 - **Punishment announcements** - per-punishment type toggle for broadcasting to all players (disabled by default; staff always see them)
 - **Entity clear** - interval, warning timing, what to clear, public announcements, threshold alerts
 - **Vanilla command logging** - fully customizable list of vanilla commands to log
@@ -220,7 +239,7 @@ Key config features:
 JustPlugin uses a clean, hierarchical permission system:
 
 - `justplugin.*` - grants everything (OP-only by default)
-- `justplugin.player` - basic player permissions (granted to everyone by default)
+- `justplugin.player` - basic player permissions (granted to everyone by default). Commands like `/back`, `/kill`, `/suicide`, `/enderchest`, `/anvil`, `/craft`, and `/playerlist` are **not** included - they require explicit permission grants
 - Every `.others` permission automatically grants the matching self permission
 - Cooldown bypass permissions (`*.nocooldown`) are **not** included in `justplugin.*` - even OPs have cooldowns unless explicitly granted
 - Safe teleport bypass permissions (`*.unsafetp`) show a confirmation prompt instead of silently teleporting
@@ -254,6 +273,7 @@ Full permission documentation with hierarchy tree is included in `PERMISSIONS.md
 | Plugin | Purpose |
 |--------|---------|
 | [Vault](https://www.spigotmc.org/resources/vault.34315/) | Use an external economy provider (e.g. EssentialsX Economy, CMI) instead of JustPlugin's built-in balance system. Set `economy.provider: "vault"` in config. |
+| [LuckPerms](https://luckperms.net/) | Enable the `/rank` management GUI to create, edit, and manage groups and player permissions through an in-game interface. Also enables automatic chat prefix/suffix display. |
 
 ## Supported Platforms
 

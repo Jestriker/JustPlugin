@@ -46,7 +46,12 @@ All settings are in `plugins/JustPlugin/scoreboard.yml`:
 | `enabled` | boolean | `true` | Enable or disable the entire scoreboard system |
 | `update-interval` | int (ticks) | `20` | How often the scoreboard refreshes. 20 ticks = 1 second. Lower = smoother but more CPU |
 | `global-emojis` | boolean | `true` | Master toggle for all emojis. When `false`, no emojis appear regardless of per-line settings |
-| `title` | string | `<gradient:...>JustPlugin</gradient>` | The sidebar title. Supports MiniMessage and placeholders |
+| `title` | string | `<gradient:...>JustServer</gradient>` | The sidebar title. Supports MiniMessage and placeholders |
+| `wave-title.enabled` | boolean | `true` | Enable animated wave effect on the title gradient |
+| `wave-title.color1` | string | `#00aaff` | First gradient color for the wave animation |
+| `wave-title.color2` | string | `#00ffaa` | Second gradient color for the wave animation |
+| `wave-title.speed` | int (ticks) | `20` | Ticks between each wave frame shift. 20 = 1 second per phase step |
+| `ping-refresh-interval` | int (ticks) | `100` | How often to check if ping changed and update scoreboard. 100 = every 5 seconds |
 | `lines` | list | (see below) | Ordered list of line entries displayed top to bottom |
 
 **Important:** The Minecraft sidebar supports a **maximum of 15 lines**.
@@ -207,6 +212,12 @@ Use `{placeholder_name}` in any line text or in the title. All placeholders are 
 | `{real_time}` | `{irl_time}`, `{clock}` | Real-world time formatted using `time-format` from scoreboard.yml (default: HH:mm). Uses config timezone | 🕐 |
 | `{real_date}` | `{irl_date}`, `{date}` | Real-world date (yyyy-MM-dd, uses config timezone) | 📅 |
 | `{game_time}` | `{world_time}` | In-game time (24h format, e.g. `14:30`) | 🌙 |
+
+### Discord
+
+| Placeholder | Aliases | Description | Default Emoji |
+|-------------|---------|-------------|---------------|
+| `{discord}` | `{discord_link}` | The Discord invite link from config. Shows "Undefined Discord Link" if not set or still using the default example link | 🔗 |
 
 ### Utility
 
@@ -423,4 +434,57 @@ lines:
 - **Separator lines:** Use `text: "<gray>━━━━━━━━━━━━━━━━━━━━"` for visual separators.
 - **Disable per-player:** Not supported. The scoreboard is always visible to all players when enabled. Staff can disable it globally via `enabled: false` in `scoreboard.yml` and then `/reloadscoreboard`.
 - **MiniMessage:** All text fields support full MiniMessage formatting - gradients, colors, bold, italic, etc. See `FORMATTING.md` for details.
+
+---
+
+## Wave Gradient Animation
+
+The title supports an animated "wave" effect that smoothly shifts the gradient colors back and forth. This creates a dynamic, eye-catching header on the scoreboard.
+
+### How it works
+
+When `wave-title.enabled` is `true`, the gradient in the title shifts its two endpoint colors through a 20-frame animation cycle. The gradient oscillates between the two configured colors (`color1` and `color2`), creating a smooth wave effect.
+
+### Configuration
+
+```yaml
+wave-title:
+  enabled: true         # Turn the wave animation on/off
+  color1: "#00aaff"     # First gradient color (hex)
+  color2: "#00ffaa"     # Second gradient color (hex)
+  speed: 20             # Ticks per frame shift (20 = 1 wave step per second)
+```
+
+- Set `speed` to `10` for a faster wave (2 steps per second), or `40` for a slower one (1 step every 2 seconds).
+- Disable the animation by setting `enabled: false` - the title will display as a static gradient.
+- The wave only affects `<gradient:...>` tags in the title. If your title has no gradient tag, the wave has no effect.
+
+---
+
+## Ping Refresh
+
+Ping values in the scoreboard are checked at a separate, faster interval than the main scoreboard update. By default, the plugin checks every 5 seconds (100 ticks) if a player's ping has changed - if it has, that player's scoreboard is immediately refreshed.
+
+```yaml
+# Ticks between ping change checks (100 = 5 seconds)
+ping-refresh-interval: 100
+```
+
+This means even with a slower main `update-interval`, ping values stay responsive and accurate.
+
+---
+
+## Discord Variable
+
+Use `{discord}` or `{discord_link}` in any scoreboard line to display your server's Discord invite link. The link is read from the `discord-link` setting in `config.yml`.
+
+- If the link is set to a valid URL, it displays the URL
+- If the link is not configured or is still the default example (`https://discord.gg/example`), it displays **"Undefined Discord Link"**
+
+Example usage:
+```yaml
+  - text: "<blue>🔗 {discord}"
+    emoji: ""
+    show-emoji: false
+```
 

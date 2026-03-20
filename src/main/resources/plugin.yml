@@ -4,7 +4,7 @@ main: org.justme.justPlugin.JustPlugin
 api-version: '1.21'
 description: An EssentialsX-like plugin for your server.
 author: JustMe
-softdepend: [Vault]
+softdepend: [Vault, LuckPerms]
 
 commands:
   # === Teleportation ===
@@ -539,7 +539,15 @@ commands:
   plugins:
     description: Show installed plugins
     usage: /plugins
+    permission: justplugin.plugins
     aliases: [pl]
+
+  # === Ranks (LuckPerms integration) ===
+  rank:
+    description: Open the ranks menu (requires LuckPerms integration)
+    usage: /rank
+    permission: justplugin.rank
+    aliases: [ranks]
 
 permissions:
   justplugin.*:
@@ -669,6 +677,8 @@ permissions:
       justplugin.oplist: true
       justplugin.banlist: true
       justplugin.applyedits: true
+      justplugin.plugins: true
+      justplugin.rank: true
       justplugin.announce.ban: true
       justplugin.announce.banip: true
       justplugin.announce.tempban: true
@@ -703,12 +713,32 @@ permissions:
       justplugin.teamhome.cooldownbypass: true
       justplugin.teamhome.delaybypass: true
       justplugin.teamhome.unsafetp: true
+      justplugin.rank.groups: true
+      justplugin.rank.groups.create: true
+      justplugin.rank.groups.delete: true
+      justplugin.rank.groups.rename: true
+      justplugin.rank.groups.prefix: true
+      justplugin.rank.groups.suffix: true
+      justplugin.rank.groups.parent: true
+      justplugin.rank.groups.permissions: true
+      justplugin.rank.groups.permissions.add: true
+      justplugin.rank.groups.permissions.remove: true
+      justplugin.rank.groups.permissions.toggle: true
+      justplugin.rank.groups.permissions.expiry: true
+      justplugin.rank.players: true
+      justplugin.rank.players.addgroup: true
+      justplugin.rank.players.removegroup: true
+      justplugin.rank.players.listgroups: true
+      justplugin.rank.players.permissions: true
+      justplugin.rank.players.permissions.add: true
+      justplugin.rank.players.permissions.remove: true
+      justplugin.rank.players.permissions.toggle: true
+      justplugin.rank.players.permissions.expiry: true
   justplugin.player:
     description: Basic player permissions
     default: true
     children:
       justplugin.tpa: true
-      justplugin.back: true
       justplugin.spawn: true
       justplugin.warp: true
       justplugin.home: true
@@ -723,19 +753,14 @@ permissions:
       justplugin.sharecoords: true
       justplugin.sharedeathcoords: true
       justplugin.chat: true
-      justplugin.enderchest: true
-      justplugin.craft: true
       justplugin.getdeathpos: true
       justplugin.shareitem: true
       justplugin.team: true
       justplugin.trade: true
-      justplugin.suicide: true
-      justplugin.kill: true
       justplugin.tab: true
       justplugin.tpahere: true
       justplugin.wild: true
-      justplugin.playerlist: true
-      justplugin.deathitems: true
+      justplugin.rank: true
 
   # --- Cooldown bypass permissions ---
   # Cooldown = countdown timer BEFORE the teleport executes (e.g., 3 seconds standing still).
@@ -942,8 +967,8 @@ permissions:
 
   # --- New Features ---
   justplugin.deathitems:
-    description: View and restore your own death items
-    default: true
+    description: View and restore your own death items (admin only)
+    default: op
   justplugin.deathitems.others:
     description: View and restore other players' death items
     default: op
@@ -1026,5 +1051,82 @@ permissions:
     default: false
   justplugin.teamhome.unsafetp:
     description: Bypass team home safe teleport protection (with confirmation)
+    default: op
+
+  # --- Plugins ---
+  justplugin.plugins:
+    description: View the list of installed plugins (staff only)
+    default: op
+
+  # --- Ranks (LuckPerms Management) ---
+  justplugin.rank:
+    description: Open the ranks main menu GUI (requires LuckPerms)
+    default: true
+
+  # Group management
+  justplugin.rank.groups:
+    description: View the group (rank) list in /rank
+    default: op
+  justplugin.rank.groups.create:
+    description: Create new LuckPerms groups
+    default: op
+  justplugin.rank.groups.delete:
+    description: Delete LuckPerms groups
+    default: op
+  justplugin.rank.groups.rename:
+    description: Rename LuckPerms groups (group name or display name)
+    default: op
+  justplugin.rank.groups.prefix:
+    description: Change a group's prefix
+    default: op
+  justplugin.rank.groups.suffix:
+    description: Change a group's suffix
+    default: op
+  justplugin.rank.groups.parent:
+    description: Set or change a group's parent (inheritance)
+    default: op
+  justplugin.rank.groups.permissions:
+    description: View permission nodes on a group
+    default: op
+  justplugin.rank.groups.permissions.add:
+    description: Add permission nodes to a group
+    default: op
+  justplugin.rank.groups.permissions.remove:
+    description: Remove permission nodes from a group
+    default: op
+  justplugin.rank.groups.permissions.toggle:
+    description: Enable or disable permission nodes on a group
+    default: op
+  justplugin.rank.groups.permissions.expiry:
+    description: Set expiry on permission nodes for a group
+    default: op
+
+  # Player management
+  justplugin.rank.players:
+    description: View the player list in /rank
+    default: op
+  justplugin.rank.players.addgroup:
+    description: Add a player to a LuckPerms group
+    default: op
+  justplugin.rank.players.removegroup:
+    description: Remove a player from a LuckPerms group
+    default: op
+  justplugin.rank.players.listgroups:
+    description: View a player's LuckPerms groups
+    default: op
+  justplugin.rank.players.permissions:
+    description: View permission nodes on a player
+    default: op
+  justplugin.rank.players.permissions.add:
+    description: Add permission nodes to a player
+    default: op
+  justplugin.rank.players.permissions.remove:
+    description: Remove permission nodes from a player
+    default: op
+  justplugin.rank.players.permissions.toggle:
+    description: Enable or disable permission nodes on a player
+    default: op
+  justplugin.rank.players.permissions.expiry:
+    description: Set expiry on permission nodes for a player
     default: op
 

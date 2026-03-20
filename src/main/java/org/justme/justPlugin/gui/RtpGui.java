@@ -188,9 +188,17 @@ public class RtpGui implements Listener {
                 }
 
                 final Location finalLoc = safeLoc;
-                plugin.getTeleportManager().setBackLocation(player.getUniqueId(), player.getLocation());
-                player.teleportAsync(finalLoc);
-                player.sendMessage(CC.success("Teleported to <yellow>" + finalLoc.getBlockX() + ", " + finalLoc.getBlockY() + ", " + finalLoc.getBlockZ() + "</yellow> in " + finalLabel + "."));
+
+                // Use teleportWithSafety for proper cooldown countdown + safety checks
+                boolean initiated = plugin.getTeleportManager().teleportWithSafety(
+                        player, finalLoc,
+                        "justplugin.wild.cooldownbypass",
+                        "wild",
+                        "justplugin.wild.unsafetp"
+                );
+                if (initiated) {
+                    player.sendMessage(CC.success("Teleported to <yellow>" + finalLoc.getBlockX() + ", " + finalLoc.getBlockY() + ", " + finalLoc.getBlockZ() + "</yellow> in " + finalLabel + "."));
+                }
             });
         });
     }

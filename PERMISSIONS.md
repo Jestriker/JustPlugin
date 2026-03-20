@@ -37,7 +37,6 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.tpa
 │   ├── justplugin.tpahere
 │   ├── justplugin.wild
-│   ├── justplugin.back
 │   ├── justplugin.spawn
 │   ├── justplugin.warp
 │   ├── justplugin.home
@@ -52,22 +51,26 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.sharecoords
 │   ├── justplugin.sharedeathcoords
 │   ├── justplugin.chat
-│   ├── justplugin.enderchest
-│   ├── justplugin.craft
 │   ├── justplugin.getdeathpos           ← Self only (configurable if required)
 │   ├── justplugin.shareitem
 │   ├── justplugin.team
 │   ├── justplugin.trade
-│   ├── justplugin.suicide
-│   ├── justplugin.kill                  ← Self only
 │   ├── justplugin.tab
-│   ├── justplugin.playerlist            ← View advanced player list
-│   └── justplugin.deathitems            ← View/restore own death items
+│   └── justplugin.rank                  ← Open ranks GUI (requires LuckPerms)
 │
 │   [No permission needed — public commands]
 │   ├── /getpos (self)                   ← Always public, no permission
 │   ├── /jpinfo, /jphelp, /plist, /motd (view), /clock, /date
-│   └── /help, /plugins, /discord
+│   └── /help, /discord
+│
+├── [Requires explicit permission — not in justplugin.player by default]
+│   ├── justplugin.back               ← Return to last location
+│   ├── justplugin.kill               ← Self-kill
+│   ├── justplugin.suicide            ← Suicide command
+│   ├── justplugin.enderchest         ← Virtual ender chest
+│   ├── justplugin.anvil              ← Virtual anvil
+│   ├── justplugin.craft              ← Virtual crafting table
+│   └── justplugin.playerlist         ← View advanced player list
 │
 ├── [Staff/Admin — must be explicitly granted]
 │   ├── justplugin.fly                ← Toggle own flight
@@ -162,7 +165,9 @@ justplugin.*                          ← OP-only, grants EVERYTHING
 │   ├── justplugin.clearentities      ← Manual entity clear
 │   ├── justplugin.clearchat          ← Clear server chat
 │   ├── justplugin.friendlyfire       ← Toggle PvP
+│   ├── justplugin.deathitems         ← View/restore own death items (admin only)
 │   ├── justplugin.deathitems.others  ← View/restore other players' death items
+│   ├── justplugin.plugins            ← View installed plugins list (staff only)
 │   ├── justplugin.oplist             ← View server operators
 │   ├── justplugin.banlist            ← View ban/IP ban lists
 │   ├── justplugin.announce.ban       ← See ban announcements (when not public)
@@ -639,10 +644,46 @@ Delay = minimum time between successive uses of the same command (e.g. 3 minutes
 
 | Permission | Description | Default | Commands |
 |------------|-------------|---------|----------|
-| `justplugin.deathitems` | View and restore your own death items | `true` (player) | `/deathitems` |
+| `justplugin.deathitems` | View and restore your own death items | `op` | `/deathitems` |
 | `justplugin.deathitems.others` | View and restore other players' death items | `op` | `/deathitems <player>` |
 
-> `.others` automatically grants `.deathitems` (self).
+> `.others` automatically grants `.deathitems` (self). Both are admin-only by default.
+
+### 🔌 Plugins Permission
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.plugins` | View the list of installed server plugins | `op` | `/plugins`, `/pl` |
+
+### 🏅 Rank Permissions (LuckPerms Management)
+
+| Permission | Description | Default | Context |
+|------------|-------------|---------|---------|
+| `justplugin.rank` | Open the /rank main menu | `true` (player) | `/rank` |
+| `justplugin.rank.groups` | View the group list | `op` | Groups tab |
+| `justplugin.rank.groups.create` | Create new LuckPerms groups | `op` | Group list |
+| `justplugin.rank.groups.delete` | Delete LuckPerms groups | `op` | Group actions |
+| `justplugin.rank.groups.rename` | Rename groups (display name) | `op` | Group actions |
+| `justplugin.rank.groups.prefix` | Change a group's prefix | `op` | Group actions |
+| `justplugin.rank.groups.suffix` | Change a group's suffix | `op` | Group actions |
+| `justplugin.rank.groups.parent` | Add/change parent groups (inheritance) | `op` | Group actions |
+| `justplugin.rank.groups.permissions` | View permission nodes on a group | `op` | Group actions |
+| `justplugin.rank.groups.permissions.add` | Add permission nodes to a group | `op` | Permission list |
+| `justplugin.rank.groups.permissions.remove` | Remove permission nodes from a group | `op` | Permission list |
+| `justplugin.rank.groups.permissions.toggle` | Enable/disable permission nodes on a group | `op` | Permission list |
+| `justplugin.rank.groups.permissions.expiry` | Set expiry on permission nodes for a group | `op` | Permission list |
+| `justplugin.rank.players` | View the player list | `op` | Players tab |
+| `justplugin.rank.players.addgroup` | Add a player to a LuckPerms group | `op` | Player actions |
+| `justplugin.rank.players.removegroup` | Remove a player from a group | `op` | Player actions |
+| `justplugin.rank.players.listgroups` | View a player's groups | `op` | Player actions |
+| `justplugin.rank.players.permissions` | View permission nodes on a player | `op` | Player actions |
+| `justplugin.rank.players.permissions.add` | Add permission nodes to a player | `op` | Permission list |
+| `justplugin.rank.players.permissions.remove` | Remove permission nodes from a player | `op` | Permission list |
+| `justplugin.rank.players.permissions.toggle` | Enable/disable permission nodes on a player | `op` | Permission list |
+| `justplugin.rank.players.permissions.expiry` | Set expiry on permission nodes for a player | `op` | Permission list |
+
+> The ranks system is **disabled by default** in config. When enabled, LuckPerms must be installed. If LuckPerms is missing, players are notified.
+> Every management action requires its own permission — opening the menu (`justplugin.rank`) is allowed for all players, but all actions are gated behind `op`-level permissions by default.
 
 ### 🛡️ Moderation List Permissions
 
