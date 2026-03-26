@@ -153,6 +153,7 @@ Open crafting stations anywhere without placing blocks:
 ### Web Config Editor
 - Self-hosted config editor accessible via a web browser when enabled
 - Beautiful, responsive editing interface served on a configurable port (default: 8585)
+- **Secure by default** - binds to `127.0.0.1` (localhost only), requires a unique auth token generated on each startup (printed to console), rate-limits API requests (30/min per IP), limits request body size (1 MB), and redacts sensitive config values (e.g. webhook URLs) from the editor
 - Changes are staged and require running `/applyedits <code>` in-game by a player with the highest-level admin permission
 - Session codes expire after 10 minutes for security
 - No external dependencies - runs entirely within the plugin

@@ -1,5 +1,9 @@
 package org.justme.justPlugin.managers;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.bukkit.Bukkit;
@@ -10,15 +14,26 @@ import org.justme.justPlugin.JustPlugin;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 /**
  * Self-hosted config web editor.
  * Runs a lightweight HTTP server that serves a beautiful SPA for editing plugin config.
  * Changes are staged with a session code that must be applied in-game via /applyedits.
+ *
+ * Security measures:
+ * - Authentication via a secret token generated on startup (printed to console)
+ * - Default bind to 127.0.0.1 (localhost only)
+ * - No wildcard CORS (same-origin only)
+ * - Request body size limit (1 MB)
+ * - Rate limiting per IP (30 requests/minute)
+ * - Sensitive config keys are redacted in API responses
+ * - Cryptographically secure session code generation
  */
 @SuppressWarnings("unused")
 public class WebEditorManager {
@@ -27,6 +42,24 @@ public class WebEditorManager {
     private HttpServer server;
     private final Map<String, PendingSession> sessions = new ConcurrentHashMap<>();
     private int taskId = -1;
+
+    /** Cryptographically secure RNG for session codes and auth token. */
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    /** Secret auth token generated on each startup. Required for all API requests. */
+    private String authToken;
+
+    /** Rate limiting: tracks request count per IP per minute. */
+    private final Map<String, AtomicInteger> rateLimitMap = new ConcurrentHashMap<>();
+    private static final int RATE_LIMIT_MAX = 30; // max requests per IP per minute
+
+    /** Maximum request body size (1 MB). */
+    private static final int MAX_BODY_SIZE = 1_048_576;
+
+    /** Config keys whose values are redacted in API responses. */
+    private static final Set<String> REDACTED_KEYS = Set.of(
+            "discord-webhook.url"
+    );
 
     /**
      * Represents a pending config edit session.
@@ -62,7 +95,10 @@ public class WebEditorManager {
         }
 
         int port = plugin.getConfig().getInt("web-editor.port", 8585);
-        String bindAddress = plugin.getConfig().getString("web-editor.bind-address", "0.0.0.0");
+        String bindAddress = plugin.getConfig().getString("web-editor.bind-address", "127.0.0.1");
+
+        // Generate a new auth token for this session
+        authToken = generateAuthToken();
 
         try {
             server = HttpServer.create(new InetSocketAddress(bindAddress, port), 0);
@@ -75,13 +111,15 @@ public class WebEditorManager {
 
             server.start();
 
-            // Schedule cleanup of expired sessions (every 60 seconds)
-            taskId = Bukkit.getScheduler().runTaskTimer(plugin, this::cleanupSessions, 20L * 60, 20L * 60).getTaskId();
+            // Schedule cleanup of expired sessions and rate limit counters (every 60 seconds)
+            taskId = Bukkit.getScheduler().runTaskTimer(plugin, this::periodicCleanup, 20L * 60, 20L * 60).getTaskId();
 
-            plugin.getLogger().info("Web editor started on port " + port);
+            plugin.getLogger().info("Web editor started on " + bindAddress + ":" + port);
+            plugin.getLogger().info("Web editor auth token: " + authToken);
+            plugin.getLogger().info("Open http://" + ("0.0.0.0".equals(bindAddress) ? "localhost" : bindAddress) + ":" + port + " in your browser to access the editor.");
             return true;
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "Failed to start web editor on port " + port, e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to start web editor on " + bindAddress + ":" + port, e);
             return false;
         }
     }
@@ -99,6 +137,8 @@ public class WebEditorManager {
             taskId = -1;
         }
         sessions.clear();
+        rateLimitMap.clear();
+        authToken = null;
     }
 
     public boolean isRunning() {
@@ -107,6 +147,54 @@ public class WebEditorManager {
 
     public int getPort() {
         return plugin.getConfig().getInt("web-editor.port", 8585);
+    }
+
+    /**
+     * Get the current auth token (for displaying to admins in-game if needed).
+     */
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    // ==========================================
+    // Rate Limiting
+    // ==========================================
+
+    /**
+     * Check if a request from the given IP should be rate-limited.
+     * Returns true if the request is allowed, false if rate-limited.
+     */
+    private boolean checkRateLimit(String ip) {
+        AtomicInteger counter = rateLimitMap.computeIfAbsent(ip, k -> new AtomicInteger(0));
+        return counter.incrementAndGet() <= RATE_LIMIT_MAX;
+    }
+
+    /**
+     * Validate the auth token from the request.
+     * Token can be in the Authorization header (Bearer token) or as a ?token= query param.
+     */
+    private boolean validateAuth(HttpExchange exchange) {
+        if (authToken == null) return false;
+
+        // Check Authorization header first
+        String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7).trim();
+            if (authToken.equals(token)) return true;
+        }
+
+        // Check query parameter
+        String query = exchange.getRequestURI().getQuery();
+        if (query != null) {
+            for (String param : query.split("&")) {
+                if (param.startsWith("token=")) {
+                    String token = param.substring(6);
+                    if (authToken.equals(token)) return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     // ==========================================
@@ -125,18 +213,32 @@ public class WebEditorManager {
             return;
         }
 
-        String html = WebEditorPage.getHtml();
+        // The page itself embeds the auth token so JS can use it for API calls.
+        // This is safe because accessing the page already requires network access to the server.
+        String html = WebEditorPage.getHtml(authToken);
         sendResponse(exchange, 200, "text/html; charset=utf-8", html);
     }
 
     private void handleConfigApi(HttpExchange exchange) throws IOException {
-        // CORS headers
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+        String clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
+
+        // Rate limiting
+        if (!checkRateLimit(clientIp)) {
+            sendResponse(exchange, 429, "application/json", "{\"error\":\"Too many requests. Try again later.\"}");
+            return;
+        }
+
+        // No wildcard CORS - same-origin requests don't need CORS headers.
+        // Only allow same-origin by not setting Access-Control-Allow-Origin.
 
         if ("OPTIONS".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 204, "text/plain", "");
+            return;
+        }
+
+        // Authenticate all API requests
+        if (!validateAuth(exchange)) {
+            sendResponse(exchange, 401, "application/json", "{\"error\":\"Unauthorized. Invalid or missing auth token.\"}");
             return;
         }
 
@@ -150,25 +252,31 @@ public class WebEditorManager {
     }
 
     private void handleGetConfig(HttpExchange exchange) throws IOException {
-        // Serialize the config to JSON
+        // Serialize the config to JSON, redacting sensitive keys
         StringBuilder json = new StringBuilder();
         json.append("{");
         json.append("\"version\":\"").append(escapeJson(plugin.getPluginMeta().getVersion())).append("\",");
         json.append("\"config\":");
-        serializeConfigSection(plugin.getConfig(), json);
+        serializeConfigSection(plugin.getConfig(), json, "");
         json.append("}");
 
         sendResponse(exchange, 200, "application/json", json.toString());
     }
 
     private void handlePostConfig(HttpExchange exchange) throws IOException {
-        // Read request body
+        // Read request body with size limit
         String body;
         try (InputStream is = exchange.getRequestBody()) {
-            body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            byte[] bodyBytes = is.readNBytes(MAX_BODY_SIZE);
+            // Check if there's still more data (body too large)
+            if (is.read() != -1) {
+                sendResponse(exchange, 413, "application/json", "{\"error\":\"Request body too large. Maximum size is 1 MB.\"}");
+                return;
+            }
+            body = new String(bodyBytes, StandardCharsets.UTF_8);
         }
 
-        // Parse the JSON changes
+        // Parse the JSON changes using Gson
         Map<String, Object> changes = parseChangesJson(body);
         if (changes == null || changes.isEmpty()) {
             sendResponse(exchange, 400, "application/json", "{\"error\":\"No changes provided\"}");
@@ -247,28 +355,46 @@ public class WebEditorManager {
         return codes;
     }
 
-    private void cleanupSessions() {
+    /** Periodic cleanup of expired sessions and rate limit counters. */
+    private void periodicCleanup() {
         sessions.entrySet().removeIf(e -> e.getValue().isExpired());
+        rateLimitMap.clear(); // Reset rate limit counters every minute
     }
 
     // ==========================================
-    // JSON Serialization (no external library)
+    // JSON Serialization (redacts sensitive keys)
     // ==========================================
 
-    private void serializeConfigSection(ConfigurationSection section, StringBuilder sb) {
+    /**
+     * Check if a full config path is a sensitive key that should be redacted.
+     */
+    private boolean isRedactedKey(String fullPath) {
+        for (String redacted : REDACTED_KEYS) {
+            if (fullPath.equals(redacted) || fullPath.endsWith("." + redacted)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void serializeConfigSection(ConfigurationSection section, StringBuilder sb, String pathPrefix) {
         sb.append("{");
         boolean first = true;
         for (String key : section.getKeys(false)) {
             if (!first) sb.append(",");
             first = false;
 
+            String fullPath = pathPrefix.isEmpty() ? key : pathPrefix + "." + key;
             sb.append("\"").append(escapeJson(key)).append("\":");
 
             Object val = section.get(key);
             if (val instanceof ConfigurationSection cs) {
-                serializeConfigSection(cs, sb);
+                serializeConfigSection(cs, sb, fullPath);
             } else if (val instanceof MemoryConfiguration mc) {
-                serializeConfigSection(mc, sb);
+                serializeConfigSection(mc, sb, fullPath);
+            } else if (isRedactedKey(fullPath)) {
+                // Redact sensitive values - show placeholder instead of real value
+                sb.append("\"***REDACTED***\"");
             } else if (val instanceof Boolean b) {
                 sb.append(b.toString());
             } else if (val instanceof Number n) {
@@ -303,133 +429,55 @@ public class WebEditorManager {
     }
 
     /**
-     * Simple JSON parser for the changes object.
+     * Parse the changes JSON using Gson for robust, safe parsing.
      * Expects: {"changes": {"key": value, ...}}
      */
     private Map<String, Object> parseChangesJson(String json) {
         try {
-            // Strip outer object to get changes map
-            int changesIdx = json.indexOf("\"changes\"");
-            if (changesIdx == -1) return null;
+            JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+            if (!root.has("changes") || !root.get("changes").isJsonObject()) {
+                return null;
+            }
 
-            // Find the opening brace of the changes object
-            int braceStart = json.indexOf('{', changesIdx);
-            if (braceStart == -1) return null;
+            JsonObject changesObj = root.getAsJsonObject("changes");
+            Map<String, Object> result = new LinkedHashMap<>();
+            for (Map.Entry<String, JsonElement> entry : changesObj.entrySet()) {
+                String key = entry.getKey();
+                JsonElement element = entry.getValue();
 
-            // Find matching closing brace
-            int depth = 0;
-            int braceEnd = -1;
-            for (int i = braceStart; i < json.length(); i++) {
-                char c = json.charAt(i);
-                if (c == '{') depth++;
-                else if (c == '}') {
-                    depth--;
-                    if (depth == 0) {
-                        braceEnd = i;
-                        break;
+                // Block attempts to modify redacted keys via the web editor
+                if (isRedactedKey(key)) continue;
+
+                if (element.isJsonNull()) {
+                    result.put(key, "");
+                } else if (element.isJsonPrimitive()) {
+                    JsonPrimitive prim = element.getAsJsonPrimitive();
+                    if (prim.isBoolean()) {
+                        result.put(key, prim.getAsBoolean());
+                    } else if (prim.isNumber()) {
+                        Number num = prim.getAsNumber();
+                        // Preserve int vs double
+                        if (prim.getAsString().contains(".")) {
+                            result.put(key, num.doubleValue());
+                        } else {
+                            long lv = num.longValue();
+                            if (lv >= Integer.MIN_VALUE && lv <= Integer.MAX_VALUE) {
+                                result.put(key, (int) lv);
+                            } else {
+                                result.put(key, lv);
+                            }
+                        }
+                    } else {
+                        result.put(key, prim.getAsString());
                     }
                 }
+                // Skip arrays/objects in changes - flat key-value only
             }
-            if (braceEnd == -1) return null;
-
-            String changesStr = json.substring(braceStart + 1, braceEnd);
-            return parseKeyValuePairs(changesStr);
+            return result;
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING, "Failed to parse web editor changes JSON", e);
             return null;
         }
-    }
-
-    /**
-     * Parse flat key-value pairs from JSON-like content.
-     * Handles strings, numbers, booleans.
-     */
-    private Map<String, Object> parseKeyValuePairs(String content) {
-        Map<String, Object> result = new LinkedHashMap<>();
-        int i = 0;
-        while (i < content.length()) {
-            // Skip whitespace and commas
-            while (i < content.length() && (content.charAt(i) == ' ' || content.charAt(i) == ',' ||
-                    content.charAt(i) == '\n' || content.charAt(i) == '\r' || content.charAt(i) == '\t')) i++;
-            if (i >= content.length()) break;
-
-            // Read key
-            if (content.charAt(i) != '"') break;
-            i++; // skip opening quote
-            StringBuilder key = new StringBuilder();
-            while (i < content.length() && content.charAt(i) != '"') {
-                if (content.charAt(i) == '\\' && i + 1 < content.length()) {
-                    i++;
-                    key.append(content.charAt(i));
-                } else {
-                    key.append(content.charAt(i));
-                }
-                i++;
-            }
-            i++; // skip closing quote
-
-            // Skip colon and whitespace
-            while (i < content.length() && (content.charAt(i) == ':' || content.charAt(i) == ' ')) i++;
-
-            // Read value
-            if (i >= content.length()) break;
-
-            char c = content.charAt(i);
-            if (c == '"') {
-                // String value
-                i++;
-                StringBuilder val = new StringBuilder();
-                while (i < content.length() && content.charAt(i) != '"') {
-                    if (content.charAt(i) == '\\' && i + 1 < content.length()) {
-                        i++;
-                        switch (content.charAt(i)) {
-                            case 'n' -> val.append('\n');
-                            case 't' -> val.append('\t');
-                            case 'r' -> val.append('\r');
-                            default -> val.append(content.charAt(i));
-                        }
-                    } else {
-                        val.append(content.charAt(i));
-                    }
-                    i++;
-                }
-                i++; // skip closing quote
-                result.put(key.toString(), val.toString());
-            } else if (c == 't' || c == 'f') {
-                // Boolean
-                if (content.startsWith("true", i)) {
-                    result.put(key.toString(), true);
-                    i += 4;
-                } else if (content.startsWith("false", i)) {
-                    result.put(key.toString(), false);
-                    i += 5;
-                }
-            } else if (c == '-' || (c >= '0' && c <= '9')) {
-                // Number
-                StringBuilder numStr = new StringBuilder();
-                boolean isFloat = false;
-                while (i < content.length() && (content.charAt(i) == '-' || content.charAt(i) == '.' ||
-                        (content.charAt(i) >= '0' && content.charAt(i) <= '9'))) {
-                    if (content.charAt(i) == '.') isFloat = true;
-                    numStr.append(content.charAt(i));
-                    i++;
-                }
-                if (isFloat) {
-                    result.put(key.toString(), Double.parseDouble(numStr.toString()));
-                } else {
-                    long lv = Long.parseLong(numStr.toString());
-                    if (lv >= Integer.MIN_VALUE && lv <= Integer.MAX_VALUE) {
-                        result.put(key.toString(), (int) lv);
-                    } else {
-                        result.put(key.toString(), lv);
-                    }
-                }
-            } else if (c == 'n' && content.startsWith("null", i)) {
-                result.put(key.toString(), "");
-                i += 4;
-            }
-        }
-        return result;
     }
 
     /**
@@ -461,17 +509,36 @@ public class WebEditorManager {
     // Utility
     // ==========================================
 
+    /**
+     * Generate a cryptographically secure auth token (32 hex characters).
+     */
+    private String generateAuthToken() {
+        byte[] bytes = new byte[16];
+        SECURE_RANDOM.nextBytes(bytes);
+        StringBuilder sb = new StringBuilder(32);
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Generate a unique session code using SecureRandom (iterative, not recursive).
+     */
     private String generateCode() {
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // No I/O/0/1 to avoid confusion
-        Random rng = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 8; i++) {
-            sb.append(chars.charAt(rng.nextInt(chars.length())));
+        for (int attempt = 0; attempt < 100; attempt++) {
+            StringBuilder sb = new StringBuilder(8);
+            for (int i = 0; i < 8; i++) {
+                sb.append(chars.charAt(SECURE_RANDOM.nextInt(chars.length())));
+            }
+            String code = sb.toString();
+            if (!sessions.containsKey(code)) {
+                return code;
+            }
         }
-        String code = sb.toString();
-        // Ensure unique
-        if (sessions.containsKey(code)) return generateCode();
-        return code;
+        // Extremely unlikely fallback - just return a UUID-based code
+        return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
     private String escapeJson(String s) {

@@ -8,8 +8,11 @@ public final class WebEditorPage {
 
     private WebEditorPage() {}
 
-    public static String getHtml() {
-        return """
+    public static String getHtml(String authToken) {
+        return PAGE_HTML.replace("%%AUTH_TOKEN%%", authToken != null ? authToken : "");
+    }
+
+    private static final String PAGE_HTML = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -519,6 +522,8 @@ public final class WebEditorPage {
 </div>
 
 <script>
+const AUTH_TOKEN = '%%AUTH_TOKEN%%';
+const AUTH_HEADERS = { 'Authorization': 'Bearer ' + AUTH_TOKEN };
 const SECTION_ICONS = {
   'general': '⚙️', 'economy': '💰', 'teleport': '🌀', 'clickable-commands': '🔗',
   'trade': '🤝', 'homes': '🏠', 'warns': '⚠️', 'default-reasons': '📝',
@@ -543,7 +548,7 @@ let modifiedKeys = new Set();
 
 async function loadConfig() {
   try {
-    const res = await fetch('/api/config');
+    const res = await fetch('/api/config', { headers: AUTH_HEADERS });
     if (!res.ok) throw new Error('Failed to load config');
     const data = await res.json();
     originalConfig = JSON.parse(JSON.stringify(data.config));
@@ -755,7 +760,7 @@ async function saveChanges() {
   try {
     const res = await fetch('/api/config', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AUTH_TOKEN },
       body: JSON.stringify({ changes: diff })
     });
     if (!res.ok) throw new Error('Save failed');
@@ -800,6 +805,5 @@ loadConfig();
 </body>
 </html>
 """;
-    }
 }
 

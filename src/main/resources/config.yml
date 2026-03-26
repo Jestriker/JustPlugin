@@ -182,8 +182,8 @@ web-editor:
   enabled: false
   # Port the web editor listens on.
   port: 8585
-  # Bind address. Use "0.0.0.0" for all interfaces, "127.0.0.1" for localhost only.
-  bind-address: "0.0.0.0"
+  # Bind address. Use "127.0.0.1" for localhost only (recommended), "0.0.0.0" for all interfaces.
+  bind-address: "127.0.0.1"
 
 # ==========================================
 # Discord Webhook Logging

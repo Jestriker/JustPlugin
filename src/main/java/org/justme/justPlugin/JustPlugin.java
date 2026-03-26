@@ -3,7 +3,6 @@ package org.justme.justPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.justme.justPlugin.commands.chat.*;
@@ -222,6 +221,7 @@ public final class JustPlugin extends JavaPlugin {
         }
         if (webEditorManager != null && webEditorManager.isRunning()) {
             console.sendMessage(CC.translate("                        <green>✔</green> <gray> Web editor <green>active</green> <dark_gray>(port " + webEditorManager.getPort() + ")"));
+            console.sendMessage(CC.translate("                          <dark_gray>Auth token: <yellow>" + webEditorManager.getAuthToken() + "</yellow>"));
         } else if (getConfig().getBoolean("web-editor.enabled", false)) {
             console.sendMessage(CC.translate("                        <red>✘</red> <gray> Web editor <red>failed to start</red>"));
         } else {
