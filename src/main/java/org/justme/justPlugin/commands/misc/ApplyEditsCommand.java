@@ -56,7 +56,8 @@ public class ApplyEditsCommand implements TabExecutor {
         webEditor.removeSession(code);
 
         // Show summary
-        sender.sendMessage(CC.success("Applied <yellow>" + applied + "</yellow> config change" + (applied != 1 ? "s" : "") + " from web editor session <yellow>" + code + "</yellow>."));
+        String targetFile = WebEditorManager.getConfigFiles().getOrDefault(session.fileId, session.fileId);
+        sender.sendMessage(CC.success("Applied <yellow>" + applied + "</yellow> change" + (applied != 1 ? "s" : "") + " to <aqua>" + targetFile + "</aqua> from session <yellow>" + code + "</yellow>."));
 
         // List what changed
         int shown = 0;

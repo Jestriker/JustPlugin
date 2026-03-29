@@ -3,6 +3,8 @@ package org.justme.justPlugin.managers;
 /**
  * Contains the full HTML/CSS/JS for the self-hosted config web editor.
  * Served as a single-page application by WebEditorManager.
+ * Supports editing ALL config files: config.yml, motd.yml, scoreboard.yml,
+ * stats.yml, icon.yml, maintenance/config.yml, and all texts/*.yml files.
  */
 public final class WebEditorPage {
 
@@ -36,6 +38,7 @@ public final class WebEditorPage {
     --accent-red: #ff6b6b;
     --accent-yellow: #ffc107;
     --accent-purple: #a855f7;
+    --accent-orange: #f97316;
     --gradient-start: #00aaff;
     --gradient-end: #00ffaa;
     --toggle-on: #00ffaa;
@@ -54,110 +57,116 @@ public final class WebEditorPage {
     color: var(--text-primary);
     min-height: 100vh;
     line-height: 1.6;
+    display: flex;
+    flex-direction: column;
   }
-
-  /* ===== Scrollbar ===== */
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: var(--bg-primary); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-  /* ===== Header ===== */
   .header {
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
     padding: 16px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: sticky; top: 0; z-index: 100;
     backdrop-filter: blur(12px);
   }
   .header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    max-width: 1400px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .logo { display: flex; align-items: center; gap: 12px; }
   .logo-icon {
     width: 36px; height: 36px;
     background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: 18px;
-    color: var(--bg-primary);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 18px; color: var(--bg-primary);
   }
-  .logo-text {
-    font-size: 20px;
-    font-weight: 700;
-  }
+  .logo-text { font-size: 20px; font-weight: 700; }
   .logo-text span {
     background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
   .logo-badge {
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    font-family: var(--mono);
+    background: var(--bg-tertiary); color: var(--text-secondary);
+    font-size: 11px; padding: 2px 8px; border-radius: 12px;
+    border: 1px solid var(--border); font-family: var(--mono);
   }
   .header-actions { display: flex; gap: 10px; align-items: center; }
+  .global-modified-badge {
+    background: var(--accent-yellow); color: var(--bg-primary);
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+    font-family: var(--mono); display: none;
+  }
+  .global-modified-badge.visible { display: inline-block; }
 
-  /* ===== Buttons ===== */
   .btn {
-    padding: 8px 18px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: var(--font);
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    padding: 8px 18px; border-radius: var(--radius);
+    border: 1px solid var(--border); cursor: pointer;
+    font-size: 13px; font-weight: 600; font-family: var(--font);
+    transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
   }
   .btn-primary {
     background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    color: var(--bg-primary);
-    border-color: transparent;
+    color: var(--bg-primary); border-color: transparent;
   }
   .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,170,255,0.3); }
   .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
   .btn-secondary:hover { background: var(--border); }
-  .btn-danger { background: transparent; color: var(--accent-red); border-color: var(--accent-red); }
-  .btn-danger:hover { background: rgba(255,107,107,0.1); }
 
-  /* ===== Layout ===== */
-  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-
-  /* ===== Stats bar ===== */
-  .stats {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
+  .main-layout {
+    display: flex; max-width: 1400px; margin: 0 auto; width: 100%; flex: 1;
   }
+
+  .sidebar {
+    width: 260px; min-width: 260px;
+    background: var(--bg-secondary); border-right: 1px solid var(--border);
+    padding: 16px 0; overflow-y: auto;
+    position: sticky; top: 69px; height: calc(100vh - 69px);
+  }
+  .sidebar-category {
+    padding: 8px 16px 4px; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted);
+    margin-top: 8px;
+  }
+  .sidebar-category:first-child { margin-top: 0; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; cursor: pointer; transition: all 0.15s;
+    border-left: 3px solid transparent; font-size: 13px;
+    color: var(--text-secondary); user-select: none;
+  }
+  .sidebar-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+  .sidebar-item.active {
+    background: rgba(0, 170, 255, 0.08); color: var(--accent-blue);
+    border-left-color: var(--accent-blue); font-weight: 600;
+  }
+  .sidebar-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  .sidebar-item .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sidebar-item .badge {
+    background: var(--bg-primary); color: var(--accent-yellow);
+    font-size: 10px; padding: 1px 6px; border-radius: 8px;
+    font-family: var(--mono); font-weight: 700; display: none; flex-shrink: 0;
+  }
+  .sidebar-item .badge.visible { display: inline; }
+  .sidebar-item.has-changes .name { color: var(--accent-yellow); }
+
+  .content { flex: 1; padding: 24px; overflow-y: auto; min-height: 0; }
+
+  .file-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  }
+  .file-header-left { display: flex; align-items: center; gap: 12px; }
+  .file-header-icon { font-size: 28px; }
+  .file-header-title { font-size: 22px; font-weight: 700; }
+  .file-header-path { font-family: var(--mono); font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .stats { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
   .stat {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 20px;
-    flex: 1;
-    min-width: 150px;
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 20px; flex: 1; min-width: 120px;
   }
   .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
   .stat-value { font-size: 22px; font-weight: 700; margin-top: 2px; }
@@ -165,188 +174,97 @@ public final class WebEditorPage {
   .stat-value.green { color: var(--accent-green); }
   .stat-value.yellow { color: var(--accent-yellow); }
   .stat-value.purple { color: var(--accent-purple); }
+  .stat-value.orange { color: var(--accent-orange); }
 
-  /* ===== Search ===== */
-  .search-bar {
-    position: relative;
-    margin-bottom: 20px;
-  }
+  .search-bar { position: relative; margin-bottom: 20px; }
   .search-bar input {
-    width: 100%;
-    padding: 12px 16px 12px 42px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text-primary);
-    font-size: 14px;
-    font-family: var(--font);
-    outline: none;
+    width: 100%; padding: 12px 16px 12px 42px;
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text-primary);
+    font-size: 14px; font-family: var(--font); outline: none;
     transition: border-color 0.2s;
   }
   .search-bar input:focus { border-color: var(--accent-blue); }
   .search-bar input::placeholder { color: var(--text-muted); }
   .search-icon {
-    position: absolute;
-    left: 14px; top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    font-size: 16px;
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%); color: var(--text-muted); font-size: 16px;
   }
 
-  /* ===== Sections ===== */
   .section {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    margin-bottom: 16px;
-    overflow: hidden;
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); margin-bottom: 16px; overflow: hidden;
     transition: box-shadow 0.2s;
   }
   .section:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
   .section-header {
-    padding: 14px 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    user-select: none;
-    transition: background 0.15s;
+    padding: 14px 20px; cursor: pointer; display: flex; align-items: center;
+    justify-content: space-between; user-select: none; transition: background 0.15s;
   }
   .section-header:hover { background: var(--bg-tertiary); }
   .section-title {
-    font-size: 14px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px;
   }
   .section-title .icon { font-size: 16px; }
   .section-count {
-    background: var(--bg-primary);
-    color: var(--text-secondary);
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-family: var(--mono);
+    background: var(--bg-primary); color: var(--text-secondary);
+    font-size: 11px; padding: 2px 8px; border-radius: 10px; font-family: var(--mono);
   }
-  .section-arrow {
-    color: var(--text-muted);
-    transition: transform 0.25s ease;
-    font-size: 12px;
-  }
+  .section-arrow { color: var(--text-muted); transition: transform 0.25s ease; font-size: 12px; }
   .section.open .section-arrow { transform: rotate(90deg); }
-  .section-body {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s ease;
-  }
-  .section.open .section-body { max-height: 5000px; }
+  .section-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+  .section.open .section-body { max-height: 10000px; }
   .section-content { padding: 4px 20px 16px; }
 
-  /* ===== Config entries ===== */
   .entry {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(48,54,61,0.5);
-    gap: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid rgba(48,54,61,0.5); gap: 16px;
   }
   .entry:last-child { border-bottom: none; }
   .entry-info { flex: 1; min-width: 0; }
   .entry-key {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--accent-blue);
-    word-break: break-all;
-  }
-  .entry-comment {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 2px;
-    line-height: 1.4;
+    font-family: var(--mono); font-size: 13px; color: var(--accent-blue); word-break: break-all;
   }
   .entry-placeholder {
-    font-size: 10px;
-    color: var(--accent-purple);
-    margin-top: 2px;
-    font-family: var(--mono);
+    font-size: 10px; color: var(--accent-purple); margin-top: 2px; font-family: var(--mono);
   }
   .entry-control { flex-shrink: 0; }
-
-  /* ===== Toggle Switch ===== */
-  .toggle {
-    position: relative;
-    width: 44px; height: 24px;
-    cursor: pointer;
+  .entry.modified .entry-key::after {
+    content: '\\25CF'; color: var(--accent-yellow); margin-left: 6px; font-size: 10px;
   }
+
+  .toggle { position: relative; width: 44px; height: 24px; cursor: pointer; }
   .toggle input { display: none; }
   .toggle-slider {
-    position: absolute;
-    inset: 0;
-    background: var(--toggle-off);
-    border-radius: 12px;
-    transition: background 0.25s;
+    position: absolute; inset: 0; background: var(--toggle-off);
+    border-radius: 12px; transition: background 0.25s;
   }
   .toggle-slider::before {
-    content: '';
-    position: absolute;
-    width: 18px; height: 18px;
-    left: 3px; top: 3px;
-    background: white;
-    border-radius: 50%;
-    transition: transform 0.25s;
+    content: ''; position: absolute; width: 18px; height: 18px;
+    left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.25s;
   }
   .toggle input:checked + .toggle-slider { background: var(--toggle-on); }
   .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
-  /* ===== Text & Number inputs ===== */
   .input-field {
-    padding: 6px 12px;
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text-primary);
-    font-size: 13px;
-    font-family: var(--mono);
-    outline: none;
-    min-width: 180px;
-    max-width: 340px;
+    padding: 6px 12px; background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text-primary); font-size: 13px;
+    font-family: var(--mono); outline: none; min-width: 180px; max-width: 340px;
     transition: border-color 0.2s;
   }
   .input-field:focus { border-color: var(--accent-blue); }
   .input-field.number { width: 100px; min-width: 80px; text-align: right; }
   .input-field.wide { width: 100%; max-width: 500px; }
 
-  /* ===== Modified indicator ===== */
-  .entry.modified .entry-key::after {
-    content: '●';
-    color: var(--accent-yellow);
-    margin-left: 6px;
-    font-size: 10px;
-  }
-
-  /* ===== Modal ===== */
   .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);
   }
   .modal-overlay.active { display: flex; }
   .modal {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    max-width: 480px;
-    width: 90%;
-    text-align: center;
-    box-shadow: var(--shadow);
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 32px; max-width: 520px;
+    width: 90%; text-align: center; box-shadow: var(--shadow);
     animation: modalIn 0.25s ease;
   }
   @keyframes modalIn {
@@ -354,95 +272,73 @@ public final class WebEditorPage {
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
   .modal h2 {
-    font-size: 20px;
-    margin-bottom: 8px;
+    font-size: 20px; margin-bottom: 8px;
     background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
   .modal p { color: var(--text-secondary); font-size: 14px; margin-bottom: 20px; }
   .session-code {
-    background: var(--bg-primary);
-    border: 2px dashed var(--accent-green);
-    border-radius: var(--radius);
-    padding: 16px;
-    font-family: var(--mono);
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--accent-green);
-    letter-spacing: 4px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    transition: background 0.2s;
-    user-select: all;
+    background: var(--bg-primary); border: 2px dashed var(--accent-green);
+    border-radius: var(--radius); padding: 16px; font-family: var(--mono);
+    font-size: 28px; font-weight: 700; color: var(--accent-green);
+    letter-spacing: 4px; margin-bottom: 12px; cursor: pointer;
+    transition: background 0.2s; user-select: all;
   }
   .session-code:hover { background: var(--bg-tertiary); }
-  .modal .hint {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-  }
+  .modal .hint { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
   .modal .command-preview {
-    background: var(--bg-primary);
+    background: var(--bg-primary); border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px 16px; font-family: var(--mono);
+    font-size: 13px; color: var(--accent-yellow); margin-bottom: 20px; user-select: all;
+  }
+  .modal .file-info {
+    font-size: 12px; color: var(--accent-blue); margin-bottom: 12px;
+    font-family: var(--mono); white-space: pre-line; text-align: left;
+    background: var(--bg-primary); padding: 10px; border-radius: 6px;
     border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 16px;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--accent-yellow);
-    margin-bottom: 20px;
-    user-select: all;
   }
 
-  /* ===== Toast ===== */
   .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--accent-green);
-    color: var(--accent-green);
-    padding: 12px 20px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 600;
-    z-index: 2000;
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg-secondary); border: 1px solid var(--accent-green);
+    color: var(--accent-green); padding: 12px 20px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 600; z-index: 2000;
     animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s;
     box-shadow: var(--shadow);
   }
   @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes toastOut { to { opacity: 0; transform: translateY(20px); } }
 
-  /* ===== Loading ===== */
   .loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 80px;
-    flex-direction: column;
-    gap: 16px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 80px; flex-direction: column; gap: 16px;
   }
   .spinner {
-    width: 36px; height: 36px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent-blue);
-    border-radius: 50%;
+    width: 36px; height: 36px; border: 3px solid var(--border);
+    border-top-color: var(--accent-blue); border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ===== Footer ===== */
   .footer {
-    text-align: center;
-    padding: 32px;
-    color: var(--text-muted);
-    font-size: 12px;
-    border-top: 1px solid var(--border);
-    margin-top: 40px;
+    text-align: center; padding: 32px; color: var(--text-muted);
+    font-size: 12px; border-top: 1px solid var(--border); margin-top: 40px;
   }
 
-  /* ===== Responsive ===== */
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
+    .main-layout { flex-direction: column; }
+    .sidebar {
+      width: 100%; min-width: 100%; position: relative; top: 0;
+      height: auto; max-height: 200px; border-right: none;
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-wrap: wrap; overflow-x: auto; padding: 8px;
+    }
+    .sidebar-category { display: none; }
+    .sidebar-item {
+      padding: 6px 12px; border-left: none;
+      border-bottom: 3px solid transparent; white-space: nowrap; font-size: 12px;
+    }
+    .sidebar-item.active { border-left-color: transparent; border-bottom-color: var(--accent-blue); }
     .stats { flex-direction: column; }
     .entry { flex-direction: column; align-items: flex-start; gap: 8px; }
     .input-field { min-width: 100%; }
@@ -451,16 +347,16 @@ public final class WebEditorPage {
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="header-inner">
     <div class="logo">
       <div class="logo-icon">JP</div>
       <div class="logo-text"><span>JustPlugin</span> Config Editor</div>
       <div class="logo-badge" id="version"></div>
+      <span class="global-modified-badge" id="globalBadge">0</span>
     </div>
     <div class="header-actions">
-      <button class="btn btn-secondary" onclick="resetAll()">↺ Reset Changes</button>
+      <button class="btn btn-secondary" onclick="resetAll()">&#8634; Reset</button>
       <button class="btn btn-primary" onclick="saveChanges()" id="saveBtn" disabled>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save &amp; Generate Code
@@ -468,339 +364,404 @@ public final class WebEditorPage {
     </div>
   </div>
 </div>
-
-<div class="container">
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-label">Total Settings</div>
-      <div class="stat-value blue" id="statTotal">-</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Modified</div>
-      <div class="stat-value yellow" id="statModified">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Sections</div>
-      <div class="stat-value green" id="statSections">-</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Session Expires</div>
-      <div class="stat-value purple" id="statExpiry">10 min</div>
-    </div>
+<div class="main-layout">
+  <div class="sidebar" id="sidebar">
+    <div class="loading" style="padding:40px"><div class="spinner"></div></div>
   </div>
-
-  <div class="search-bar">
-    <span class="search-icon">⌕</span>
-    <input type="text" id="search" placeholder="Search settings... (e.g. teleport, economy, enabled)" oninput="filterEntries()">
-  </div>
-
-  <div id="configRoot">
+  <div class="content" id="content">
     <div class="loading">
       <div class="spinner"></div>
       <span style="color:var(--text-secondary)">Loading configuration...</span>
     </div>
   </div>
-
-  <div class="footer">
-    JustPlugin Config Editor &mdash; Changes require <code>/applyedits &lt;code&gt;</code> in-game to take effect.
-  </div>
 </div>
-
-<!-- Session Code Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
-    <h2>✓ Edits Saved</h2>
-    <p>Your changes have been staged. Run the following command in-game to apply them:</p>
+    <h2>&#10003; Edits Saved</h2>
+    <p>Your changes have been staged. Run the command(s) in-game to apply:</p>
+    <div class="file-info" id="modalFileInfo"></div>
     <div class="session-code" id="sessionCode" onclick="copyCode()">--------</div>
-    <div class="hint">Click the code to copy &bull; Expires in 10 minutes</div>
+    <div class="hint">Click the code to copy - Expires in 10 minutes</div>
     <div class="command-preview">/applyedits <span id="cmdCode">--------</span></div>
     <div style="display:flex;gap:10px;justify-content:center">
       <button class="btn btn-secondary" onclick="closeModal()">Close</button>
-      <button class="btn btn-primary" onclick="copyCode()">📋 Copy Code</button>
+      <button class="btn btn-primary" onclick="copyCode()">Copy Code</button>
     </div>
   </div>
 </div>
-
 <script>
 const AUTH_TOKEN = '%%AUTH_TOKEN%%';
 const AUTH_HEADERS = { 'Authorization': 'Bearer ' + AUTH_TOKEN };
+
+let files = [];
+let activeFileId = 'config';
+let fileConfigs = {};
+let fileMetaCache = {};
+
 const SECTION_ICONS = {
-  'general': '⚙️', 'economy': '💰', 'teleport': '🌀', 'clickable-commands': '🔗',
-  'trade': '🤝', 'homes': '🏠', 'warns': '⚠️', 'default-reasons': '📝',
-  'discord-webhook': '🔔', 'punishment-announcements': '📢', 'entity-clear': '🧹',
-  'clear-chat': '💬', 'friendly-fire': '⚔️', 'command-settings': '📋',
-  'web-editor': '🌐'
+  'general':'\\u2699\\uFE0F','economy':'\\uD83D\\uDCB0','teleport':'\\uD83C\\uDF00',
+  'clickable-commands':'\\uD83D\\uDD17','trade':'\\uD83E\\uDD1D','homes':'\\uD83C\\uDFE0',
+  'warns':'\\u26A0\\uFE0F','default-reasons':'\\uD83D\\uDCDD','discord-webhook':'\\uD83D\\uDD14',
+  'punishment-announcements':'\\uD83D\\uDCE2','entity-clear':'\\uD83E\\uDDF9',
+  'clear-chat':'\\uD83D\\uDCAC','friendly-fire':'\\u2694\\uFE0F','command-settings':'\\uD83D\\uDCCB',
+  'web-editor':'\\uD83C\\uDF10','chat':'\\uD83D\\uDCAC','tab':'\\uD83D\\uDCCB',
+  'vanilla-command-log':'\\uD83D\\uDCDC','commands':'\\u2699\\uFE0F','spawn':'\\uD83C\\uDFAF',
+  'server-motd':'\\uD83D\\uDCE8','wave-title':'\\uD83C\\uDF0A','animations':'\\uD83C\\uDFA5',
+  'lines':'\\uD83D\\uDCDD','items':'\\uD83C\\uDFB2',
+  'tpa':'\\uD83C\\uDF00','tpahere':'\\uD83C\\uDF00','tpaccept':'\\u2705','tpreject':'\\u274C',
+  'tpacancel':'\\u23F9','back':'\\u21A9\\uFE0F','warp':'\\u2728','home':'\\uD83C\\uDFE0',
+  'balance':'\\uD83D\\uDCB0','pay':'\\uD83D\\uDCB3','paynote':'\\uD83D\\uDCDD',
+  'ban':'\\uD83D\\uDEAB','kick':'\\uD83D\\uDC62','mute':'\\uD83D\\uDD07','warn':'\\u26A0\\uFE0F',
+  'msg':'\\uD83D\\uDCE9','ignore':'\\uD83D\\uDE36','announce':'\\uD83D\\uDCE2',
+  'team':'\\uD83D\\uDC65','fly':'\\uD83E\\uDE82','god':'\\u2728','speed':'\\u26A1',
+  'vanish':'\\uD83D\\uDC7B','invsee':'\\uD83C\\uDF92'
 };
 
 const PLACEHOLDER_HINTS = {
-  'motd': ['{player} - Player name'],
-  'entity-clear.warning-message': ['%seconds% - Seconds until clear'],
-  'entity-clear.clear-message': ['%items% - Items cleared', '%mobs% - Mobs cleared', '%total% - Total cleared'],
-  'clear-chat.message': ['MiniMessage format supported'],
-  'discord-link': ['Discord invite URL'],
-  'warns.appeal-source': ['Defaults to discord-link if empty'],
-  'discord-webhook.url': ['Discord webhook URL (use /setlogswebhook in-game)']
+  'join-motd':['{player} - Player name','{online} - Online count','{max} - Max players'],
+  'entity-clear.warning-message':['%seconds% - Seconds until clear'],
+  'entity-clear.clear-message':['%items% - Items cleared','%mobs% - Mobs cleared','%total% - Total cleared'],
+  'discord-link':['Discord invite URL'],
+  'warns.appeal-source':['Defaults to discord-link if empty'],
+  'discord-webhook.url':['Discord webhook URL (use /setlogswebhook in-game)'],
+  'kick-message':['{cooldown_line} - Cooldown or "Please try again later"'],
+  'motd':['{online}, {max}, {cooldown_text}'],
+  'title':['Supports MiniMessage + all scoreboard placeholders'],
+  'time-format':['Java DateTimeFormatter: HH:mm, HH:mm:ss, dd/MM/YYYY'],
+  'playtime-format':['compact | detailed | hours_only'],
+  'default-playtime':['total | session']
 };
 
-let originalConfig = {};
-let currentConfig = {};
-let modifiedKeys = new Set();
-
-async function loadConfig() {
+async function init() {
   try {
-    const res = await fetch('/api/config', { headers: AUTH_HEADERS });
-    if (!res.ok) throw new Error('Failed to load config');
-    const data = await res.json();
-    originalConfig = JSON.parse(JSON.stringify(data.config));
-    currentConfig = JSON.parse(JSON.stringify(data.config));
-    document.getElementById('version').textContent = data.version || 'unknown';
-    renderConfig();
-    updateStats();
+    const filesRes = await fetch('/api/files', { headers: AUTH_HEADERS });
+    if (!filesRes.ok) throw new Error('Failed to load file list');
+    files = await filesRes.json();
+    renderSidebar();
+    await loadFile('config');
   } catch (e) {
-    document.getElementById('configRoot').innerHTML =
-      '<div class="loading" style="color:var(--accent-red)">❌ Failed to load configuration.<br><span style="font-size:13px;color:var(--text-muted)">Make sure the server is running and the web editor is enabled.</span></div>';
+    document.getElementById('content').innerHTML =
+      '<div class="loading" style="color:var(--accent-red)">Failed to load.<br>' +
+      '<span style="font-size:13px;color:var(--text-muted)">Server running? Web editor enabled?</span></div>';
   }
 }
 
-function renderConfig() {
-  const root = document.getElementById('configRoot');
-  root.innerHTML = '';
-  const sections = groupIntoSections(currentConfig);
-  let sectionCount = 0;
-
-  // Top-level simple keys
-  const topLevel = {};
-  for (const [k, v] of Object.entries(currentConfig)) {
-    if (typeof v !== 'object' || v === null) topLevel[k] = v;
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+  const cats = {};
+  for (const f of files) {
+    if (!cats[f.category]) cats[f.category] = [];
+    cats[f.category].push(f);
   }
-  if (Object.keys(topLevel).length > 0) {
-    root.appendChild(createSection('General', 'general', topLevel, ''));
-    sectionCount++;
-  }
-
-  // Nested sections
-  for (const [k, v] of Object.entries(currentConfig)) {
-    if (typeof v === 'object' && v !== null) {
-      root.appendChild(createSection(formatTitle(k), k, v, k));
-      sectionCount++;
+  const order = ['Core','Display','System','Messages'];
+  const keys = [...order.filter(c => cats[c]), ...Object.keys(cats).filter(c => !order.includes(c))];
+  for (const cat of keys) {
+    const d = document.createElement('div');
+    d.className = 'sidebar-category';
+    d.textContent = cat;
+    sb.appendChild(d);
+    for (const f of cats[cat]) {
+      const item = document.createElement('div');
+      item.className = 'sidebar-item' + (f.id === activeFileId ? ' active' : '');
+      item.setAttribute('data-file', f.id);
+      item.innerHTML = '<span class="icon">' + f.icon + '</span>' +
+        '<span class="name">' + esc(f.name) + '</span>' +
+        '<span class="badge" id="badge-' + f.id + '">0</span>';
+      item.onclick = () => switchFile(f.id);
+      sb.appendChild(item);
     }
   }
-
-  document.getElementById('statSections').textContent = sectionCount;
 }
 
-function groupIntoSections(config) {
-  const sections = {};
-  for (const [key, val] of Object.entries(config)) {
-    if (typeof val === 'object' && val !== null) {
-      sections[key] = val;
-    }
+function updateBadges() {
+  let g = 0;
+  for (const f of files) {
+    const s = fileConfigs[f.id];
+    const c = s ? s.modified.size : 0;
+    g += c;
+    const b = document.getElementById('badge-' + f.id);
+    if (b) { b.textContent = c; b.classList.toggle('visible', c > 0); }
+    const item = document.querySelector('.sidebar-item[data-file="' + f.id + '"]');
+    if (item) item.classList.toggle('has-changes', c > 0);
   }
-  return sections;
+  const gb = document.getElementById('globalBadge');
+  gb.textContent = g; gb.classList.toggle('visible', g > 0);
+  document.getElementById('saveBtn').disabled = g === 0;
 }
 
-function createSection(title, sectionKey, data, pathPrefix) {
-  const section = document.createElement('div');
-  section.className = 'section';
-  section.setAttribute('data-section', sectionKey);
-
-  const entries = flattenForDisplay(data, pathPrefix);
-  const icon = SECTION_ICONS[sectionKey] || '📄';
-
-  section.innerHTML = `
-    <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
-      <div class="section-title">
-        <span class="icon">${icon}</span>
-        ${title}
-        <span class="section-count">${entries.length} settings</span>
-      </div>
-      <span class="section-arrow">▶</span>
-    </div>
-    <div class="section-body">
-      <div class="section-content" id="sec-${sectionKey}"></div>
-    </div>
-  `;
-
-  const content = section.querySelector('.section-content');
-  for (const entry of entries) {
-    content.appendChild(createEntry(entry));
+async function loadFile(fid) {
+  if (fileConfigs[fid]) { activeFileId = fid; renderFile(); hlSidebar(); return; }
+  document.getElementById('content').innerHTML =
+    '<div class="loading"><div class="spinner"></div><span style="color:var(--text-secondary)">Loading ' + getN(fid) + '...</span></div>';
+  try {
+    const res = await fetch('/api/config?file=' + encodeURIComponent(fid), { headers: AUTH_HEADERS });
+    if (!res.ok) throw new Error('Load failed');
+    const data = await res.json();
+    fileConfigs[fid] = {
+      original: JSON.parse(JSON.stringify(data.config)),
+      current: JSON.parse(JSON.stringify(data.config)),
+      modified: new Set()
+    };
+    fileMetaCache[fid] = { version: data.version, fileName: data.fileName };
+    document.getElementById('version').textContent = data.version || '';
+    activeFileId = fid;
+    renderFile(); hlSidebar();
+  } catch (e) {
+    document.getElementById('content').innerHTML =
+      '<div class="loading" style="color:var(--accent-red)">Failed to load ' + esc(getN(fid)) + '.</div>';
   }
-  return section;
 }
 
-function flattenForDisplay(obj, prefix) {
-  const entries = [];
-  for (const [key, val] of Object.entries(obj)) {
-    const fullKey = prefix ? prefix + '.' + key : key;
-    if (typeof val === 'object' && val !== null) {
-      entries.push(...flattenForDisplay(val, fullKey));
-    } else {
-      entries.push({ key: fullKey, value: val, type: typeof val });
-    }
-  }
-  return entries;
-}
-
-function createEntry(entry) {
-  const div = document.createElement('div');
-  div.className = 'entry';
-  div.setAttribute('data-key', entry.key);
-  if (modifiedKeys.has(entry.key)) div.classList.add('modified');
-
-  const shortKey = entry.key.includes('.') ? entry.key.split('.').pop() : entry.key;
-  const hints = PLACEHOLDER_HINTS[entry.key] || [];
-  const placeholderHtml = hints.length > 0
-    ? '<div class="entry-placeholder">' + hints.join(' &bull; ') + '</div>'
-    : '';
-
-  // Detect placeholders in value
-  let detectedPlaceholders = '';
-  if (typeof entry.value === 'string') {
-    const found = [];
-    const matches = entry.value.matchAll(/\\{(\\w+)\\}|%(\\w+)%/g);
-    for (const m of matches) found.push(m[0]);
-    if (found.length > 0 && hints.length === 0) {
-      detectedPlaceholders = '<div class="entry-placeholder">Variables: ' + found.join(', ') + '</div>';
-    }
-  }
-
-  let controlHtml;
-  if (typeof entry.value === 'boolean') {
-    controlHtml = `<label class="toggle"><input type="checkbox" ${entry.value ? 'checked' : ''} onchange="updateValue('${entry.key}', this.checked)"><span class="toggle-slider"></span></label>`;
-  } else if (typeof entry.value === 'number') {
-    controlHtml = `<input type="number" class="input-field number" value="${entry.value}" onchange="updateValue('${entry.key}', parseFloat(this.value) || 0)" step="any">`;
-  } else {
-    const escaped = String(entry.value).replace(/"/g, '&quot;').replace(/</g, '&lt;');
-    const isLong = String(entry.value).length > 60;
-    controlHtml = `<input type="text" class="input-field ${isLong ? 'wide' : ''}" value="${escaped}" onchange="updateValue('${entry.key}', this.value)">`;
-  }
-
-  div.innerHTML = `
-    <div class="entry-info">
-      <div class="entry-key">${entry.key}</div>
-      ${placeholderHtml}${detectedPlaceholders}
-    </div>
-    <div class="entry-control">${controlHtml}</div>
-  `;
-  return div;
-}
-
-function updateValue(key, value) {
-  setNestedValue(currentConfig, key, value);
-  const orig = getNestedValue(originalConfig, key);
-  if (orig === value || (String(orig) === String(value))) {
-    modifiedKeys.delete(key);
-  } else {
-    modifiedKeys.add(key);
-  }
-  // Update entry visual
-  const entry = document.querySelector(`.entry[data-key="${key}"]`);
-  if (entry) {
-    entry.classList.toggle('modified', modifiedKeys.has(key));
-  }
-  updateStats();
-}
-
-function setNestedValue(obj, path, value) {
-  const keys = path.split('.');
-  let cur = obj;
-  for (let i = 0; i < keys.length - 1; i++) {
-    if (!(keys[i] in cur)) cur[keys[i]] = {};
-    cur = cur[keys[i]];
-  }
-  cur[keys[keys.length - 1]] = value;
-}
-
-function getNestedValue(obj, path) {
-  const keys = path.split('.');
-  let cur = obj;
-  for (const k of keys) {
-    if (cur === undefined || cur === null) return undefined;
-    cur = cur[k];
-  }
-  return cur;
-}
-
-function updateStats() {
-  const total = document.querySelectorAll('.entry').length;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statModified').textContent = modifiedKeys.size;
-  document.getElementById('saveBtn').disabled = modifiedKeys.size === 0;
-}
-
-function filterEntries() {
-  const query = document.getElementById('search').value.toLowerCase().trim();
-  document.querySelectorAll('.section').forEach(sec => {
-    let anyVisible = false;
-    sec.querySelectorAll('.entry').forEach(entry => {
-      const key = entry.getAttribute('data-key').toLowerCase();
-      const matches = !query || key.includes(query);
-      entry.style.display = matches ? '' : 'none';
-      if (matches) anyVisible = true;
-    });
-    sec.style.display = anyVisible ? '' : 'none';
-    if (query && anyVisible) sec.classList.add('open');
+function switchFile(fid) { loadFile(fid); }
+function hlSidebar() {
+  document.querySelectorAll('.sidebar-item').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-file') === activeFileId);
   });
 }
+function getN(fid) { const f = files.find(x => x.id === fid); return f ? f.name : fid; }
+function getI(fid) { const f = files.find(x => x.id === fid); return f ? f.icon : '\\uD83D\\uDCC4'; }
+function getP(fid) { const f = files.find(x => x.id === fid); return f ? f.path : fid; }
 
+function renderFile() {
+  const st = fileConfigs[activeFileId];
+  if (!st) return;
+  const c = document.getElementById('content');
+  c.innerHTML = '';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'file-header';
+  hdr.innerHTML = '<div class="file-header-left">' +
+    '<div class="file-header-icon">' + getI(activeFileId) + '</div>' +
+    '<div><div class="file-header-title">' + esc(getN(activeFileId)) + '</div>' +
+    '<div class="file-header-path">' + esc(getP(activeFileId)) + '</div></div></div>';
+  c.appendChild(hdr);
+
+  const stats = document.createElement('div');
+  stats.className = 'stats';
+  const tot = cntE(st.current);
+  const gtot = getTotMod();
+  stats.innerHTML =
+    '<div class="stat"><div class="stat-label">Settings</div><div class="stat-value blue" id="stTot">' + tot + '</div></div>' +
+    '<div class="stat"><div class="stat-label">Modified</div><div class="stat-value yellow" id="stMod">' + st.modified.size + '</div></div>' +
+    '<div class="stat"><div class="stat-label">File</div><div class="stat-value green" style="font-size:14px">' + esc(getP(activeFileId)) + '</div></div>' +
+    '<div class="stat"><div class="stat-label">All Unsaved</div><div class="stat-value orange" id="stGlob">' + gtot + '</div></div>';
+  c.appendChild(stats);
+
+  const sb = document.createElement('div');
+  sb.className = 'search-bar';
+  sb.innerHTML = '<span class="search-icon">\\u2315</span><input type="text" id="search" placeholder="Search settings..." oninput="filterE()">';
+  c.appendChild(sb);
+
+  const root = document.createElement('div');
+  root.id = 'configRoot';
+  c.appendChild(root);
+
+  const topLvl = {};
+  for (const [k,v] of Object.entries(st.current)) {
+    if (typeof v !== 'object' || v === null || Array.isArray(v)) topLvl[k] = v;
+  }
+  if (Object.keys(topLvl).length > 0) root.appendChild(mkSec('General','general',topLvl,''));
+  for (const [k,v] of Object.entries(st.current)) {
+    if (typeof v === 'object' && v !== null && !Array.isArray(v)) root.appendChild(mkSec(fmtT(k),k,v,k));
+  }
+
+  const ft = document.createElement('div');
+  ft.className = 'footer';
+  ft.innerHTML = 'JustPlugin Config Editor - Changes require <code>/applyedits &lt;code&gt;</code> in-game.';
+  c.appendChild(ft);
+}
+
+function mkSec(title,sk,data,pfx) {
+  const sec = document.createElement('div');
+  sec.className = 'section';
+  sec.setAttribute('data-section',sk);
+  const ents = flatE(data,pfx);
+  const ico = SECTION_ICONS[sk] || '\\uD83D\\uDCC4';
+  sec.innerHTML =
+    '<div class="section-header" onclick="this.parentElement.classList.toggle(\'open\')">' +
+    '<div class="section-title"><span class="icon">' + ico + '</span>' + esc(title) +
+    '<span class="section-count">' + ents.length + '</span></div>' +
+    '<span class="section-arrow">\\u25B6</span></div>' +
+    '<div class="section-body"><div class="section-content"></div></div>';
+  const ct = sec.querySelector('.section-content');
+  for (const e of ents) ct.appendChild(mkE(e));
+  return sec;
+}
+
+function flatE(obj,pfx) {
+  const r = [];
+  for (const [k,v] of Object.entries(obj)) {
+    const fk = pfx ? pfx + '.' + k : k;
+    if (typeof v === 'object' && v !== null && !Array.isArray(v)) r.push(...flatE(v,fk));
+    else r.push({key:fk,value:v,type:typeof v});
+  }
+  return r;
+}
+
+function mkE(e) {
+  const st = fileConfigs[activeFileId];
+  const d = document.createElement('div');
+  d.className = 'entry';
+  d.setAttribute('data-key',e.key);
+  if (st && st.modified.has(e.key)) d.classList.add('modified');
+
+  const hints = PLACEHOLDER_HINTS[e.key] || [];
+  let phHtml = hints.length > 0 ? '<div class="entry-placeholder">' + hints.join(' \\u2022 ') + '</div>' : '';
+
+  if (typeof e.value === 'string' && !phHtml) {
+    const found = [];
+    const rx = /\\{(\\w+)\\}|%(\\w+)%/g;
+    let m;
+    while ((m = rx.exec(e.value)) !== null) found.push(m[0]);
+    if (found.length > 0) phHtml = '<div class="entry-placeholder">Variables: ' + found.join(', ') + '</div>';
+  }
+
+  const ek = e.key.replace(/'/g,"\\\\'");
+  let ctrl;
+  if (typeof e.value === 'boolean') {
+    ctrl = '<label class="toggle"><input type="checkbox" ' + (e.value ? 'checked' : '') +
+      ' onchange="uv(\\'' + ek + '\\',this.checked)"><span class="toggle-slider"></span></label>';
+  } else if (typeof e.value === 'number') {
+    ctrl = '<input type="number" class="input-field number" value="' + e.value +
+      '" onchange="uv(\\'' + ek + '\\',parseFloat(this.value)||0)" step="any">';
+  } else if (Array.isArray(e.value)) {
+    ctrl = '<input type="text" class="input-field wide" value="' + esc(JSON.stringify(e.value)) +
+      '" title="JSON array" style="color:var(--accent-purple)" onchange="uva(\\'' + ek + '\\',this.value)">';
+  } else {
+    const v = esc(String(e.value));
+    const w = String(e.value).length > 60 ? 'wide' : '';
+    ctrl = '<input type="text" class="input-field ' + w + '" value="' + v +
+      '" onchange="uv(\\'' + ek + '\\',this.value)">';
+  }
+
+  d.innerHTML = '<div class="entry-info"><div class="entry-key">' + esc(e.key) + '</div>' + phHtml + '</div>' +
+    '<div class="entry-control">' + ctrl + '</div>';
+  return d;
+}
+
+function uv(key,val) {
+  const st = fileConfigs[activeFileId];
+  if (!st) return;
+  sNV(st.current,key,val);
+  const orig = gNV(st.original,key);
+  if (orig === val || String(orig) === String(val)) st.modified.delete(key);
+  else st.modified.add(key);
+  const el = document.querySelector('.entry[data-key="' + CSS.escape(key) + '"]');
+  if (el) el.classList.toggle('modified',st.modified.has(key));
+  updStats();
+}
+
+function uva(key,json) {
+  try { const a = JSON.parse(json); if (Array.isArray(a)) uv(key,a); }
+  catch(e) { toast('Invalid JSON array'); }
+}
+
+function sNV(o,p,v) {
+  const k = p.split('.'); let c = o;
+  for (let i = 0; i < k.length-1; i++) { if (!(k[i] in c)) c[k[i]] = {}; c = c[k[i]]; }
+  c[k[k.length-1]] = v;
+}
+function gNV(o,p) {
+  const k = p.split('.'); let c = o;
+  for (const x of k) { if (c == null) return undefined; c = c[x]; }
+  return c;
+}
+function cntE(o) {
+  let n = 0;
+  for (const v of Object.values(o)) {
+    if (typeof v === 'object' && v !== null && !Array.isArray(v)) n += cntE(v);
+    else n++;
+  }
+  return n;
+}
+function getTotMod() {
+  let t = 0;
+  for (const s of Object.values(fileConfigs)) t += s.modified.size;
+  return t;
+}
+function updStats() {
+  const st = fileConfigs[activeFileId];
+  const m = document.getElementById('stMod');
+  if (m && st) m.textContent = st.modified.size;
+  const g = document.getElementById('stGlob');
+  if (g) g.textContent = getTotMod();
+  updateBadges();
+}
+function filterE() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  document.querySelectorAll('.section').forEach(sec => {
+    let any = false;
+    sec.querySelectorAll('.entry').forEach(e => {
+      const k = e.getAttribute('data-key').toLowerCase();
+      const ok = !q || k.includes(q);
+      e.style.display = ok ? '' : 'none';
+      if (ok) any = true;
+    });
+    sec.style.display = any ? '' : 'none';
+    if (q && any) sec.classList.add('open');
+  });
+}
 function resetAll() {
-  currentConfig = JSON.parse(JSON.stringify(originalConfig));
-  modifiedKeys.clear();
-  renderConfig();
-  updateStats();
-  showToast('All changes reset');
+  const st = fileConfigs[activeFileId];
+  if (st) { st.current = JSON.parse(JSON.stringify(st.original)); st.modified.clear(); }
+  renderFile(); updStats();
+  toast('Reset: ' + getN(activeFileId));
 }
 
 async function saveChanges() {
-  if (modifiedKeys.size === 0) return;
-  const diff = {};
-  for (const key of modifiedKeys) {
-    diff[key] = getNestedValue(currentConfig, key);
+  const fwc = [];
+  for (const [fid,st] of Object.entries(fileConfigs)) {
+    if (st.modified.size > 0) fwc.push(fid);
   }
-  try {
-    const res = await fetch('/api/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AUTH_TOKEN },
-      body: JSON.stringify({ changes: diff })
-    });
-    if (!res.ok) throw new Error('Save failed');
-    const data = await res.json();
-    document.getElementById('sessionCode').textContent = data.code;
-    document.getElementById('cmdCode').textContent = data.code;
-    document.getElementById('modal').classList.add('active');
-  } catch (e) {
-    showToast('Failed to save changes!');
+  if (!fwc.length) return;
+  const results = [];
+  for (const fid of fwc) {
+    const st = fileConfigs[fid];
+    const diff = {};
+    for (const k of st.modified) diff[k] = gNV(st.current,k);
+    try {
+      const res = await fetch('/api/config?file=' + encodeURIComponent(fid), {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer ' + AUTH_TOKEN},
+        body: JSON.stringify({changes:diff})
+      });
+      if (!res.ok) throw new Error('fail');
+      const d = await res.json();
+      results.push({fid,code:d.code,changes:d.changes,file:d.file});
+    } catch(e) {
+      toast('Failed: ' + getN(fid)); return;
+    }
   }
+  if (results.length === 1) {
+    const r = results[0];
+    document.getElementById('sessionCode').textContent = r.code;
+    document.getElementById('cmdCode').textContent = r.code;
+    document.getElementById('modalFileInfo').textContent = r.file + ' - ' + r.changes + ' change(s)';
+  } else {
+    document.getElementById('sessionCode').textContent = results[0].code;
+    document.getElementById('cmdCode').textContent = results[0].code;
+    document.getElementById('modalFileInfo').innerHTML =
+      results.length + ' files changed. Run /applyedits for each:<br>' +
+      results.map(r => esc(r.file) + ': <b>' + r.code + '</b> (' + r.changes + ')').join('<br>');
+  }
+  document.getElementById('modal').classList.add('active');
 }
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('active');
-}
-
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
 function copyCode() {
-  const code = document.getElementById('sessionCode').textContent;
-  navigator.clipboard.writeText(code).then(() => showToast('Code copied to clipboard!'));
+  const c = document.getElementById('sessionCode').textContent;
+  navigator.clipboard.writeText(c).then(() => toast('Code copied!'));
 }
-
-function formatTitle(key) {
-  return key.replace(/-/g, ' ').replace(/\\b\\w/g, c => c.toUpperCase());
+function fmtT(k) { return k.replace(/-/g,' ').replace(/\\b\\w/g,c=>c.toUpperCase()); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(m) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = m;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
 }
-
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
-// Close modal on escape
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-// Close modal on backdrop click
 document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
-
-// Load on start
-loadConfig();
+init();
 </script>
 </body>
 </html>

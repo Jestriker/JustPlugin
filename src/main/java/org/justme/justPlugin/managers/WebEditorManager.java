@@ -9,6 +9,7 @@ import com.sun.net.httpserver.HttpServer;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.justme.justPlugin.JustPlugin;
 
 import java.io.*;
@@ -23,8 +24,17 @@ import java.util.logging.Level;
 
 /**
  * Self-hosted config web editor.
- * Runs a lightweight HTTP server that serves a beautiful SPA for editing plugin config.
+ * Runs a lightweight HTTP server that serves a beautiful SPA for editing ALL plugin config files.
  * Changes are staged with a session code that must be applied in-game via /applyedits.
+ *
+ * Supported config files:
+ * - config.yml (main config)
+ * - motd.yml
+ * - scoreboard.yml
+ * - stats.yml
+ * - icon.yml
+ * - maintenance/config.yml
+ * - texts/general.yml, texts/teleport.yml, texts/economy.yml, etc. (15 text files)
  *
  * Security measures:
  * - Authentication via a secret token generated on startup (printed to console)
@@ -61,17 +71,45 @@ public class WebEditorManager {
             "discord-webhook.url"
     );
 
+    /** All known config file identifiers mapped to their relative paths. */
+    private static final LinkedHashMap<String, String> CONFIG_FILES = new LinkedHashMap<>();
+    static {
+        CONFIG_FILES.put("config", "config.yml");
+        CONFIG_FILES.put("motd", "motd.yml");
+        CONFIG_FILES.put("scoreboard", "scoreboard.yml");
+        CONFIG_FILES.put("stats", "stats.yml");
+        CONFIG_FILES.put("icon", "icon.yml");
+        CONFIG_FILES.put("maintenance", "maintenance/config.yml");
+        CONFIG_FILES.put("texts-general", "texts/general.yml");
+        CONFIG_FILES.put("texts-teleport", "texts/teleport.yml");
+        CONFIG_FILES.put("texts-warp", "texts/warp.yml");
+        CONFIG_FILES.put("texts-home", "texts/home.yml");
+        CONFIG_FILES.put("texts-economy", "texts/economy.yml");
+        CONFIG_FILES.put("texts-moderation", "texts/moderation.yml");
+        CONFIG_FILES.put("texts-player", "texts/player.yml");
+        CONFIG_FILES.put("texts-chat", "texts/chat.yml");
+        CONFIG_FILES.put("texts-inventory", "texts/inventory.yml");
+        CONFIG_FILES.put("texts-world", "texts/world.yml");
+        CONFIG_FILES.put("texts-team", "texts/team.yml");
+        CONFIG_FILES.put("texts-trade", "texts/trade.yml");
+        CONFIG_FILES.put("texts-maintenance", "texts/maintenance.yml");
+        CONFIG_FILES.put("texts-info", "texts/info.yml");
+        CONFIG_FILES.put("texts-misc", "texts/misc.yml");
+    }
+
     /**
      * Represents a pending config edit session.
      */
     public static class PendingSession {
         public final String code;
+        public final String fileId;
         public final Map<String, Object> changes;
         public final long createdAt;
         public final long expiresAt;
 
-        public PendingSession(String code, Map<String, Object> changes) {
+        public PendingSession(String code, String fileId, Map<String, Object> changes) {
             this.code = code;
+            this.fileId = fileId;
             this.changes = changes;
             this.createdAt = System.currentTimeMillis();
             this.expiresAt = this.createdAt + (10 * 60 * 1000); // 10 minutes
@@ -108,6 +146,8 @@ public class WebEditorManager {
             server.createContext("/", this::handlePage);
             // API endpoints
             server.createContext("/api/config", this::handleConfigApi);
+            // File list endpoint
+            server.createContext("/api/files", this::handleFilesApi);
 
             server.start();
 
@@ -176,7 +216,7 @@ public class WebEditorManager {
     private boolean validateAuth(HttpExchange exchange) {
         if (authToken == null) return false;
 
-        // Check Authorization header first
+        // Check Authorization header
         String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7).trim();
@@ -193,8 +233,112 @@ public class WebEditorManager {
                 }
             }
         }
-
         return false;
+    }
+
+    // ==========================================
+    // Config File Loading
+    // ==========================================
+
+    /**
+     * Get a ConfigurationSection for the given file ID.
+     * Loads the YAML file from the plugin data folder.
+     */
+    private YamlConfiguration loadConfigFile(String fileId) {
+        if ("config".equals(fileId)) {
+            // Main config.yml - use plugin's config which handles defaults/migration
+            plugin.reloadConfig();
+            // Copy it into a fresh YamlConfiguration to avoid modifying the live config
+            YamlConfiguration copy = new YamlConfiguration();
+            for (String key : plugin.getConfig().getKeys(true)) {
+                if (!plugin.getConfig().isConfigurationSection(key)) {
+                    copy.set(key, plugin.getConfig().get(key));
+                }
+            }
+            return copy;
+        }
+
+        String relativePath = CONFIG_FILES.get(fileId);
+        if (relativePath == null) return null;
+
+        File file = new File(plugin.getDataFolder(), relativePath);
+        if (!file.exists()) {
+            // Try to save default from resources
+            String resourcePath = relativePath;
+            try (InputStream in = plugin.getResource(resourcePath)) {
+                if (in != null) {
+                    file.getParentFile().mkdirs();
+                    java.nio.file.Files.copy(in, file.toPath());
+                }
+            } catch (IOException e) {
+                plugin.getLogger().warning("Failed to create default config file: " + relativePath);
+            }
+        }
+
+        if (file.exists()) {
+            return YamlConfiguration.loadConfiguration(file);
+        }
+        return new YamlConfiguration();
+    }
+
+    /**
+     * Save changes to a config file by its file ID.
+     */
+    private void saveConfigFile(String fileId, Map<String, Object> changes) {
+        if ("config".equals(fileId)) {
+            for (Map.Entry<String, Object> entry : changes.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                Object current = plugin.getConfig().get(key);
+                if (current != null) {
+                    value = coerceType(value, current);
+                }
+                plugin.getConfig().set(key, value);
+            }
+            plugin.saveConfig();
+            return;
+        }
+
+        String relativePath = CONFIG_FILES.get(fileId);
+        if (relativePath == null) return;
+
+        File file = new File(plugin.getDataFolder(), relativePath);
+        if (!file.exists()) return;
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        for (Map.Entry<String, Object> entry : changes.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            Object current = config.get(key);
+            if (current != null) {
+                value = coerceType(value, current);
+            }
+            config.set(key, value);
+        }
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to save config file: " + relativePath, e);
+        }
+    }
+
+    /**
+     * Extract the "file" query parameter from the request URI.
+     * Defaults to "config" if not specified.
+     */
+    private String getFileIdFromQuery(HttpExchange exchange) {
+        String query = exchange.getRequestURI().getQuery();
+        if (query != null) {
+            for (String param : query.split("&")) {
+                if (param.startsWith("file=")) {
+                    String fileId = param.substring(5);
+                    if (CONFIG_FILES.containsKey(fileId)) {
+                        return fileId;
+                    }
+                }
+            }
+        }
+        return "config";
     }
 
     // ==========================================
@@ -214,9 +358,45 @@ public class WebEditorManager {
         }
 
         // The page itself embeds the auth token so JS can use it for API calls.
-        // This is safe because accessing the page already requires network access to the server.
         String html = WebEditorPage.getHtml(authToken);
         sendResponse(exchange, 200, "text/html; charset=utf-8", html);
+    }
+
+    private void handleFilesApi(HttpExchange exchange) throws IOException {
+        String clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
+        if (!checkRateLimit(clientIp)) {
+            sendResponse(exchange, 429, "application/json", "{\"error\":\"Too many requests.\"}");
+            return;
+        }
+        if (!validateAuth(exchange)) {
+            sendResponse(exchange, 401, "application/json", "{\"error\":\"Unauthorized.\"}");
+            return;
+        }
+        if (!"GET".equals(exchange.getRequestMethod())) {
+            sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
+            return;
+        }
+
+        // Return list of all config files with metadata
+        StringBuilder json = new StringBuilder("[");
+        boolean first = true;
+        for (Map.Entry<String, String> entry : CONFIG_FILES.entrySet()) {
+            if (!first) json.append(",");
+            first = false;
+            String id = entry.getKey();
+            String path = entry.getValue();
+            String displayName = getFileDisplayName(id);
+            String category = getFileCategory(id);
+            String icon = getFileIcon(id);
+            json.append("{\"id\":\"").append(escapeJson(id))
+                .append("\",\"path\":\"").append(escapeJson(path))
+                .append("\",\"name\":\"").append(escapeJson(displayName))
+                .append("\",\"category\":\"").append(escapeJson(category))
+                .append("\",\"icon\":\"").append(escapeJson(icon))
+                .append("\"}");
+        }
+        json.append("]");
+        sendResponse(exchange, 200, "application/json", json.toString());
     }
 
     private void handleConfigApi(HttpExchange exchange) throws IOException {
@@ -227,9 +407,6 @@ public class WebEditorManager {
             sendResponse(exchange, 429, "application/json", "{\"error\":\"Too many requests. Try again later.\"}");
             return;
         }
-
-        // No wildcard CORS - same-origin requests don't need CORS headers.
-        // Only allow same-origin by not setting Access-Control-Allow-Origin.
 
         if ("OPTIONS".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 204, "text/plain", "");
@@ -242,33 +419,41 @@ public class WebEditorManager {
             return;
         }
 
+        String fileId = getFileIdFromQuery(exchange);
+
         if ("GET".equals(exchange.getRequestMethod())) {
-            handleGetConfig(exchange);
+            handleGetConfig(exchange, fileId);
         } else if ("POST".equals(exchange.getRequestMethod())) {
-            handlePostConfig(exchange);
+            handlePostConfig(exchange, fileId);
         } else {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
         }
     }
 
-    private void handleGetConfig(HttpExchange exchange) throws IOException {
-        // Serialize the config to JSON, redacting sensitive keys
+    private void handleGetConfig(HttpExchange exchange, String fileId) throws IOException {
+        YamlConfiguration config = loadConfigFile(fileId);
+        if (config == null) {
+            sendResponse(exchange, 404, "application/json", "{\"error\":\"Config file not found: " + escapeJson(fileId) + "\"}");
+            return;
+        }
+
         StringBuilder json = new StringBuilder();
         json.append("{");
         json.append("\"version\":\"").append(escapeJson(plugin.getPluginMeta().getVersion())).append("\",");
+        json.append("\"fileId\":\"").append(escapeJson(fileId)).append("\",");
+        json.append("\"fileName\":\"").append(escapeJson(getFileDisplayName(fileId))).append("\",");
         json.append("\"config\":");
-        serializeConfigSection(plugin.getConfig(), json, "");
+        serializeConfigSection(config, json, "");
         json.append("}");
 
         sendResponse(exchange, 200, "application/json", json.toString());
     }
 
-    private void handlePostConfig(HttpExchange exchange) throws IOException {
+    private void handlePostConfig(HttpExchange exchange, String fileId) throws IOException {
         // Read request body with size limit
         String body;
         try (InputStream is = exchange.getRequestBody()) {
             byte[] bodyBytes = is.readNBytes(MAX_BODY_SIZE);
-            // Check if there's still more data (body too large)
             if (is.read() != -1) {
                 sendResponse(exchange, 413, "application/json", "{\"error\":\"Request body too large. Maximum size is 1 MB.\"}");
                 return;
@@ -285,13 +470,15 @@ public class WebEditorManager {
 
         // Generate a session code
         String code = generateCode();
-        PendingSession session = new PendingSession(code, changes);
+        PendingSession session = new PendingSession(code, fileId, changes);
         sessions.put(code, session);
 
         // Log to console
-        plugin.getLogger().info("Web editor session created: " + code + " (" + changes.size() + " changes, expires in 10 min)");
+        String fileName = CONFIG_FILES.getOrDefault(fileId, fileId);
+        plugin.getLogger().info("Web editor session created: " + code + " (" + changes.size() + " changes to " + fileName + ", expires in 10 min)");
 
-        String response = "{\"code\":\"" + escapeJson(code) + "\",\"changes\":" + changes.size() + ",\"expiresIn\":600}";
+        String response = "{\"code\":\"" + escapeJson(code) + "\",\"changes\":" + changes.size()
+                + ",\"file\":\"" + escapeJson(fileName) + "\",\"expiresIn\":600}";
         sendResponse(exchange, 200, "application/json", response);
     }
 
@@ -320,26 +507,12 @@ public class WebEditorManager {
     }
 
     /**
-     * Apply a session's changes to the plugin config.
+     * Apply a session's changes to the appropriate config file.
      * Must be called from the main server thread.
      */
     public int applySession(PendingSession session) {
-        int applied = 0;
-        for (Map.Entry<String, Object> entry : session.changes.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-
-            // Convert numeric strings back to proper types
-            Object current = plugin.getConfig().get(key);
-            if (current != null) {
-                value = coerceType(value, current);
-            }
-
-            plugin.getConfig().set(key, value);
-            applied++;
-        }
-        plugin.saveConfig();
-        return applied;
+        saveConfigFile(session.fileId, session.changes);
+        return session.changes.size();
     }
 
     /**
@@ -358,16 +531,82 @@ public class WebEditorManager {
     /** Periodic cleanup of expired sessions and rate limit counters. */
     private void periodicCleanup() {
         sessions.entrySet().removeIf(e -> e.getValue().isExpired());
-        rateLimitMap.clear(); // Reset rate limit counters every minute
+        rateLimitMap.clear();
+    }
+
+    // ==========================================
+    // File Metadata
+    // ==========================================
+
+    private String getFileDisplayName(String fileId) {
+        return switch (fileId) {
+            case "config" -> "Main Config";
+            case "motd" -> "MOTD";
+            case "scoreboard" -> "Scoreboard";
+            case "stats" -> "Stats GUI";
+            case "icon" -> "Server Icon";
+            case "maintenance" -> "Maintenance";
+            case "texts-general" -> "General Messages";
+            case "texts-teleport" -> "Teleport Messages";
+            case "texts-warp" -> "Warp Messages";
+            case "texts-home" -> "Home Messages";
+            case "texts-economy" -> "Economy Messages";
+            case "texts-moderation" -> "Moderation Messages";
+            case "texts-player" -> "Player Messages";
+            case "texts-chat" -> "Chat Messages";
+            case "texts-inventory" -> "Inventory Messages";
+            case "texts-world" -> "World Messages";
+            case "texts-team" -> "Team Messages";
+            case "texts-trade" -> "Trade Messages";
+            case "texts-maintenance" -> "Maintenance Messages";
+            case "texts-info" -> "Info Messages";
+            case "texts-misc" -> "Misc Messages";
+            default -> fileId;
+        };
+    }
+
+    private String getFileCategory(String fileId) {
+        if (fileId.startsWith("texts-")) return "Messages";
+        return switch (fileId) {
+            case "config" -> "Core";
+            case "motd", "scoreboard", "icon" -> "Display";
+            case "stats" -> "Display";
+            case "maintenance" -> "System";
+            default -> "Other";
+        };
+    }
+
+    private String getFileIcon(String fileId) {
+        return switch (fileId) {
+            case "config" -> "\u2699\uFE0F"; // ⚙️
+            case "motd" -> "\uD83D\uDCE8"; // 📨
+            case "scoreboard" -> "\uD83D\uDCCA"; // 📊
+            case "stats" -> "\uD83D\uDCC8"; // 📈
+            case "icon" -> "\uD83D\uDDBC\uFE0F"; // 🖼️
+            case "maintenance" -> "\uD83D\uDEE0\uFE0F"; // 🛠️
+            case "texts-general" -> "\uD83D\uDCDD"; // 📝
+            case "texts-teleport" -> "\uD83C\uDF00"; // 🌀
+            case "texts-warp" -> "\u2728"; // ✨
+            case "texts-home" -> "\uD83C\uDFE0"; // 🏠
+            case "texts-economy" -> "\uD83D\uDCB0"; // 💰
+            case "texts-moderation" -> "\uD83D\uDEE1\uFE0F"; // 🛡️
+            case "texts-player" -> "\uD83D\uDC64"; // 👤
+            case "texts-chat" -> "\uD83D\uDCAC"; // 💬
+            case "texts-inventory" -> "\uD83C\uDF92"; // 🎒
+            case "texts-world" -> "\uD83C\uDF0D"; // 🌍
+            case "texts-team" -> "\uD83D\uDC65"; // 👥
+            case "texts-trade" -> "\uD83E\uDD1D"; // 🤝
+            case "texts-maintenance" -> "\uD83D\uDD27"; // 🔧
+            case "texts-info" -> "\u2139\uFE0F"; // ℹ️
+            case "texts-misc" -> "\uD83D\uDCE6"; // 📦
+            default -> "\uD83D\uDCC4"; // 📄
+        };
     }
 
     // ==========================================
     // JSON Serialization (redacts sensitive keys)
     // ==========================================
 
-    /**
-     * Check if a full config path is a sensitive key that should be redacted.
-     */
     private boolean isRedactedKey(String fullPath) {
         for (String redacted : REDACTED_KEYS) {
             if (fullPath.equals(redacted) || fullPath.endsWith("." + redacted)) {
@@ -393,12 +632,10 @@ public class WebEditorManager {
             } else if (val instanceof MemoryConfiguration mc) {
                 serializeConfigSection(mc, sb, fullPath);
             } else if (isRedactedKey(fullPath)) {
-                // Redact sensitive values - show placeholder instead of real value
                 sb.append("\"***REDACTED***\"");
             } else if (val instanceof Boolean b) {
                 sb.append(b.toString());
             } else if (val instanceof Number n) {
-                // Preserve int vs double
                 if (val instanceof Integer || val instanceof Long) {
                     sb.append(n.longValue());
                 } else {
@@ -416,6 +653,8 @@ public class WebEditorManager {
                         sb.append(n);
                     } else if (item instanceof Boolean b) {
                         sb.append(b);
+                    } else if (item instanceof Map) {
+                        sb.append("\"").append(escapeJson(String.valueOf(item))).append("\"");
                     } else {
                         sb.append("\"").append(escapeJson(String.valueOf(item))).append("\"");
                     }
@@ -456,7 +695,6 @@ public class WebEditorManager {
                         result.put(key, prim.getAsBoolean());
                     } else if (prim.isNumber()) {
                         Number num = prim.getAsNumber();
-                        // Preserve int vs double
                         if (prim.getAsString().contains(".")) {
                             result.put(key, num.doubleValue());
                         } else {
@@ -509,9 +747,6 @@ public class WebEditorManager {
     // Utility
     // ==========================================
 
-    /**
-     * Generate a cryptographically secure auth token (32 hex characters).
-     */
     private String generateAuthToken() {
         byte[] bytes = new byte[16];
         SECURE_RANDOM.nextBytes(bytes);
@@ -522,11 +757,8 @@ public class WebEditorManager {
         return sb.toString();
     }
 
-    /**
-     * Generate a unique session code using SecureRandom (iterative, not recursive).
-     */
     private String generateCode() {
-        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // No I/O/0/1 to avoid confusion
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         for (int attempt = 0; attempt < 100; attempt++) {
             StringBuilder sb = new StringBuilder(8);
             for (int i = 0; i < 8; i++) {
@@ -537,7 +769,6 @@ public class WebEditorManager {
                 return code;
             }
         }
-        // Extremely unlikely fallback - just return a UUID-based code
         return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
@@ -558,7 +789,12 @@ public class WebEditorManager {
             os.write(bytes);
         }
     }
+
+    /**
+     * Get the map of all config files.
+     */
+    public static Map<String, String> getConfigFiles() {
+        return Collections.unmodifiableMap(CONFIG_FILES);
+    }
 }
-
-
 
