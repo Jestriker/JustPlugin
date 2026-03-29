@@ -1,9 +1,9 @@
-# 🔌 JustPlugin — Ecosystem Developer Guide
+# 🔌 JustPlugin - Ecosystem Developer Guide
 
-> **Version:** 1.1  
+> **Version:** 1.3  
 > **API Package:** `org.justme.justPlugin.api`  
 > **Minecraft:** 1.21.11 (Paper)  
-> **Last Updated:** March 15, 2026
+> **Last Updated:** March 29, 2026
 
 ---
 
@@ -11,17 +11,17 @@
 
 JustPlugin exposes a public API that allows **add-on plugins** to interact with its core systems:
 
-- **💰 Economy** — Read, modify, and transfer player balances
-- **🔨 Punishments** — Ban, temp-ban, mute, temp-mute, warn, and check status
-- **👻 Vanish** — Check if a player is vanished or super-vanished
+- **💰 Economy** - Read, modify, and transfer player balances
+- **🔨 Punishments** - Ban, temp-ban, mute, temp-mute, warn, and check status
+- **👻 Vanish** - Check if a player is vanished or super-vanished
 
-This guide is intended for developers (or AI agents) building plugins that integrate with JustPlugin's ecosystem — for example, a **sign shop plugin**, a **chest shop**, an **auction house**, a **voting rewards** plugin, etc.
+This guide is intended for developers (or AI agents) building plugins that integrate with JustPlugin's ecosystem - for example, a **sign shop plugin**, a **chest shop**, an **auction house**, a **voting rewards** plugin, etc.
 
 ---
 
 ## Table of Contents
 
-- [Setup — Adding JustPlugin as a Dependency](#setup--adding-justplugin-as-a-dependency)
+- [Setup - Adding JustPlugin as a Dependency](#setup--adding-justplugin-as-a-dependency)
 - [Accessing the API](#accessing-the-api)
 - [Economy API](#-economy-api)
 - [Punishment API](#-punishment-api)
@@ -31,7 +31,7 @@ This guide is intended for developers (or AI agents) building plugins that integ
 
 ---
 
-## Setup — Adding JustPlugin as a Dependency
+## Setup - Adding JustPlugin as a Dependency
 
 ### 1. Place the JustPlugin JAR in your project
 
@@ -59,7 +59,7 @@ dependencies {
     // Paper API
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
 
-    // JustPlugin API — compileOnly so it's not bundled in your JAR
+    // JustPlugin API - compileOnly so it's not bundled in your JAR
     compileOnly files('libs/JustPlugin-1.0-SNAPSHOT.jar')
 }
 
@@ -96,7 +96,7 @@ import org.justme.justPlugin.api.EconomyAPI;
 import org.justme.justPlugin.api.PunishmentAPI;
 import org.justme.justPlugin.api.VanishAPI;
 
-// Get the API instance (do this in onEnable or when needed — not in constructor)
+// Get the API instance (do this in onEnable or when needed - not in constructor)
 JustPluginAPI api = JustPluginProvider.get();
 if (api == null) {
     getLogger().severe("JustPlugin not found! Disabling...");
@@ -123,7 +123,7 @@ VanishAPI vanish = api.getVanishAPI();
 
 The `EconomyAPI` interface provides full access to player balances.
 
-> **Vault Support:** JustPlugin optionally delegates to Vault's economy API when `economy.provider` is set to `"vault"` in `config.yml`. Your add-on plugin does **not** need to care about this — the `EconomyAPI` interface works identically regardless of the backend. All calls are transparently routed to either JustPlugin's built-in system or Vault.
+> **Vault Support:** JustPlugin optionally delegates to Vault's economy API when `economy.provider` is set to `"vault"` in `config.yml`. Your add-on plugin does **not** need to care about this - the `EconomyAPI` interface works identically regardless of the backend. All calls are transparently routed to either JustPlugin's built-in system or Vault.
 
 ### Interface
 
@@ -168,7 +168,7 @@ if (economy.removeBalance(buyerUuid, price)) {
     player.sendMessage("Purchased for " + economy.format(price) + "!");
     player.sendMessage("New balance: " + economy.format(economy.getBalance(buyerUuid)));
 } else {
-    player.sendMessage("Transaction failed — insufficient funds.");
+    player.sendMessage("Transaction failed - insufficient funds.");
 }
 ```
 
@@ -460,13 +460,13 @@ public class ShopSignListener implements Listener {
 ## 📌 Important Notes & Best Practices
 
 ### 1. Always use `compileOnly`
-JustPlugin's JAR must be added as `compileOnly` — do **not** shade/bundle it into your plugin. It's already on the server as a separate plugin.
+JustPlugin's JAR must be added as `compileOnly` - do **not** shade/bundle it into your plugin. It's already on the server as a separate plugin.
 
 ### 2. Always null-check the API
 ```java
 JustPluginAPI api = JustPluginProvider.get();
 if (api == null) {
-    // JustPlugin is not loaded — handle gracefully
+    // JustPlugin is not loaded - handle gracefully
 }
 ```
 
@@ -483,7 +483,7 @@ All bans, mutes, and warnings are saved to disk (YAML files in JustPlugin's data
 Always use `economy.format(amount)` when displaying money to players. This ensures the correct currency symbol (configured by the server admin) is used.
 
 ### 7. `removeBalance()` is safe
-It returns `false` and does **not** modify the balance if the player doesn't have enough. You don't need to call `hasBalance()` first if you're going to remove right after — just check the return value.
+It returns `false` and does **not** modify the balance if the player doesn't have enough. You don't need to call `hasBalance()` first if you're going to remove right after - just check the return value.
 
 ### 8. `pay()` respects pay-toggle
 If the recipient has `/paytoggle` enabled (disabled receiving payments), `pay()` returns `false`. Your plugin should handle this case.
@@ -494,14 +494,17 @@ When you call `addWarn()`, JustPlugin automatically looks up the punishment for 
 ### 10. Don't store JustPlugin references in static fields
 The API is cleared when JustPlugin disables. Always use `JustPluginProvider.get()` for fresh access, or store it in an instance field that's set in `onEnable()`.
 
+### 11. Internal listener architecture
+JustPlugin uses a modular listener architecture. Event handling is split into 6 categorized sub-listeners (`connection`, `chat`, `combat`, `player`, `server`, `inventory`). The `PlayerListener` class is a shared state holder (god mode, death locations, persistence) - it does **not** handle events directly. If your plugin listens for events that JustPlugin also handles, be aware of event priority: most JustPlugin listeners use `EventPriority.HIGH` or `EventPriority.LOWEST`.
+
 ---
 
 ## 📁 API Class Reference
 
 | Class / Interface | Location | Purpose |
 |-------------------|----------|---------|
-| `JustPluginProvider` | `org.justme.justPlugin.api` | Static accessor — call `.get()` to obtain the API |
-| `JustPluginAPI` | `org.justme.justPlugin.api` | Main API interface — provides sub-APIs |
+| `JustPluginProvider` | `org.justme.justPlugin.api` | Static accessor - call `.get()` to obtain the API |
+| `JustPluginAPI` | `org.justme.justPlugin.api` | Main API interface - provides sub-APIs |
 | `EconomyAPI` | `org.justme.justPlugin.api` | Balance management (get, set, add, remove, pay, format) |
 | `PunishmentAPI` | `org.justme.justPlugin.api` | Bans, mutes, warnings (check, apply, lift) |
 | `VanishAPI` | `org.justme.justPlugin.api` | Check vanish / super-vanish status |
@@ -512,7 +515,7 @@ The API is cleared when JustPlugin disables. Always use `JustPluginProvider.get(
 
 1. Build your add-on plugin JAR.
 2. Place **both** `JustPlugin-1.0-SNAPSHOT.jar` and your add-on JAR in the server's `plugins/` folder.
-3. Start the server — your plugin should load **after** JustPlugin.
+3. Start the server - your plugin should load **after** JustPlugin.
 4. If JustPlugin is missing, your plugin should log an error and disable itself (if using `depend`).
 
 ### Quick test commands (in-game):

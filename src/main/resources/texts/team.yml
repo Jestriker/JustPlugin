@@ -1,0 +1,116 @@
+# ==========================================
+# Team Messages
+# ==========================================
+# Messages for /team create, disband, invite, join, leave, kick,
+# promote, demote, sethome, delhome, home, info, list.
+#
+# Placeholders:
+#   {team}      - Team display name
+#   {player}    - Target player name
+#   {sender}    - Action performer name
+#   {role}      - Player role (Owner, Member, etc.)
+#   {count}     - Member count
+#   {max}       - Maximum team size
+#   {members}   - Formatted member list
+#   {accept}    - Clickable accept button (when clickable-commands.team is true)
+# ==========================================
+
+# === Create ===
+create:
+  success: "Team <yellow>{team}</yellow> created!"
+  already-in-team: "You are already in a team! Leave your current team first."
+  name-taken: "A team with that name already exists!"
+  usage: "Usage: /team create <name>"
+
+# === Disband ===
+disband:
+  success: "Team <yellow>{team}</yellow> has been disbanded."
+  not-owner: "Only the team owner can disband the team!"
+  not-in-team: "You are not in a team!"
+  confirm-prompt: "Are you sure? Type <yellow>/team disband confirm</yellow> to disband."
+
+# === Invite ===
+invite:
+  sent: "Invited <yellow>{player}</yellow> to your team."
+  received: "<yellow>{sender}</yellow> invited you to join team <yellow>{team}</yellow>!"
+  received-hint: "Type {accept} to join."
+  already-member: "<yellow>{player}</yellow> is already in your team!"
+  already-invited: "<yellow>{player}</yellow> has already been invited!"
+  not-in-team: "You are not in a team!"
+  usage: "Usage: /team invite <player>"
+
+# === Join ===
+join:
+  success: "You joined team <yellow>{team}</yellow>!"
+  team-notify: "<yellow>{player}</yellow> joined the team!"
+  no-invite: "You have no pending invite from that team."
+  already-in-team: "You are already in a team! Leave first."
+  usage: "Usage: /team join <name>"
+
+# === Leave ===
+leave:
+  success: "You left team <yellow>{team}</yellow>."
+  team-notify: "<yellow>{player}</yellow> left the team."
+  not-in-team: "You are not in a team!"
+  owner-cannot-leave: "You are the team owner! Use <yellow>/team disband</yellow> or promote someone first."
+
+# === Kick ===
+kick:
+  success: "Kicked <yellow>{player}</yellow> from the team."
+  kicked-notify: "You have been kicked from team <yellow>{team}</yellow>."
+  team-notify: "<yellow>{player}</yellow> was kicked from the team by <yellow>{sender}</yellow>."
+  not-in-team: "You are not in a team!"
+  not-owner: "Only the team owner can kick members!"
+  player-not-member: "<yellow>{player}</yellow> is not in your team!"
+  cannot-kick-self: "You can't kick yourself! Use <yellow>/team leave</yellow>."
+  usage: "Usage: /team kick <player>"
+
+# === Promote ===
+promote:
+  success: "Promoted <yellow>{player}</yellow> to team owner."
+  promoted-notify: "You have been promoted to team owner of <yellow>{team}</yellow>!"
+  not-owner: "Only the team owner can promote members!"
+  usage: "Usage: /team promote <player>"
+
+# === Demote ===
+demote:
+  success: "Demoted <yellow>{player}</yellow>."
+  not-owner: "Only the team owner can demote members!"
+  usage: "Usage: /team demote <player>"
+
+# === Set Home ===
+sethome:
+  success: "Team home set!"
+  not-in-team: "You are not in a team!"
+
+# === Delete Home ===
+delhome:
+  success: "Team home deleted."
+  not-set: "Your team doesn't have a home set."
+  not-in-team: "You are not in a team!"
+
+# === Home ===
+home:
+  teleporting: "Teleporting to team <yellow>{team}</yellow>'s home."
+  not-set: "Your team doesn't have a home set."
+  not-in-team: "You are not in a team!"
+
+# === Info ===
+info:
+  header: "<gold><bold>Team: {team}</bold></gold>"
+  owner: "Owner: <yellow>{player}</yellow>"
+  members: "Members ({count}): <yellow>{members}"
+  has-home: "Home: <green>Set"
+  no-home: "Home: <red>Not set"
+
+# === List ===
+list:
+  header: "<gold><bold>Teams</bold></gold> <gray>({count}):"
+  entry: " <yellow>{team}</yellow> <gray>- {count} members"
+  empty: "No teams exist."
+
+# === General ===
+general:
+  not-in-team: "You are not in a team!"
+  usage: "Usage: /team <create|disband|invite|join|leave|kick|promote|demote|sethome|delhome|home|info|list>"
+

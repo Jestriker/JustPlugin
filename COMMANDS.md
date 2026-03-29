@@ -1,8 +1,8 @@
-# 📋 JustPlugin — Command Reference
+# 📋 JustPlugin - Command Reference
 
-> **Version:** 1.2  
+> **Version:** 1.3  
 > **Author:** JustMe  
-> **Last Updated:** March 15, 2026
+> **Last Updated:** March 29, 2026
 
 ---
 
@@ -29,16 +29,16 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/tpa` | `/tpa <player>` | Request to teleport to a player | `justplugin.tpa` | — |
-| `/tpaccept` | `/tpaccept` | Accept an incoming teleport request | — | `tpyes` |
-| `/tpacancel` | `/tpacancel` | Cancel your outgoing teleport request or pending teleport | — | — |
-| `/tpreject` | `/tpreject` | Reject an incoming teleport request | — | `tpdeny`, `tpno` |
-| `/tpahere` | `/tpahere <player>` | Request a player to teleport to you | `justplugin.tpahere` | — |
+| `/tpa` | `/tpa <player>` | Request to teleport to a player | `justplugin.tpa` | - |
+| `/tpaccept` | `/tpaccept` | Accept an incoming teleport request | - | `tpyes` |
+| `/tpacancel` | `/tpacancel` | Cancel your outgoing teleport request or pending teleport | - | - |
+| `/tpreject` | `/tpreject` | Reject an incoming teleport request | - | `tpdeny`, `tpno` |
+| `/tpahere` | `/tpahere <player>` | Request a player to teleport to you | `justplugin.tpahere` | - |
 | `/tppos` | `/tppos <x> <y> <z> [world]` | Teleport to exact coordinates | `justplugin.tppos` | `tpposition` |
 | `/tpr` | `/tpr` | Opens the Random Teleport GUI with dimension selection (Overworld, Nether, End) | `justplugin.wild` | `wild`, `rtp` |
 | `/back` | `/back` | Return to your last location before teleporting | `justplugin.back` | `return` |
-| `/spawn` | `/spawn` | Teleport to the world spawn | `justplugin.spawn` | — |
-| `/setspawn` | `/setspawn` | Set the world spawn to your current location (requires safe block below) | `justplugin.setspawn` | — |
+| `/spawn` | `/spawn` | Teleport to the world spawn | `justplugin.spawn` | - |
+| `/setspawn` | `/setspawn` | Set the world spawn to your current location (requires safe block below) | `justplugin.setspawn` | - |
 
 ### Details
 
@@ -57,11 +57,11 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/warp` | `/warp [name]` | Teleport to a warp, or list all warps if no name given | `justplugin.warp` | — |
+| `/warp` | `/warp [name]` | Teleport to a warp, or list all warps if no name given | `justplugin.warp` | - |
 | `/warps` | `/warps` | List all available warps | `justplugin.warp` | `warplist` |
 | `/setwarp` | `/setwarp <name>` | Create a warp at your current location | `justplugin.setwarp` | `createwarp` |
 | `/delwarp` | `/delwarp <name>` | Delete a warp | `justplugin.delwarp` | `removewarp`, `rmwarp` |
-| `/renamewarp` | `/renamewarp <old> <new>` | Rename an existing warp | `justplugin.renamewarp` | — |
+| `/renamewarp` | `/renamewarp <old> <new>` | Rename an existing warp | `justplugin.renamewarp` | - |
 
 ### Details
 
@@ -80,9 +80,9 @@
 
 ### Details
 
-- **Home GUI** — running `/home` without arguments opens a 4-row inventory:
+- **Home GUI** - running `/home` without arguments opens a 4-row inventory:
   - **Row 1**: Spawn banner + up to 5 home bed slots
-  - **Row 2**: Action dyes — yellow (set home), red (delete with confirmation), black (unavailable/locked)
+  - **Row 2**: Action dyes - yellow (set home), red (delete with confirmation), black (unavailable/locked)
   - Green beds = defined homes (click to teleport), gray beds = empty available slots, red beds = over max limit
   - All actions respect permissions, cooldowns, and safe teleport protection
 - Running `/home <name>` still directly teleports to that home (bypasses GUI)
@@ -97,9 +97,9 @@
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
 | `/balance` | `/balance [player]` | Check your balance, or another player's if permitted | `justplugin.balance` | `bal`, `money` |
-| `/pay` | `/pay <player> <amount>` | Send money to another player | `justplugin.pay` | — |
-| `/paytoggle` | `/paytoggle` | Toggle receiving payments on/off | `justplugin.paytoggle` | — |
-| `/paynote` | `/paynote [amount \| list]` | Convert held items into coins based on configured values | `justplugin.paynote` | — |
+| `/pay` | `/pay <player> <amount>` | Send money to another player | `justplugin.pay` | - |
+| `/paytoggle` | `/paytoggle` | Toggle receiving payments on/off | `justplugin.paytoggle` | - |
+| `/paynote` | `/paynote [amount \| list]` | Convert held items into coins based on configured values | `justplugin.paynote` | - |
 | `/addcash` | `/addcash [player] <amount>` | Add cash to yourself or another player | `justplugin.addcash` | `givemoney`, `addmoney`, `addbal` |
 | `/baltop` | `/baltop` | Opens the Balance Leaderboard GUI with top 10 player heads | `justplugin.balance` | `balancetop`, `moneytop`, `topbal` |
 | `/baltophide` | `/baltophide [player]` | Hide yourself or another player from the balance leaderboard | `justplugin.baltophide` | `hidebaltop`, `balancetophide` |
@@ -121,7 +121,7 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/ban` | `/ban <player \| uuid> [reason]` | Permanently ban a player | `justplugin.ban` | — |
+| `/ban` | `/ban <player \| uuid> [reason]` | Permanently ban a player | `justplugin.ban` | - |
 | `/banip` | `/banip <ip \| player> [reason]` | Ban an IP address (resolves player to IP if name given) | `justplugin.banip` | `ban-ip` |
 | `/tempban` | `/tempban <player> <duration> [reason]` | Temporarily ban a player | `justplugin.tempban` | `tban` |
 | `/tempbanip` | `/tempbanip <ip \| player> <duration> [reason]` | Temporarily ban an IP | `justplugin.tempbanip` | `tbanip` |
@@ -129,12 +129,12 @@
 | `/unbanip` | `/unbanip <ip>` | Unban an IP address | `justplugin.unbanip` | `pardon-ip`, `unban-ip` |
 | `/vanish` | `/vanish [player]` | Toggle vanish mode (invisible to other players) | `justplugin.vanish` | `v` |
 | `/supervanish` | `/supervanish [player]` | Toggle super vanish (spectator-based full ghost mode) | `justplugin.supervanish` | `sv` |
-| `/sudo` | `/sudo <player> <command \| message>` | Force a player to execute a command or send a chat message | `justplugin.sudo` | — |
+| `/sudo` | `/sudo <player> <command \| message>` | Force a player to execute a command or send a chat message | `justplugin.sudo` | - |
 | `/invsee` | `/invsee <player>` | View a player's full inventory in a GUI (armor, offhand, all slots) | `justplugin.invsee` | `openinv` |
 | `/echestsee` | `/echestsee <player>` | View a player's ender chest | `justplugin.echestsee` | `openec` |
-| `/mute` | `/mute <player> [reason]` | Permanently mute a player (blocks chat & /msg) | `justplugin.mute` | — |
+| `/mute` | `/mute <player> [reason]` | Permanently mute a player (blocks chat & /msg) | `justplugin.mute` | - |
 | `/tempmute` | `/tempmute <player> <duration> [reason]` | Temporarily mute a player | `justplugin.tempmute` | `tmute` |
-| `/unmute` | `/unmute <player>` | Unmute a player | `justplugin.unmute` | — |
+| `/unmute` | `/unmute <player>` | Unmute a player | `justplugin.unmute` | - |
 | `/warn` | `/warn <add\|remove\|list\|confirm\|cancel> <player> [reason\|index]` | Manage player warnings with auto-punishment | `justplugin.warn` | `warning`, `warnings` |
 | `/kick` | `/kick <player> [reason]` | Kick a player from the server | `justplugin.kick` | - |
 | `/setlogswebhook` | `/setlogswebhook <url\|disable\|confirm\|cancel\|tryagain>` | Configure Discord webhook for log output | `justplugin.setlogswebhook` | `logwebhook`, `webhooklog` |
@@ -149,19 +149,19 @@
 - **BanIP** resolves player names to IPs (online or offline using last recorded IP). Shows "already IP banned" if IP is already banned. Displays styled disconnect screen saying "IP Banned".
 - **Duration format** for temp bans: `1d2h30m` (days, hours, minutes, seconds). Tab suggests `1h`, `1d`, `7d`, `30d`.
 - **Unban/UnbanIP** will tell you if the player/IP is not currently banned.
-- **Custom ban screen** — banned players see a styled disconnect screen with reason, duration (if temp), banned-by, and appeal info.
+- **Custom ban screen** - banned players see a styled disconnect screen with reason, duration (if temp), banned-by, and appeal info.
 - **Vanish** hides you from all players. Use `justplugin.vanish.others` to vanish other players. Players with `justplugin.vanish.see` can see vanished players in `/plist`. Grants invisibility potion effect, removes from tab list, and fakes a quit message.
-- **Super Vanish** puts you in spectator mode — a complete ghost: can't pick up/drop items, can't break/place blocks, can't trigger redstone/pressure plates/sculk sensors, can't open chests, and is invisible to other players. Use `justplugin.supervanish.others` to super-vanish other players. Previous game mode is restored on unvanish.
-- **Sudo** — if the message starts with `/`, it's executed as a command; otherwise it's sent as chat.
-- **Invsee** opens a 6-row GUI showing main inventory (slots 0-35), armor, and offhand. Refreshes every second. Armor slots show orange glass panes when empty — click with the correct armor type to equip it on the target.
+- **Super Vanish** puts you in spectator mode - a complete ghost: can't pick up/drop items, can't break/place blocks, can't trigger redstone/pressure plates/sculk sensors, can't open chests, and is invisible to other players. Use `justplugin.supervanish.others` to super-vanish other players. Previous game mode is restored on unvanish.
+- **Sudo** - if the message starts with `/`, it's executed as a command; otherwise it's sent as chat.
+- **Invsee** opens a 6-row GUI showing main inventory (slots 0-35), armor, and offhand. Refreshes every second. Armor slots show orange glass panes when empty - click with the correct armor type to equip it on the target.
 - **EchestSee** opens the target's real ender chest (live sync). Auto-closes if target logs off.
 - **Mute** permanently blocks a player from using chat and `/msg`/`/r`. Muted players see the mute reason. Default reason is configurable in `config.yml`.
 - **TempMute** temporarily blocks chat and `/msg`/`/r`. Duration format: `5m`, `1h`, `1d`, etc. Auto-expires. Default reason is configurable.
 - **Unmute** lifts mutes (both permanent and temporary). Works by name or UUID.
 - **Warn** manages a warning system with configurable auto-punishments per warning level:
-  - `/warn add <player> [reason]` — Issues a warning and auto-executes the configured punishment.
-  - `/warn remove <player> <index> [reason]` — Lifts a warning (keeps in history, doesn't count toward future punishments). Requires confirmation.
-  - `/warn list <player>` — Shows all warnings (active & lifted) with details.
+  - `/warn add <player> [reason]` - Issues a warning and auto-executes the configured punishment.
+  - `/warn remove <player> <index> [reason]` - Lifts a warning (keeps in history, doesn't count toward future punishments). Requires confirmation.
+  - `/warn list <player>` - Shows all warnings (active & lifted) with details.
   - Default punishment escalation: 1st=ChatMessage, 2nd=Kick, 3rd=TempBan 5m, 4th=TempBan 1d, 5th=TempBan 30d, 6th=TempBan 1y, 7th=Permanent Ban. All configurable in `config.yml`.
   - Supported punishment types: `ChatMessage`, `Kick`, `TempBan <duration>`, `Ban`, `ChatMute`, `ChatTempMute <duration>`, `NoPunishment`.
 - **Kick** disconnects a player with a styled kick screen. Default reason is configurable.
@@ -178,25 +178,25 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/fly` | `/fly [player]` | Toggle flight for yourself or another player | `justplugin.fly` | — |
+| `/fly` | `/fly [player]` | Toggle flight for yourself or another player | `justplugin.fly` | - |
 | `/gm` | `/gm <mode> [player]` | Change gamemode (accepts `0/1/2/3`, `s/c/a/sp`, or full names) | `justplugin.gamemode` | `gamemode` |
-| `/gmc` | `/gmc [player]` | Switch to Creative mode | `justplugin.gamemode` | — |
-| `/gms` | `/gms [player]` | Switch to Survival mode | `justplugin.gamemode` | — |
-| `/gma` | `/gma [player]` | Switch to Adventure mode | `justplugin.gamemode` | — |
-| `/gmsp` | `/gmsp [player]` | Switch to Spectator mode | `justplugin.gamemode` | — |
+| `/gmc` | `/gmc [player]` | Switch to Creative mode | `justplugin.gamemode` | - |
+| `/gms` | `/gms [player]` | Switch to Survival mode | `justplugin.gamemode` | - |
+| `/gma` | `/gma [player]` | Switch to Adventure mode | `justplugin.gamemode` | - |
+| `/gmsp` | `/gmsp [player]` | Switch to Spectator mode | `justplugin.gamemode` | - |
 | `/gmcheck` | `/gmcheck [player]` | Check a player's current game mode, fly status, and allow-flight | `justplugin.gmcheck` | `checkgm`, `gamemodecheck` |
 | `/god` | `/god [player]` | Toggle god mode (invincible, full heal, clears bad effects) | `justplugin.god` | `godmode`, `tgm` |
-| `/speed` | `/speed <0-10> [player]` | Set speed dynamically (fly speed if flying, walk speed if walking) | `justplugin.speed` | — |
+| `/speed` | `/speed <0-10> [player]` | Set speed dynamically (fly speed if flying, walk speed if walking) | `justplugin.speed` | - |
 | `/flyspeed` | `/flyspeed <0-10> [player]` | Set fly speed explicitly | `justplugin.speed` | `fspeed` |
 | `/walkspeed` | `/walkspeed <0-10> [player]` | Set walk speed explicitly | `justplugin.speed` | `wspeed` |
-| `/hat` | `/hat` | Wear the item in your main hand as a helmet (swaps with current helmet) | `justplugin.hat` | — |
+| `/hat` | `/hat` | Wear the item in your main hand as a helmet (swaps with current helmet) | `justplugin.hat` | - |
 | `/exp` | `/exp <set \| give> <levels \| orbs> <amount> [player]` | Manage experience points (set/give levels or orbs) | `justplugin.exp` | `xp` |
 | `/skull` | `/skull [player]` | Get a player's head item (defaults to your own) | `justplugin.skull` | `head`, `playerhead` |
-| `/suicide` | `/suicide` | Kill yourself | `justplugin.suicide` | — |
-| `/kill` | `/kill [player]` | Kill yourself or another player (overrides vanilla) | `justplugin.kill` | — |
-| `/heal` | `/heal [player]` | Restore full health and extinguish fire | `justplugin.heal` | — |
-| `/feed` | `/feed [player]` | Restore full hunger and saturation | `justplugin.feed` | — |
-| `/getpos` | `/getpos [player]` | Display current coordinates, world, yaw, and pitch | — (public for self) | `whereami`, `position`, `getcoords`, `coords` |
+| `/suicide` | `/suicide` | Kill yourself | `justplugin.suicide` | - |
+| `/kill` | `/kill [player]` | Kill yourself or another player (overrides vanilla) | `justplugin.kill` | - |
+| `/heal` | `/heal [player]` | Restore full health and extinguish fire | `justplugin.heal` | - |
+| `/feed` | `/feed [player]` | Restore full hunger and saturation | `justplugin.feed` | - |
+| `/getpos` | `/getpos [player]` | Display current coordinates, world, yaw, and pitch | - (public for self) | `whereami`, `position`, `getcoords`, `coords` |
 | `/getdeathpos` | `/getdeathpos [player]` | Display last death location | Configurable for self | `getdeathcoords`, `deathpos`, `deathcoords` |
 
 ### Details
@@ -219,12 +219,12 @@
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
 | `/msg` | `/msg <player> <message>` | Send a private message to a player | `justplugin.msg` | `tell`, `whisper`, `w`, `m`, `pm`, `dm` |
-| `/r` | `/r <message>` | Reply to the last player who messaged you | — | `reply` |
-| `/ignore` | `/ignore <add\|remove\|list\|clearlist> [player]` | Manage your ignore list | `justplugin.ignore` | — |
+| `/r` | `/r <message>` | Reply to the last player who messaged you | - | `reply` |
+| `/ignore` | `/ignore <add\|remove\|list\|clearlist> [player]` | Manage your ignore list | `justplugin.ignore` | - |
 | `/announce` | `/announce <message>` | Broadcast a server-wide announcement | `justplugin.announce` | `broadcast`, `bcast` |
 | `/sharecoords` | `/sharecoords [all \| team]` | Share your current coordinates in chat (global or team) | `justplugin.sharecoords` | `sendcoords` |
 | `/sharedeathcoords` | `/sharedeathcoords [all \| team]` | Share your last death coordinates in chat (global or team) | `justplugin.sharedeathcoords` | `senddeathcoords` |
-| `/chat` | `/chat <all \| team>` | Switch your chat mode between global and team chat | `justplugin.chat` | — |
+| `/chat` | `/chat <all \| team>` | Switch your chat mode between global and team chat | `justplugin.chat` | - |
 | `/teammsg` | `/teammsg <message>` | Send a one-off message to your team (doesn't change chat mode) | `justplugin.chat` | `tmsg`, `tm` |
 | `/clearchat` | `/clearchat [reason]` | Clear the chat for all online players | `justplugin.clearchat` | `cc`, `chatclear` |
 
@@ -245,19 +245,19 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/anvil` | `/anvil` | Open a virtual anvil | `justplugin.anvil` | — |
-| `/grindstone` | `/grindstone` | Open a virtual grindstone | `justplugin.grindstone` | — |
+| `/anvil` | `/anvil` | Open a virtual anvil | `justplugin.anvil` | - |
+| `/grindstone` | `/grindstone` | Open a virtual grindstone | `justplugin.grindstone` | - |
 | `/enderchest` | `/enderchest` | Open your ender chest | `justplugin.enderchest` | `echest`, `ec` |
 | `/craft` | `/craft` | Open a virtual crafting table | `justplugin.craft` | `workbench`, `wb` |
-| `/stonecutter` | `/stonecutter` | Open a virtual stonecutter | `justplugin.stonecutter` | — |
-| `/loom` | `/loom` | Open a virtual loom | `justplugin.loom` | — |
+| `/stonecutter` | `/stonecutter` | Open a virtual stonecutter | `justplugin.stonecutter` | - |
+| `/loom` | `/loom` | Open a virtual loom | `justplugin.loom` | - |
 | `/smithingtable` | `/smithingtable` | Open a virtual smithing table | `justplugin.smithingtable` | `smithtable` |
 | `/enchantingtable` | `/enchantingtable` | Open a virtual enchanting table | `justplugin.enchantingtable` | `enchtable` |
 
 ### Details
 
 - All virtual inventory commands are player-only.
-- These open functional GUIs — you can actually use them to craft, repair, enchant, etc.
+- These open functional GUIs - you can actually use them to craft, repair, enchant, etc.
 
 ---
 
@@ -265,16 +265,16 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/jpinfo` | `/jpinfo` | Show plugin information (version, author) | — | `about` |
-| `/jphelp` | `/jphelp [page]` | Show paginated help (4 pages of commands) | — | — |
+| `/jpinfo` | `/jpinfo` | Show plugin information (version, author) | - | `about` |
+| `/jphelp` | `/jphelp [page]` | Show paginated help (4 pages of commands) | - | - |
 | `/playerinfo` | `/playerinfo <player>` | View detailed player info (health, food, gamemode, location, balance, etc.) | `justplugin.playerinfo` | `whois`, `seen` |
-| `/plist` | `/plist` | List online players (hides vanished players unless you have `justplugin.vanish.see`) | — | `who`, `online`, `players` |
+| `/plist` | `/plist` | List online players (hides vanished players unless you have `justplugin.vanish.see`) | - | `who`, `online`, `players` |
 | `/playerlist` | `/playerlist [page]` | Advanced paginated player list with staff tags, world info, and vanish indicators | `justplugin.playerlist` | `pls` |
 | `/playerlisthide` | `/playerlisthide [player]` | Hide yourself or another player from the player list | `justplugin.playerlist.hide` | `plhide`, `hideplayer` |
 | `/motd` | `/motd [server \| join] [message]` | View both MOTDs, or set the server list MOTD or join MOTD | - | - |
 | `/resetmotd` | `/resetmotd [server \| join]` | Reset one or both MOTDs to defaults | `justplugin.motd.set` | - |
-| `/clock` | `/clock` | Show current real-world time and in-game time | — | `realtime`, `rltime` |
-| `/date` | `/date` | Show current real-world date, time, game day, and game time | — | `realdate`, `rldate` |
+| `/clock` | `/clock` | Show current real-world time and in-game time | - | `realtime`, `rltime` |
+| `/date` | `/date` | Show current real-world date, time, game day, and game time | - | `realdate`, `rldate` |
 
 ### Details
 
@@ -329,14 +329,14 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/team create` | `/team create <name>` | Create a new team (you become the leader) | `justplugin.team` | — |
-| `/team disband` | `/team disband` | Disband your team (leader only) | `justplugin.team` | — |
-| `/team invite` | `/team invite <player>` | Invite a player to your team (leader only) | `justplugin.team` | — |
-| `/team join` | `/team join <name>` | Join a team you've been invited to | `justplugin.team` | — |
-| `/team leave` | `/team leave` | Leave your current team (leaders must disband instead) | `justplugin.team` | — |
-| `/team kick` | `/team kick <player>` | Kick a player from your team (leader only) | `justplugin.team` | — |
-| `/team info` | `/team info [name]` | View team info (defaults to your team) | `justplugin.team` | — |
-| `/team list` | `/team list` | List all existing teams | `justplugin.team` | — |
+| `/team create` | `/team create <name>` | Create a new team (you become the leader) | `justplugin.team` | - |
+| `/team disband` | `/team disband` | Disband your team (leader only) | `justplugin.team` | - |
+| `/team invite` | `/team invite <player>` | Invite a player to your team (leader only) | `justplugin.team` | - |
+| `/team join` | `/team join <name>` | Join a team you've been invited to | `justplugin.team` | - |
+| `/team leave` | `/team leave` | Leave your current team (leaders must disband instead) | `justplugin.team` | - |
+| `/team kick` | `/team kick <player>` | Kick a player from your team (leader only) | `justplugin.team` | - |
+| `/team info` | `/team info [name]` | View team info (defaults to your team) | `justplugin.team` | - |
+| `/team list` | `/team list` | List all existing teams | `justplugin.team` | - |
 
 ### Details
 
@@ -358,6 +358,11 @@
 | `/tab` | `/tab` | Manually refresh the tab list header/footer | `justplugin.tab` | - |
 | `/reloadscoreboard` | `/reloadscoreboard` | Reload the scoreboard config and refresh for all players (staff only) | `justplugin.scoreboard.reload` | `reloadsb` |
 | `/rank` | `/rank` | Open the Ranks GUI showing server ranks from LuckPerms (requires LuckPerms) | `justplugin.rank` | `ranks` |
+| `/stats` | `/stats [player]` | View player statistics in an interactive GUI | `justplugin.stats` | `statistics` |
+| `/maintenance` | `/maintenance <mode \| allowed-users \| allowed-groups \| cooldown> [args...]` | Manage server maintenance mode | `justplugin.maintenance` | `maint` |
+| `/skin` | `/skin <set \| clear> [name] [player]` | Set, clear, or reset your skin | `justplugin.skin` | `setskin` |
+| `/skinban` | `/skinban [name \| list]` | Ban a skin name from being used, or list all banned skins | `justplugin.skinban` | - |
+| `/skinunban` | `/skinunban <name>` | Unban a skin name | `justplugin.skinunban` | - |
 
 ### Details
 
@@ -367,6 +372,22 @@
 - **Tab** header/footer is configurable in `config.yml` with MiniMessage and `{player}`, `{online}`, `{max}`, `{tps}`, `{ping}` placeholders. Auto-applied on join and refreshed every 5 seconds (configurable).
 - **Scoreboard** shows a sidebar with configurable lines and 50+ placeholders. Configuration lives in `scoreboard.yml`. Use `/reloadscoreboard` (staff only, requires `justplugin.scoreboard.reload`) to apply config changes to all online players. The scoreboard is always visible to all players when enabled in config. See `SCOREBOARD.md` for full placeholder reference.
 - **Rank** opens a GUI displaying server ranks. Each rank corresponds to a LuckPerms group and is configured in `config.yml` under `ranks.list`. Players see their current rank highlighted with an enchanted glow and a green checkmark. The rank system is **disabled by default** and requires LuckPerms to be installed. If LuckPerms is not found, players are notified. Configure ranks by setting group names, display names, icons, slots, and descriptions in config.
+- **Stats** opens an interactive inventory GUI showing player statistics (kills, deaths, K/D ratio, playtime, blocks broken, mobs killed, etc.). `justplugin.stats` for self, `justplugin.stats.others` for viewing other players' stats.
+- **Maintenance** manages the server maintenance mode:
+  - `/maintenance mode on/off` - activate or deactivate maintenance mode
+  - `/maintenance allowed-users list/add/remove` - manage the maintenance whitelist
+  - `/maintenance allowed-groups list/add/remove` - manage LuckPerms group bypass
+  - `/maintenance cooldown <duration | clear>` - set estimated maintenance end time (shown in MOTD and kick screen)
+  - OP bypass enabled by default. Configurable auto-disable when cooldown expires.
+  - Custom kick screen, MOTD override, and server icon during maintenance. See `maintenance/config.yml`.
+- **Skin** manages player skins:
+  - `/skin set <name>` - set your skin to any player's skin (fetched via Mojang API)
+  - `/skin set <name> <player>` - set another player's skin (requires `justplugin.skin.others`)
+  - `/skin clear` / `/skin reset` - reset your skin to your username's default
+  - `/skin clear <player>` - reset another player's skin (requires `justplugin.skin.others`)
+  - Auto-applies stored skins on join. Works for cracked players. **Disabled by default** - opt-in via config.
+- **SkinBan** bans a skin name so no player can use it. Use `/skinban list` to view all banned skins.
+- **SkinUnban** unbans a previously banned skin name.
 
 ---
 
@@ -374,9 +395,9 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
-| `/help` | `/help [page]` | Show plugin help (overrides vanilla help) | — | `?` |
+| `/help` | `/help [page]` | Show plugin help (overrides vanilla help) | - | `?` |
 | `/plugins` | `/plugins` | Show installed plugins with enable/disable status (staff only) | `justplugin.plugins` | `pl` |
-| `/kill` | `/kill [player]` | Kill yourself or another player (overrides vanilla kill) | `justplugin.kill` | — |
+| `/kill` | `/kill [player]` | Kill yourself or another player (overrides vanilla kill) | `justplugin.kill` | - |
 
 ### Details
 

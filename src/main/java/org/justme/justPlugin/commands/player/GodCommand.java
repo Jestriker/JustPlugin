@@ -38,7 +38,7 @@ public class GodCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         Player target = player;
@@ -49,7 +49,7 @@ public class GodCommand implements TabExecutor {
             }
             target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                player.sendMessage(CC.error("Player not found!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                 return true;
             }
         }
@@ -71,7 +71,7 @@ public class GodCommand implements TabExecutor {
                 }
             }
         } else {
-            // Disabling god mode — check if player has any effects, suggest clearing
+            // Disabling god mode - check if player has any effects, suggest clearing
             if (!target.getActivePotionEffects().isEmpty()) {
                 target.sendMessage(CC.info("You have active effects. Use <yellow>/effect clear</yellow> to remove them."));
             }

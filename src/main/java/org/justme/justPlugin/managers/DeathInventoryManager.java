@@ -92,7 +92,7 @@ public class DeathInventoryManager {
     }
 
     /**
-     * Finalize the recording. Call after death event — only keeps it if drops happened.
+     * Finalize the recording. Call after death event - only keeps it if drops happened.
      */
     public void finalizeRecording(UUID uuid, boolean keepInventory, boolean hadDrops) {
         if (keepInventory || !hadDrops) {

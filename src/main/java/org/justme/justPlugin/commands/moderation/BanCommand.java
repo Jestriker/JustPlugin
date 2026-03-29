@@ -25,7 +25,7 @@ public class BanCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /ban <player | uuid> [reason]"));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("moderation.ban.usage")));
             return true;
         }
 

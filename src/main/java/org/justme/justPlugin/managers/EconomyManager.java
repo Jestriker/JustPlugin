@@ -12,7 +12,7 @@ public class EconomyManager {
     private final DataManager dataManager;
     private final double startingBalance;
 
-    // Vault bridge — null if not using Vault
+    // Vault bridge - null if not using Vault
     private VaultEconomyBridge vaultBridge;
     private boolean usingVault = false;
 

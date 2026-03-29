@@ -28,7 +28,7 @@ public class GetPosCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
 
@@ -40,14 +40,14 @@ public class GetPosCommand implements TabExecutor {
             }
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null || (plugin.getVanishManager().isVanished(target.getUniqueId()) && !player.hasPermission("justplugin.vanish.see"))) {
-                player.sendMessage(CC.error("Player not found!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                 return true;
             }
             showPosition(player, target, true);
             return true;
         }
 
-        // Self — no permission needed
+        // Self - no permission needed
         showPosition(player, player, false);
         return true;
     }
@@ -78,7 +78,7 @@ public class GetPosCommand implements TabExecutor {
             boolean coordsSafe = plugin.getTeleportManager().isLocationSafe(coordsLoc);
             String coordsSafetyTag = coordsSafe ? "" : " <red><bold>⚠ UNSAFE</bold></red>";
 
-            // TP to player (live location) — will check safety on click
+            // TP to player (live location) - will check safety on click
             String tpPlayerCmd = "/tpsafecheck " + target.getName();
             Component tpToPlayer = CC.translate(" <dark_gray>></dark_gray> <green><bold>[TP to Player]</bold></green> <gray><italic>(checks safety on click)</italic>")
                     .clickEvent(ClickEvent.runCommand(tpPlayerCmd))

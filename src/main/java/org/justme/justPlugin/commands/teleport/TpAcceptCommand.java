@@ -23,20 +23,20 @@ public class TpAcceptCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         TeleportManager tm = plugin.getTeleportManager();
         if (!tm.hasIncomingRequest(player.getUniqueId())) {
-            player.sendMessage(CC.error("You have no pending teleport requests."));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tpaccept.no-pending")));
             return true;
         }
         TeleportManager.TpaRequest req = tm.getIncomingRequest(player.getUniqueId());
         if (req == null) {
-            player.sendMessage(CC.error("You have no pending teleport requests."));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tpaccept.no-pending")));
             return true;
         }
-        player.sendMessage(CC.success("Teleport request accepted!"));
+        player.sendMessage(CC.success(plugin.getMessageManager().raw("teleport.tpaccept.accepted")));
         tm.acceptRequest(player.getUniqueId());
         return true;
     }

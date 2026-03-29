@@ -1,0 +1,87 @@
+# ==========================================
+# Misc Messages
+# ==========================================
+# Messages for /discord, /applyedits, /tab, /rank, /plugins,
+# /reloadscoreboard, /itemname, /shareitem, /setspawner,
+# /skinban, /skinunban, and other miscellaneous features.
+#
+# Placeholders:
+#   {link}      - Discord link URL
+#   {code}      - Web editor apply code
+#   {name}      - Item/skin name
+#   {player}    - Player name
+#   {type}      - Entity/spawner type
+#   {count}     - Count of items in a list
+# ==========================================
+
+# === Discord ===
+discord:
+  # Message shown when player runs /discord
+  link: "Join our Discord: <click:open_url:'{link}'><yellow><underlined>{link}</underlined></yellow></click>"
+  not-set: "Discord link has not been configured."
+  set-success: "Discord link set to: <yellow>{link}"
+  set-usage: "Usage: /discord set <link>"
+
+# === Apply Edits (Web Editor) ===
+applyedits:
+  success: "Config changes applied successfully! Some changes may require a restart."
+  invalid-code: "Invalid or expired code. Generate a new one from the web editor."
+  no-pending: "No pending changes to apply."
+  usage: "Usage: /applyedits <code>"
+
+# === Tab ===
+tab:
+  refreshed: "Tab list refreshed."
+
+# === Reload Scoreboard ===
+reloadscoreboard:
+  success: "Scoreboard configuration reloaded for all players."
+
+# === Rank ===
+rank:
+  no-luckperms: "LuckPerms is not installed! The rank system requires LuckPerms."
+  disabled: "The rank system is disabled. Enable it in config.yml (command-settings.rank.enabled)."
+
+# === Plugins ===
+plugins:
+  header: "<gold><bold>Plugins</bold></gold> <gray>({count}):"
+
+# === Item Name ===
+itemname:
+  success: "Item renamed to: {name}"
+  empty-hand: "You must be holding an item!"
+  usage: "Usage: /itemname <name>"
+
+# === Share Item ===
+shareitem:
+  empty-hand: "You must be holding an item to share!"
+  # The format when broadcasting. {player} = sender, {item} = hover-able item display
+  format: "<yellow>{player}</yellow> is showing: {item}"
+
+# === Set Spawner ===
+setspawner:
+  success: "Spawner type set to <yellow>{type}</yellow>."
+  not-looking: "You must be looking at a spawner!"
+  invalid-type: "Invalid entity type: <yellow>{type}"
+  usage: "Usage: /setspawner <type>"
+
+# === Skin Ban ===
+skinban:
+  banned: "Skin <yellow>{name}</yellow> has been banned."
+  already-banned: "Skin <yellow>{name}</yellow> is already banned."
+  list-header: "<gold><bold>Banned Skins</bold></gold> <gray>({count}):"
+  list-entry: " <gray>- <yellow>{name}"
+  list-empty: "No skins are currently banned."
+  usage: "Usage: /skinban <name|list>"
+
+# === Skin Unban ===
+skinunban:
+  unbanned: "Skin <yellow>{name}</yellow> has been unbanned."
+  not-banned: "Skin <yellow>{name}</yellow> is not banned."
+  usage: "Usage: /skinunban <name>"
+
+# === Startup Warnings ===
+startup:
+  warnings-header: "<gray>[<gradient:#ff6b6b:#ee5a24>JustPlugin</gradient><gray>] <yellow><bold>Startup Warnings:</bold></yellow>"
+  warnings-footer: "  <dark_gray>Check config.yml for details."
+

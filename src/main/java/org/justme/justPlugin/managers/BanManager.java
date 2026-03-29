@@ -94,7 +94,7 @@ public class BanManager {
     }
 
     /**
-     * Unban by name — finds the UUID that has that name in the bans config and unbans it.
+     * Unban by name - finds the UUID that has that name in the bans config and unbans it.
      */
     public boolean unbanByName(String name) {
         YamlConfiguration config = dataManager.getBansConfig();
@@ -290,7 +290,7 @@ public class BanManager {
     }
 
     /**
-     * Unban IP by player name or UUID — finds the IP ban entry that has this player associated.
+     * Unban IP by player name or UUID - finds the IP ban entry that has this player associated.
      */
     public boolean unbanIpByNameOrUuid(String input) {
         YamlConfiguration config = dataManager.getBansConfig();
@@ -474,7 +474,7 @@ public class BanManager {
             return buildBanScreen(expires == -1L ? "You have been banned!" : "You have been temporarily banned!", reason, bannedBy, duration);
         }
 
-        // Check name ban (different UUID using same name — edge case)
+        // Check name ban (different UUID using same name - edge case)
         if (isBannedByName(name)) {
             return buildBanScreen("You have been banned!", "Your account name is banned.", "System", null);
         }

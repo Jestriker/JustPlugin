@@ -21,7 +21,7 @@ import org.justme.justPlugin.util.CC;
 import java.util.*;
 
 /**
- * Homes GUI — 9×4 grid.
+ * Homes GUI - 9×4 grid.
  * Row 1 (top):    black glass panes
  * Row 2:          spawn flag (slot 10), team home shield (slot 11), 3 bed slots (slots 12-14)
  * Row 3:          spawn info (slot 19), team home dye (slot 20), dyes below each bed (slots 21-23)
@@ -237,13 +237,13 @@ public class HomeGui implements Listener {
             }
             boolean spawnDefined = plugin.getConfig().contains("spawn.world") && plugin.getConfig().contains("spawn.x");
             if (!spawnDefined) {
-                player.sendMessage(CC.error("No spawn has been set on this server."));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.spawn.not-set")));
                 return;
             }
             player.closeInventory();
 
-            // Delay check (time between uses) — OPs auto-skip
-            if (!player.isOp() && !player.hasPermission("justplugin.spawn.delaybypass")
+            // Delay check (time between uses) - requires explicit delaybypass permission
+            if (!player.hasPermission("justplugin.spawn.delaybypass")
                     && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "spawn")) {
                 int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "spawn");
                 player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
@@ -252,7 +252,7 @@ public class HomeGui implements Listener {
 
             String worldName = plugin.getConfig().getString("spawn.world");
             if (worldName == null || Bukkit.getWorld(worldName) == null) {
-                player.sendMessage(CC.error("Spawn world not found!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.spawn.world-not-found")));
                 return;
             }
 
@@ -268,7 +268,7 @@ public class HomeGui implements Listener {
                     player, spawnLoc, "justplugin.teleport.bypass", "spawn", "justplugin.spawn.unsafetp");
             if (initiated) {
                 plugin.getCooldownManager().setDelayStart(player.getUniqueId(), "spawn");
-                player.sendMessage(CC.success("Teleporting to spawn."));
+                player.sendMessage(CC.success(plugin.getMessageManager().raw("teleport.spawn.teleporting")));
             }
             return;
         }
@@ -278,7 +278,7 @@ public class HomeGui implements Listener {
             TeamManager tm = plugin.getTeamManager();
             String teamName = tm.getPlayerTeam(player.getUniqueId());
             if (teamName == null) {
-                player.sendMessage(CC.error("You are not in a team!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                 return;
             }
             Location teamHome = tm.getTeamHome(teamName);
@@ -291,8 +291,8 @@ public class HomeGui implements Listener {
             }
             player.closeInventory();
 
-            // Delay check (time between uses) — OPs auto-skip
-            if (!player.isOp() && !player.hasPermission("justplugin.teamhome.delaybypass")
+            // Delay check (time between uses) - requires explicit delaybypass permission
+            if (!player.hasPermission("justplugin.teamhome.delaybypass")
                     && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "teamhome")) {
                 int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "teamhome");
                 player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
@@ -319,7 +319,7 @@ public class HomeGui implements Listener {
         if (slot >= 12 && slot <= 16) {
             int index = slot - 12;
             if (index < homeNames.size()) {
-                // Defined home — teleport
+                // Defined home - teleport
                 String name = homeNames.get(index);
                 Location loc = homes.get(name);
                 if (loc == null) return;
@@ -331,8 +331,8 @@ public class HomeGui implements Listener {
 
                 player.closeInventory();
 
-                // Delay check (time between uses) — OPs auto-skip
-                if (!player.isOp() && !player.hasPermission("justplugin.home.delaybypass")
+                // Delay check (time between uses) - requires explicit delaybypass permission
+                if (!player.hasPermission("justplugin.home.delaybypass")
                         && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "home")) {
                     int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "home");
                     player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
@@ -346,10 +346,10 @@ public class HomeGui implements Listener {
                     player.sendMessage(CC.success("Teleporting to home <yellow>" + name + "</yellow>."));
                 }
             } else if (index < maxHomes) {
-                // Gray bed — say it's empty
+                // Gray bed - say it's empty
                 player.sendMessage(CC.info("This home slot is empty. Use the <yellow>yellow dye</yellow> below to set a home here."));
             } else {
-                // Red bed — say it's locked
+                // Red bed - say it's locked
                 player.sendMessage(CC.error("This slot is locked. Maximum homes: <yellow>" + maxHomes));
             }
             return;

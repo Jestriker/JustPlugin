@@ -24,7 +24,7 @@ public class GameModeCheckCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
-        // /gmcheck [player] — if no player specified, check your own (must be a player)
+        // /gmcheck [player] - if no player specified, check your own (must be a player)
         if (args.length < 1) {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(CC.error("Usage: /gmcheck <player>"));

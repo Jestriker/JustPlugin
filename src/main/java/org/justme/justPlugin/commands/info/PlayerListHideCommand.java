@@ -25,7 +25,7 @@ public class PlayerListHideCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
 

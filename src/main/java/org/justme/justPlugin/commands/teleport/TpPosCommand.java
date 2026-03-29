@@ -26,11 +26,11 @@ public class TpPosCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 3) {
-            player.sendMessage(CC.error("Usage: /tppos <x> <y> <z> [world]"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tppos.usage")));
             return true;
         }
         try {
@@ -41,7 +41,7 @@ public class TpPosCommand implements TabExecutor {
             if (args.length >= 4) {
                 world = Bukkit.getWorld(args[3]);
                 if (world == null) {
-                    player.sendMessage(CC.error("World not found!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tppos.world-not-found")));
                     return true;
                 }
             }
@@ -49,7 +49,7 @@ public class TpPosCommand implements TabExecutor {
             plugin.getTeleportManager().teleport(player, loc);
             player.sendMessage(CC.success("Teleporting to <yellow>" + x + ", " + y + ", " + z + "</yellow>."));
         } catch (NumberFormatException e) {
-            player.sendMessage(CC.error("Invalid coordinates!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tppos.invalid-coords")));
         }
         return true;
     }

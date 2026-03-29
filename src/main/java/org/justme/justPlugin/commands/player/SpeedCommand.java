@@ -24,24 +24,24 @@ public class SpeedCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /speed <0-10> [player]"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("player.speed.usage")));
             return true;
         }
         try {
             float speed = Float.parseFloat(args[0]);
             if (speed < 0 || speed > 10) {
-                player.sendMessage(CC.error("Speed must be between 0 and 10!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("player.speed.invalid-speed")));
                 return true;
             }
             Player target = player;
             if (args.length >= 2 && player.hasPermission("justplugin.speed.others")) {
                 target = Bukkit.getPlayer(args[1]);
                 if (target == null) {
-                    player.sendMessage(CC.error("Player not found!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                     return true;
                 }
             }
@@ -56,7 +56,7 @@ public class SpeedCommand implements TabExecutor {
                 target.setWalkSpeed(normalized);
                 target.sendMessage(CC.success("Walk speed set to <yellow>" + speed + "</yellow>."));
             } else {
-                // /speed — dynamic based on current state
+                // /speed - dynamic based on current state
                 if (target.isFlying()) {
                     target.setFlySpeed(normalized);
                     target.sendMessage(CC.success("Fly speed set to <yellow>" + speed + "</yellow>."));

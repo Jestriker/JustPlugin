@@ -25,11 +25,11 @@ public class MsgCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 2) {
-            player.sendMessage(CC.error("Usage: /msg <player> <message>"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("chat.msg.usage")));
             return true;
         }
 
@@ -40,11 +40,11 @@ public class MsgCommand implements TabExecutor {
         }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null || (plugin.getVanishManager().isVanished(target.getUniqueId()) && !player.hasPermission("justplugin.vanish.see"))) {
-            player.sendMessage(CC.error("Player not found!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
             return true;
         }
         if (target.equals(player)) {
-            player.sendMessage(CC.error("You can't message yourself!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("chat.msg.self-message")));
             return true;
         }
         if (plugin.getIgnoreManager().isIgnoring(target.getUniqueId(), player.getUniqueId())) {

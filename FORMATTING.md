@@ -229,7 +229,7 @@ tab:
 
 ## ⚠️ Important Notes
 
-- Tags are **case-sensitive** — use lowercase: `<red>` not `<Red>`
+- Tags are **case-sensitive** - use lowercase: `<red>` not `<Red>`
 - Always close tags: `<red>text</red>` (though unclosed tags apply to the rest of the line)
 - Escape literal `<` characters with `\<` if you don't want them parsed as tags
 - Legacy `&` color codes (e.g., `&c`, `&l`) also work in player-facing input

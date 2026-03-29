@@ -28,7 +28,7 @@ public class GetDeathPosCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
 
@@ -40,7 +40,7 @@ public class GetDeathPosCommand implements TabExecutor {
             }
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                player.sendMessage(CC.error("Player not found!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                 return true;
             }
             if (!plugin.getPlayerListener().hasDeathLocation(target.getUniqueId())) {
@@ -51,7 +51,7 @@ public class GetDeathPosCommand implements TabExecutor {
             return true;
         }
 
-        // Self — check configurable permission
+        // Self - check configurable permission
         boolean requirePermSelf = plugin.getConfig().getBoolean("commands.getdeathpos.require-permission-self", false);
         if (requirePermSelf && !player.hasPermission("justplugin.getdeathpos")) {
             player.sendMessage(CC.error("You don't have permission to use this command."));

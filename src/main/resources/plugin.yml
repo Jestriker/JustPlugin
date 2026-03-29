@@ -4,7 +4,7 @@ main: org.justme.justPlugin.JustPlugin
 api-version: '1.21'
 description: An EssentialsX-like plugin for your server.
 author: JustMe
-softdepend: [Vault, LuckPerms]
+softdepend: [Vault, LuckPerms, PlaceholderAPI]
 
 commands:
   # === Teleportation ===
@@ -15,13 +15,16 @@ commands:
   tpaccept:
     description: Accept a teleport request
     usage: /tpaccept
+    permission: justplugin.tpaccept
     aliases: [tpyes]
   tpacancel:
     description: Cancel your teleport request
     usage: /tpacancel
+    permission: justplugin.tpacancel
   tpreject:
     description: Reject a teleport request
     usage: /tpreject
+    permission: justplugin.tpreject
     aliases: [tpdeny, tpno]
   tppos:
     description: Teleport to coordinates
@@ -320,10 +323,12 @@ commands:
   getpos:
     description: Get your or another player's current position
     usage: /getpos [player]
+    permission: justplugin.getpos
     aliases: [whereami, position, getcoords, coords]
   getdeathpos:
     description: Get your or another player's last death location
     usage: /getdeathpos [player]
+    permission: justplugin.getdeathpos
     aliases: [getdeathcoords, deathpos, deathcoords]
 
   # === Chat ===
@@ -335,6 +340,7 @@ commands:
   r:
     description: Reply to last message
     usage: /r <message>
+    permission: justplugin.msg
     aliases: [reply]
   ignore:
     description: Manage your ignore list
@@ -412,10 +418,12 @@ commands:
   jpinfo:
     description: Plugin information
     usage: /jpinfo
+    permission: justplugin.info
     aliases: [about]
   jphelp:
     description: Show help
     usage: /jphelp [page]
+    permission: justplugin.help
   playerinfo:
     description: View player info
     usage: /playerinfo <player>
@@ -424,6 +432,7 @@ commands:
   plist:
     description: List online players
     usage: /plist
+    permission: justplugin.list
     aliases: [who, online, players]
   playerlist:
     description: Advanced player list with pagination, staff tags, and vanish indicators
@@ -438,6 +447,7 @@ commands:
   motd:
     description: View or set the server list MOTD and join MOTD
     usage: /motd [server|join] [message]
+    permission: justplugin.motd
   resetmotd:
     description: Reset one or both MOTDs to plugin defaults
     usage: /resetmotd [server|join]
@@ -445,10 +455,12 @@ commands:
   clock:
     description: Show current time
     usage: /clock
+    permission: justplugin.clock
     aliases: [realtime, rltime]
   date:
     description: Show current date and time
     usage: /date
+    permission: justplugin.date
     aliases: [realdate, rldate]
 
   # === Items ===
@@ -512,6 +524,7 @@ commands:
   discord:
     description: Show the Discord link
     usage: /discord
+    permission: justplugin.discord
     aliases: [dc]
   applyedits:
     description: Apply pending config changes from the web editor
@@ -532,10 +545,12 @@ commands:
   help:
     description: Show plugin help
     usage: /help [page]
+    permission: justplugin.help
     aliases: [?]
   "?":
     description: Show plugin help (alias for /help)
     usage: /? [page]
+    permission: justplugin.help
   plugins:
     description: Show installed plugins
     usage: /plugins
@@ -549,12 +564,44 @@ commands:
     permission: justplugin.rank
     aliases: [ranks]
 
+  # === Stats ===
+  stats:
+    description: View player statistics in a GUI
+    usage: /stats [player]
+    permission: justplugin.stats
+    aliases: [statistics]
+
+  # === Maintenance ===
+  maintenance:
+    description: Manage server maintenance mode
+    usage: /maintenance <mode | allowed-users | allowed-groups | cooldown> [args...]
+    permission: justplugin.maintenance
+    aliases: [maint]
+
+  # === Skins ===
+  skin:
+    description: Set, clear, or reset your skin
+    usage: /skin <set | clear> [name] [player]
+    permission: justplugin.skin
+    aliases: [setskin]
+  skinban:
+    description: Ban a skin name from being used
+    usage: /skinban [name | list]
+    permission: justplugin.skinban
+  skinunban:
+    description: Unban a skin name
+    usage: /skinunban <name>
+    permission: justplugin.skinunban
+
 permissions:
   justplugin.*:
     description: All JustPlugin permissions
-    default: op
+    default: false
     children:
       justplugin.tpa: true
+      justplugin.tpaccept: true
+      justplugin.tpacancel: true
+      justplugin.tpreject: true
       justplugin.tpahere: true
       justplugin.tppos: true
       justplugin.wild: true
@@ -620,6 +667,7 @@ permissions:
       justplugin.kill: true
       justplugin.kill.others: true
       justplugin.getpos.others: true
+      justplugin.getpos: true
       justplugin.getdeathpos: true
       justplugin.getdeathpos.others: true
       justplugin.msg: true
@@ -662,6 +710,13 @@ permissions:
       justplugin.team: true
       justplugin.trade: true
       justplugin.tab: true
+      justplugin.info: true
+      justplugin.help: true
+      justplugin.list: true
+      justplugin.motd: true
+      justplugin.clock: true
+      justplugin.date: true
+      justplugin.discord: true
       justplugin.addcash: true
       justplugin.addcash.others: true
       justplugin.discord.set: true
@@ -671,6 +726,10 @@ permissions:
       justplugin.baltophide: true
       justplugin.clearentities: true
       justplugin.clearchat: true
+      justplugin.stats: true
+      justplugin.stats.others: true
+      justplugin.maintenance: true
+      justplugin.maintenance.bypass: true
       justplugin.friendlyfire: true
       justplugin.deathitems: true
       justplugin.deathitems.others: true
@@ -734,13 +793,24 @@ permissions:
       justplugin.rank.players.permissions.remove: true
       justplugin.rank.players.permissions.toggle: true
       justplugin.rank.players.permissions.expiry: true
+      justplugin.skin: true
+      justplugin.skin.others: true
+      justplugin.skin.bypassban: true
+      justplugin.skinban: true
+      justplugin.skinunban: true
   justplugin.player:
-    description: Basic player permissions
-    default: true
+    description: Basic player permissions (grant to all players via a permissions plugin)
+    default: false
     children:
       justplugin.tpa: true
+      justplugin.tpaccept: true
+      justplugin.tpacancel: true
+      justplugin.tpreject: true
+      justplugin.tpahere: true
+      justplugin.back: true
       justplugin.spawn: true
       justplugin.warp: true
+      justplugin.wild: true
       justplugin.home: true
       justplugin.sethome: true
       justplugin.delhome: true
@@ -748,23 +818,78 @@ permissions:
       justplugin.pay: true
       justplugin.paytoggle: true
       justplugin.paynote: true
+      justplugin.baltophide: true
       justplugin.msg: true
       justplugin.ignore: true
       justplugin.sharecoords: true
       justplugin.sharedeathcoords: true
-      justplugin.chat: true
-      justplugin.getdeathpos: true
       justplugin.shareitem: true
+      justplugin.chat: true
+      justplugin.getpos: true
+      justplugin.getdeathpos: true
       justplugin.team: true
       justplugin.trade: true
       justplugin.tab: true
-      justplugin.tpahere: true
-      justplugin.wild: true
       justplugin.rank: true
+      justplugin.stats: true
+      justplugin.playerlist: true
+      justplugin.info: true
+      justplugin.help: true
+      justplugin.list: true
+      justplugin.motd: true
+      justplugin.clock: true
+      justplugin.date: true
+      justplugin.discord: true
+      justplugin.suicide: true
+      justplugin.skull: true
+      justplugin.hat: true
+      justplugin.anvil: true
+      justplugin.craft: true
+      justplugin.grindstone: true
+      justplugin.enderchest: true
+      justplugin.stonecutter: true
+      justplugin.loom: true
+      justplugin.smithingtable: true
+      justplugin.enchantingtable: true
+
+  # --- Basic command permissions ---
+  justplugin.tpaccept:
+    description: Accept a teleport request
+    default: false
+  justplugin.tpacancel:
+    description: Cancel your own teleport request
+    default: false
+  justplugin.tpreject:
+    description: Reject a teleport request
+    default: false
+  justplugin.getpos:
+    description: Get your own current position
+    default: false
+  justplugin.discord:
+    description: View the server Discord link
+    default: false
+  justplugin.info:
+    description: View plugin info (/jpinfo)
+    default: false
+  justplugin.help:
+    description: View plugin help (/help, /jphelp)
+    default: false
+  justplugin.list:
+    description: List online players (/plist)
+    default: false
+  justplugin.motd:
+    description: View the server MOTD
+    default: false
+  justplugin.clock:
+    description: Show current real time
+    default: false
+  justplugin.date:
+    description: Show current real date and time
+    default: false
 
   # --- Cooldown bypass permissions ---
   # Cooldown = countdown timer BEFORE the teleport executes (e.g., 3 seconds standing still).
-  # These are NOT included in justplugin.* — even OPs wait for cooldowns unless explicitly granted.
+  # These are NOT included in justplugin.* - even OPs wait for cooldowns unless explicitly granted.
   # Must be explicitly granted via a permissions plugin.
   justplugin.tpa.cooldownbypass:
     description: Bypass TPA pre-teleport countdown
@@ -790,7 +915,7 @@ permissions:
 
   # --- Delay bypass permissions ---
   # Delay = minimum time between successive uses of the same command (e.g., 3 minutes).
-  # OPs auto-skip delays. Non-OPs need these permissions to bypass.
+  # Must be explicitly granted via a permissions plugin.
   justplugin.tpa.delaybypass:
     description: Bypass TPA delay between uses
     default: false
@@ -816,231 +941,231 @@ permissions:
   # --- Safety bypass permissions ---
   justplugin.tpa.unsafetp:
     description: Bypass TPA safe teleport protection (with warning)
-    default: op
+    default: false
   justplugin.tpahere.unsafetp:
     description: Bypass TPAHere safe teleport protection (with warning)
-    default: op
+    default: false
   justplugin.warp.unsafetp:
     description: Bypass warp safe teleport protection (with warning)
-    default: op
+    default: false
   justplugin.spawn.unsafetp:
     description: Bypass spawn safe teleport protection (with warning)
-    default: op
+    default: false
   justplugin.home.unsafetp:
     description: Bypass home safe teleport protection (with confirmation)
-    default: op
+    default: false
   justplugin.back.unsafetp:
     description: Bypass back safe teleport protection (with confirmation)
-    default: op
+    default: false
   justplugin.playerlist.seeHiddenPlayers:
     description: See players hidden from the player list (with hidden indicator)
-    default: op
+    default: false
   justplugin.staff:
     description: Marks a player as staff (shown in /playerlist)
-    default: op
+    default: false
 
   # --- Hierarchical Permissions ---
   # .others permissions automatically grant the base permission (self).
   justplugin.fly.others:
     description: Toggle flight for other players
-    default: op
+    default: false
     children:
       justplugin.fly: true
   justplugin.god.others:
     description: Toggle god mode for other players
-    default: op
+    default: false
     children:
       justplugin.god: true
   justplugin.heal.others:
     description: Heal other players
-    default: op
+    default: false
     children:
       justplugin.heal: true
   justplugin.feed.others:
     description: Feed other players
-    default: op
+    default: false
     children:
       justplugin.feed: true
   justplugin.speed.others:
     description: Set speed for other players
-    default: op
+    default: false
     children:
       justplugin.speed: true
   justplugin.gamemode.others:
     description: Change game mode for other players
-    default: op
+    default: false
     children:
       justplugin.gamemode: true
   justplugin.exp.others:
     description: Manage experience for other players
-    default: op
+    default: false
     children:
       justplugin.exp: true
   justplugin.vanish.others:
     description: Vanish other players
-    default: op
+    default: false
     children:
       justplugin.vanish: true
   justplugin.supervanish.others:
     description: Super vanish other players
-    default: op
+    default: false
     children:
       justplugin.supervanish: true
   justplugin.kill.others:
     description: Kill other players
-    default: op
+    default: false
     children:
       justplugin.kill: true
   justplugin.addcash.others:
     description: Add cash to other players
-    default: op
+    default: false
     children:
       justplugin.addcash: true
   justplugin.balance.others:
     description: Check other players' balance
-    default: op
+    default: false
     children:
       justplugin.balance: true
   justplugin.getpos.others:
     description: Get other players' positions
-    default: op
+    default: false
   justplugin.getdeathpos.others:
     description: Get other players' death locations
-    default: op
+    default: false
     children:
       justplugin.getdeathpos: true
   justplugin.baltophide.others:
     description: Hide other players from the balance leaderboard
-    default: op
+    default: false
     children:
       justplugin.baltophide: true
   justplugin.playerlist.hide.others:
     description: Hide other players from the player list
-    default: op
+    default: false
     children:
       justplugin.playerlist.hide: true
 
   justplugin.supervanish:
     description: Toggle super vanish mode
-    default: op
+    default: false
   justplugin.playerlist.hide:
     description: Hide yourself from the player list
-    default: op
+    default: false
   justplugin.playerlist.hide.notify:
     description: Receive notifications when players are hidden/unhidden
-    default: op
+    default: false
   justplugin.baltophide.notify:
     description: Receive notifications when players are hidden/unhidden from baltop
-    default: op
+    default: false
 
   # --- Moderation ---
   justplugin.mute:
     description: Permanently mute a player
-    default: op
+    default: false
   justplugin.tempmute:
     description: Temporarily mute a player
-    default: op
+    default: false
   justplugin.unmute:
     description: Unmute a player
-    default: op
+    default: false
   justplugin.warn:
     description: Manage player warnings
-    default: op
+    default: false
   justplugin.warn.notify:
     description: Receive notifications about warnings
-    default: op
+    default: false
   justplugin.kick:
     description: Kick a player from the server
-    default: op
+    default: false
   justplugin.setlogswebhook:
     description: Configure Discord webhook logging
-    default: op
+    default: false
 
   justplugin.applyedits:
     description: Apply config changes from the web editor (highest-level permission)
-    default: op
+    default: false
 
   # --- Scoreboard ---
   justplugin.scoreboard.reload:
     description: Reload the scoreboard configuration and refresh for all players (staff only)
-    default: op
+    default: false
 
   # --- New Features ---
   justplugin.deathitems:
     description: View and restore your own death items (admin only)
-    default: op
+    default: false
   justplugin.deathitems.others:
     description: View and restore other players' death items
-    default: op
+    default: false
     children:
       justplugin.deathitems: true
   justplugin.oplist:
     description: View the list of server operators
-    default: op
+    default: false
   justplugin.banlist:
     description: View ban and IP ban lists
-    default: op
+    default: false
   justplugin.clearentities:
     description: Manually trigger entity clearing
-    default: op
+    default: false
   justplugin.clearchat:
     description: Clear the server chat
-    default: op
+    default: false
   justplugin.friendlyfire:
     description: Toggle PvP on/off server-wide
-    default: op
+    default: false
   justplugin.playerlist:
     description: View the advanced player list
-    default: true
+    default: false
 
   # --- Punishment Announcement Permissions ---
   # Staff with these permissions see punishment announcements even when public announcements are disabled.
   justplugin.announce.ban:
     description: See ban announcements (when public announcements are disabled)
-    default: op
+    default: false
   justplugin.announce.banip:
     description: See IP ban announcements
-    default: op
+    default: false
   justplugin.announce.tempban:
     description: See temp ban announcements
-    default: op
+    default: false
   justplugin.announce.tempbanip:
     description: See temp IP ban announcements
-    default: op
+    default: false
   justplugin.announce.mute:
     description: See mute announcements
-    default: op
+    default: false
   justplugin.announce.tempmute:
     description: See temp mute announcements
-    default: op
+    default: false
   justplugin.announce.warn:
     description: See warning announcements
-    default: op
+    default: false
   justplugin.announce.kick:
     description: See kick announcements
-    default: op
+    default: false
 
   # --- RTP Dimension Permissions ---
   justplugin.wild.nether:
     description: Random teleport in the Nether
-    default: op
+    default: false
     children:
       justplugin.wild: true
   justplugin.wild.end:
     description: Random teleport in The End
-    default: op
+    default: false
     children:
       justplugin.wild: true
 
   # --- Baltop ---
   justplugin.baltop.viewhidden:
     description: See hidden players in the balance leaderboard GUI
-    default: op
+    default: false
 
   # --- Team ---
   justplugin.team.list:
     description: List all teams on the server (/team list)
-    default: op
+    default: false
 
   # --- Team Home Bypass Permissions ---
   justplugin.teamhome.cooldownbypass:
@@ -1051,82 +1176,98 @@ permissions:
     default: false
   justplugin.teamhome.unsafetp:
     description: Bypass team home safe teleport protection (with confirmation)
-    default: op
+    default: false
 
   # --- Plugins ---
   justplugin.plugins:
     description: View the list of installed plugins (staff only)
-    default: op
+    default: false
 
   # --- Ranks (LuckPerms Management) ---
   justplugin.rank:
     description: Open the ranks main menu GUI (requires LuckPerms)
-    default: true
+    default: false
 
   # Group management
   justplugin.rank.groups:
     description: View the group (rank) list in /rank
-    default: op
+    default: false
   justplugin.rank.groups.create:
     description: Create new LuckPerms groups
-    default: op
+    default: false
   justplugin.rank.groups.delete:
     description: Delete LuckPerms groups
-    default: op
+    default: false
   justplugin.rank.groups.rename:
     description: Rename LuckPerms groups (group name or display name)
-    default: op
+    default: false
   justplugin.rank.groups.prefix:
     description: Change a group's prefix
-    default: op
+    default: false
   justplugin.rank.groups.suffix:
     description: Change a group's suffix
-    default: op
+    default: false
   justplugin.rank.groups.parent:
     description: Set or change a group's parent (inheritance)
-    default: op
+    default: false
   justplugin.rank.groups.permissions:
     description: View permission nodes on a group
-    default: op
+    default: false
   justplugin.rank.groups.permissions.add:
     description: Add permission nodes to a group
-    default: op
+    default: false
   justplugin.rank.groups.permissions.remove:
     description: Remove permission nodes from a group
-    default: op
+    default: false
   justplugin.rank.groups.permissions.toggle:
     description: Enable or disable permission nodes on a group
-    default: op
+    default: false
   justplugin.rank.groups.permissions.expiry:
     description: Set expiry on permission nodes for a group
-    default: op
+    default: false
 
   # Player management
   justplugin.rank.players:
     description: View the player list in /rank
-    default: op
+    default: false
   justplugin.rank.players.addgroup:
     description: Add a player to a LuckPerms group
-    default: op
+    default: false
   justplugin.rank.players.removegroup:
     description: Remove a player from a LuckPerms group
-    default: op
+    default: false
   justplugin.rank.players.listgroups:
     description: View a player's LuckPerms groups
-    default: op
+    default: false
   justplugin.rank.players.permissions:
     description: View permission nodes on a player
-    default: op
+    default: false
   justplugin.rank.players.permissions.add:
     description: Add permission nodes to a player
-    default: op
+    default: false
   justplugin.rank.players.permissions.remove:
     description: Remove permission nodes from a player
-    default: op
+    default: false
   justplugin.rank.players.permissions.toggle:
     description: Enable or disable permission nodes on a player
-    default: op
+    default: false
   justplugin.rank.players.permissions.expiry:
     description: Set expiry on permission nodes for a player
-    default: op
+    default: false
+
+  # --- Stats ---
+  justplugin.stats:
+    description: View your own statistics GUI
+    default: false
+  justplugin.stats.others:
+    description: View other players' statistics GUI
+    default: false
+
+  # --- Maintenance ---
+  justplugin.maintenance:
+    description: Manage maintenance mode (toggle, whitelist, cooldown)
+    default: false
+  justplugin.maintenance.bypass:
+    description: Join the server even when maintenance mode is active
+    default: false
 

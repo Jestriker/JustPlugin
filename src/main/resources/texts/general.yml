@@ -1,0 +1,43 @@
+# ==========================================
+# General Messages
+# ==========================================
+# Shared messages used across multiple commands and features.
+#
+# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
+# Colors: <red>, <green>, <yellow>, <gray>, <gold>, <aqua>, etc.
+# Formatting: <bold>, <italic>, <underlined>, <strikethrough>
+# Gradients: <gradient:#00aaff:#00ffaa>text</gradient>
+# Hex colors: <#ff6b6b>text</#ff6b6b>
+#
+# No placeholders are needed for these messages unless specified.
+# ==========================================
+
+# Shown when a console tries to run a player-only command.
+only-players: "Only players can use this command."
+
+# Shown when a player lacks the required permission.
+no-permission: "You don't have permission to use this command."
+
+# Shown when a command is disabled in config.
+command-disabled: "This command is currently disabled."
+
+# Shown when a target player cannot be found (offline or doesn't exist).
+player-not-found: "Player not found!"
+
+# Shown when a player is on cooldown between command uses.
+# Placeholders: {time} - formatted remaining time (e.g., "2m 30s")
+cooldown-wait: "You must wait <yellow>{time}</yellow> before using this command again."
+
+# Shown when a command is used incorrectly.
+# Placeholders: {usage} - correct command usage
+invalid-usage: "Usage: {usage}"
+
+# Shown when an invalid number or amount is provided.
+invalid-number: "Invalid number!"
+
+# Shown when trying to target yourself when not allowed.
+cannot-target-self: "You can't target yourself!"
+
+# Generic error for unexpected failures.
+generic-error: "An error occurred. Please try again."
+

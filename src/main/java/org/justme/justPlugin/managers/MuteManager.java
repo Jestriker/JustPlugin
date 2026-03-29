@@ -156,7 +156,7 @@ public class MuteManager {
     }
 
     /**
-     * Unmute by name — finds the UUID that has that name.
+     * Unmute by name - finds the UUID that has that name.
      */
     public boolean unmuteByName(String name) {
         for (Map.Entry<UUID, MuteEntry> entry : mutes.entrySet()) {

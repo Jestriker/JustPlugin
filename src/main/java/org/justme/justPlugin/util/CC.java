@@ -50,7 +50,7 @@ public final class CC {
         return MINI.deserialize(PREFIX + "<yellow>" + message);
     }
 
-    /** Continuation line — no prefix, just an indent with ">" marker. */
+    /** Continuation line - no prefix, just an indent with ">" marker. */
     public static Component line(String message) {
         return MINI.deserialize(" <dark_gray>></dark_gray> <gray>" + message);
     }

@@ -24,17 +24,17 @@ public class BackCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         Location back = plugin.getTeleportManager().getBackLocation(player.getUniqueId());
         if (back == null) {
-            player.sendMessage(CC.error("No back location found!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.back.no-location")));
             return true;
         }
 
-        // Delay check (time between uses) — OPs auto-skip, or explicit delaybypass permission
-        if (!player.isOp() && !player.hasPermission("justplugin.back.delaybypass")
+        // Delay check (time between uses) - requires explicit delaybypass permission
+        if (!player.hasPermission("justplugin.back.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "back")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "back");
             player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
@@ -45,7 +45,7 @@ public class BackCommand implements TabExecutor {
                 player, back, "justplugin.back.cooldownbypass", "back", "justplugin.back.unsafetp");
         if (initiated) {
             plugin.getCooldownManager().setDelayStart(player.getUniqueId(), "back");
-            player.sendMessage(CC.success("Teleporting to your previous location."));
+            player.sendMessage(CC.success(plugin.getMessageManager().raw("teleport.back.teleporting")));
         }
         return true;
     }

@@ -1,5 +1,41 @@
 # JustPlugin - Changelog
 
+## v1.3 - Architecture Refactor & Listener Modularization
+**Released:** March 29, 2026
+
+### What's New
+
+#### Listener Architecture Refactor
+- **Monolithic `PlayerListener` split into 6 categorized sub-listeners** for better code organization, maintainability, and performance:
+  - `connection/ConnectionListener` - Login, join, quit events (ban checks, maintenance mode, MOTD, data loading/saving, vanish handling, scoreboard, startup warnings)
+  - `chat/ChatListener` - Async chat events (mute checks, chat formatting with LuckPerms prefixes/suffixes, hover stats, team chat mode, ignore filtering)
+  - `combat/CombatListener` - Damage events (god mode, hunger drain prevention, bad potion effect blocking, teleport cancellation on damage)
+  - `player/PlayerEventListener` - Death, respawn, teleport, movement, and advancement hiding for vanished players
+  - `server/ServerListener` - Server list ping (MOTD, maintenance icon, vanished player hiding) and tab completion filtering
+  - `inventory/InventoryListener` - PayNote redemption on right-click
+- **`PlayerListener` converted to a shared state holder** - no longer implements `Listener` or handles events directly. Retains all public utility methods (god mode, death locations, back/death location persistence, inventory snapshots) used by the categorized sub-listeners
+- **Zero behavioral changes** - all events are handled identically to before; this is a pure internal refactor
+- **No duplicate event firing** - the old monolith is no longer registered as an event listener
+
+#### Stats GUI
+- New `/stats` command opens an interactive stats inventory GUI
+
+#### Skin System
+- `/skin set/clear` with Mojang API integration
+- `/skinban` / `/skinunban` for banning specific skin names
+- Auto-applies stored skins on join
+
+#### Maintenance Mode
+- Full maintenance system with kick screen, MOTD override, server icon, LuckPerms group bypass
+- Cooldown with estimated end time and auto-disable option
+
+### Internal Changes
+- Each sub-listener receives the `JustPlugin` instance and delegates shared state operations to `PlayerListener` via `plugin.getPlayerListener()`
+- `PlayerListener` class reduced from ~710 lines to ~146 lines (utility methods only)
+- All event handler registration moved to categorized listeners in `JustPlugin.onEnable()`
+
+---
+
 ## v1.2 - Ranks, Revamps & Permission Fixes
 **Released:** March 21, 2026
 

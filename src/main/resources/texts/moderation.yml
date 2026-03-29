@@ -1,0 +1,171 @@
+# ==========================================
+# Moderation Messages
+# ==========================================
+# Messages for /ban, /unban, /tempban, /banip, /tempbanip, /unbanip,
+# /mute, /tempmute, /unmute, /warn, /kick, /vanish, /supervanish,
+# /sudo, /invsee, /echestsee, /deathitems, /oplist, /banlist, /setlogswebhook.
+#
+# Placeholders:
+#   {player}    - Target player name
+#   {staff}     - Staff member who performed the action
+#   {reason}    - Punishment reason
+#   {duration}  - Formatted duration (e.g., "7d", "1h 30m")
+#   {expires}   - Expiry date/time
+#   {index}     - Warning index number
+#   {count}     - Total count (warnings, bans, etc.)
+#   {page}      - Current page number
+#   {max_page}  - Total pages
+#   {ip}        - IP address
+#   {uuid}      - Player UUID
+# ==========================================
+
+# === Ban ===
+ban:
+  success: "Banned <yellow>{player}</yellow>. <gray>Reason: {reason}"
+  already-banned: "<yellow>{player}</yellow> is already banned!"
+  kick-message: "\n<red><bold>You have been banned!</bold></red>\n\n<gray>Reason: <white>{reason}\n<gray>Appeal at: <yellow>{appeal}"
+  usage: "Usage: /ban <player | uuid> [reason]"
+  # Broadcast to staff with justplugin.announce.ban permission
+  announce: "<red>[Ban]</red> <yellow>{player}</yellow> was banned by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+
+# === Temp Ban ===
+tempban:
+  success: "Temporarily banned <yellow>{player}</yellow> for <yellow>{duration}</yellow>. <gray>Reason: {reason}"
+  already-banned: "<yellow>{player}</yellow> is already banned!"
+  kick-message: "\n<red><bold>You have been temporarily banned!</bold></red>\n\n<gray>Reason: <white>{reason}\n<gray>Duration: <yellow>{duration}\n<gray>Appeal at: <yellow>{appeal}"
+  usage: "Usage: /tempban <player> <duration> [reason]"
+  invalid-duration: "Invalid duration! Examples: 5m, 1h, 1d, 7d, 30d"
+  announce: "<red>[TempBan]</red> <yellow>{player}</yellow> was temp-banned for <yellow>{duration}</yellow> by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+
+# === Ban IP ===
+banip:
+  success: "IP banned <yellow>{ip}</yellow>. <gray>Reason: {reason}"
+  already-banned: "IP <yellow>{ip}</yellow> is already banned!"
+  usage: "Usage: /banip <ip | player> [reason]"
+  announce: "<red>[IP Ban]</red> <yellow>{ip}</yellow> was banned by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+
+# === Temp Ban IP ===
+tempbanip:
+  success: "Temporarily IP banned <yellow>{ip}</yellow> for <yellow>{duration}</yellow>. <gray>Reason: {reason}"
+  already-banned: "IP <yellow>{ip}</yellow> is already banned!"
+  usage: "Usage: /tempbanip <ip | player> <duration> [reason]"
+  announce: "<red>[Temp IP Ban]</red> <yellow>{ip}</yellow> was temp-banned for <yellow>{duration}</yellow> by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+
+# === Unban ===
+unban:
+  success: "Unbanned <yellow>{player}</yellow>."
+  not-banned: "<yellow>{player}</yellow> is not banned!"
+  usage: "Usage: /unban <player | uuid>"
+
+# === Unban IP ===
+unbanip:
+  success: "Unbanned IP <yellow>{ip}</yellow>."
+  not-banned: "IP <yellow>{ip}</yellow> is not banned!"
+  usage: "Usage: /unbanip <ip | player | uuid>"
+
+# === Mute ===
+mute:
+  success: "Muted <yellow>{player}</yellow>. <gray>Reason: {reason}"
+  already-muted: "<yellow>{player}</yellow> is already muted!"
+  usage: "Usage: /mute <player> [reason]"
+  # Message shown to the muted player when they try to chat
+  blocked: "You are muted! <gray>Reason: {reason}"
+  announce: "<red>[Mute]</red> <yellow>{player}</yellow> was muted by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+
+# === Temp Mute ===
+tempmute:
+  success: "Temporarily muted <yellow>{player}</yellow> for <yellow>{duration}</yellow>. <gray>Reason: {reason}"
+  already-muted: "<yellow>{player}</yellow> is already muted!"
+  usage: "Usage: /tempmute <player> <duration> [reason]"
+  blocked: "You are muted! <gray>Expires in {duration}. Reason: {reason}"
+  announce: "<red>[TempMute]</red> <yellow>{player}</yellow> was temp-muted for <yellow>{duration}</yellow> by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+
+# === Unmute ===
+unmute:
+  success: "Unmuted <yellow>{player}</yellow>."
+  not-muted: "<yellow>{player}</yellow> is not muted!"
+  usage: "Usage: /unmute <player>"
+
+# === Warn ===
+warn:
+  added: "Warned <yellow>{player}</yellow>. <gray>Reason: {reason} <dark_gray>(Warning #{count})"
+  removed: "Removed warning #{index} from <yellow>{player}</yellow>."
+  list-header: "<gold><bold>Warnings for {player}</bold></gold> <gray>({count} total):"
+  list-entry: " <yellow>#{index}</yellow> <gray>- {reason} <dark_gray>(by {staff})"
+  no-warnings: "<yellow>{player}</yellow> has no warnings."
+  usage: "Usage: /warn <add | remove | list> <player> [reason | index]"
+  # Confirmation prompt for warn punishments
+  confirm-prompt: "Warning #{count} will result in: <yellow>{punishment}</yellow>. Type <yellow>/warn confirm</yellow> to proceed or <yellow>/warn cancel</yellow> to abort."
+  confirmed: "Warning confirmed and applied."
+  cancelled: "Warning cancelled."
+  no-pending: "You have no pending warning to confirm."
+  announce: "<yellow>[Warn]</yellow> <yellow>{player}</yellow> was warned by <yellow>{staff}</yellow>. <gray>Reason: {reason} (#{count})"
+
+# === Kick ===
+kick:
+  success: "Kicked <yellow>{player}</yellow>. <gray>Reason: {reason}"
+  kick-message: "\n<red><bold>You have been kicked!</bold></red>\n\n<gray>Reason: <white>{reason}"
+  usage: "Usage: /kick <player> [reason]"
+  announce: "<red>[Kick]</red> <yellow>{player}</yellow> was kicked by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+
+# === Vanish ===
+vanish:
+  enabled-self: "You are now <green>vanished</green>."
+  disabled-self: "You are now <red>visible</red>."
+  enabled-other: "<yellow>{player}</yellow> is now <green>vanished</green>."
+  disabled-other: "<yellow>{player}</yellow> is now <red>visible</red>."
+  usage: "Usage: /vanish [player]"
+
+# === Super Vanish ===
+supervanish:
+  enabled-self: "You are now in <green>super vanish</green> <gray>(spectator ghost mode)."
+  disabled-self: "You have exited <red>super vanish</red>."
+  enabled-other: "<yellow>{player}</yellow> is now in <green>super vanish</green>."
+  disabled-other: "<yellow>{player}</yellow> has exited <red>super vanish</red>."
+  usage: "Usage: /supervanish [player]"
+
+# === Sudo ===
+sudo:
+  success: "Forced <yellow>{player}</yellow> to run: <gray>{command}"
+  usage: "Usage: /sudo <player> <command | message>"
+
+# === Invsee ===
+invsee:
+  opened: "Viewing <yellow>{player}</yellow>'s inventory."
+  usage: "Usage: /invsee <player>"
+
+# === Ender Chest See ===
+echestsee:
+  opened: "Viewing <yellow>{player}</yellow>'s ender chest."
+  usage: "Usage: /echestsee <player>"
+
+# === Death Items ===
+deathitems:
+  opened: "Viewing <yellow>{player}</yellow>'s death items."
+  no-items: "<yellow>{player}</yellow> has no saved death items."
+  restored: "Restored <yellow>{player}</yellow>'s death items."
+  usage: "Usage: /deathitems [player]"
+
+# === OP List ===
+oplist:
+  header: "<gold><bold>Server Operators</bold></gold>"
+  entry: " <gray>- <yellow>{player}"
+  empty: "No operators found."
+
+# === Ban List ===
+banlist:
+  header: "<gold><bold>Ban List</bold></gold> <gray>(Page {page}/{max_page}):"
+  entry: " <yellow>{player}</yellow> <gray>- {reason} <dark_gray>(by {staff})"
+  empty: "No bans found."
+  usage: "Usage: /banlist [page]"
+
+# === Set Logs Webhook ===
+setlogswebhook:
+  success: "Discord webhook URL has been set!"
+  disabled: "Discord webhook logging has been disabled."
+  usage: "Usage: /setlogswebhook <url | disable>"
+  invalid-url: "Invalid webhook URL! Must be a Discord webhook URL."
+  confirm-prompt: "Are you sure? Type <yellow>/setlogswebhook confirm</yellow> to apply."
+  confirm-success: "Webhook confirmed and saved."
+  cancel: "Webhook setup cancelled."
+

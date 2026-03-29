@@ -1,0 +1,99 @@
+# ==========================================
+# Info Messages
+# ==========================================
+# Messages for /jpinfo, /jphelp, /playerinfo, /plist, /playerlist,
+# /playerlisthide, /motd, /resetmotd, /clock, /date, /stats.
+#
+# Placeholders:
+#   {player}    - Player name
+#   {version}   - Plugin version
+#   {server}    - Server version
+#   {time}      - Formatted time
+#   {date}      - Formatted date
+#   {timezone}  - Timezone name
+#   {online}    - Online player count
+#   {max}       - Max player count
+#   {page}      - Current page
+#   {max_page}  - Total pages
+#   {uuid}      - Player UUID
+#   {world}     - World name
+#   {x}, {y}, {z} - Coordinates
+#   {ip}        - IP address (requires justplugin.playerinfo.ip)
+#   {balance}   - Formatted balance
+#   {gamemode}  - Game mode
+#   {flying}    - Flying status
+#   {op}        - OP status
+#   {last_seen} - Last seen date
+# ==========================================
+
+# === Plugin Info ===
+jpinfo:
+  header: "<gradient:#00aaff:#00ffaa><bold>JustPlugin</bold></gradient> <gray>v{version}"
+  author: "Author: <yellow>JustMe"
+  server: "Server: <yellow>{server}"
+  commands: "Commands: <yellow>{enabled} enabled</yellow>, <gray>{disabled} disabled"
+
+# === Help ===
+jphelp:
+  header: "<gold><bold>JustPlugin Help</bold></gold> <gray>(Page {page}/{max_page})"
+  footer: "<gray>Use <yellow>/help {next_page}</yellow> for the next page."
+  no-more-pages: "There are no more pages."
+
+# === Player Info ===
+playerinfo:
+  header-online: "<gold><bold>Player Info: {player}</bold></gold> <green>(Online)</green>"
+  header-offline: "<gold><bold>Player Info: {player}</bold></gold> <red>(Offline)</red>"
+  uuid: "UUID: <yellow>{uuid}"
+  world: "World: <yellow>{world}"
+  location: "Location: <yellow>{x}, {y}, {z}"
+  ip: "IP: <yellow>{ip}"
+  flying: "Flying: <yellow>{flying}"
+  op: "Op: <yellow>{op}"
+  balance: "Balance: <green>{balance}"
+  gamemode: "Game Mode: <yellow>{gamemode}"
+  last-seen: "Last Seen: <yellow>{last_seen}"
+  first-played: "First Played: <yellow>{first_played}"
+
+# === Player List (Simple) ===
+plist:
+  header: "<gold><bold>Online Players</bold></gold> <gray>({online}/{max}):"
+  format: " <yellow>{player}"
+
+# === Player List (Advanced) ===
+playerlist:
+  header: "<gold><bold>Player List</bold></gold> <gray>(Page {page}/{max_page}) - {online}/{max} online"
+
+# === Player List Hide ===
+playerlisthide:
+  hidden-self: "You are now <red>hidden</red> from the player list."
+  visible-self: "You are now <green>visible</green> on the player list."
+  hidden-other: "<yellow>{player}</yellow> is now <red>hidden</red> from the player list."
+  visible-other: "<yellow>{player}</yellow> is now <green>visible</green> on the player list."
+  usage: "Usage: /playerlisthide [player]"
+
+# === MOTD ===
+motd:
+  current: "Current server MOTD:"
+  set-success: "Server MOTD updated!"
+  usage: "Usage: /motd [server|join] [message]"
+
+# === Reset MOTD ===
+resetmotd:
+  success: "MOTD has been reset to default."
+  usage: "Usage: /resetmotd [server|join]"
+
+# === Clock ===
+clock:
+  # {time} = formatted time, {timezone} = timezone name
+  format: "Current time: <yellow>{time}</yellow> <gray>({timezone})"
+
+# === Date ===
+date:
+  # {date} = formatted date and time, {timezone} = timezone name
+  format: "Current date: <yellow>{date}</yellow> <gray>({timezone})"
+
+# === Stats ===
+stats:
+  usage: "Usage: /stats [player]"
+  no-data: "No statistics found for <yellow>{player}</yellow>."
+

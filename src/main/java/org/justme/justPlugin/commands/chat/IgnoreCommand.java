@@ -28,7 +28,7 @@ public class IgnoreCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 1) {
@@ -54,11 +54,11 @@ public class IgnoreCommand implements TabExecutor {
         }
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            player.sendMessage(CC.error("Player not found!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
             return;
         }
         if (target.equals(player)) {
-            player.sendMessage(CC.error("You can't ignore yourself!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("chat.ignore.cannot-self")));
             return;
         }
         if (plugin.getIgnoreManager().isIgnoring(player.getUniqueId(), target.getUniqueId())) {

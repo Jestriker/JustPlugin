@@ -42,7 +42,7 @@ public class ChatManager {
         TeamManager teamManager = plugin.getTeamManager();
         String teamName = teamManager.getPlayerTeam(sender.getUniqueId());
         if (teamName == null) {
-            sender.sendMessage(CC.error("You are not in a team!"));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
             return;
         }
         TeamManager.TeamData team = teamManager.getTeam(teamName);

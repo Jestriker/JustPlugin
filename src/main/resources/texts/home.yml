@@ -1,0 +1,41 @@
+# ==========================================
+# Home Messages
+# ==========================================
+# Messages for /home, /sethome, /delhome, and the Home GUI.
+#
+# Placeholders:
+#   {home}      - The home name
+#   {count}     - Current number of homes
+#   {max}       - Maximum allowed homes
+#   {list}      - Formatted home list
+# ==========================================
+
+# === Home ===
+home:
+  teleporting: "Teleporting to home <yellow>{home}</yellow>."
+  not-found: "Home <yellow>{home}</yellow> not found!"
+  no-homes: "You don't have any homes set."
+  usage: "Usage: /home [name]"
+  list-header: "<gold><bold>Your Homes</bold></gold> <gray>({count}/{max}):"
+
+# === Set Home ===
+sethome:
+  success: "Home <yellow>{home}</yellow> set!"
+  max-reached: "You've reached the maximum number of homes <yellow>({max})</yellow>!"
+  already-exists: "Home <yellow>{home}</yellow> already exists! Use <yellow>/delhome {home}</yellow> first."
+  usage: "Usage: /sethome [name]"
+
+# === Delete Home ===
+delhome:
+  success: "Home <yellow>{home}</yellow> deleted."
+  not-found: "Home <yellow>{home}</yellow> not found!"
+  usage: "Usage: /delhome <name>"
+
+# === Home GUI ===
+gui:
+  title: "Homes"
+  spawn-button: "Spawn"
+  team-home-button: "Team Home"
+  no-team-home: "Your team doesn't have a home set."
+  not-in-team: "You're not in a team."
+

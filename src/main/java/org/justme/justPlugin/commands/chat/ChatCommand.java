@@ -25,7 +25,7 @@ public class ChatCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 1) {
@@ -45,7 +45,7 @@ public class ChatCommand implements TabExecutor {
         }
         if (mode == ChatManager.ChatMode.TEAM
                 && plugin.getTeamManager().getPlayerTeam(player.getUniqueId()) == null) {
-            player.sendMessage(CC.error("You are not in a team!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
             return true;
         }
         plugin.getChatManager().setChatMode(player.getUniqueId(), mode);

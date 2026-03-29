@@ -25,7 +25,7 @@ public class WarpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 1) {
@@ -43,8 +43,8 @@ public class WarpCommand implements TabExecutor {
             return true;
         }
 
-        // Delay check (time between uses) — OPs auto-skip, or explicit delaybypass permission
-        if (!player.isOp() && !player.hasPermission("justplugin.warp.delaybypass")
+        // Delay check (time between uses) - requires explicit delaybypass permission
+        if (!player.hasPermission("justplugin.warp.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "warp")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "warp");
             player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));

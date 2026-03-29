@@ -24,7 +24,7 @@ public class SetSpawnCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         Location loc = player.getLocation();
@@ -34,7 +34,7 @@ public class SetSpawnCommand implements TabExecutor {
         if (!below.isSolid() || below == Material.LAVA || below == Material.MAGMA_BLOCK
                 || below == Material.CACTUS || below == Material.FIRE || below == Material.SOUL_FIRE
                 || below == Material.CAMPFIRE || below == Material.SOUL_CAMPFIRE) {
-            player.sendMessage(CC.error("Unsafe spawn location! Stand on a solid, safe block."));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.setspawn.unsafe")));
             return true;
         }
 
@@ -50,7 +50,7 @@ public class SetSpawnCommand implements TabExecutor {
         // Also set the world spawn
         loc.getWorld().setSpawnLocation(loc);
 
-        player.sendMessage(CC.success("Spawn has been set to your exact location."));
+        player.sendMessage(CC.success(plugin.getMessageManager().raw("teleport.setspawn.success")));
         plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set the spawn to <yellow>" + String.format("%.1f, %.1f, %.1f", loc.getX(), loc.getY(), loc.getZ()) + "</yellow> in <yellow>" + loc.getWorld().getName() + "</yellow>");
         return true;
     }

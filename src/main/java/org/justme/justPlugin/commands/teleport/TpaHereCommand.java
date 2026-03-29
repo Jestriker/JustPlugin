@@ -25,16 +25,16 @@ public class TpaHereCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /tpahere <player>"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tpahere.usage")));
             return true;
         }
 
-        // Delay check (time between uses) — OPs auto-skip, or explicit delaybypass permission
-        if (!player.isOp() && !player.hasPermission("justplugin.tpahere.delaybypass")
+        // Delay check (time between uses) - requires explicit delaybypass permission
+        if (!player.hasPermission("justplugin.tpahere.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "tpahere")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "tpahere");
             player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
@@ -43,16 +43,16 @@ public class TpaHereCommand implements TabExecutor {
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null || (plugin.getVanishManager().isVanished(target.getUniqueId()) && !player.hasPermission("justplugin.vanish.see"))) {
-            player.sendMessage(CC.error("Player not found!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
             return true;
         }
         if (target.equals(player)) {
-            player.sendMessage(CC.error("You can't request yourself!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tpahere.cannot-self")));
             return true;
         }
         // Check if target is ignoring sender
         if (plugin.getIgnoreManager().isIgnoring(target.getUniqueId(), player.getUniqueId())) {
-            player.sendMessage(CC.error("This player is not accepting teleport requests from you."));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tpa.blocked-by-ignore")));
             return true;
         }
 

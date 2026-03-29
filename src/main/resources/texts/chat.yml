@@ -1,0 +1,83 @@
+# ==========================================
+# Chat Messages
+# ==========================================
+# Messages for /msg, /r (reply), /ignore, /announce, /sharecoords,
+# /sharedeathcoords, /chat, /teammsg, /clearchat.
+#
+# Placeholders:
+#   {player}    - Target player name
+#   {sender}    - Sending player name
+#   {message}   - The message content
+#   {x}, {y}, {z} - Coordinates
+#   {world}     - World name
+#   {reply}     - Clickable reply button (when clickable-commands.msg-reply is true)
+#   {count}     - Count (ignore list, etc.)
+# ==========================================
+
+# === Private Message ===
+msg:
+  # Format shown to the SENDER of a private message
+  sent: "<gray>[<yellow>You</yellow> -> <yellow>{player}</yellow>] <white>{message}"
+  # Format shown to the RECEIVER of a private message
+  received: "<gray>[<yellow>{sender}</yellow> -> <yellow>You</yellow>] <white>{message} {reply}"
+  usage: "Usage: /msg <player> <message>"
+  self-message: "You can't message yourself!"
+  # When target is ignoring sender
+  ignored: "This player is not accepting messages from you."
+
+# === Reply ===
+reply:
+  no-target: "You have no one to reply to!"
+  target-offline: "That player is no longer online."
+  usage: "Usage: /r <message>"
+
+# === Ignore ===
+ignore:
+  added: "You are now ignoring <yellow>{player}</yellow>."
+  removed: "You are no longer ignoring <yellow>{player}</yellow>."
+  already-ignored: "You are already ignoring <yellow>{player}</yellow>."
+  not-ignored: "You are not ignoring <yellow>{player}</yellow>."
+  list-header: "<gold><bold>Ignore List</bold></gold> <gray>({count}):"
+  list-empty: "Your ignore list is empty."
+  list-cleared: "Your ignore list has been cleared."
+  cannot-self: "You can't ignore yourself!"
+  usage: "Usage: /ignore <add|remove|list|clearlist> [player]"
+
+# === Announce ===
+announce:
+  # The broadcast format. {message} is the announcement text.
+  format: "\n<red><bold>⚠ Announcement</bold></red>\n<white>{message}\n"
+  usage: "Usage: /announce <message>"
+
+# === Share Coords ===
+sharecoords:
+  # Message format when sharing coordinates
+  format: "<yellow>{player}</yellow> shared their location: <green>{x}, {y}, {z}</green> in <yellow>{world}</yellow>"
+  usage: "Usage: /sharecoords [all|team]"
+
+# === Share Death Coords ===
+sharedeathcoords:
+  format: "<yellow>{player}</yellow> shared their death location: <red>{x}, {y}, {z}</red> in <yellow>{world}</yellow>"
+  no-death: "You don't have a death location to share."
+  usage: "Usage: /sharedeathcoords [all|team]"
+
+# === Chat Mode ===
+chat:
+  switched-all: "Switched to <green>global</green> chat."
+  switched-team: "Switched to <yellow>team</yellow> chat."
+  not-in-team: "You are not in a team!"
+  usage: "Usage: /chat <all|team>"
+
+# === Team Message ===
+teammsg:
+  not-in-team: "You are not in a team!"
+  usage: "Usage: /teammsg <message>"
+  # Team chat format. {team} = team name
+  format: "<dark_gray>[<yellow>{team}</yellow>]</dark_gray> <white>{sender}</white>: <gray>{message}"
+
+# === Clear Chat ===
+clearchat:
+  cleared: "Chat has been cleared by <yellow>{player}</yellow>."
+  cleared-reason: "Chat has been cleared by <yellow>{player}</yellow>. <gray>Reason: {reason}"
+  usage: "Usage: /clearchat [reason]"
+

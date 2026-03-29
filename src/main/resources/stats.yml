@@ -1,0 +1,87 @@
+# ==========================================
+# JustPlugin - Stats GUI Configuration
+# ==========================================
+#
+# Configure the /stats command GUI window.
+# Each item slot is defined by its grid position (x,y), material, name, and lore.
+# The grid is 9 columns (x: 1-9) by 3 rows (y: 1-3).
+#
+# Supports all JustPlugin {placeholder} variables (see SCOREBOARD.md)
+# and PlaceholderAPI %placeholder% tokens (if installed).
+#
+# ==========================================
+
+# GUI title. {player} is replaced with the target player's name.
+title: "<dark_gray>{player}'s Stats"
+
+# Number of rows in the GUI (1-6, default 3 for 9x3).
+rows: 3
+
+# Fill empty slots with glass panes for a clean look.
+fill-empty: true
+fill-material: GRAY_STAINED_GLASS_PANE
+
+# ==========================================
+# Item Definitions
+# ==========================================
+# Each item has:
+#   slot-x:    Column (1-9)
+#   slot-y:    Row (1-3)
+#   material:  Bukkit Material name (e.g. EMERALD, DIAMOND_SWORD)
+#   name:      Display name (MiniMessage + placeholders)
+#   lore:      List of lore lines (MiniMessage + placeholders)
+# ==========================================
+
+items:
+  - slot-x: 2
+    slot-y: 2
+    material: EMERALD
+    name: "<green>Money"
+    lore:
+      - "<gray>Balance: <yellow>{balance}"
+      - "<gray>Rank: <gold>{balance_rank}"
+
+  - slot-x: 3
+    slot-y: 2
+    material: DIAMOND_SWORD
+    name: "<red>Kills"
+    lore:
+      - "<gray>Player Kills: <red>{kills}"
+      - "<gray>K/D Ratio: <yellow>{kdr}"
+
+  - slot-x: 4
+    slot-y: 2
+    material: SKELETON_SKULL
+    name: "<#ff8800>Deaths"
+    lore:
+      - "<gray>Total: <#ff8800>{deaths}"
+
+  - slot-x: 5
+    slot-y: 2
+    material: ZOMBIE_HEAD
+    name: "<dark_red>Mobs Killed"
+    lore:
+      - "<gray>Total: <white>{mobs_killed}"
+
+  - slot-x: 6
+    slot-y: 2
+    material: STONE
+    name: "<gray>Blocks Placed"
+    lore:
+      - "<gray>Total: <white>{blocks_placed}"
+
+  - slot-x: 7
+    slot-y: 2
+    material: COBBLESTONE
+    name: "<gray>Blocks Broken"
+    lore:
+      - "<gray>Total: <white>{blocks_broken}"
+
+  - slot-x: 8
+    slot-y: 2
+    material: CLOCK
+    name: "<yellow>Playtime"
+    lore:
+      - "<gray>Total: <yellow>{total_playtime_detailed}"
+      - "<gray>Session: <yellow>{session_playtime_detailed}"
+

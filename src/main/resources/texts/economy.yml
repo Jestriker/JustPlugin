@@ -1,0 +1,68 @@
+# ==========================================
+# Economy Messages
+# ==========================================
+# Messages for /balance, /pay, /paytoggle, /paynote, /addcash, /baltop, /baltophide.
+#
+# Placeholders:
+#   {player}    - Target player name
+#   {amount}    - Formatted currency amount (e.g., "$500.00")
+#   {balance}   - Formatted balance (e.g., "$1,000.00")
+#   {rank}      - Leaderboard rank number
+#   {symbol}    - Currency symbol (e.g., "$")
+# ==========================================
+
+# === Balance ===
+balance:
+  self: "Your balance: <green>{balance}"
+  other: "<yellow>{player}</yellow>'s balance: <green>{balance}"
+  usage: "Usage: /balance [player]"
+
+# === Pay ===
+pay:
+  success: "You paid <yellow>{player}</yellow> <green>{amount}</green>."
+  received: "<yellow>{player}</yellow> paid you <green>{amount}</green>."
+  insufficient-funds: "You don't have enough money! Balance: <red>{balance}"
+  invalid-amount: "Invalid amount! Must be a positive number."
+  usage: "Usage: /pay <player> <amount>"
+  cannot-self: "You can't pay yourself!"
+  # Shown when target has /paytoggle off
+  target-disabled: "<yellow>{player}</yellow> is not accepting payments."
+  # Minimum pay amount
+  minimum-amount: "Minimum payment amount is <yellow>{amount}</yellow>."
+
+# === Pay Toggle ===
+paytoggle:
+  enabled: "You are now <green>accepting</green> payments."
+  disabled: "You are now <red>rejecting</red> payments."
+
+# === PayNote ===
+paynote:
+  created: "Created a PayNote worth <green>{amount}</green>."
+  redeemed: "Redeemed PayNote worth <green>{amount}</green>!"
+  invalid-amount: "Invalid amount! Must be a positive number."
+  insufficient-funds: "You don't have enough money! Balance: <red>{balance}"
+  no-paper: "You need to hold paper to create a PayNote!"
+  usage: "Usage: /paynote <amount>"
+
+# === Add Cash ===
+addcash:
+  success-self: "Added <green>{amount}</green> to your balance. New balance: <green>{balance}"
+  success-other: "Added <green>{amount}</green> to <yellow>{player}</yellow>'s balance."
+  notify-target: "<yellow>{player}</yellow> added <green>{amount}</green> to your balance."
+  usage: "Usage: /addcash [player] <amount>"
+  invalid-amount: "Invalid amount!"
+
+# === Baltop ===
+baltop:
+  header: "<gold><bold>Balance Top</bold></gold>"
+  entry: "<yellow>#{rank}</yellow> <white>{player} <gray>- <green>{balance}"
+  empty: "No balances to display."
+
+# === Baltop Hide ===
+baltophide:
+  hidden-self: "You are now <red>hidden</red> from the balance leaderboard."
+  visible-self: "You are now <green>visible</green> on the balance leaderboard."
+  hidden-other: "<yellow>{player}</yellow> is now <red>hidden</red> from the balance leaderboard."
+  visible-other: "<yellow>{player}</yellow> is now <green>visible</green> on the balance leaderboard."
+  usage: "Usage: /baltophide [player]"
+

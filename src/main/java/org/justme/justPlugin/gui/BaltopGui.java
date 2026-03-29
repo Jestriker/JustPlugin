@@ -18,7 +18,7 @@ import org.justme.justPlugin.util.CC;
 import java.util.*;
 
 /**
- * Balance Top GUI — 9×4 grid.
+ * Balance Top GUI - 9×4 grid.
  * Row 0 (top):    black glass panes
  * Row 1:          top 5 player heads (slots 11-15)
  * Row 2:          next 5 player heads (slots 20-24)
@@ -49,7 +49,7 @@ public class BaltopGui implements Listener {
             inv.setItem(i, filler);
         }
 
-        boolean isOp = viewer.isOp() || viewer.hasPermission("justplugin.baltop.viewhidden");
+        boolean isOp = viewer.hasPermission("justplugin.baltop.viewhidden");
         List<Map.Entry<UUID, Double>> sorted = plugin.getEconomyManager().getAllBalancesSorted();
 
         // Slots for top 10: row 1 slots 11-15 (ranks 1-5), row 2 slots 20-24 (ranks 6-10)

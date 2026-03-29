@@ -176,18 +176,18 @@ public class TeleportManager {
 
             if (isUnsafe) {
                 if (teleporter.hasPermission(safetyBypassPerm)) {
-                    // Store pending unsafe confirmation — do NOT teleport yet
+                    // Store pending unsafe confirmation - do NOT teleport yet
                     pendingUnsafeTps.put(teleporter.getUniqueId(),
                             new PendingUnsafeTp(destination.getLocation(), delayBypassPerm, featureKey));
                     sendUnsafeWarningWithConfirm(teleporter);
-                    destination.sendMessage(CC.warning("Teleport request cancelled — your current location is unsafe for teleportation."));
+                    destination.sendMessage(CC.warning("Teleport request cancelled - your current location is unsafe for teleportation."));
                     return;
                 } else {
                     String reason = playerFlying
                             ? "the destination player is flying"
                             : "hazardous blocks detected at the destination";
-                    teleporter.sendMessage(CC.error("Teleportation cancelled — " + reason + "!"));
-                    destination.sendMessage(CC.warning("Teleport request cancelled — your current location is unsafe for teleportation."));
+                    teleporter.sendMessage(CC.error("Teleportation cancelled - " + reason + "!"));
+                    destination.sendMessage(CC.warning("Teleport request cancelled - your current location is unsafe for teleportation."));
                     return;
                 }
             }
@@ -202,23 +202,17 @@ public class TeleportManager {
             return;
         }
 
-        long delayTicks = (long) (cooldown * 20);
-        Location startLoc = teleporter.getLocation().clone();
-        teleportStartLocations.put(teleporter.getUniqueId(), startLoc);
+        int countdownSecs = Math.max(1, (int) Math.ceil(cooldown));
 
         boolean clickable = plugin.getConfig().getBoolean("clickable-commands.tpa", true);
         String cancelCmd = CC.clickCmd("<yellow>/tpacancel</yellow>", "/tpacancel", clickable);
 
-        String delayStr = cooldown == (int) cooldown ? String.valueOf((int) cooldown) : String.valueOf(cooldown);
-        teleporter.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. <gray>Don't move or take damage!"));
-        teleporter.sendMessage(CC.info("Type " + cancelCmd + " to cancel."));
-        destination.sendMessage(CC.success("<yellow>" + teleporter.getName() + "</yellow> is teleporting to you in <yellow>" + delayStr + "</yellow> seconds."));
+        teleporter.sendMessage(CC.info("Don't move or take damage! Type " + cancelCmd + " to cancel."));
+        destination.sendMessage(CC.success("<yellow>" + teleporter.getName() + "</yellow> is teleporting to you in <yellow>" + countdownSecs + "</yellow> seconds."));
 
         final boolean finalSafetyEnabled = safetyEnabled;
 
-        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            pendingTeleports.remove(teleporter.getUniqueId());
-            teleportStartLocations.remove(teleporter.getUniqueId());
+        startCountdown(teleporter, countdownSecs, () -> {
             if (!teleporter.isOnline()) return;
 
             // Re-check safety before teleporting
@@ -228,24 +222,22 @@ public class TeleportManager {
                 boolean destUnsafe = !isLocationSafe(destLoc);
                 if (destFlying || destUnsafe) {
                     if (teleporter.hasPermission(safetyBypassPerm)) {
-                        // Store pending unsafe confirmation — do NOT teleport
                         pendingUnsafeTps.put(teleporter.getUniqueId(),
                                 new PendingUnsafeTp(destLoc, delayBypassPerm, featureKey));
                         sendUnsafeWarningWithConfirm(teleporter);
                     } else {
-                        teleporter.sendMessage(CC.error("Teleportation cancelled — the destination became unsafe!"));
+                        teleporter.sendMessage(CC.error("Teleportation cancelled - the destination became unsafe!"));
                     }
                     return;
                 }
             }
 
             executeTeleport(teleporter, destLoc, true);
-        }, delayTicks);
-        pendingTeleports.put(teleporter.getUniqueId(), task);
+        });
     }
 
     /**
-     * Called from PlayerMoveEvent — cancels teleport if the player moved.
+     * Called from PlayerMoveEvent - cancels teleport if the player moved.
      */
     public void handleMoveDuringTeleport(Player player) {
         UUID uuid = player.getUniqueId();
@@ -262,7 +254,7 @@ public class TeleportManager {
     }
 
     /**
-     * Called from EntityDamageEvent — cancels pending teleport if damaged during warmup.
+     * Called from EntityDamageEvent - cancels pending teleport if damaged during warmup.
      */
     public void handleDamageDuringTeleport(Player player) {
         UUID uuid = player.getUniqueId();
@@ -279,6 +271,41 @@ public class TeleportManager {
         BukkitTask task = pendingTeleports.remove(uuid);
         if (task != null) task.cancel();
         teleportStartLocations.remove(uuid);
+    }
+
+    /**
+     * Starts a per-second countdown for a player waiting to teleport.
+     * Sends a chat message each second ("Teleporting in 3...", "2...", "1...").
+     * When the countdown reaches 0, executes the onComplete callback.
+     * The task is stored in pendingTeleports so it can be cancelled by move/damage.
+     *
+     * @param player     the player teleporting
+     * @param seconds    total countdown seconds (must be >= 1)
+     * @param onComplete called on the main thread when countdown hits 0
+     */
+    private void startCountdown(Player player, int seconds, Runnable onComplete) {
+        UUID uuid = player.getUniqueId();
+        Location startLoc = player.getLocation().clone();
+        teleportStartLocations.put(uuid, startLoc);
+
+        final int[] remaining = {seconds};
+
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (!player.isOnline()) {
+                cancelPendingTeleport(uuid);
+                return;
+            }
+            if (remaining[0] > 0) {
+                player.sendMessage(CC.info("Teleporting in <yellow>" + remaining[0] + "</yellow>..."));
+                remaining[0]--;
+            } else {
+                // Countdown complete - cancel the repeating task and run the teleport
+                cancelPendingTeleport(uuid);
+                onComplete.run();
+            }
+        }, 0L, 20L); // start immediately, repeat every second
+
+        pendingTeleports.put(uuid, task);
     }
 
     // --- Teleport Execution ---
@@ -316,7 +343,7 @@ public class TeleportManager {
     }
 
     // ==========================================
-    // Safety Check — 3×3 area around destination
+    // Safety Check - 3×3 area around destination
     // ==========================================
 
     /**
@@ -359,7 +386,7 @@ public class TeleportManager {
     }
 
     /**
-     * Expanded dangerous block check — includes tripwire, pressure plates, sculk sensors,
+     * Expanded dangerous block check - includes tripwire, pressure plates, sculk sensors,
      * pointed dripstone, and other hazardous blocks.
      */
     private boolean isDangerousBlock(Material mat) {
@@ -505,11 +532,11 @@ public class TeleportManager {
 
         if (safetyEnabled && !isLocationSafe(location)) {
             if (safetyBypassPerm != null && player.hasPermission(safetyBypassPerm)) {
-                // Store pending confirmation — do NOT teleport yet
+                // Store pending confirmation - do NOT teleport yet
                 pendingUnsafeTps.put(player.getUniqueId(), new PendingUnsafeTp(location, delayBypassPerm, featureKey));
                 sendUnsafeWarningWithConfirm(player);
             } else {
-                player.sendMessage(CC.error("Teleportation cancelled — the destination is unsafe!"));
+                player.sendMessage(CC.error("Teleportation cancelled - the destination is unsafe!"));
             }
             return false;
         }
@@ -519,18 +546,14 @@ public class TeleportManager {
         if (cooldown <= 0 || player.hasPermission(delayBypassPerm)) {
             Location finalLoc = getSafeLocation(location);
             player.teleportAsync(finalLoc);
+            player.sendMessage(CC.success("Teleported!"));
             return true;
         }
 
-        long delayTicks = (long) (cooldown * 20);
-        Location startLoc = player.getLocation().clone();
-        teleportStartLocations.put(player.getUniqueId(), startLoc);
-        String delayStr = cooldown == (int) cooldown ? String.valueOf((int) cooldown) : String.valueOf(cooldown);
-        player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. Don't move or take damage!"));
+        int countdownSecs = Math.max(1, (int) Math.ceil(cooldown));
+        player.sendMessage(CC.info("Don't move or take damage!"));
         final boolean finalSafetyEnabled = safetyEnabled;
-        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            pendingTeleports.remove(player.getUniqueId());
-            teleportStartLocations.remove(player.getUniqueId());
+        startCountdown(player, countdownSecs, () -> {
             if (!player.isOnline()) return;
 
             // Re-check safety before actually teleporting
@@ -539,7 +562,7 @@ public class TeleportManager {
                     pendingUnsafeTps.put(player.getUniqueId(), new PendingUnsafeTp(location, delayBypassPerm, featureKey));
                     sendUnsafeWarningWithConfirm(player);
                 } else {
-                    player.sendMessage(CC.error("Teleportation cancelled — the destination became unsafe!"));
+                    player.sendMessage(CC.error("Teleportation cancelled - the destination became unsafe!"));
                 }
                 return;
             }
@@ -548,13 +571,12 @@ public class TeleportManager {
             setBackLocation(player.getUniqueId(), player.getLocation());
             player.teleportAsync(finalLoc);
             player.sendMessage(CC.success("Teleported!"));
-        }, delayTicks);
-        pendingTeleports.put(player.getUniqueId(), task);
+        });
         return true;
     }
 
     /**
-     * Teleport with bypass permission — uses specific bypass permission for cooldown.
+     * Teleport with bypass permission - uses specific bypass permission for cooldown.
      * No safety check (legacy method for backward compatibility).
      */
     public void teleportWithBypass(Player player, Location location, String bypassPermission) {
@@ -570,27 +592,22 @@ public class TeleportManager {
         if (cooldown <= 0 || player.hasPermission(bypassPermission)) {
             Location safeLoc = getSafeLocation(location);
             player.teleportAsync(safeLoc);
+            player.sendMessage(CC.success("Teleported!"));
             return;
         }
-        long delayTicks = (long) (cooldown * 20);
-        Location startLoc = player.getLocation().clone();
-        teleportStartLocations.put(player.getUniqueId(), startLoc);
-        String delayStr = cooldown == (int) cooldown ? String.valueOf((int) cooldown) : String.valueOf(cooldown);
-        player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. Don't move or take damage!"));
-        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            pendingTeleports.remove(player.getUniqueId());
-            teleportStartLocations.remove(player.getUniqueId());
+        int countdownSecs = Math.max(1, (int) Math.ceil(cooldown));
+        player.sendMessage(CC.info("Don't move or take damage!"));
+        startCountdown(player, countdownSecs, () -> {
             if (!player.isOnline()) return;
             Location safeLoc = getSafeLocation(location);
             setBackLocation(player.getUniqueId(), player.getLocation());
             player.teleportAsync(safeLoc);
             player.sendMessage(CC.success("Teleported!"));
-        }, delayTicks);
-        pendingTeleports.put(player.getUniqueId(), task);
+        });
     }
 
     /**
-     * Legacy teleport method — uses justplugin.teleport.bypass as the bypass permission.
+     * Legacy teleport method - uses justplugin.teleport.bypass as the bypass permission.
      */
     public void teleport(Player player, Location location) {
         teleportWithBypass(player, location, "justplugin.teleport.bypass");

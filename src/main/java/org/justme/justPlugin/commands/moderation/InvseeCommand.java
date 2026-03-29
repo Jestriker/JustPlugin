@@ -52,7 +52,7 @@ public class InvseeCommand implements TabExecutor, Listener {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 1) {
@@ -72,7 +72,7 @@ public class InvseeCommand implements TabExecutor, Listener {
         @SuppressWarnings("deprecation")
         OfflinePlayer offline = Bukkit.getOfflinePlayer(args[0]);
         if (!offline.hasPlayedBefore() && !offline.isOnline()) {
-            player.sendMessage(CC.error("Player not found!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
             return true;
         }
 
@@ -223,7 +223,7 @@ public class InvseeCommand implements TabExecutor, Listener {
             return;
         }
 
-        // Handle armor slot clicks — allow placing correct armor type
+        // Handle armor slot clicks - allow placing correct armor type
         if (slot == SLOT_HELMET || slot == SLOT_CHESTPLATE || slot == SLOT_LEGGINGS || slot == SLOT_BOOTS) {
             event.setCancelled(true);
             UUID targetUuid = openSessions.get(viewerUuid);
@@ -232,7 +232,7 @@ public class InvseeCommand implements TabExecutor, Listener {
 
             ItemStack cursor = event.getCursor();
             if (cursor.getType() == Material.AIR) {
-                // Clicking with empty hand on an equipped armor piece — remove it
+                // Clicking with empty hand on an equipped armor piece - remove it
                 ItemStack current = getArmorPiece(target, slot);
                 if (current != null && current.getType() != Material.AIR) {
                     // Give the armor piece to the viewer's cursor
@@ -297,7 +297,7 @@ public class InvseeCommand implements TabExecutor, Listener {
             return;
         }
 
-        // Allow interaction with main inventory slots (0-35) — read only by default
+        // Allow interaction with main inventory slots (0-35) - read only by default
         // Block all interaction to keep it read-only except armor
         if (slot >= 0 && slot < 36) {
             event.setCancelled(true);

@@ -25,7 +25,7 @@ public class ExpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 1) {
@@ -53,7 +53,7 @@ public class ExpCommand implements TabExecutor {
                 }
                 target = Bukkit.getPlayer(args[3]);
                 if (target == null) {
-                    player.sendMessage(CC.error("Player not found!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                     return true;
                 }
             }
@@ -87,7 +87,7 @@ public class ExpCommand implements TabExecutor {
                 default -> player.sendMessage(CC.error("Usage: /exp <set | give> <levels | orbs> <amount> [player]"));
             }
         } catch (NumberFormatException e) {
-            player.sendMessage(CC.error("Invalid amount!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-number")));
         }
         return true;
     }

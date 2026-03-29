@@ -1,0 +1,111 @@
+# ==========================================
+# Teleportation Messages
+# ==========================================
+# Messages for /tpa, /tpahere, /tpaccept, /tpreject, /tpacancel,
+# /spawn, /setspawn, /back, /tppos, /tpr (wild/rtp), and safe teleport system.
+#
+# Supports MiniMessage formatting.
+#
+# Common Placeholders:
+#   {player}    - The target player's name
+#   {sender}    - The requesting player's name
+#   {time}      - Formatted time (cooldown/countdown remaining)
+#   {timeout}   - Request expiration time in seconds
+#   {x}, {y}, {z} - Coordinates
+#   {world}     - World name
+#   {accept}    - Clickable /tpaccept command (when clickable-commands.tpa is true)
+#   {reject}    - Clickable /tpreject command (when clickable-commands.tpa is true)
+#   {cancel}    - Clickable /tpacancel command (when clickable-commands.tpa is true)
+# ==========================================
+
+# === TPA ===
+tpa:
+  usage: "Usage: /tpa <player>"
+  sent: "TPA request sent to <yellow>{player}</yellow>. <gray>Expires in {timeout}s."
+  sent-cancel-hint: "Type {cancel} to cancel."
+  received: "<yellow>{sender}</yellow> has requested to teleport to you."
+  received-hint: "Type {accept} to accept or {reject} to deny. <gray>Expires in {timeout}s."
+  cannot-self: "You can't teleport to yourself!"
+  blocked-by-ignore: "This player is not accepting teleport requests from you."
+  already-pending-same: "You already have a pending request for <yellow>{player}</yellow>."
+  already-pending-other: "You already have a pending request to <yellow>{player}</yellow>."
+  already-pending-cancel-hint: "Use {cancel} to cancel it and try again."
+
+# === TPA Here ===
+tpahere:
+  usage: "Usage: /tpahere <player>"
+  sent: "TPA Here request sent to <yellow>{player}</yellow>. <gray>Expires in {timeout}s."
+  sent-cancel-hint: "Type {cancel} to cancel."
+  received: "<yellow>{sender}</yellow> has requested you to teleport to them."
+  received-hint: "Type {accept} to accept or {reject} to deny. <gray>Expires in {timeout}s."
+  cannot-self: "You can't request yourself!"
+  blocked-by-ignore: "This player is not accepting teleport requests from you."
+  already-pending-same: "You already have a pending request for <yellow>{player}</yellow>."
+  already-pending-other: "You already have a pending request to <yellow>{player}</yellow>."
+  already-pending-cancel-hint: "Use {cancel} to cancel it and try again."
+
+# === TP Accept ===
+tpaccept:
+  accepted: "Teleport request accepted!"
+  no-pending: "You have no pending teleport requests."
+
+# === TP Reject ===
+tpreject:
+  rejected: "Teleport request rejected."
+  no-pending: "You have no pending teleport requests."
+  notify-requester: "<yellow>{player}</yellow> rejected your teleport request."
+
+# === TP Cancel ===
+tpacancel:
+  tp-cancelled: "Teleportation cancelled."
+  no-pending: "You have no pending teleport requests."
+  request-cancelled: "Teleport request cancelled."
+  notify-target: "<yellow>{player}</yellow> cancelled their teleport request."
+
+# === Spawn ===
+spawn:
+  teleporting: "Teleporting to spawn."
+  world-not-found: "Spawn world not found!"
+  not-set: "No spawn has been set on this server."
+
+# === Set Spawn ===
+setspawn:
+  success: "Spawn has been set to your exact location."
+  unsafe: "Unsafe spawn location! Stand on a solid, safe block."
+
+# === Back ===
+back:
+  teleporting: "Teleporting to your previous location."
+  no-location: "No back location found!"
+
+# === TP Position ===
+tppos:
+  usage: "Usage: /tppos <x> <y> <z> [world]"
+  teleporting: "Teleporting to <yellow>{x}, {y}, {z}</yellow>."
+  world-not-found: "World not found!"
+  invalid-coords: "Invalid coordinates!"
+
+# === Random Teleport (Wild/RTP) ===
+tpr:
+  searching: "Finding a safe random location in <yellow>{world}</yellow>..."
+  teleported: "You've been teleported to a random location in <yellow>{world}</yellow>!"
+  failed: "Could not find a safe location. Please try again."
+  no-permission-dimension: "You don't have permission to random teleport in {world}."
+
+# === Safe Teleport System ===
+safe-teleport:
+  unsafe-warning: "⚠ <yellow>{player}</yellow>'s current location is unsafe!"
+  protection-hint: "Consider enabling protection before teleporting:"
+  teleported-to-player: "Teleported to <yellow>{player}</yellow>."
+  player-not-found: "Player not found or is no longer online!"
+  usage: "Usage: /tpsafecheck <player>"
+
+# === Teleport Countdown ===
+countdown:
+  # Shown each second during warmup. {seconds} = remaining seconds.
+  tick: "Teleporting in <yellow>{seconds}</yellow>..."
+  # Shown when player moves during countdown.
+  cancelled-moved: "Teleport cancelled - you moved!"
+  # Shown when player takes damage during countdown.
+  cancelled-damage: "Teleport cancelled - you took damage!"
+

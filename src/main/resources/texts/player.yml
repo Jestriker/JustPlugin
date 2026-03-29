@@ -1,0 +1,124 @@
+# ==========================================
+# Player Messages
+# ==========================================
+# Messages for /fly, /gm (gamemode), /god, /speed, /hat, /exp,
+# /skull, /suicide, /heal, /feed, /kill, /getpos, /getdeathpos, /gmcheck.
+#
+# Placeholders:
+#   {player}    - Target player name
+#   {mode}      - Game mode name (Survival, Creative, etc.)
+#   {speed}     - Speed value
+#   {amount}    - Amount value
+#   {x}, {y}, {z} - Coordinates
+#   {world}     - World name
+# ==========================================
+
+# === Fly ===
+fly:
+  enabled-self: "Flight <green>enabled</green>."
+  disabled-self: "Flight <red>disabled</red>."
+  enabled-other: "Flight <green>enabled</green> for <yellow>{player}</yellow>."
+  disabled-other: "Flight <red>disabled</red> for <yellow>{player}</yellow>."
+  usage: "Usage: /fly [player]"
+
+# === Gamemode ===
+gamemode:
+  changed-self: "Game mode set to <yellow>{mode}</yellow>."
+  changed-other: "Set <yellow>{player}</yellow>'s game mode to <yellow>{mode}</yellow>."
+  usage: "Usage: /gm <0|1|2|3|survival|creative|adventure|spectator> [player]"
+  invalid-mode: "Invalid game mode! Use survival, creative, adventure, or spectator."
+
+# === GM Check ===
+gmcheck:
+  self: "Your game mode: <yellow>{mode}"
+  other: "<yellow>{player}</yellow>'s game mode: <yellow>{mode}"
+  usage: "Usage: /gmcheck [player]"
+
+# === God ===
+god:
+  enabled-self: "God mode <green>enabled</green>."
+  disabled-self: "God mode <red>disabled</red>."
+  enabled-other: "God mode <green>enabled</green> for <yellow>{player}</yellow>."
+  disabled-other: "God mode <red>disabled</red> for <yellow>{player}</yellow>."
+  usage: "Usage: /god [player]"
+
+# === Speed ===
+speed:
+  set-fly-self: "Fly speed set to <yellow>{speed}</yellow>."
+  set-walk-self: "Walk speed set to <yellow>{speed}</yellow>."
+  set-fly-other: "Set <yellow>{player}</yellow>'s fly speed to <yellow>{speed}</yellow>."
+  set-walk-other: "Set <yellow>{player}</yellow>'s walk speed to <yellow>{speed}</yellow>."
+  usage: "Usage: /speed <0-10> [player]"
+  invalid-speed: "Speed must be between 0 and 10!"
+
+# === Hat ===
+hat:
+  success: "You are now wearing the item as a hat!"
+  empty-hand: "You must be holding an item!"
+  usage: "Usage: /hat"
+
+# === Exp ===
+exp:
+  set-levels: "Set <yellow>{player}</yellow>'s experience to <yellow>{amount}</yellow> levels."
+  set-orbs: "Set <yellow>{player}</yellow>'s experience to <yellow>{amount}</yellow> points."
+  give-levels: "Gave <yellow>{amount}</yellow> levels to <yellow>{player}</yellow>."
+  give-orbs: "Gave <yellow>{amount}</yellow> experience points to <yellow>{player}</yellow>."
+  usage: "Usage: /exp <set|give> <levels|orbs> <amount> [player]"
+  invalid-amount: "Invalid amount! Must be a non-negative number."
+
+# === Skull ===
+skull:
+  success: "You received <yellow>{player}</yellow>'s skull."
+  usage: "Usage: /skull [player]"
+
+# === Suicide ===
+suicide:
+  success: "You killed yourself."
+
+# === Heal ===
+heal:
+  healed-self: "You have been healed!"
+  healed-other: "Healed <yellow>{player}</yellow>."
+  healed-notify: "You have been healed by <yellow>{player}</yellow>."
+  usage: "Usage: /heal [player]"
+
+# === Feed ===
+feed:
+  fed-self: "You have been fed!"
+  fed-other: "Fed <yellow>{player}</yellow>."
+  fed-notify: "You have been fed by <yellow>{player}</yellow>."
+  usage: "Usage: /feed [player]"
+
+# === Kill ===
+kill:
+  killed-self: "You killed yourself."
+  killed-other: "Killed <yellow>{player}</yellow>."
+  killed-entities: "Killed <yellow>{amount}</yellow> entities."
+  usage: "Usage: /kill [player | mobs | hostile | friendly | items | entities | players | allplayers | everything]"
+  no-permission-mass: "You don't have permission for mass kill operations."
+
+# === Get Position ===
+getpos:
+  self: "Your position: <yellow>{x}, {y}, {z}</yellow> in <yellow>{world}</yellow>"
+  other: "<yellow>{player}</yellow>'s position: <yellow>{x}, {y}, {z}</yellow> in <yellow>{world}</yellow>"
+  usage: "Usage: /getpos [player]"
+
+# === Get Death Position ===
+getdeathpos:
+  self: "Your last death location: <yellow>{x}, {y}, {z}</yellow> in <yellow>{world}</yellow>"
+  other: "<yellow>{player}</yellow>'s last death location: <yellow>{x}, {y}, {z}</yellow> in <yellow>{world}</yellow>"
+  no-death: "No death location found."
+  no-death-other: "No death location found for <yellow>{player}</yellow>."
+  usage: "Usage: /getdeathpos [player]"
+
+# === Skin ===
+skin:
+  set-self: "Your skin has been set to <yellow>{skin}</yellow>."
+  set-other: "Set <yellow>{player}</yellow>'s skin to <yellow>{skin}</yellow>."
+  cleared-self: "Your skin has been reset to default."
+  cleared-other: "Reset <yellow>{player}</yellow>'s skin to default."
+  applying: "Applying skin <yellow>{skin}</yellow>..."
+  failed: "Failed to apply skin. Player may not exist."
+  banned: "The skin <yellow>{skin}</yellow> is banned and cannot be used."
+  usage: "Usage: /skin <set|clear> [name] [player]"
+

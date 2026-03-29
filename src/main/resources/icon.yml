@@ -1,0 +1,23 @@
+# ==========================================
+# JustPlugin - Server Icon Configuration
+# ==========================================
+#
+# Set a custom server icon from a direct image URL.
+# The image will be fetched on startup and cached locally.
+#
+# Requirements:
+#   - Image must be a PNG file
+#   - Images that are not 64x64 will be automatically resized
+#
+# The icon is applied to the server list (multiplayer screen).
+# When maintenance mode is active, the maintenance icon takes priority.
+#
+# ==========================================
+
+# Enable or disable the custom server icon from URL.
+enabled: false
+
+# Direct URL to the server icon image.
+# Example: "https://example.com/my-server-icon.png"
+url: ""
+

@@ -66,15 +66,15 @@ public class TradeManager implements Listener {
     private static final int SEP_COL = 4;
 
     // Bottom-row slot indices (row 5)
-    private static final int SLOT_CONFIRM   = 45;  // col 0  — green wool
-    private static final int SLOT_UNCONFIRM = 46;  // col 1  — red wool
-    private static final int SLOT_FILLER_47 = 47;  // col 2  — glass filler
-    private static final int SLOT_COIN_YOU  = 48;  // col 3  — gray dye / coin offer
-    private static final int SLOT_SEP_BOT   = 49;  // col 4  — separator
-    private static final int SLOT_COIN_OTHER= 50;  // col 5  — other's coin display
-    private static final int SLOT_FILLER_51 = 51;  // col 6  — glass filler
-    private static final int SLOT_FILLER_52 = 52;  // col 7  — glass filler
-    private static final int SLOT_ACCEPT_OTHER = 53; // col 8 — other's acceptance indicator
+    private static final int SLOT_CONFIRM   = 45;  // col 0  - green wool
+    private static final int SLOT_UNCONFIRM = 46;  // col 1  - red wool
+    private static final int SLOT_FILLER_47 = 47;  // col 2  - glass filler
+    private static final int SLOT_COIN_YOU  = 48;  // col 3  - gray dye / coin offer
+    private static final int SLOT_SEP_BOT   = 49;  // col 4  - separator
+    private static final int SLOT_COIN_OTHER= 50;  // col 5  - other's coin display
+    private static final int SLOT_FILLER_51 = 51;  // col 6  - glass filler
+    private static final int SLOT_FILLER_52 = 52;  // col 7  - glass filler
+    private static final int SLOT_ACCEPT_OTHER = 53; // col 8 - other's acceptance indicator
 
     public TradeManager(JustPlugin plugin) {
         this.plugin = plugin;
@@ -190,7 +190,7 @@ public class TradeManager implements Listener {
     }
 
     // ====================================================================
-    //  Trade GUI — normal (two real players)
+    //  Trade GUI - normal (two real players)
     // ====================================================================
 
     public void openTradeGUI(Player p1, Player p2) {
@@ -233,7 +233,7 @@ public class TradeManager implements Listener {
         inv.setItem(SLOT_COIN_OTHER, glass(Material.GRAY_STAINED_GLASS_PANE, " "));
         inv.setItem(SLOT_FILLER_51, filler.clone());
         inv.setItem(SLOT_FILLER_52, filler.clone());
-        // Other's acceptance indicator — starts as red wool
+        // Other's acceptance indicator - starts as red wool
         inv.setItem(SLOT_ACCEPT_OTHER, wool(Material.RED_WOOL, "<red><bold>Not Confirmed</bold></red>",
                 "<gray>" + otherName + " has not confirmed."));
     }
@@ -415,7 +415,7 @@ public class TradeManager implements Listener {
     }
 
     // ====================================================================
-    //  Coin input (via sign editor — Hypixel-style)
+    //  Coin input (via sign editor - Hypixel-style)
     // ====================================================================
 
     public boolean isAwaitingCoinInput(UUID uuid) { return awaitingCoinInput.contains(uuid); }
@@ -473,14 +473,14 @@ public class TradeManager implements Listener {
         TradeSession s = activeSessions.get(uuid);
         if (s == null) return;
 
-        // Read line 2 (index 1) — the player's input
+        // Read line 2 (index 1) - the player's input
         Component lineComp = event.line(1);
         String input = lineComp != null
                 ? net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(lineComp)
                 : "";
 
         if (input.trim().isEmpty()) {
-            // No input — treat as cancel, just reopen
+            // No input - treat as cancel, just reopen
             reopen(player, s);
             return;
         }
@@ -565,12 +565,12 @@ public class TradeManager implements Listener {
             updateAcceptDisplay(s);
             Player p1 = Bukkit.getPlayer(s.player1);
             if (p1 != null) {
-                p1.sendMessage(CC.warning("Trade contents changed — confirmations reset."));
+                p1.sendMessage(CC.warning("Trade contents changed - confirmations reset."));
                 playTradeSound(p1, Sound.UI_BUTTON_CLICK, 0.5f, 0.8f);
             }
             Player p2 = Bukkit.getPlayer(s.player2);
             if (p2 != null) {
-                p2.sendMessage(CC.warning("Trade contents changed — confirmations reset."));
+                p2.sendMessage(CC.warning("Trade contents changed - confirmations reset."));
                 playTradeSound(p2, Sound.UI_BUTTON_CLICK, 0.5f, 0.8f);
             }
         }
@@ -696,7 +696,7 @@ public class TradeManager implements Listener {
 
         int raw = event.getRawSlot();
 
-        // Bottom-half (player inventory) — only allow shift-click into "You" slots
+        // Bottom-half (player inventory) - only allow shift-click into "You" slots
         if (raw >= 54) {
             if (event.isShiftClick()) {
                 event.setCancelled(true);
@@ -720,10 +720,10 @@ public class TradeManager implements Listener {
             return;
         }
 
-        // Separator column — block
+        // Separator column - block
         if (raw % 9 == SEP_COL) { event.setCancelled(true); return; }
 
-        // Other side — block
+        // Other side - block
         if (isOtherSlot(raw)) { event.setCancelled(true); return; }
 
         // Bottom control row
@@ -766,7 +766,7 @@ public class TradeManager implements Listener {
             return; // all other bottom slots are locked
         }
 
-        // "You" item slot — allowed, but reset acceptance & sync
+        // "You" item slot - allowed, but reset acceptance & sync
         if (isYouSlot(raw)) {
             resetAcceptance(s);
             syncAfterClick(s, player.getUniqueId());
@@ -822,13 +822,13 @@ public class TradeManager implements Listener {
         if (targetUuid != null) {
             clearRequest(targetUuid);
             Player tP = Bukkit.getPlayer(targetUuid);
-            if (tP != null) tP.sendMessage(CC.warning("Trade request from <yellow>" + name + "</yellow> was cancelled — they logged off."));
+            if (tP != null) tP.sendMessage(CC.warning("Trade request from <yellow>" + name + "</yellow> was cancelled - they logged off."));
         }
         UUID senderUuid = pendingRequests.get(uuid);
         if (senderUuid != null) {
             clearRequest(uuid);
             Player sP = Bukkit.getPlayer(senderUuid);
-            if (sP != null) sP.sendMessage(CC.warning("Your trade request was cancelled — <yellow>" + name + "</yellow> logged off."));
+            if (sP != null) sP.sendMessage(CC.warning("Your trade request was cancelled - <yellow>" + name + "</yellow> logged off."));
         }
 
         TradeSession s = activeSessions.get(uuid);

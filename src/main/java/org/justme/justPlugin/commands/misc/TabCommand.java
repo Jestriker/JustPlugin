@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.PAPIHook;
+import org.justme.justPlugin.util.PlaceholderResolver;
 
 import java.util.List;
 
@@ -23,7 +25,7 @@ public class TabCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
 
@@ -46,8 +48,27 @@ public class TabCommand implements TabExecutor {
         String footer = plugin.getConfig().getString("tab.footer",
                 "<gray>Players: <yellow>{online}<gray>/<yellow>{max} <gray>| <gray>Ping: <yellow>{ping}ms <gray>| <gray>TPS: <yellow>{tps}");
 
-        String h = resolveTabPlaceholders(header, player);
-        String f = resolveTabPlaceholders(footer, player);
+        // Resolve animations if available
+        if (plugin.getScoreboardManager() != null) {
+            header = plugin.getScoreboardManager().resolveAnimations(header);
+            footer = plugin.getScoreboardManager().resolveAnimations(footer);
+        }
+
+        // Resolve all 50+ placeholders via PlaceholderResolver + PAPI
+        String h = PlaceholderResolver.resolve(player, plugin, header);
+        h = PAPIHook.setPlaceholders(player, h);
+        String f = PlaceholderResolver.resolve(player, plugin, footer);
+        f = PAPIHook.setPlaceholders(player, f);
+
+        // Append maintenance footer line if enabled and maintenance is active
+        if (plugin.getConfig().getBoolean("tab.maintenance-footer-enabled", false)
+                && plugin.getMaintenanceManager() != null
+                && plugin.getMaintenanceManager().isActive()) {
+            String maintenanceLine = plugin.getConfig().getString("tab.maintenance-footer-line",
+                    "\n<red><bold>⚠</bold> Server is in maintenance mode</red>");
+            f = f + maintenanceLine;
+        }
+
         player.sendPlayerListHeaderAndFooter(CC.translate(h), CC.translate(f));
     }
 
@@ -66,27 +87,6 @@ public class TabCommand implements TabExecutor {
      */
     public int getRefreshInterval() {
         return plugin.getConfig().getInt("tab.refresh-interval", 5);
-    }
-
-    /**
-     * Resolve all supported tab placeholders for a player.
-     */
-    private String resolveTabPlaceholders(String text, Player player) {
-        text = text.replace("{player}", player.getName());
-        text = text.replace("{online}", String.valueOf(Bukkit.getOnlinePlayers().size()));
-        text = text.replace("{max}", String.valueOf(Bukkit.getMaxPlayers()));
-        text = text.replace("{ping}", String.valueOf(player.getPing()));
-
-        // TPS - use cached value
-        try {
-            double[] tps = Bukkit.getTPS();
-            double serverTps = tps.length > 0 ? Math.min(tps[0], 20.0) : 20.0;
-            text = text.replace("{tps}", String.format("%.1f", serverTps));
-        } catch (Exception e) {
-            text = text.replace("{tps}", "20.0");
-        }
-
-        return text;
     }
 }
 

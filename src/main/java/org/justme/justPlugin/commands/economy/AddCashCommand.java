@@ -29,7 +29,7 @@ public class AddCashCommand implements TabExecutor {
             return true;
         }
 
-        // /addcash <amount> — self
+        // /addcash <amount> - self
         if (args.length == 1) {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(CC.error("Console must specify a player: /addcash <player> <amount>"));
@@ -49,12 +49,12 @@ public class AddCashCommand implements TabExecutor {
                 player.sendMessage(CC.success("Added <green>" + plugin.getEconomyManager().format(amount) + "</green> to your balance. New balance: <green>" + plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(player.getUniqueId())) + "</green>"));
                 plugin.getLogManager().log("economy", "<yellow>" + player.getName() + "</yellow> added <green>" + plugin.getEconomyManager().format(amount) + "</green> to their own balance");
             } catch (NumberFormatException e) {
-                player.sendMessage(CC.error("Invalid amount!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-number")));
             }
             return true;
         }
 
-        // /addcash <player> <amount> — others
+        // /addcash <player> <amount> - others
         if (sender instanceof Player p && !p.hasPermission("justplugin.addcash.others")) {
             sender.sendMessage(CC.error("You don't have permission to add cash to other players."));
             return true;
@@ -95,7 +95,7 @@ public class AddCashCommand implements TabExecutor {
             String senderNameOff = sender instanceof Player ? sender.getName() : "Console";
             plugin.getLogManager().log("economy", "<yellow>" + senderNameOff + "</yellow> added <green>" + plugin.getEconomyManager().format(amount) + "</green> to <yellow>" + name + "</yellow>'s balance (offline)");
         } catch (NumberFormatException e) {
-            sender.sendMessage(CC.error("Invalid amount!"));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-number")));
         }
         return true;
     }

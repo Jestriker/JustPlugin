@@ -36,7 +36,7 @@ public class EchestSeeCommand implements TabExecutor, Listener {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 1) {
@@ -45,7 +45,7 @@ public class EchestSeeCommand implements TabExecutor, Listener {
         }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            player.sendMessage(CC.error("Player not found!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
             return true;
         }
 
@@ -65,7 +65,7 @@ public class EchestSeeCommand implements TabExecutor, Listener {
                 cancelSession(player.getUniqueId());
                 if (player.isOnline()) {
                     player.closeInventory();
-                    player.sendMessage(CC.warning("Ender chest view closed — player logged off."));
+                    player.sendMessage(CC.warning("Ender chest view closed - player logged off."));
                 }
             }
         }, 20L, 20L);

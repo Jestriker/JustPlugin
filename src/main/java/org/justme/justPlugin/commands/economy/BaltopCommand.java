@@ -33,7 +33,7 @@ public class BaltopCommand implements TabExecutor {
     }
 
     private void showTextBaltop(CommandSender sender) {
-        boolean isOp = sender.isOp();
+        boolean isOp = sender.hasPermission("justplugin.baltop.viewhidden");
         var sorted = plugin.getEconomyManager().getAllBalancesSorted();
 
         sender.sendMessage(CC.translate("<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));

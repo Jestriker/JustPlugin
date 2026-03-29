@@ -23,7 +23,7 @@ public class MotdCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
-        // /motd server <text> — set the server list MOTD
+        // /motd server <text> - set the server list MOTD
         if (args.length >= 2 && args[0].equalsIgnoreCase("server") && sender.hasPermission("justplugin.motd.set")) {
             String text = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
             plugin.getMotdManager().setServerMotd(text);
@@ -37,7 +37,7 @@ public class MotdCommand implements TabExecutor {
             return true;
         }
 
-        // /motd join <text> — set the join MOTD
+        // /motd join <text> - set the join MOTD
         if (args.length >= 2 && args[0].equalsIgnoreCase("join") && sender.hasPermission("justplugin.motd.set")) {
             String text = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
             plugin.getMotdManager().setJoinMotd(text);
@@ -52,7 +52,7 @@ public class MotdCommand implements TabExecutor {
             return true;
         }
 
-        // /motd — view both MOTDs
+        // /motd - view both MOTDs
         sender.sendMessage(CC.translate("<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
         sender.sendMessage(CC.translate("  <gold><bold>MOTD Configuration</bold></gold>"));
         sender.sendMessage(CC.translate("<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));

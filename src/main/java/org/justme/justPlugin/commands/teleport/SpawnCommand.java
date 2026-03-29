@@ -26,12 +26,12 @@ public class SpawnCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
 
-        // Delay check (time between uses) — OPs auto-skip, or explicit delaybypass permission
-        if (!player.isOp() && !player.hasPermission("justplugin.spawn.delaybypass")
+        // Delay check (time between uses) - requires explicit delaybypass permission
+        if (!player.hasPermission("justplugin.spawn.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "spawn")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "spawn");
             player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
@@ -44,7 +44,7 @@ public class SpawnCommand implements TabExecutor {
         if (worldName != null && plugin.getConfig().contains("spawn.x")) {
             World world = Bukkit.getWorld(worldName);
             if (world == null) {
-                player.sendMessage(CC.error("Spawn world not found!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.spawn.world-not-found")));
                 return true;
             }
             spawnLoc = new Location(world,
@@ -61,7 +61,7 @@ public class SpawnCommand implements TabExecutor {
                 player, spawnLoc, "justplugin.teleport.bypass", "spawn", "justplugin.spawn.unsafetp");
         if (initiated) {
             plugin.getCooldownManager().setDelayStart(player.getUniqueId(), "spawn");
-            player.sendMessage(CC.success("Teleporting to spawn."));
+            player.sendMessage(CC.success(plugin.getMessageManager().raw("teleport.spawn.teleporting")));
         }
         return true;
     }

@@ -1,0 +1,47 @@
+# ==========================================
+# Trade Messages
+# ==========================================
+# Messages for /trade <player|accept|deny|cancel> and the trade GUI.
+#
+# Placeholders:
+#   {player}    - Target/partner player name
+#   {sender}    - The player who sent the request
+#   {amount}    - Currency amount
+#   {timeout}   - Request expiration time in seconds
+#   {seconds}   - Countdown seconds
+#   {accept}    - Clickable accept button (when clickable-commands.trade is true)
+#   {deny}      - Clickable deny button
+#   {cancel}    - Clickable cancel button
+# ==========================================
+
+# === Trade Requests ===
+request:
+  sent: "Trade request sent to <yellow>{player}</yellow>. <gray>Expires in {timeout}s."
+  sent-cancel-hint: "Type {cancel} to cancel."
+  received: "<yellow>{sender}</yellow> wants to trade with you!"
+  received-hint: "Type {accept} to accept or {deny} to deny. <gray>Expires in {timeout}s."
+  cannot-self: "You can't trade with yourself!"
+  already-pending: "You already have a pending trade request."
+  busy: "<yellow>{player}</yellow> is currently in a trade."
+  usage: "Usage: /trade <player|accept|deny>"
+
+# === Trade Accept/Deny/Cancel ===
+accepted: "Trade request accepted! Opening trade window..."
+denied: "Trade request denied."
+deny-notify: "<yellow>{player}</yellow> denied your trade request."
+cancelled: "Trade request cancelled."
+cancel-notify: "<yellow>{player}</yellow> cancelled the trade request."
+no-pending: "You have no pending trade request."
+expired: "Trade request expired."
+
+# === Trade GUI ===
+gui:
+  title: "Trading with {player}"
+  # Countdown messages shown during the 5-second confirmation
+  countdown: "Trade completing in <yellow>{seconds}</yellow>..."
+  completed: "Trade completed successfully!"
+  cancelled: "Trade cancelled."
+  other-cancelled: "<yellow>{player}</yellow> cancelled the trade."
+  # Amount display
+  coins-label: "Coins: {amount}"
+

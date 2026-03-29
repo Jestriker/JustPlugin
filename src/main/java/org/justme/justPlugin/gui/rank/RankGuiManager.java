@@ -672,7 +672,7 @@ public class RankGuiManager implements Listener {
                 // Clear existing display name node
                 group.data().clear(NodeType.DISPLAY_NAME::matches);
                 if (newName.equalsIgnoreCase(CLEAR_KEYWORD)) {
-                    // Clear display name — don't add a new node
+                    // Clear display name - don't add a new node
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
                             Bukkit.getScheduler().runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Display name cleared for <yellow>" + groupName + "</yellow>."));
@@ -696,7 +696,7 @@ public class RankGuiManager implements Listener {
                 if (group == null) return;
                 group.data().clear(NodeType.PREFIX::matches);
                 if (prefix.equalsIgnoreCase(CLEAR_KEYWORD)) {
-                    // Clear prefix — don't add a new node
+                    // Clear prefix - don't add a new node
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
                             Bukkit.getScheduler().runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Prefix cleared for <yellow>" + groupName + "</yellow>."));
@@ -720,7 +720,7 @@ public class RankGuiManager implements Listener {
                 if (group == null) return;
                 group.data().clear(NodeType.SUFFIX::matches);
                 if (suffix.equalsIgnoreCase(CLEAR_KEYWORD)) {
-                    // Clear suffix — don't add a new node
+                    // Clear suffix - don't add a new node
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
                             Bukkit.getScheduler().runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Suffix cleared for <yellow>" + groupName + "</yellow>."));

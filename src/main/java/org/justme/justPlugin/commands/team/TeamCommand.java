@@ -29,7 +29,7 @@ public class TeamCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 1) {
@@ -58,7 +58,7 @@ public class TeamCommand implements TabExecutor {
             case "disband" -> {
                 String teamName = tm.getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error("You are not in a team!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                     return true;
                 }
                 if (!tm.isLeader(player.getUniqueId(), teamName)) {
@@ -84,7 +84,7 @@ public class TeamCommand implements TabExecutor {
                 }
                 String teamName = tm.getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error("You are not in a team!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                     return true;
                 }
                 if (!tm.isLeader(player.getUniqueId(), teamName)) {
@@ -93,7 +93,7 @@ public class TeamCommand implements TabExecutor {
                 }
                 Player target = Bukkit.getPlayer(args[1]);
                 if (target == null) {
-                    player.sendMessage(CC.error("Player not found!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                     return true;
                 }
                 if (tm.getPlayerTeam(target.getUniqueId()) != null) {
@@ -131,7 +131,7 @@ public class TeamCommand implements TabExecutor {
             case "leave" -> {
                 String teamName = tm.getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error("You are not in a team!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                     return true;
                 }
                 // Notify team before leaving (so the player's UUID is still in the team)
@@ -152,7 +152,7 @@ public class TeamCommand implements TabExecutor {
                 }
                 String teamName = tm.getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error("You are not in a team!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                     return true;
                 }
                 if (!tm.isLeader(player.getUniqueId(), teamName)) {
@@ -161,7 +161,7 @@ public class TeamCommand implements TabExecutor {
                 }
                 Player target = Bukkit.getPlayer(args[1]);
                 if (target == null) {
-                    player.sendMessage(CC.error("Player not found!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                     return true;
                 }
                 String targetTeam = tm.getPlayerTeam(target.getUniqueId());
@@ -188,7 +188,7 @@ public class TeamCommand implements TabExecutor {
                 }
                 String teamName = tm.getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error("You are not in a team!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                     return true;
                 }
                 if (!tm.isLeader(player.getUniqueId(), teamName)) {
@@ -197,7 +197,7 @@ public class TeamCommand implements TabExecutor {
                 }
                 Player target = Bukkit.getPlayer(args[1]);
                 if (target == null) {
-                    player.sendMessage(CC.error("Player not found!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                     return true;
                 }
                 String result = tm.promoteToLeader(teamName, target.getUniqueId());
@@ -220,7 +220,7 @@ public class TeamCommand implements TabExecutor {
                 }
                 String teamName = tm.getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error("You are not in a team!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                     return true;
                 }
                 if (!tm.isLeader(player.getUniqueId(), teamName)) {
@@ -229,7 +229,7 @@ public class TeamCommand implements TabExecutor {
                 }
                 Player target = Bukkit.getPlayer(args[1]);
                 if (target == null) {
-                    player.sendMessage(CC.error("Player not found!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                     return true;
                 }
                 if (target.getUniqueId().equals(player.getUniqueId())) {
@@ -253,7 +253,7 @@ public class TeamCommand implements TabExecutor {
             case "sethome" -> {
                 String teamName = tm.getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error("You are not in a team!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                     return true;
                 }
                 if (!tm.isLeader(player.getUniqueId(), teamName)) {
@@ -267,7 +267,7 @@ public class TeamCommand implements TabExecutor {
             case "delhome" -> {
                 String teamName = tm.getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error("You are not in a team!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                     return true;
                 }
                 if (!tm.isLeader(player.getUniqueId(), teamName)) {
@@ -285,7 +285,7 @@ public class TeamCommand implements TabExecutor {
             case "home" -> {
                 String teamName = tm.getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error("You are not in a team!"));
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
                     return true;
                 }
                 Location homeLoc = tm.getTeamHome(teamName);
@@ -297,8 +297,8 @@ public class TeamCommand implements TabExecutor {
                     return true;
                 }
 
-                // Delay check (time between uses) — OPs auto-skip
-                if (!player.isOp() && !player.hasPermission("justplugin.teamhome.delaybypass")
+                // Delay check (time between uses) - requires explicit delaybypass permission
+                if (!player.hasPermission("justplugin.teamhome.delaybypass")
                         && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "teamhome")) {
                     int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "teamhome");
                     player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));

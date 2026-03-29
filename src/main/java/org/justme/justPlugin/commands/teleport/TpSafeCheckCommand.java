@@ -30,18 +30,18 @@ public class TpSafeCheckCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
 
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /tpsafecheck <player>"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.safe-teleport.usage")));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            player.sendMessage(CC.error("Player not found or is no longer online!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.safe-teleport.player-not-found")));
             return true;
         }
 
@@ -50,7 +50,7 @@ public class TpSafeCheckCommand implements TabExecutor {
         boolean destFlying = target.isFlying();
 
         if (!safe || destFlying) {
-            // Destination is unsafe — warn, offer options based on permissions
+            // Destination is unsafe - warn, offer options based on permissions
             player.sendMessage(CC.warning("⚠ <yellow>" + target.getName() + "</yellow>'s current location is unsafe!"));
             if (destFlying) {
                 player.sendMessage(CC.line("<gray>The player is currently flying."));
@@ -73,7 +73,7 @@ public class TpSafeCheckCommand implements TabExecutor {
             buttons = buttons.append(CC.translate("<click:run_command:'/tp " + target.getName() + "'><hover:show_text:'<gray>Click to teleport anyway'><red><bold>[TP Anyway]</bold></red></hover></click>"));
             player.sendMessage(buttons);
         } else {
-            // Safe — teleport directly
+            // Safe - teleport directly
             plugin.getTeleportManager().setBackLocation(player.getUniqueId(), player.getLocation());
             player.teleportAsync(destLoc);
             player.sendMessage(CC.success("Teleported to <yellow>" + target.getName() + "</yellow>."));

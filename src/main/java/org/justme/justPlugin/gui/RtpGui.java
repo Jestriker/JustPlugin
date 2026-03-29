@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Random Teleport GUI — 9×3 grid.
+ * Random Teleport GUI - 9×3 grid.
  * Row 0 (top):    black glass panes
  * Row 1:          Grass Block (slot 11), Netherrack (slot 13), End Stone (slot 15)
  * Row 2 (bottom): black glass panes
@@ -153,8 +153,8 @@ public class RtpGui implements Listener {
             return;
         }
 
-        // Delay check (time between uses) — OPs auto-skip
-        if (!player.isOp() && !player.hasPermission("justplugin.wild.delaybypass")
+        // Delay check (time between uses) - requires explicit delaybypass permission
+        if (!player.hasPermission("justplugin.wild.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "wild")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "wild");
             player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));

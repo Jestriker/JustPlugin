@@ -25,7 +25,7 @@ public class UnmuteCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /unmute <player>"));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("moderation.unmute.usage")));
             return true;
         }
 

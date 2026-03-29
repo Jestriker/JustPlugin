@@ -25,12 +25,12 @@ public class SudoCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(CC.error("Usage: /sudo <player> <command | message>"));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("moderation.sudo.usage")));
             return true;
         }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(CC.error("Player not found!"));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
             return true;
         }
         String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));

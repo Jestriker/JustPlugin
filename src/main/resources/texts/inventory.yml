@@ -1,0 +1,44 @@
+# ==========================================
+# Virtual Inventory Messages
+# ==========================================
+# Messages for /anvil, /craft, /grindstone, /enderchest,
+# /stonecutter, /loom, /smithingtable, /enchantingtable.
+#
+# These commands have minimal messages since they just open inventories.
+# The "opened" messages are optional - set to "" to disable.
+#
+# No special placeholders needed.
+# ==========================================
+
+# === Anvil ===
+anvil:
+  opened: ""
+
+# === Craft (Workbench) ===
+craft:
+  opened: ""
+
+# === Grindstone ===
+grindstone:
+  opened: ""
+
+# === Ender Chest ===
+enderchest:
+  opened: ""
+
+# === Stonecutter ===
+stonecutter:
+  opened: ""
+
+# === Loom ===
+loom:
+  opened: ""
+
+# === Smithing Table ===
+smithingtable:
+  opened: ""
+
+# === Enchanting Table ===
+enchantingtable:
+  opened: ""
+

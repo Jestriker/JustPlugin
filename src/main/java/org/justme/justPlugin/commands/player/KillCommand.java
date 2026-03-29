@@ -154,7 +154,7 @@ public class KillCommand implements TabExecutor {
             }
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                sender.sendMessage(CC.error("Player not found!"));
+                sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                 return true;
             }
             target.setHealth(0);

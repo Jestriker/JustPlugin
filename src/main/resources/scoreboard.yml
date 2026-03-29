@@ -90,6 +90,54 @@ playtime-format: "compact"
 # in any line to bypass this setting.
 default-playtime: "total"
 
+s# ==========================================
+# Text Animations
+# ==========================================
+# Define named animations usable in scoreboard lines and tab with {anim:name}.
+# Supported types:
+#   rainbow_gradient - Cycling rainbow colors across the text
+#   typing          - Text appears one character at a time
+#   sweep_right     - Highlight sweeps left to right across the text
+#   sweep_left      - Highlight sweeps right to left across the text
+#   wave            - Sine-wave color ripple between two colors
+#
+# Properties:
+#   type:   Animation type (see above)
+#   text:   The text to animate
+#   speed:  Ticks per frame (lower = faster, 1 = every tick, 2 = every 2 ticks)
+#   color1: Base/primary color (hex, for sweep and wave types)
+#   color2: Highlight/secondary color (hex, for sweep and wave types)
+#
+# Example usage in a line: "{anim:server_rainbow}"
+# ==========================================
+animations:
+  server_rainbow:
+    type: rainbow_gradient
+    text: "JustServer"
+    speed: 2
+  welcome_typing:
+    type: typing
+    text: "Welcome!"
+    speed: 4
+  glow_right:
+    type: sweep_right
+    text: "JustPlugin"
+    speed: 3
+    color1: "#555555"
+    color2: "#55ffff"
+  glow_left:
+    type: sweep_left
+    text: "JustPlugin"
+    speed: 3
+    color1: "#555555"
+    color2: "#ff55ff"
+  ocean_wave:
+    type: wave
+    text: "JustServer"
+    speed: 2
+    color1: "#00aaff"
+    color2: "#00ffaa"
+
 # ==========================================
 # Lines Configuration
 # ==========================================

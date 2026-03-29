@@ -1,15 +1,7 @@
-// ProGuard dependency for obfuscation
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.6.1'
-    }
-}
 
 plugins {
     id 'java'
+    id("com.gradleup.shadow") version "9.3.1"
     id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
@@ -26,12 +18,18 @@ repositories {
         name = "jitpack"
         url = "https://jitpack.io"
     }
+    maven {
+        name = "placeholderapi"
+        url = "https://repo.extendedclip.com/content/repositories/placeholderapi/"
+    }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("net.luckperms:api:5.4")
+    compileOnly("me.clip:placeholderapi:2.11.6")
+    implementation("org.bstats:bstats-bukkit:3.2.1")
 }
 
 tasks {
@@ -71,68 +69,26 @@ processResources {
 }
 
 // ==========================================
-// ProGuard Obfuscation Task
+// Shadow Jar – shade & relocate bStats
 // ==========================================
-// Run with:   ./gradlew obfuscate
-// Output:     build/libs/JustPlugin-1.0-SNAPSHOT-obfuscated.jar
-// This makes the decompiled code extremely hard to read/understand.
-// ==========================================
-tasks.register('obfuscate', proguard.gradle.ProGuardTask) {
-    dependsOn 'jar'
+tasks.shadowJar {
+    configurations = [project.configurations.runtimeClasspath]
 
-    // Input / Output
-    injars tasks.jar.archiveFile
-    outjars layout.buildDirectory.file("libs/${project.name}-${project.version}-obfuscated.jar")
+    dependencies {
+        // Only merge bStats into the final jar, no other dependencies
+        exclude { it.moduleGroup != "org.bstats" }
+    }
 
-    // Library jars (Paper API + JDK)
-    libraryjars configurations.compileClasspath
-    libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-    libraryjars "${System.getProperty('java.home')}/jmods/java.logging.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-    libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-    libraryjars "${System.getProperty('java.home')}/jmods/java.sql.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-    libraryjars "${System.getProperty('java.home')}/jmods/java.net.http.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-    libraryjars "${System.getProperty('java.home')}/jmods/jdk.httpserver.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-    libraryjars "${System.getProperty('java.home')}/jmods/java.management.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+    // Relocate bStats into the plugin's package to avoid conflicts with other
+    // plugins using bStats
+    relocate("org.bstats", "org.justme.justPlugin.bstats")
 
-    // Keep the main plugin class (referenced in plugin.yml)
-    keep 'public class org.justme.justPlugin.JustPlugin extends org.bukkit.plugin.java.JavaPlugin { *; }'
-
-    // Keep the entire public API package so external/add-on plugins can use it
-    keep 'public interface org.justme.justPlugin.api.** { *; }'
-    keep 'public class org.justme.justPlugin.api.JustPluginProvider { *; }'
-    keep 'public class org.justme.justPlugin.api.JustPluginAPIImpl { *; }'
-
-    // Keep all public/protected methods in classes extending Bukkit types
-    keep 'class * extends org.bukkit.event.Listener { @org.bukkit.event.EventHandler *; }'
-    keep 'class * implements org.bukkit.command.CommandExecutor { public boolean onCommand(...); }'
-    keep 'class * implements org.bukkit.command.TabCompleter { public java.util.List onTabComplete(...); }'
-    keep 'class * implements org.bukkit.command.TabExecutor { *; }'
-
-    // Keep annotations (important for @EventHandler etc.)
-    keepattributes '*Annotation*,Signature,InnerClasses,EnclosingMethod'
-
-    // Don't warn about Paper API references
-    dontwarn 'io.papermc.**'
-    dontwarn 'net.kyori.**'
-    dontwarn 'org.bukkit.**'
-    dontwarn 'com.destroystokyo.**'
-    dontwarn 'org.jetbrains.**'
-    dontwarn 'javax.**'
-    dontwarn 'com.google.**'
-    dontwarn 'net.minecraft.**'
-    dontwarn 'org.yaml.**'
-    dontwarn 'net.milkbowl.**'
-    dontwarn 'net.luckperms.**'
-
-    // Obfuscation settings
-    optimizationpasses 3
-    allowaccessmodification()
-    repackageclasses 'jp'              // Moves all obfuscated classes into a flat 'jp' package
-    // NOTE: overloadaggressively() removed — it causes Paper's AutoRenamingTool to crash
-    // with "Duplicate key" errors when two fields share the same obfuscated name but differ in type.
-
-    // Don't remove resources
-    keepdirectories()
-    adaptresourcefilecontents 'plugin.yml'
+    archiveClassifier.set('')   // produce JustPlugin-1.3.jar (no -all suffix)
 }
+
+// Make the standard 'build' lifecycle use shadowJar instead of plain jar
+tasks.named('build') {
+    dependsOn tasks.shadowJar
+}
+
 

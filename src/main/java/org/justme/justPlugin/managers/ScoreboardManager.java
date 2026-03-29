@@ -12,6 +12,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import io.papermc.paper.scoreboard.numbers.NumberFormat;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.util.AnimationEngine;
 import org.justme.justPlugin.util.CC;
 import org.justme.justPlugin.util.PlaceholderResolver;
 
@@ -57,10 +58,13 @@ public class ScoreboardManager {
     private BukkitTask pingTask;
     private final Map<UUID, Scoreboard> playerBoards = new HashMap<>();
     private final Map<UUID, Integer> lastPing = new HashMap<>();
+    // Animation engine
+    private AnimationEngine animationEngine;
 
     public ScoreboardManager(JustPlugin plugin) {
         this.plugin = plugin;
         this.scoreboardFile = new File(plugin.getDataFolder(), "scoreboard.yml");
+        this.animationEngine = new AnimationEngine(plugin);
         loadConfig();
     }
 
@@ -83,6 +87,11 @@ public class ScoreboardManager {
         // Ping refresh task - checks every 5 seconds (100 ticks) by default
         long pingInterval = Math.max(20, pingRefreshInterval);
         pingTask = Bukkit.getScheduler().runTaskTimer(plugin, this::refreshPingIfChanged, pingInterval, pingInterval);
+
+        // Start animation engine
+        if (animationEngine.hasAnimations()) {
+            animationEngine.start();
+        }
     }
 
     /**
@@ -100,6 +109,9 @@ public class ScoreboardManager {
         if (pingTask != null) {
             pingTask.cancel();
             pingTask = null;
+        }
+        if (animationEngine != null) {
+            animationEngine.stop();
         }
         // Reset all players to default scoreboard
         for (var entry : playerBoards.entrySet()) {
@@ -179,6 +191,9 @@ public class ScoreboardManager {
             String condition = condObj != null ? String.valueOf(condObj) : "";
             lines.add(new LineEntry(text, emoji, showEmoji, condition));
         }
+
+        // Load animations from config
+        animationEngine.loadAnimations(config.getConfigurationSection("animations"));
     }
 
     private void saveConfig() {
@@ -246,7 +261,7 @@ public class ScoreboardManager {
     }
 
     /**
-     * Returns "total" or "session" — controls what {playtime_display} resolves to.
+     * Returns "total" or "session" - controls what {playtime_display} resolves to.
      */
     public String getDefaultPlaytimeMode() {
         return defaultPlaytimeMode;
@@ -333,6 +348,7 @@ public class ScoreboardManager {
 
         // Create new objective
         String resolvedTitle = PlaceholderResolver.resolve(player, plugin, currentTitle);
+        resolvedTitle = org.justme.justPlugin.util.PAPIHook.setPlaceholders(player, resolvedTitle);
         Component titleComponent = CC.translate(resolvedTitle);
         Objective objective = board.registerNewObjective("jp_sidebar", Criteria.DUMMY, titleComponent);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
@@ -376,8 +392,12 @@ public class ScoreboardManager {
                 }
             }
 
+            // Resolve animations
+            lineText = resolveAnimations(lineText);
+
             // Resolve placeholders
             lineText = PlaceholderResolver.resolve(player, plugin, lineText);
+            lineText = org.justme.justPlugin.util.PAPIHook.setPlaceholders(player, lineText);
 
             // Convert to Component
             Component lineComponent = CC.translate(lineText);
@@ -426,6 +446,14 @@ public class ScoreboardManager {
         return colors[index / colors.length] + colors[index % colors.length] + "§r";
     }
 
+    /**
+     * Resolve {anim:xxx} placeholders in text. Exposed for TabCommand.
+     */
+    public String resolveAnimations(String text) {
+        if (animationEngine == null) return text;
+        return animationEngine.resolveAll(text);
+    }
+
     // =========== Data Classes ===========
 
     public static class LineEntry {
@@ -446,5 +474,4 @@ public class ScoreboardManager {
         }
     }
 }
-
 

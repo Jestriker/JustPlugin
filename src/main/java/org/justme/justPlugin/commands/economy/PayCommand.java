@@ -25,15 +25,15 @@ public class PayCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         if (args.length < 2) {
-            player.sendMessage(CC.error("Usage: /pay <player> <amount>"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("economy.pay.usage")));
             return true;
         }
 
-        // Resolve target — online or offline
+        // Resolve target - online or offline
         UUID targetUuid;
         String targetName;
         boolean targetOnline = false;
@@ -41,7 +41,7 @@ public class PayCommand implements TabExecutor {
         Player onlineTarget = Bukkit.getPlayer(args[0]);
         if (onlineTarget != null) {
             if (onlineTarget.equals(player)) {
-                player.sendMessage(CC.error("You can't pay yourself!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("economy.pay.cannot-self")));
                 return true;
             }
             targetUuid = onlineTarget.getUniqueId();
@@ -58,7 +58,7 @@ public class PayCommand implements TabExecutor {
             targetUuid = offP.getUniqueId();
             targetName = offP.getName() != null ? offP.getName() : args[0];
             if (targetUuid.equals(player.getUniqueId())) {
-                player.sendMessage(CC.error("You can't pay yourself!"));
+                player.sendMessage(CC.error(plugin.getMessageManager().raw("economy.pay.cannot-self")));
                 return true;
             }
         }
@@ -95,7 +95,7 @@ public class PayCommand implements TabExecutor {
                 player.sendMessage(CC.error("Payment failed!"));
             }
         } catch (NumberFormatException e) {
-            player.sendMessage(CC.error("Invalid amount!"));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-number")));
         }
         return true;
     }

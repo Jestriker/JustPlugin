@@ -24,24 +24,24 @@ public class TpaCancelCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
         TeleportManager tm = plugin.getTeleportManager();
         // Cancel pending teleport delay (after accept)
         if (tm.isWaitingToTeleport(player.getUniqueId())) {
             tm.cancelPendingTeleport(player.getUniqueId());
-            player.sendMessage(CC.success("Teleportation cancelled."));
+            player.sendMessage(CC.success(plugin.getMessageManager().raw("teleport.tpacancel.tp-cancelled")));
             return true;
         }
         // Cancel outgoing request
         TeleportManager.TpaRequest req = tm.getOutgoingRequest(player.getUniqueId());
         if (req == null) {
-            player.sendMessage(CC.error("You have no pending teleport requests."));
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tpaccept.no-pending")));
             return true;
         }
         tm.cancelOutgoingRequest(player.getUniqueId());
-        player.sendMessage(CC.success("Teleport request cancelled."));
+        player.sendMessage(CC.success(plugin.getMessageManager().raw("teleport.tpacancel.request-cancelled")));
         Player target = Bukkit.getPlayer(req.target);
         if (target != null) {
             target.sendMessage(CC.warning("<yellow>" + player.getName() + "</yellow> cancelled their teleport request."));

@@ -28,6 +28,10 @@ public final class PlaceholderResolver {
     private static double cachedTps = 20.0;
     private static long tpsCacheTime = 0;
 
+    // Cache online staff count (refreshed every 5 seconds)
+    private static int cachedStaffCount = 0;
+    private static long staffCacheTime = 0;
+
     // Cache expensive aggregate stats per player (refreshed every 10s)
     private static final Map<UUID, Map<String, Object>> statsCache = new HashMap<>();
     private static final Map<UUID, Long> statsCacheTime = new HashMap<>();
@@ -186,8 +190,11 @@ public final class PlaceholderResolver {
                 yield deaths > 0 ? String.format("%.2f", (double) kills / deaths) : String.valueOf(kills);
             }
             case "mobs_killed", "mobkills" -> String.valueOf(player.getStatistic(Statistic.MOB_KILLS));
+            case "mobs_killed_short", "mobkills_short" -> formatCompact(player.getStatistic(Statistic.MOB_KILLS));
             case "blocks_broken", "blocksbroken" -> String.valueOf(getCachedAggregateStat(player, "blocks_broken"));
+            case "blocks_broken_short", "blocksbroken_short" -> formatCompact(getCachedAggregateStat(player, "blocks_broken"));
             case "blocks_placed", "blocksplaced" -> String.valueOf(getCachedAggregateStat(player, "blocks_placed"));
+            case "blocks_placed_short", "blocksplaced_short" -> formatCompact(getCachedAggregateStat(player, "blocks_placed"));
             case "blocks_walked", "blockswalked", "distance" -> {
                 long cm = player.getStatistic(Statistic.WALK_ONE_CM)
                         + player.getStatistic(Statistic.SPRINT_ONE_CM);
@@ -287,7 +294,7 @@ public final class PlaceholderResolver {
             case "tps" -> String.format("%.1f", getTps());
             case "server_name", "servername" -> Bukkit.getServer().getName();
             case "free_memory", "freemem" -> (Runtime.getRuntime().freeMemory() / 1024 / 1024) + " MB";
-            case "used_memory", "usedmem" -> ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB";
+            case "used_memory", "usedmem", "used_ram" -> ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB";
             case "max_memory", "maxmem" -> (Runtime.getRuntime().maxMemory() / 1024 / 1024) + " MB";
             case "uptime", "server_uptime" -> formatDuration(ManagementFactory.getRuntimeMXBean().getUptime());
 
@@ -300,7 +307,7 @@ public final class PlaceholderResolver {
             }
 
             // ===== Time (Real World) =====
-            case "real_time", "irl_time", "clock" -> {
+            case "real_time", "irl_time", "clock", "time" -> {
                 String tz = plugin.getConfig().getString("timezone", "UTC");
                 yield LocalTime.now(ZoneId.of(tz)).format(DateTimeFormatter.ofPattern("HH:mm:ss"));
             }
@@ -331,6 +338,24 @@ public final class PlaceholderResolver {
             // ===== Misc =====
             case "empty", "blank" -> "";
             case "line" -> "━━━━━━━━━━━━━━━━━━━━";
+            case "welcome_name", "welcome" -> "Welcome " + player.getName();
+
+            // ===== Staff Count =====
+            case "online_staff", "staff_count", "staff_online" -> String.valueOf(getOnlineStaffCount(plugin));
+
+            // ===== LuckPerms Integration =====
+            case "prefix", "luckperms_prefix" -> {
+                if (!plugin.isLuckPermsAvailable()) yield "";
+                yield getLuckPermsMetaValue(player, "prefix");
+            }
+            case "suffix", "luckperms_suffix" -> {
+                if (!plugin.isLuckPermsAvailable()) yield "";
+                yield getLuckPermsMetaValue(player, "suffix");
+            }
+            case "group", "luckperms_group", "primary_group" -> {
+                if (!plugin.isLuckPermsAvailable()) yield "";
+                yield getLuckPermsMetaValue(player, "group");
+            }
 
             default -> null;
         };
@@ -381,6 +406,45 @@ public final class PlaceholderResolver {
             tpsCacheTime = now;
         }
         return cachedTps;
+    }
+
+    /**
+     * Count online staff members (OP or in configured LuckPerms staff groups).
+     * Cached for 5 seconds to avoid expensive LP API calls.
+     */
+    private static int getOnlineStaffCount(JustPlugin plugin) {
+        long now = System.currentTimeMillis();
+        if (now - staffCacheTime < 5000) return cachedStaffCount;
+
+        List<String> staffGroups = plugin.getConfig().getStringList("staff-groups");
+        Set<UUID> staffUuids = new HashSet<>();
+
+        for (org.bukkit.entity.Player p : Bukkit.getOnlinePlayers()) {
+            if (p.hasPermission("justplugin.staff")) {
+                staffUuids.add(p.getUniqueId());
+                continue;
+            }
+            if (plugin.isLuckPermsAvailable() && !staffGroups.isEmpty()) {
+                try {
+                    net.luckperms.api.LuckPerms lp = net.luckperms.api.LuckPermsProvider.get();
+                    net.luckperms.api.model.user.User user = lp.getUserManager().getUser(p.getUniqueId());
+                    if (user != null) {
+                        for (net.luckperms.api.node.Node node : user.getNodes()) {
+                            if (node instanceof net.luckperms.api.node.types.InheritanceNode inh) {
+                                if (staffGroups.contains(inh.getGroupName().toLowerCase())) {
+                                    staffUuids.add(p.getUniqueId());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } catch (Throwable ignored) {}
+            }
+        }
+
+        cachedStaffCount = staffUuids.size();
+        staffCacheTime = now;
+        return cachedStaffCount;
     }
 
     private static String formatDuration(long millis) {
@@ -492,6 +556,27 @@ public final class PlaceholderResolver {
         playerCache.put(statKey, value);
         statsCacheTime.put(uuid, now);
         return value;
+    }
+
+    /**
+     * Retrieve LuckPerms prefix, suffix, or primary group for a player.
+     * Uses cached metadata so it's cheap to call frequently.
+     */
+    private static String getLuckPermsMetaValue(Player player, String type) {
+        try {
+            net.luckperms.api.LuckPerms lp = net.luckperms.api.LuckPermsProvider.get();
+            net.luckperms.api.model.user.User user = lp.getUserManager().getUser(player.getUniqueId());
+            if (user == null) return "";
+            var meta = user.getCachedData().getMetaData();
+            return switch (type) {
+                case "prefix" -> meta.getPrefix() != null ? meta.getPrefix() : "";
+                case "suffix" -> meta.getSuffix() != null ? meta.getSuffix() : "";
+                case "group" -> meta.getPrimaryGroup() != null ? meta.getPrimaryGroup() : "";
+                default -> "";
+            };
+        } catch (Exception e) {
+            return "";
+        }
     }
 }
 

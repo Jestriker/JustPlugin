@@ -1,0 +1,91 @@
+# ==========================================
+# Maintenance Mode Configuration
+# ==========================================
+# This file controls all maintenance mode settings.
+# Place custom server icon images in this folder (maintenance/).
+#
+# The maintenance system has two independent settings:
+#   1. FEATURE ENABLED (config.yml: command-settings.maintenance.enabled)
+#      Controls whether the maintenance system exists at all.
+#   2. MODE ACTIVE (toggled via /maintenance mode on|off, stored in maintenance.yml)
+#      Controls whether the server is currently IN maintenance mode.
+# ==========================================
+
+# ==========================================
+# Kick Message
+# ==========================================
+# Message shown on the kick screen when a non-whitelisted player tries to join.
+# {cooldown_line} is replaced with "Back in ~Xh Ym." or "Please try again later."
+# Supports MiniMessage formatting.
+kick-message: "\n<red><bold>⚠ Server Maintenance ⚠</bold></red>\n\n<gray>The server is currently undergoing maintenance.\n<yellow>{cooldown_line}\n\n<gray>Only authorized staff can join at this time."
+
+# ==========================================
+# Maintenance MOTD
+# ==========================================
+# When maintenance mode is active, the server list MOTD is FULLY REPLACED with this.
+# Supports MiniMessage formatting.
+# Placeholders: {online}, {max}, {cooldown_text}
+#   {cooldown_text} - "back in: ~Xh Ym" or "try again later" if no cooldown is set.
+motd: "<red><bold>⚠ MAINTENANCE</bold></red>\n<gray>Server is currently under maintenance, <yellow>{cooldown_text}<gray>."
+
+# ==========================================
+# Join Warning
+# ==========================================
+# Message sent in chat to whitelisted players when they join during maintenance.
+# Supports MiniMessage formatting.
+join-warning: "<yellow><bold>⚠</bold></yellow> <gray>The server is currently running in <red>maintenance mode</red><gray>."
+
+# ==========================================
+# Custom Server Icon
+# ==========================================
+# When maintenance mode is active, the server list icon can be replaced
+# with a custom image. Place a 64x64 PNG image in the maintenance/ folder
+# and set the filename below.
+#
+# Set to "" (empty) to keep the normal server icon during maintenance.
+# The icon is loaded on server startup - a restart is required after
+# placing the image file for the first time.
+#
+# Example: icon: "maintenance-icon.png"
+icon: ""
+
+# ==========================================
+# Auto-Disable on Cooldown Expiry
+# ==========================================
+# Controls what happens when the maintenance cooldown timer runs out.
+#   false (default) - Maintenance stays active, only the cooldown is cleared.
+#                      An admin must manually run /maintenance mode off.
+#   true            - Maintenance is automatically turned off when the
+#                      cooldown expires, and the server reopens to everyone.
+auto-disable-on-expire: false
+
+# ==========================================
+# OP Bypass
+# ==========================================
+# When enabled, server operators (OPs) can always join during maintenance,
+# even if they are not on the allowed-users list or in an allowed group.
+# Disabled by default - all access is permission-based.
+ops-bypass: false
+
+# ==========================================
+# Allowed Groups (LuckPerms Integration)
+# ==========================================
+# Players who belong to any of these LuckPerms groups can bypass maintenance
+# and join the server even when maintenance mode is active.
+# Requires LuckPerms to be installed. Group names are case-insensitive.
+# Manage at runtime with: /maintenance allowed-groups <add|remove|list> [group]
+allowed-groups: []
+
+# ==========================================
+# Allowed Players
+# ==========================================
+# Players listed here (by username) can always join during maintenance.
+# Names are resolved to UUIDs on server startup. Case-insensitive.
+# You can also manage this list at runtime with: /maintenance allowed-users <add|remove|list> [player]
+# Or from the console with the same command.
+# Example:
+#   allowed-players:
+#     - "Notch"
+#     - "jeb_"
+allowed-players: []
+

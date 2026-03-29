@@ -75,7 +75,7 @@ public class CooldownManager {
     }
 
     // =====================
-    // COOLDOWN (pre-TP countdown) — read from config
+    // COOLDOWN (pre-TP countdown) - read from config
     // =====================
 
     /**

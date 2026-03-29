@@ -1,0 +1,42 @@
+# ==========================================
+# Warp Messages
+# ==========================================
+# Messages for /warp, /warps, /setwarp, /delwarp, /renamewarp.
+#
+# Placeholders:
+#   {warp}      - The warp name
+#   {new_name}  - New warp name (for rename)
+#   {count}     - Number of warps
+#   {list}      - Formatted warp list
+# ==========================================
+
+# === Warp ===
+warp:
+  teleporting: "Teleporting to warp <yellow>{warp}</yellow>."
+  not-found: "Warp <yellow>{warp}</yellow> not found!"
+  usage: "Usage: /warp <name>"
+
+# === Warp List ===
+warps:
+  header: "<gold><bold>Warps</bold></gold> <gray>({count}):"
+  none: "No warps have been set yet."
+
+# === Set Warp ===
+setwarp:
+  success: "Warp <yellow>{warp}</yellow> created!"
+  already-exists: "A warp named <yellow>{warp}</yellow> already exists!"
+  usage: "Usage: /setwarp <name>"
+
+# === Delete Warp ===
+delwarp:
+  success: "Warp <yellow>{warp}</yellow> deleted."
+  not-found: "Warp <yellow>{warp}</yellow> not found!"
+  usage: "Usage: /delwarp <name>"
+
+# === Rename Warp ===
+renamewarp:
+  success: "Warp <yellow>{warp}</yellow> renamed to <yellow>{new_name}</yellow>."
+  not-found: "Warp <yellow>{warp}</yellow> not found!"
+  already-exists: "A warp named <yellow>{new_name}</yellow> already exists!"
+  usage: "Usage: /renamewarp <old> <new>"
+

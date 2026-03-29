@@ -16,21 +16,54 @@ discord-link: "https://discord.gg/example"
 timezone: "UTC"
 
 # ==========================================
+# Staff Groups
+# ==========================================
+# LuckPerms groups that count as "staff" for the {online_staff} placeholder.
+# Players with justplugin.staff permission also count. Duplicates are not counted twice.
+staff-groups:
+  - admin
+  - mod
+  - staff
+
+# ==========================================
 # Chat Format Settings
 # ==========================================
 chat:
   # The separator between the player name and their message in global chat.
+  # Format: [prefix] [name] [suffix]<separator>[message]
   # Supports MiniMessage. Common options: "»", ":", ">", "-", ">>", "|"
   # Set to empty string "" for no separator.
-  separator: "<dark_gray> » <reset>"
+  separator: "<dark_gray> > <reset>"
+
+  # --- Hover Tooltip ---
+  # When hovering over a player's name/prefix/suffix in chat, a stats tooltip appears.
+  # Fully configurable with all {placeholder} variables (same as scoreboard).
+  # Also supports %PlaceholderAPI% tokens if PlaceholderAPI is installed.
+  hover:
+    # Enable or disable the hover tooltip on player names in chat.
+    enabled: true
+    # Lines shown in the tooltip. Supports MiniMessage + {placeholder} variables.
+    lines:
+      - "{prefix} {name} {suffix}"
+      - "<dark_gray>━━━━━━━━━━━━━━━━"
+      - "<green>$ <white>Money: <yellow>{balance_short}"
+      - "<red>🗡 <white>Kills: <red>{kills_short}"
+      - "<#ff8800>☠ <white>Deaths: <#ff8800>{deaths_short}"
+      - "<yellow>⏳ <white>Playtime: <yellow>{playtime_compact}"
+      - "<dark_gray>━━━━━━━━━━━━━━━━"
+    # Text shown at the bottom of the tooltip if the viewer has permission to click.
+    # Clicking opens /stats <player> for the hovered player.
+    click-to-view: "<gray>Click to view statistics"
+    # Permission required to see the "Click to view statistics" line and click it.
+    click-to-view-permission: "justplugin.stats.others"
 
 # ==========================================
 # Economy Settings
 # ==========================================
 economy:
   # Economy provider to use.
-  # "justplugin" — uses JustPlugin's built-in economy system (default).
-  # "vault" — uses Vault's economy API. Requires the Vault plugin and an economy
+  # "justplugin" - uses JustPlugin's built-in economy system (default).
+  # "vault" - uses Vault's economy API. Requires the Vault plugin and an economy
   #           provider (e.g. EssentialsX Economy, CMI, etc.) installed on the server.
   #           All JustPlugin economy commands (/balance, /pay, /baltop, /addcash,
   #           /paynote, /trade coins, etc.) will read/write through Vault instead.
@@ -39,7 +72,7 @@ economy:
   # Starting balance for new players (only used when provider is "justplugin").
   starting-balance: 100.0
   # Currency symbol displayed before amounts (e.g. "$100.00").
-  # When provider is "vault", this is ignored — Vault's economy plugin provides formatting.
+  # When provider is "vault", this is ignored - Vault's economy plugin provides formatting.
   currency-symbol: "$"
   # Whether to show the currency symbol in the scoreboard's {balance_short} placeholder.
   # When false, scoreboard shows "25.70K" instead of "$25.70K".
@@ -59,7 +92,7 @@ teleport:
   # --- Cooldowns (countdown before teleport executes) ---
   # After running a TP command, the player must wait this many seconds
   # before the teleportation actually happens. Moving or taking damage cancels it.
-  # OPs ALSO wait for cooldowns unless they have the explicit cooldownbypass permission.
+  # Players must have the explicit cooldownbypass permission to skip cooldowns.
   # Set to 0 for instant teleportation (no countdown).
   cooldown-tpa: 3
   cooldown-tpahere: 3
@@ -72,7 +105,7 @@ teleport:
 
   # --- Delays (minimum time between successive uses of the same command) ---
   # After using a TP command, the player must wait this long before they can use
-  # the same command again. OPs auto-skip delays.
+  # the same command again. Players need the delaybypass permission to skip delays.
   # Values in seconds. Set to 0 to disable the delay for that feature.
   delay-tpa: 180          # 3 minutes
   delay-tpahere: 180      # 3 minutes
@@ -254,6 +287,11 @@ tab:
   # Lower values keep TPS and Ping more up-to-date but use slightly more resources.
   # Default: 5 (every 5 seconds). Set to 0 to disable periodic updates (only on join).
   refresh-interval: 5
+  # --- Maintenance Footer Line ---
+  # When enabled AND maintenance mode is active, an extra line is appended to the tab footer.
+  # Automatically disappears when maintenance is turned off.
+  maintenance-footer-enabled: false
+  maintenance-footer-line: "\n<red><bold>⚠</bold> Server is in maintenance mode</red>"
 
 # ==========================================
 # Entity Clear System (ClearLag replacement)
@@ -283,7 +321,7 @@ entity-clear:
 
 # ==========================================
 # Spawn Settings
-# Set automatically by /setspawn — do not edit manually unless you know what you're doing.
+# Set automatically by /setspawn - do not edit manually unless you know what you're doing.
 # ==========================================
 # spawn:
 #   world: "world"
@@ -294,367 +332,297 @@ entity-clear:
 #   pitch: 0.0
 
 # ==========================================
-# Command-Specific Settings
-# Additional per-command configuration beyond enable/disable.
+# Command-Specific Behavior Settings
+# Additional per-command behavior configuration (not permissions).
+# Permissions are fixed in plugin.yml and cannot be changed here.
 # ==========================================
 commands:
   getdeathpos:
     # If true, players need justplugin.getdeathpos permission to view their OWN death location.
     # If false, any player can view their own death location without permission.
-    # Viewing OTHER players' death locations always requires justplugin.getdeathpos.others.
     require-permission-self: false
 
 # ==========================================
-# Command Settings
-# Enable/disable ANY command and optionally override its permission node.
-# Set "enabled: false" to completely disable a command regardless of permissions.
-# Set "permission: ''" (empty) to allow everyone to use the command.
+# Feature Toggles
+# Enable or disable any command/feature. Set to false to completely
+# disable a feature regardless of permissions.
+#
+# Permissions are FIXED and defined in plugin.yml. They cannot be
+# changed here. This ensures consistency with the permissions wiki.
+# See PERMISSIONS.md or the online docs for the full permissions list.
+#
+# OPs do NOT have any permissions by default - everything is
+# permission-based via a permissions plugin (e.g., LuckPerms).
 # ==========================================
 command-settings:
 
   # --- Teleportation ---
   tpa:
     enabled: true
-    permission: "justplugin.tpa"
   tpaccept:
     enabled: true
-    permission: ""
   tpacancel:
     enabled: true
-    permission: ""
   tpreject:
     enabled: true
-    permission: ""
   tppos:
     enabled: true
-    permission: "justplugin.tppos"
   tpr:
     enabled: true
-    permission: "justplugin.wild"
   tpahere:
     enabled: true
-    permission: "justplugin.tpahere"
   back:
     enabled: true
-    permission: "justplugin.back"
   spawn:
     enabled: true
-    permission: "justplugin.spawn"
   setspawn:
     enabled: true
-    permission: "justplugin.setspawn"
   tpsafecheck:
     enabled: true
-    permission: "justplugin.tppos"
   tpunsafeconfirm:
     enabled: true
-    permission: "justplugin.tppos"
 
   # --- Warps ---
   warp:
     enabled: true
-    permission: "justplugin.warp"
   warps:
     enabled: true
-    permission: "justplugin.warp"
   setwarp:
     enabled: true
-    permission: "justplugin.setwarp"
   delwarp:
     enabled: true
-    permission: "justplugin.delwarp"
   renamewarp:
     enabled: true
-    permission: "justplugin.renamewarp"
 
   # --- Homes ---
   home:
     enabled: true
-    permission: "justplugin.home"
   sethome:
     enabled: true
-    permission: "justplugin.sethome"
   delhome:
     enabled: true
-    permission: "justplugin.delhome"
 
   # --- Economy ---
   balance:
     enabled: true
-    permission: "justplugin.balance"
   pay:
     enabled: true
-    permission: "justplugin.pay"
   paytoggle:
     enabled: true
-    permission: "justplugin.paytoggle"
   paynote:
     enabled: true
-    permission: "justplugin.paynote"
   addcash:
     enabled: true
-    permission: "justplugin.addcash"
   baltop:
     enabled: true
-    permission: "justplugin.balance"
   baltophide:
     enabled: true
-    permission: "justplugin.baltophide"
 
   # --- Moderation ---
   ban:
     enabled: true
-    permission: "justplugin.ban"
   banip:
     enabled: true
-    permission: "justplugin.banip"
   tempban:
     enabled: true
-    permission: "justplugin.tempban"
   tempbanip:
     enabled: true
-    permission: "justplugin.tempbanip"
   unban:
     enabled: true
-    permission: "justplugin.unban"
   unbanip:
     enabled: true
-    permission: "justplugin.unbanip"
   vanish:
     enabled: true
-    permission: "justplugin.vanish"
   supervanish:
     enabled: true
-    permission: "justplugin.supervanish"
   sudo:
     enabled: true
-    permission: "justplugin.sudo"
   invsee:
     enabled: true
-    permission: "justplugin.invsee"
   echestsee:
     enabled: true
-    permission: "justplugin.echestsee"
   mute:
     enabled: true
-    permission: "justplugin.mute"
   tempmute:
     enabled: true
-    permission: "justplugin.tempmute"
   unmute:
     enabled: true
-    permission: "justplugin.unmute"
   warn:
     enabled: true
-    permission: "justplugin.warn"
   kick:
     enabled: true
-    permission: "justplugin.kick"
   setlogswebhook:
     enabled: true
-    permission: "justplugin.setlogswebhook"
   deathitems:
     enabled: true
-    permission: "justplugin.deathitems"
   oplist:
     enabled: true
-    permission: "justplugin.oplist"
   banlist:
     enabled: true
-    permission: "justplugin.banlist"
 
   # --- Player ---
   fly:
     enabled: true
-    permission: "justplugin.fly"
   gm:
     enabled: true
-    permission: "justplugin.gamemode"
   god:
     enabled: true
-    permission: "justplugin.god"
   speed:
     enabled: true
-    permission: "justplugin.speed"
   hat:
     enabled: true
-    permission: "justplugin.hat"
   exp:
     enabled: true
-    permission: "justplugin.exp"
   skull:
     enabled: true
-    permission: "justplugin.skull"
   suicide:
     enabled: true
-    permission: "justplugin.suicide"
   heal:
     enabled: true
-    permission: "justplugin.heal"
   feed:
     enabled: true
-    permission: "justplugin.feed"
   kill:
     enabled: true
-    permission: "justplugin.kill"
-  # /getpos — no base permission needed (public for self).
-  # Viewing other players' positions requires justplugin.getpos.others.
   getpos:
     enabled: true
-    permission: ""
-  # /getdeathpos — self permission is configurable above in "commands.getdeathpos".
-  # Viewing other players' death locations requires justplugin.getdeathpos.others.
   getdeathpos:
     enabled: true
-    permission: ""
 
   # --- Chat ---
   msg:
     enabled: true
-    permission: "justplugin.msg"
   r:
     enabled: true
-    permission: "justplugin.msg"
   ignore:
     enabled: true
-    permission: "justplugin.ignore"
   announce:
     enabled: true
-    permission: "justplugin.announce"
   sharecoords:
     enabled: true
-    permission: "justplugin.sharecoords"
   sharedeathcoords:
     enabled: true
-    permission: "justplugin.sharedeathcoords"
   chat:
     enabled: true
-    permission: "justplugin.chat"
   teammsg:
     enabled: true
-    permission: "justplugin.chat"
 
   # --- Virtual Inventories ---
   anvil:
     enabled: true
-    permission: "justplugin.anvil"
   grindstone:
     enabled: true
-    permission: "justplugin.grindstone"
   enderchest:
     enabled: true
-    permission: "justplugin.enderchest"
   craft:
     enabled: true
-    permission: "justplugin.craft"
   stonecutter:
     enabled: true
-    permission: "justplugin.stonecutter"
   loom:
     enabled: true
-    permission: "justplugin.loom"
   smithingtable:
     enabled: true
-    permission: "justplugin.smithingtable"
   enchantingtable:
     enabled: true
-    permission: "justplugin.enchantingtable"
 
   # --- Info ---
   jpinfo:
     enabled: true
-    permission: "justplugin.info"
   jphelp:
     enabled: true
-    permission: "justplugin.help"
   playerinfo:
     enabled: true
-    permission: "justplugin.playerinfo"
   plist:
     enabled: true
-    permission: "justplugin.list"
   playerlist:
     enabled: true
-    permission: "justplugin.playerlist"
   playerlisthide:
     enabled: true
-    permission: "justplugin.playerlist.hide"
   motd:
     enabled: true
-    permission: "justplugin.motd"
   resetmotd:
     enabled: true
-    permission: "justplugin.motd.set"
   clock:
     enabled: true
-    permission: "justplugin.clock"
   date:
     enabled: true
-    permission: "justplugin.date"
 
   # --- Items ---
   itemname:
     enabled: true
-    permission: "justplugin.itemname"
   shareitem:
     enabled: true
-    permission: "justplugin.shareitem"
   setspawner:
     enabled: true
-    permission: "justplugin.setspawner"
 
   # --- World ---
   weather:
     enabled: true
-    permission: "justplugin.weather"
   time:
     enabled: true
-    permission: "justplugin.time"
   freezegame:
     enabled: true
-    permission: "justplugin.freezegame"
   unfreezegame:
     enabled: true
-    permission: "justplugin.unfreezegame"
   clearentities:
     enabled: true
-    permission: "justplugin.clearentities"
   friendlyfire:
     enabled: true
-    permission: "justplugin.friendlyfire"
   clearchat:
     enabled: true
-    permission: "justplugin.clearchat"
 
   # --- Teams ---
   team:
     enabled: true
-    permission: "justplugin.team"
 
   # --- Misc ---
   trade:
     enabled: true
-    permission: "justplugin.trade"
   discord:
     enabled: true
-    permission: ""
   applyedits:
     enabled: true
-    permission: "justplugin.applyedits"
   tab:
     enabled: true
-    permission: "justplugin.tab"
   plugins:
     enabled: true
-    permission: "justplugin.plugins"
   scoreboard:
     enabled: true
-    reload-permission: "justplugin.scoreboard.reload"
 
   # --- Ranks (LuckPerms Integration) ---
   rank:
     enabled: false
-    permission: "justplugin.rank"
+
+  # --- Stats ---
+  stats:
+    enabled: true
+
+  # --- Maintenance ---
+  maintenance:
+    enabled: true
+
+# ==========================================
+# Maintenance System
+# ==========================================
+# The maintenance system has two independent settings:
+#
+# 1. FEATURE ENABLED (command-settings.maintenance.enabled above):
+#    Controls whether the maintenance system exists at all.
+#    If disabled, the /maintenance command is unavailable and maintenance
+#    mode can never be activated. For servers that don't want this feature.
+#
+# 2. MODE ACTIVE (toggled via /maintenance mode on|off, stored in maintenance.yml):
+#    Controls whether the server is currently IN maintenance mode.
+#    Only relevant when the feature is enabled.
+#
+# Summary:
+#   Feature DISABLED             -> system doesn't exist, everyone joins normally
+#   Feature ENABLED + Mode OFF   -> "Open mode" - everyone joins, staff can toggle maintenance
+#   Feature ENABLED + Mode ON    -> "Maintenance mode" - only whitelisted players can join
+#
+# Whitelisted players and cooldown state are stored in maintenance.yml (auto-generated).
+# Maintenance messages, MOTD, icon, group bypass, and OP bypass are configured in
+# the dedicated maintenance/config.yml file (auto-generated on first startup).
+# ==========================================
 
 # ==========================================
 # Ranks System (LuckPerms Integration)
@@ -670,7 +638,7 @@ command-settings:
 #              individual permission nodes.
 #
 # All data is read from and written to LuckPerms in real-time.
-# No additional configuration is needed here — groups and players are
+# No additional configuration is needed here - groups and players are
 # discovered dynamically from LuckPerms.
 #
 # Every action requires its own permission (justplugin.rank.groups.*,

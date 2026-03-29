@@ -11,7 +11,7 @@ import org.justme.justPlugin.util.CC;
 import java.util.List;
 
 /**
- * /rank — opens the Ranks management GUI.
+ * /rank - opens the Ranks management GUI.
  * Requires LuckPerms integration to be enabled in config.
  * If LuckPerms is not installed, players are notified.
  */
@@ -27,7 +27,7 @@ public class RankCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
 

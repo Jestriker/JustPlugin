@@ -1,0 +1,61 @@
+# ==========================================
+# Maintenance Messages
+# ==========================================
+# Messages for /maintenance command and maintenance mode system.
+# NOTE: Kick message, MOTD, and join warning are in maintenance/config.yml.
+# This file covers COMMAND responses only.
+#
+# Placeholders:
+#   {player}    - Player name (for allowed-users management)
+#   {group}     - LuckPerms group name
+#   {duration}  - Cooldown duration
+#   {cooldown}  - Formatted remaining cooldown
+#   {count}     - Number of items in a list
+# ==========================================
+
+# === Mode Toggle ===
+mode:
+  enabled: "Maintenance mode <red>enabled</red>. Non-whitelisted players have been kicked."
+  disabled: "Maintenance mode <green>disabled</green>. Server is now open!"
+  already-on: "Maintenance mode is already <red>active</red>!"
+  already-off: "Maintenance mode is already <green>inactive</green>!"
+  usage: "Usage: /maintenance mode <on|off>"
+
+# === Allowed Users ===
+allowed-users:
+  added: "<yellow>{player}</yellow> added to the maintenance whitelist."
+  removed: "<yellow>{player}</yellow> removed from the maintenance whitelist."
+  already-added: "<yellow>{player}</yellow> is already on the whitelist."
+  not-on-list: "<yellow>{player}</yellow> is not on the whitelist."
+  list-header: "<gold><bold>Maintenance Whitelist</bold></gold> <gray>({count}):"
+  list-entry: " <gray>- <yellow>{player}"
+  list-empty: "No players on the maintenance whitelist."
+  usage: "Usage: /maintenance allowed-users <add|remove|list> [player]"
+
+# === Allowed Groups ===
+allowed-groups:
+  added: "Group <yellow>{group}</yellow> added to maintenance bypass."
+  removed: "Group <yellow>{group}</yellow> removed from maintenance bypass."
+  already-added: "Group <yellow>{group}</yellow> is already on the bypass list."
+  not-on-list: "Group <yellow>{group}</yellow> is not on the bypass list."
+  list-header: "<gold><bold>Maintenance Bypass Groups</bold></gold> <gray>({count}):"
+  list-entry: " <gray>- <yellow>{group}"
+  list-empty: "No groups on the bypass list."
+  usage: "Usage: /maintenance allowed-groups <add|remove|list> [group]"
+
+# === Cooldown ===
+cooldown:
+  set: "Maintenance cooldown set to <yellow>{duration}</yellow>."
+  cleared: "Maintenance cooldown cleared."
+  current: "Maintenance cooldown remaining: <yellow>{cooldown}"
+  no-cooldown: "No maintenance cooldown is currently set."
+  invalid-duration: "Invalid duration! Examples: 1h, 2h30m, 1d, 30m"
+  usage: "Usage: /maintenance cooldown <duration|clear|info>"
+
+# === General ===
+general:
+  not-active: "Maintenance mode is not currently active."
+  usage: "Usage: /maintenance <mode|allowed-users|allowed-groups|cooldown> [args...]"
+  status-on: "Maintenance mode: <red>ACTIVE</red>"
+  status-off: "Maintenance mode: <green>INACTIVE</green>"
+

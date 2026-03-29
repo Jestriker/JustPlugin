@@ -28,6 +28,7 @@ import org.justme.justPlugin.gui.RtpGui;
 import org.justme.justPlugin.gui.rank.RankGuiManager;
 import org.justme.justPlugin.managers.*;
 import org.justme.justPlugin.util.CC;
+import org.bstats.bukkit.Metrics;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -63,7 +64,15 @@ public final class JustPlugin extends JavaPlugin {
     private BaltopGui baltopGui;
     private RtpGui rtpGui;
     private RankGuiManager rankGuiManager;
+    private org.justme.justPlugin.gui.StatsGui statsGui;
+    private MaintenanceManager maintenanceManager;
+    private IconManager iconManager;
+    private SkinManager skinManager;
+    private MessageManager messageManager;
     private boolean luckPermsAvailable = false;
+    /** Startup warnings that will be shown to staff on their first join after each restart */
+    private final java.util.List<String> startupWarnings = new java.util.ArrayList<>();
+    private final java.util.Set<java.util.UUID> warnedStaff = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
 
     @Override
     public void onEnable() {
@@ -72,8 +81,16 @@ public final class JustPlugin extends JavaPlugin {
         // Save default config
         saveDefaultConfig();
 
+        // Save default stats.yml if not present
+        if (!new java.io.File(getDataFolder(), "stats.yml").exists()) {
+            saveResource("stats.yml", false);
+        }
+
         // Migrate config - add any missing keys from the default config while preserving existing values
         migrateConfig();
+
+        // Initialize message manager (loads all configurable texts from texts/ folder)
+        messageManager = new MessageManager(this);
 
         // Initialize managers
         dataManager = new DataManager(this);
@@ -109,21 +126,45 @@ public final class JustPlugin extends JavaPlugin {
 
         // Register listeners
         playerListener = new PlayerListener(this);
-        Bukkit.getPluginManager().registerEvents(playerListener, this);
         Bukkit.getPluginManager().registerEvents(new VanillaCommandLogger(this), this);
+
+        // Register categorized sub-listeners
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.connection.ConnectionListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.chat.ChatListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.combat.CombatListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.player.PlayerEventListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.server.ServerListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.inventory.InventoryListener(this), this);
+
+        // Detect LuckPerms (must happen before RankGuiManager which depends on it)
+        luckPermsAvailable = Bukkit.getPluginManager().getPlugin("LuckPerms") != null;
+
+        // Initialize maintenance manager (after LuckPerms detection for group bypass support)
+        maintenanceManager = new MaintenanceManager(this);
+
+        // Initialize server icon manager (fetches from URL if configured)
+        iconManager = new IconManager(this);
+
+        // Initialize skin manager
+        skinManager = new SkinManager(this);
 
         // Initialize and register GUI listeners
         homeGui = new HomeGui(this);
         baltopGui = new BaltopGui(this);
         rtpGui = new RtpGui(this);
-        rankGuiManager = new RankGuiManager(this);
         Bukkit.getPluginManager().registerEvents(homeGui, this);
         Bukkit.getPluginManager().registerEvents(baltopGui, this);
         Bukkit.getPluginManager().registerEvents(rtpGui, this);
-        Bukkit.getPluginManager().registerEvents(rankGuiManager, this);
 
-        // Detect LuckPerms
-        luckPermsAvailable = Bukkit.getPluginManager().getPlugin("LuckPerms") != null;
+        // Initialize stats GUI
+        statsGui = new org.justme.justPlugin.gui.StatsGui(this);
+        Bukkit.getPluginManager().registerEvents(statsGui, this);
+
+        // Only load RankGuiManager if LuckPerms is present (it references LP classes directly)
+        if (luckPermsAvailable) {
+            rankGuiManager = new RankGuiManager(this);
+            Bukkit.getPluginManager().registerEvents(rankGuiManager, this);
+        }
 
         // Register commands
         registerCommands();
@@ -142,8 +183,12 @@ public final class JustPlugin extends JavaPlugin {
         // Initialize API for external plugins
         JustPluginProvider.set(new JustPluginAPIImpl(this));
 
-        // Check dependency warnings
-        checkDependencies();
+        // Enforce dependency checks - auto-disable features with missing dependencies
+        enforceDependencies();
+
+        // Initialize bStats metrics (https://bstats.org)
+        int pluginId = 30446;
+        Metrics metrics = new Metrics(this, pluginId);
 
         long elapsed = System.currentTimeMillis() - startTime;
         printBanner(elapsed);
@@ -162,6 +207,11 @@ public final class JustPlugin extends JavaPlugin {
         // Stop scoreboard
         if (scoreboardManager != null) {
             scoreboardManager.stop();
+        }
+
+        // Stop MOTD cycle task
+        if (motdManager != null) {
+            motdManager.shutdown();
         }
 
         // Save all player states before shutdown
@@ -202,6 +252,13 @@ public final class JustPlugin extends JavaPlugin {
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Team system loaded"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Warp system loaded <dark_gray>(" + warpManager.getWarpNames().size() + " warps)"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Punishment system loaded <dark_gray>(bans, mutes, warns)"));
+        if (commandSettings.isEnabled("maintenance")) {
+            if (maintenanceManager.isActive()) {
+                console.sendMessage(CC.translate("                        <red>✘</red> <gray> Maintenance mode <red>ACTIVE</red> <dark_gray>(" + maintenanceManager.getAllowedUsers().size() + " whitelisted)"));
+            } else {
+                console.sendMessage(CC.translate("                        <green>✔</green> <gray> Maintenance system <green>ready</green> <dark_gray>(mode: open)"));
+            }
+        }
         if (webhookManager.isEnabled()) {
             String url = webhookManager.getWebhookUrl();
             if (url != null && !url.isEmpty()) {
@@ -214,6 +271,9 @@ public final class JustPlugin extends JavaPlugin {
             console.sendMessage(CC.translate("                        <red>✘</red> <dark_gray> Discord webhook logging <red>disabled</red> <dark_gray>(enable in config)"));
         }
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> API ecosystem loaded"));
+        if (org.justme.justPlugin.util.PAPIHook.isAvailable()) {
+            console.sendMessage(CC.translate("                        <green>✔</green> <gray> PlaceholderAPI <green>hooked</green>"));
+        }
         if (scoreboardManager != null && scoreboardManager.isEnabled()) {
             console.sendMessage(CC.translate("                        <green>✔</green> <gray> Scoreboard system <green>active</green>"));
         } else {
@@ -369,6 +429,13 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("applyedits", new ApplyEditsCommand(this));
         registerCmd("reloadscoreboard", new ReloadScoreboardCommand(this));
         registerCmd("rank", new RankCommand(this));
+        registerCmd("stats", new org.justme.justPlugin.commands.info.StatsCommand(this));
+        registerCmd("maintenance", new org.justme.justPlugin.commands.moderation.MaintenanceCommand(this));
+
+        // Skins
+        registerCmd("skin", new org.justme.justPlugin.commands.player.SkinCommand(this));
+        registerCmd("skinban", new org.justme.justPlugin.commands.moderation.SkinBanCommand(this));
+        registerCmd("skinunban", new org.justme.justPlugin.commands.moderation.SkinUnbanCommand(this));
 
         // Overrides (replace vanilla commands)
         registerCmd("help", new HelpCommand(this));
@@ -393,13 +460,13 @@ public final class JustPlugin extends JavaPlugin {
         CommandExecutor wrapped = (sender, command, label, args) -> {
             // 1. Check if command is enabled in config
             if (!commandSettings.isEnabled(name)) {
-                sender.sendMessage(CC.error("This command is currently disabled."));
+                sender.sendMessage(messageManager.error("general.command-disabled"));
                 return true;
             }
             // 2. Check permission from config
             String perm = commandSettings.getPermission(name);
             if (perm != null && !perm.isEmpty() && !sender.hasPermission(perm)) {
-                sender.sendMessage(CC.error("You don't have permission to use this command."));
+                sender.sendMessage(messageManager.error("general.no-permission"));
                 return true;
             }
             // 3. Delegate to actual command handler
@@ -445,48 +512,81 @@ public final class JustPlugin extends JavaPlugin {
         }
     }
 
-    // === Dependency Warnings ===
-    private void checkDependencies() {
+    // === Dependency Enforcement ===
+    /**
+     * Checks all optional dependencies at startup and automatically disables
+     * features whose requirements are not met.  Changes are persisted to config.yml
+     * and recorded in {@link #startupWarnings} so staff are alerted on join.
+     */
+    private void enforceDependencies() {
         var console = Bukkit.getConsoleSender();
-        boolean anyWarning = false;
+        startupWarnings.clear();
+        warnedStaff.clear();
 
-        // Vault configured but not hooked
+        // ── LuckPerms-dependent features ─────────────────────────────
+        if (!luckPermsAvailable) {
+            // /rank command
+            if (commandSettings.isEnabled("rank")) {
+                commandSettings.disableCommand("rank");
+                String msg = "/rank was <red>auto-disabled</red> <gray>- LuckPerms is not installed.";
+                console.sendMessage(CC.translate("  <red><bold>⚠</bold></red> <gray>" + msg));
+                startupWarnings.add(msg);
+            }
+        }
+
+        // ── Vault-dependent features ─────────────────────────────────
         String ecoProvider = getConfig().getString("economy.provider", "justplugin").toLowerCase();
-        if ("vault".equals(ecoProvider) && !economyManager.isUsingVault()) {
-            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>economy.provider</yellow> <gray>is set to <yellow>vault</yellow> but Vault or an economy plugin was not found!"));
-            console.sendMessage(CC.translate("    <gray>Falling back to JustPlugin's built-in economy system."));
-            anyWarning = true;
+        boolean vaultInstalled = Bukkit.getPluginManager().getPlugin("Vault") != null;
+        if ("vault".equals(ecoProvider) && (!vaultInstalled || !economyManager.isUsingVault())) {
+            // Vault was configured but is missing or has no economy provider - revert to JustPlugin economy
+            getConfig().set("economy.provider", "justplugin");
+            saveConfig();
+            String msg = "economy.provider was set to <yellow>vault</yellow> <gray>but Vault " +
+                    (vaultInstalled ? "has no economy provider" : "is not installed") +
+                    ". <red>Auto-switched</red> <gray>to <green>justplugin</green> <gray>built-in economy.";
+            console.sendMessage(CC.translate("  <red><bold>⚠</bold></red> <gray>" + msg));
+            startupWarnings.add(msg);
         }
 
-        // Pay requires balance
+        // ── Soft dependency warnings (not auto-disabled, just recommendations) ──
         if (commandSettings.isEnabled("pay") && !commandSettings.isEnabled("balance")) {
-            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/pay</yellow> <gray>is enabled but <yellow>/balance</yellow> is disabled! Economy features may not work properly."));
-            anyWarning = true;
+            String msg = "/pay is enabled but /balance is disabled - economy features may not work properly.";
+            console.sendMessage(CC.translate("  <yellow><bold>⚠</bold></yellow> <gray>" + msg));
+            startupWarnings.add(msg);
         }
-        // Trade requires economy
         if (commandSettings.isEnabled("trade") && !commandSettings.isEnabled("balance")) {
-            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/trade</yellow> <gray>is enabled but <yellow>/balance</yellow> is disabled! Trade currency features won't work."));
-            anyWarning = true;
+            String msg = "/trade is enabled but /balance is disabled - trade currency features won't work.";
+            console.sendMessage(CC.translate("  <yellow><bold>⚠</bold></yellow> <gray>" + msg));
+            startupWarnings.add(msg);
         }
-        // TeamMsg requires team
         if (commandSettings.isEnabled("teammsg") && !commandSettings.isEnabled("team")) {
-            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/teammsg</yellow> <gray>is enabled but <yellow>/team</yellow> is disabled!"));
-            anyWarning = true;
+            String msg = "/teammsg is enabled but /team is disabled.";
+            console.sendMessage(CC.translate("  <yellow><bold>⚠</bold></yellow> <gray>" + msg));
+            startupWarnings.add(msg);
         }
-        // Mute blocking /msg requires msg to be enabled
         if (commandSettings.isEnabled("mute") && !commandSettings.isEnabled("msg")) {
-            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/mute</yellow> <gray>is enabled but <yellow>/msg</yellow> is disabled. Muted players won't be blocked from DMs."));
-            anyWarning = true;
+            String msg = "/mute is enabled but /msg is disabled - muted players won't be blocked from DMs.";
+            console.sendMessage(CC.translate("  <yellow><bold>⚠</bold></yellow> <gray>" + msg));
+            startupWarnings.add(msg);
         }
-        // Ranks requires LuckPerms
-        if (commandSettings.isEnabled("rank") && !luckPermsAvailable) {
-            console.sendMessage(CC.translate("  <red><bold>⚠ WARNING:</bold></red> <yellow>/rank</yellow> <gray>is enabled but <yellow>LuckPerms</yellow> is not installed!"));
-            console.sendMessage(CC.translate("    <gray>Players using /rank will be told that LuckPerms is missing."));
-            anyWarning = true;
+
+        if (!startupWarnings.isEmpty()) {
+            console.sendMessage(CC.translate("  <gray>Features with missing dependencies were auto-disabled. Check config.yml for details."));
         }
-        if (anyWarning) {
-            console.sendMessage(CC.translate("  <gray>These are recommendations only — the plugin will still work."));
-        }
+    }
+
+    /**
+     * Returns the list of startup warnings to display to staff on their first join.
+     */
+    public java.util.List<String> getStartupWarnings() {
+        return startupWarnings;
+    }
+
+    /**
+     * Returns the set of staff UUIDs that have already been warned this session.
+     */
+    public java.util.Set<java.util.UUID> getWarnedStaff() {
+        return warnedStaff;
     }
 
     // === Getters ===
@@ -515,9 +615,15 @@ public final class JustPlugin extends JavaPlugin {
     public MotdManager getMotdManager() { return motdManager; }
     public ScoreboardManager getScoreboardManager() { return scoreboardManager; }
     public PlayerListener getPlayerListener() { return playerListener; }
+    public TabCommand getTabCommand() { return tabCommand; }
     public HomeGui getHomeGui() { return homeGui; }
     public BaltopGui getBaltopGui() { return baltopGui; }
     public RtpGui getRtpGui() { return rtpGui; }
     public RankGuiManager getRankGuiManager() { return rankGuiManager; }
+    public org.justme.justPlugin.gui.StatsGui getStatsGui() { return statsGui; }
+    public MaintenanceManager getMaintenanceManager() { return maintenanceManager; }
+    public IconManager getIconManager() { return iconManager; }
+    public SkinManager getSkinManager() { return skinManager; }
+    public MessageManager getMessageManager() { return messageManager; }
     public boolean isLuckPermsAvailable() { return luckPermsAvailable; }
 }

@@ -5,19 +5,16 @@
 # Two separate MOTDs:
 #
 #   server-motd  - The text shown in the Minecraft server list (multiplayer screen).
+#                  Supports multiple profiles with cycling or random selection.
 #                  Supports MiniMessage formatting. Placeholders: {online}, {max}
-#                  Set to "" (empty) to use the vanilla server.properties motd.
 #
 #   join-motd    - The message shown to each player when they join the server.
 #                  Supports MiniMessage formatting. Placeholders: {player}, {online}, {max}
 #                  Set to "" (empty) to disable the join message.
 #
-# Both support MiniMessage tags: <bold>, <italic>, <gradient:#hex:#hex>, <color>, etc.
-# Multi-line: use \n for line breaks.
-#
 # Commands:
 #   /motd                     - View both MOTDs
-#   /motd server <text>       - Set the server list MOTD
+#   /motd server <text>       - Set the server list MOTD (replaces all profiles with one)
 #   /motd join <text>         - Set the join MOTD
 #   /resetmotd                - Reset both to defaults
 #   /resetmotd server         - Reset only the server list MOTD
@@ -25,9 +22,31 @@
 #
 # ==========================================
 
-# Server list MOTD - shown when players see your server in the multiplayer list.
-server-motd: "<gradient:#00aaff:#00ffaa><bold>JustPlugin Server</bold></gradient>\n<gray>Powered by JustPlugin"
+# ==========================================
+# Server List MOTD (Profiles)
+# ==========================================
+# Multiple MOTD profiles can be defined. The server will display them
+# based on the selected mode.
+#
+# Modes:
+#   static  - Always shows the first profile (default).
+#   cycle   - Cycles through profiles on a timer (see "delay").
+#   random  - Shows a random profile every time a player refreshes the server list.
+#
+# Delay: Time between profile changes in cycle mode.
+#   Supports: 1s, 30s, 1m, 5m, 1h, 1d, 500ms
+#
+server-motd:
+  mode: "static"
+  delay: "30s"
+  profiles:
+    - "<gradient:#00aaff:#00ffaa><bold>JustPlugin Server</bold></gradient>\n<gray>Powered by JustPlugin"
+    - "<gradient:#ff6b6b:#ee5a24><bold>JustPlugin Server</bold></gradient>\n<yellow>Welcome to the server!"
+    - "<gradient:#a855f7:#ec4899><bold>JustPlugin Server</bold></gradient>\n<gray>Join the adventure!"
 
-# Join MOTD - shown to players in chat when they join.
+# ==========================================
+# Join MOTD
+# ==========================================
+# Shown to players in chat when they join. Set to "" to disable.
 join-motd: "<gradient:#00aaff:#00ffaa><bold>Welcome to the server, {player}!</bold></gradient>\n<gray>Type <yellow>/help</yellow> for commands."
 

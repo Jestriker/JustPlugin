@@ -64,7 +64,7 @@ public class GameModeCommand implements TabExecutor {
             }
             target = Bukkit.getPlayer(args[targetArgIndex]);
             if (target == null) {
-                sender.sendMessage(CC.error("Player not found!"));
+                sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
                 return true;
             }
         }
@@ -102,7 +102,7 @@ public class GameModeCommand implements TabExecutor {
         boolean isShortcut = List.of("gmc", "gms", "gma", "gmsp").contains(label.toLowerCase());
 
         if (isShortcut) {
-            // Shortcut: /gmc [player] — arg 1 is the target
+            // Shortcut: /gmc [player] - arg 1 is the target
             if (args.length == 1 && sender.hasPermission("justplugin.gamemode.others")) {
                 return Bukkit.getOnlinePlayers().stream().map(Player::getName)
                         .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
