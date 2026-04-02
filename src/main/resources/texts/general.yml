@@ -38,6 +38,10 @@ invalid-number: "Invalid number!"
 # Shown when trying to target yourself when not allowed.
 cannot-target-self: "You can't target yourself!"
 
+# Shown when a player provides an invalid name (warp, home, team, etc.).
+# Names must be 1-32 characters using only letters, numbers, underscores, and hyphens.
+invalid-name: "Invalid name! Use only letters, numbers, underscores, and hyphens (max 32 chars)."
+
 # Generic error for unexpected failures.
 generic-error: "An error occurred. Please try again."
 

@@ -122,3 +122,11 @@ skin:
   banned: "The skin <yellow>{skin}</yellow> is banned and cannot be used."
   usage: "Usage: /skin <set|clear> [name] [player]"
 
+# === AFK ===
+afk:
+  now-afk: "You are now AFK."
+  no-longer-afk: "You are no longer AFK."
+  broadcast-afk: "<yellow>{player}</yellow> is now AFK."
+  broadcast-return: "<yellow>{player}</yellow> is no longer AFK."
+  kicked: "You were kicked for being AFK too long."
+

@@ -35,6 +35,7 @@ import java.io.InputStreamReader;
 
 public final class JustPlugin extends JavaPlugin {
 
+    private DatabaseManager databaseManager;
     private DataManager dataManager;
     private CommandSettings commandSettings;
     private EconomyManager economyManager;
@@ -54,6 +55,7 @@ public final class JustPlugin extends JavaPlugin {
     private WarnManager warnManager;
     private WebhookManager webhookManager;
     private DeathInventoryManager deathInventoryManager;
+    private AfkManager afkManager;
     private EntityClearManager entityClearManager;
     private PlayerListener playerListener;
     private TabCommand tabCommand;
@@ -68,7 +70,19 @@ public final class JustPlugin extends JavaPlugin {
     private MaintenanceManager maintenanceManager;
     private IconManager iconManager;
     private SkinManager skinManager;
+    private MailManager mailManager;
+    private JailManager jailManager;
+    private NickManager nickManager;
+    private TagManager tagManager;
+    private org.justme.justPlugin.gui.TagGui tagGui;
     private MessageManager messageManager;
+    private JoinLeaveManager joinLeaveManager;
+    private BackupManager backupManager;
+    private SpawnProtectionManager spawnProtectionManager;
+    private KitManager kitManager;
+    private org.justme.justPlugin.gui.kits.KitSelectionGui kitSelectionGui;
+    private org.justme.justPlugin.gui.kits.KitPreviewGui kitPreviewGui;
+    private org.justme.justPlugin.gui.kits.KitEditGui kitEditGui;
     private boolean luckPermsAvailable = false;
     /** Startup warnings that will be shown to staff on their first join after each restart */
     private final java.util.List<String> startupWarnings = new java.util.ArrayList<>();
@@ -92,6 +106,9 @@ public final class JustPlugin extends JavaPlugin {
         // Initialize message manager (loads all configurable texts from texts/ folder)
         messageManager = new MessageManager(this);
 
+        // Initialize database manager (loads database.yml, sets up storage provider)
+        databaseManager = new DatabaseManager(this);
+
         // Initialize managers
         dataManager = new DataManager(this);
         commandSettings = new CommandSettings(this);
@@ -114,9 +131,16 @@ public final class JustPlugin extends JavaPlugin {
         deathInventoryManager = new DeathInventoryManager(this);
         entityClearManager = new EntityClearManager(this);
         entityClearManager.start();
+        afkManager = new AfkManager(this);
+        afkManager.start();
+        mailManager = new MailManager(this);
         motdManager = new MotdManager(this);
         webEditorManager = new WebEditorManager(this);
         webEditorManager.start();
+        joinLeaveManager = new JoinLeaveManager(this);
+        backupManager = new BackupManager(this);
+        spawnProtectionManager = new SpawnProtectionManager(this);
+        kitManager = new KitManager(this);
 
         // Try to hook into Vault if configured
         economyManager.setupVault();
@@ -135,6 +159,9 @@ public final class JustPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.player.PlayerEventListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.server.ServerListener(this), this);
         Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.inventory.InventoryListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.player.AfkListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.SpawnProtectionListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.SeedProtectionListener(this), this);
 
         // Detect LuckPerms (must happen before RankGuiManager which depends on it)
         luckPermsAvailable = Bukkit.getPluginManager().getPlugin("LuckPerms") != null;
@@ -148,6 +175,14 @@ public final class JustPlugin extends JavaPlugin {
         // Initialize skin manager
         skinManager = new SkinManager(this);
 
+        // Initialize nickname and tag managers
+        nickManager = new NickManager(this);
+        tagManager = new TagManager(this);
+
+        // Initialize jail manager
+        jailManager = new JailManager(this);
+        Bukkit.getPluginManager().registerEvents(new org.justme.justPlugin.listeners.jail.JailListener(this), this);
+
         // Initialize and register GUI listeners
         homeGui = new HomeGui(this);
         baltopGui = new BaltopGui(this);
@@ -159,6 +194,18 @@ public final class JustPlugin extends JavaPlugin {
         // Initialize stats GUI
         statsGui = new org.justme.justPlugin.gui.StatsGui(this);
         Bukkit.getPluginManager().registerEvents(statsGui, this);
+
+        // Initialize tag GUI
+        tagGui = new org.justme.justPlugin.gui.TagGui(this);
+        Bukkit.getPluginManager().registerEvents(tagGui, this);
+
+        // Initialize kit GUIs
+        kitSelectionGui = new org.justme.justPlugin.gui.kits.KitSelectionGui(this);
+        kitPreviewGui = new org.justme.justPlugin.gui.kits.KitPreviewGui(this);
+        kitEditGui = new org.justme.justPlugin.gui.kits.KitEditGui(this);
+        Bukkit.getPluginManager().registerEvents(kitSelectionGui, this);
+        Bukkit.getPluginManager().registerEvents(kitPreviewGui, this);
+        Bukkit.getPluginManager().registerEvents(kitEditGui, this);
 
         // Only load RankGuiManager if LuckPerms is present (it references LP classes directly)
         if (luckPermsAvailable) {
@@ -180,6 +227,9 @@ public final class JustPlugin extends JavaPlugin {
         // Start scoreboard update task
         scoreboardManager.start();
 
+        // Start auto-save task for cached player data
+        dataManager.startAutoSave();
+
         // Initialize API for external plugins
         JustPluginProvider.set(new JustPluginAPIImpl(this));
 
@@ -196,6 +246,17 @@ public final class JustPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Stop auto-save and flush all cached data synchronously
+        if (dataManager != null) {
+            dataManager.stopAutoSave();
+            dataManager.saveAllCached();
+        }
+
+        // Shutdown database
+        if (databaseManager != null) {
+            databaseManager.shutdown();
+        }
+
         // Clear API
         JustPluginProvider.clear();
 
@@ -209,14 +270,34 @@ public final class JustPlugin extends JavaPlugin {
             scoreboardManager.stop();
         }
 
+        // Stop AFK manager
+        if (afkManager != null) {
+            afkManager.stop();
+        }
+
         // Stop MOTD cycle task
         if (motdManager != null) {
             motdManager.shutdown();
         }
 
+        // Stop backup auto-task
+        if (backupManager != null) {
+            backupManager.shutdown();
+        }
+
+        // Shutdown jail manager
+        if (jailManager != null) {
+            jailManager.shutdown();
+        }
+
         // Save all player states before shutdown
         if (playerStateManager != null) {
             playerStateManager.saveAll();
+        }
+
+        // Shutdown kit manager (saves kits and cooldowns)
+        if (kitManager != null) {
+            kitManager.shutdown();
         }
 
         var console = Bukkit.getConsoleSender();
@@ -248,10 +329,14 @@ public final class JustPlugin extends JavaPlugin {
         if (disabledCmds > 0) {
             console.sendMessage(CC.translate("                        <red>✘</red> <gray>" + " " + disabledCmds + " commands disabled"));
         }
+        console.sendMessage(CC.translate("                        <green>✔</green> <gray> Storage engine loaded <dark_gray>(" + databaseManager.getStorageType() + ")"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Economy system loaded <dark_gray>(" + economyManager.getProviderName() + ")"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Team system loaded"));
         console.sendMessage(CC.translate("                        <green>✔</green> <gray> Warp system loaded <dark_gray>(" + warpManager.getWarpNames().size() + " warps)"));
-        console.sendMessage(CC.translate("                        <green>✔</green> <gray> Punishment system loaded <dark_gray>(bans, mutes, warns)"));
+        console.sendMessage(CC.translate("                        <green>✔</green> <gray> Punishment system loaded <dark_gray>(bans, mutes, warns, jails)"));
+        if (commandSettings.isEnabled("afk")) {
+            console.sendMessage(CC.translate("                        <green>✔</green> <gray> AFK system <green>active</green> <dark_gray>(auto: " + getConfig().getInt("afk.auto-afk-seconds", 300) + "s)"));
+        }
         if (commandSettings.isEnabled("maintenance")) {
             if (maintenanceManager.isActive()) {
                 console.sendMessage(CC.translate("                        <red>✘</red> <gray> Maintenance mode <red>ACTIVE</red> <dark_gray>(" + maintenanceManager.getAllowedUsers().size() + " whitelisted)"));
@@ -306,6 +391,9 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("setspawn", new SetSpawnCommand(this));
         registerCmd("tpsafecheck", new TpSafeCheckCommand(this));
         registerCmd("tpunsafeconfirm", new TpUnsafeConfirmCommand(this));
+        registerCmd("tpoff", new TpOffCommand(this));
+        registerCmd("getposoff", new GetPosOffCommand(this));
+        registerCmd("getdeathposoff", new GetDeathPosOffCommand(this));
 
         // Warps
         registerCmd("warp", new WarpCommand(this));
@@ -340,6 +428,8 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("sudo", new SudoCommand(this));
         registerCmd("invsee", new InvseeCommand(this));
         registerCmd("echestsee", new EchestSeeCommand(this));
+        registerCmd("invseeoff", new InvseeOffCommand(this));
+        registerCmd("echestseeoff", new EchestSeeOffCommand(this));
         registerCmd("mute", new MuteCommand(this));
         registerCmd("tempmute", new TempMuteCommand(this));
         registerCmd("unmute", new UnmuteCommand(this));
@@ -349,6 +439,12 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("deathitems", new DeathItemsCommand(this));
         registerCmd("oplist", new OpListCommand(this));
         registerCmd("banlist", new BanListCommand(this));
+        registerCmd("jail", new JailCommand(this));
+        registerCmd("unjail", new UnjailCommand(this));
+        registerCmd("setjail", new SetJailCommand(this));
+        registerCmd("deljail", new DelJailCommand(this));
+        registerCmd("jails", new JailListCommand(this));
+        registerCmd("jailinfo", new JailInfoCommand(this));
 
         // Player
         registerCmd("fly", new FlyCommand(this));
@@ -373,6 +469,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("kill", new KillCommand(this));
         registerCmd("getpos", new GetPosCommand(this));
         registerCmd("getdeathpos", new GetDeathPosCommand(this));
+        registerCmd("afk", new AfkCommand(this));
 
         // Chat
         registerCmd("msg", new MsgCommand(this));
@@ -383,6 +480,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("sharedeathcoords", new ShareDeathCoordsCommand(this));
         registerCmd("chat", new ChatCommand(this));
         registerCmd("teammsg", new TeamMsgCommand(this));
+        registerCmd("mail", new MailCommand(this));
 
         // Virtual Inventories
         registerCmd("anvil", new AnvilCommand());
@@ -436,6 +534,30 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("skin", new org.justme.justPlugin.commands.player.SkinCommand(this));
         registerCmd("skinban", new org.justme.justPlugin.commands.moderation.SkinBanCommand(this));
         registerCmd("skinunban", new org.justme.justPlugin.commands.moderation.SkinUnbanCommand(this));
+
+        // Nicknames & Tags
+        registerCmd("nick", new NickCommand(this));
+        registerCmd("tag", new TagCommand(this));
+        TagAdminCommand tagAdmin = new TagAdminCommand(this);
+        registerCmd("tagcreate", tagAdmin);
+        registerCmd("tagdelete", tagAdmin);
+        registerCmd("taglist", tagAdmin);
+
+        // Backup
+        registerCmd("jpbackup", new BackupCommand(this));
+
+        // Kits
+        registerCmd("kit", new org.justme.justPlugin.commands.kits.KitCommand(this));
+        registerCmd("kitpreview", new org.justme.justPlugin.commands.kits.KitPreviewCommand(this));
+        registerCmd("kitcreate", new org.justme.justPlugin.commands.kits.KitAdminCommand(this, "kitcreate"));
+        registerCmd("kitedit", new org.justme.justPlugin.commands.kits.KitAdminCommand(this, "kitedit"));
+        registerCmd("kitrename", new org.justme.justPlugin.commands.kits.KitAdminCommand(this, "kitrename"));
+        registerCmd("kitdelete", new org.justme.justPlugin.commands.kits.KitAdminCommand(this, "kitdelete"));
+        registerCmd("kitpublish", new org.justme.justPlugin.commands.kits.KitAdminCommand(this, "kitpublish"));
+        registerCmd("kitdisable", new org.justme.justPlugin.commands.kits.KitAdminCommand(this, "kitdisable"));
+        registerCmd("kitenable", new org.justme.justPlugin.commands.kits.KitAdminCommand(this, "kitenable"));
+        registerCmd("kitarchive", new org.justme.justPlugin.commands.kits.KitAdminCommand(this, "kitarchive"));
+        registerCmd("kitlist", new org.justme.justPlugin.commands.kits.KitAdminCommand(this, "kitlist"));
 
         // Overrides (replace vanilla commands)
         registerCmd("help", new HelpCommand(this));
@@ -509,6 +631,12 @@ public final class JustPlugin extends JavaPlugin {
         if (changed) {
             saveConfig();
             getLogger().info("[Config Migration] Added " + added + " new config key(s). Existing settings preserved.");
+        }
+
+        // Track config version for future migrations
+        if (!getConfig().contains("config-version")) {
+            getConfig().set("config-version", 1);
+            saveConfig();
         }
     }
 
@@ -590,6 +718,7 @@ public final class JustPlugin extends JavaPlugin {
     }
 
     // === Getters ===
+    public DatabaseManager getDatabaseManager() { return databaseManager; }
     public DataManager getDataManager() { return dataManager; }
     @SuppressWarnings("unused") // Public API for external plugins
     public CommandSettings getCommandSettings() { return commandSettings; }
@@ -610,6 +739,7 @@ public final class JustPlugin extends JavaPlugin {
     public WarnManager getWarnManager() { return warnManager; }
     public WebhookManager getWebhookManager() { return webhookManager; }
     public DeathInventoryManager getDeathInventoryManager() { return deathInventoryManager; }
+    public AfkManager getAfkManager() { return afkManager; }
     public EntityClearManager getEntityClearManager() { return entityClearManager; }
     public WebEditorManager getWebEditorManager() { return webEditorManager; }
     public MotdManager getMotdManager() { return motdManager; }
@@ -624,6 +754,18 @@ public final class JustPlugin extends JavaPlugin {
     public MaintenanceManager getMaintenanceManager() { return maintenanceManager; }
     public IconManager getIconManager() { return iconManager; }
     public SkinManager getSkinManager() { return skinManager; }
+    public MailManager getMailManager() { return mailManager; }
+    public JailManager getJailManager() { return jailManager; }
+    public NickManager getNickManager() { return nickManager; }
+    public TagManager getTagManager() { return tagManager; }
+    public org.justme.justPlugin.gui.TagGui getTagGui() { return tagGui; }
     public MessageManager getMessageManager() { return messageManager; }
+    public SpawnProtectionManager getSpawnProtectionManager() { return spawnProtectionManager; }
+    public JoinLeaveManager getJoinLeaveManager() { return joinLeaveManager; }
+    public BackupManager getBackupManager() { return backupManager; }
+    public KitManager getKitManager() { return kitManager; }
+    public org.justme.justPlugin.gui.kits.KitSelectionGui getKitSelectionGui() { return kitSelectionGui; }
+    public org.justme.justPlugin.gui.kits.KitPreviewGui getKitPreviewGui() { return kitPreviewGui; }
+    public org.justme.justPlugin.gui.kits.KitEditGui getKitEditGui() { return kitEditGui; }
     public boolean isLuckPermsAvailable() { return luckPermsAvailable; }
 }

@@ -75,6 +75,21 @@ teammsg:
   # Team chat format. {team} = team name
   format: "<dark_gray>[<yellow>{team}</yellow>]</dark_gray> <white>{sender}</white>: <gray>{message}"
 
+# === Mail ===
+mail:
+  usage: "Usage: /mail <send|read|clear|clearall>"
+  send-usage: "Usage: /mail send <player> <message>"
+  sent: "Mail sent to <yellow>{player}</yellow>."
+  received-notify: "You have new mail from <yellow>{sender}</yellow>! Type <yellow>/mail read</yellow> to view."
+  self-send: "You can't send mail to yourself!"
+  mailbox-full: "<yellow>{player}</yellow>'s mailbox is full!"
+  empty: "Your mailbox is empty."
+  invalid-page: "Invalid page number."
+  header: "<gold><bold>Mailbox</bold></gold> <gray>({count} messages) <dark_gray>- Page {page}/{total}"
+  cleared: "Cleared <yellow>{count}</yellow> read message(s)."
+  cleared-all: "Cleared <yellow>{count}</yellow> message(s)."
+  join-unread: "You have <yellow>{count}</yellow> unread mail message(s). Type <yellow>/mail read</yellow> to view."
+
 # === Clear Chat ===
 clearchat:
   cleared: "Chat has been cleared by <yellow>{player}</yellow>."

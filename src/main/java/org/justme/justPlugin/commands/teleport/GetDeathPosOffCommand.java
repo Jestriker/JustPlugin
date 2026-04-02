@@ -1,0 +1,72 @@
+package org.justme.justPlugin.commands.teleport;
+
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.util.CC;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@SuppressWarnings("NullableProblems")
+public class GetDeathPosOffCommand implements TabExecutor {
+
+    private final JustPlugin plugin;
+
+    public GetDeathPosOffCommand(JustPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            return true;
+        }
+        if (args.length < 1) {
+            player.sendMessage(CC.error("Usage: /getdeathposoff <player>"));
+            return true;
+        }
+
+        @SuppressWarnings("deprecation")
+        OfflinePlayer offline = Bukkit.getOfflinePlayer(args[0]);
+        if (!offline.hasPlayedBefore() && !offline.isOnline()) {
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+            return true;
+        }
+
+        String name = offline.getName() != null ? offline.getName() : args[0];
+        YamlConfiguration data = plugin.getDataManager().getPlayerData(offline.getUniqueId());
+        if (!data.contains("lastDeath.world")) {
+            player.sendMessage(plugin.getMessageManager().error("moderation.offline.no-data",
+                    "{player}", name));
+            return true;
+        }
+
+        String world = data.getString("lastDeath.world", "");
+        int x = (int) data.getDouble("lastDeath.x");
+        int y = (int) data.getDouble("lastDeath.y");
+        int z = (int) data.getDouble("lastDeath.z");
+
+        String msg = plugin.getMessageManager().raw("moderation.offline.getposoff-location",
+                "{player}", name, "{world}", world,
+                "{x}", String.valueOf(x), "{y}", String.valueOf(y), "{z}", String.valueOf(z));
+        player.sendMessage(CC.translate(msg));
+        return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
+        if (args.length == 1) {
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName)
+                    .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
+        }
+        return List.of();
+    }
+}

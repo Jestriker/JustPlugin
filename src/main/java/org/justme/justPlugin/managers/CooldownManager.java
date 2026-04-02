@@ -45,6 +45,39 @@ public class CooldownManager {
     }
 
     /**
+     * Check if a player is still in the delay period for a feature,
+     * using a custom delay duration instead of the config value.
+     *
+     * @param uuid          Player UUID
+     * @param featureKey    Feature key (e.g., "pay")
+     * @param delaySeconds  Custom delay duration in seconds
+     * @return true if still in delay period
+     */
+    public boolean isOnDelay(UUID uuid, String featureKey, int delaySeconds) {
+        if (delaySeconds <= 0) return false;
+        Map<String, Long> playerDelays = lastUseTimes.get(uuid);
+        if (playerDelays == null) return false;
+        Long lastUse = playerDelays.get(featureKey);
+        if (lastUse == null) return false;
+        return System.currentTimeMillis() - lastUse < delaySeconds * 1000L;
+    }
+
+    /**
+     * Get remaining delay seconds for a player and feature,
+     * using a custom delay duration instead of the config value.
+     */
+    public int getRemainingDelaySeconds(UUID uuid, String featureKey, int delaySeconds) {
+        if (delaySeconds <= 0) return 0;
+        Map<String, Long> playerDelays = lastUseTimes.get(uuid);
+        if (playerDelays == null) return 0;
+        Long lastUse = playerDelays.get(featureKey);
+        if (lastUse == null) return 0;
+        long elapsed = System.currentTimeMillis() - lastUse;
+        long remaining = (delaySeconds * 1000L) - elapsed;
+        return remaining > 0 ? (int) Math.ceil(remaining / 1000.0) : 0;
+    }
+
+    /**
      * Get remaining delay seconds for a player and feature.
      */
     public int getRemainingDelaySeconds(UUID uuid, String featureKey) {

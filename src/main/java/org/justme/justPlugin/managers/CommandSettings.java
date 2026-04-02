@@ -172,6 +172,19 @@ public class CommandSettings {
         PERMISSIONS.put("skinban", "justplugin.skinban");
         PERMISSIONS.put("skinunban", "justplugin.skinunban");
 
+        // Kits
+        PERMISSIONS.put("kit", "justplugin.kit");
+        PERMISSIONS.put("kitpreview", "justplugin.kit.preview");
+        PERMISSIONS.put("kitcreate", "justplugin.kit.create");
+        PERMISSIONS.put("kitedit", "justplugin.kit.edit");
+        PERMISSIONS.put("kitrename", "justplugin.kit.rename");
+        PERMISSIONS.put("kitdelete", "justplugin.kit.delete");
+        PERMISSIONS.put("kitpublish", "justplugin.kit.publish");
+        PERMISSIONS.put("kitdisable", "justplugin.kit.disable");
+        PERMISSIONS.put("kitenable", "justplugin.kit.disable");
+        PERMISSIONS.put("kitarchive", "justplugin.kit.archive");
+        PERMISSIONS.put("kitlist", "justplugin.kit.list");
+
         // Overrides
         PERMISSIONS.put("help", "justplugin.help");
         PERMISSIONS.put("rank", "justplugin.rank");

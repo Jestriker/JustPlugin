@@ -8,6 +8,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
@@ -28,6 +29,16 @@ public class PayCommand implements TabExecutor {
             sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
             return true;
         }
+
+        // Rate limiting - cooldown between pay commands
+        CooldownManager cm = plugin.getCooldownManager();
+        int payCooldown = plugin.getConfig().getInt("economy.pay-cooldown", 5);
+        if (payCooldown > 0 && cm.isOnDelay(player.getUniqueId(), "pay", payCooldown)) {
+            player.sendMessage(plugin.getMessageManager().error("general.cooldown-wait",
+                "{time}", CooldownManager.formatTime(cm.getRemainingDelaySeconds(player.getUniqueId(), "pay", payCooldown))));
+            return true;
+        }
+
         if (args.length < 2) {
             player.sendMessage(CC.error(plugin.getMessageManager().raw("economy.pay.usage")));
             return true;
@@ -91,6 +102,8 @@ public class PayCommand implements TabExecutor {
                     onlineTarget.sendMessage(CC.success("<yellow>" + player.getName() + "</yellow> paid you <green>" + formatted + "</green>."));
                 }
                 plugin.getLogManager().log("economy", "<yellow>" + player.getName() + "</yellow> paid <yellow>" + targetName + "</yellow> <green>" + formatted + "</green>");
+                // Set cooldown after successful pay
+                cm.setDelayStart(player.getUniqueId(), "pay");
             } else {
                 player.sendMessage(CC.error("Payment failed!"));
             }

@@ -6,6 +6,7 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChatManager {
 
@@ -14,8 +15,8 @@ public class ChatManager {
     }
 
     private final JustPlugin plugin;
-    private final Map<UUID, ChatMode> chatModes = new HashMap<>();
-    private final Map<UUID, UUID> lastMessaged = new HashMap<>(); // for /r
+    private final Map<UUID, ChatMode> chatModes = new ConcurrentHashMap<>();
+    private final Map<UUID, UUID> lastMessaged = new ConcurrentHashMap<>(); // for /r
 
     public ChatManager(JustPlugin plugin) {
         this.plugin = plugin;

@@ -3,7 +3,8 @@
 # ==========================================
 # Messages for /ban, /unban, /tempban, /banip, /tempbanip, /unbanip,
 # /mute, /tempmute, /unmute, /warn, /kick, /vanish, /supervanish,
-# /sudo, /invsee, /echestsee, /deathitems, /oplist, /banlist, /setlogswebhook.
+# /sudo, /invsee, /echestsee, /deathitems, /oplist, /banlist, /setlogswebhook,
+# /jail, /unjail, /setjail, /deljail, /jails, /jailinfo.
 #
 # Placeholders:
 #   {player}    - Target player name
@@ -168,4 +169,62 @@ setlogswebhook:
   confirm-prompt: "Are you sure? Type <yellow>/setlogswebhook confirm</yellow> to apply."
   confirm-success: "Webhook confirmed and saved."
   cancel: "Webhook setup cancelled."
+
+# === Jail ===
+jail:
+  success: "Jailed <yellow>{player}</yellow> at <yellow>{jail}</yellow>. <gray>Reason: {reason}"
+  success-duration: "Jailed <yellow>{player}</yellow> for <yellow>{duration}</yellow>. <gray>Reason: {reason}"
+  already-jailed: "<yellow>{player}</yellow> is already jailed!"
+  no-jails: "No jail locations set! Use <yellow>/setjail <name></yellow> first."
+  usage: "Usage: /jail <player> [duration] [reason]"
+  you-are-jailed: "You have been jailed! <gray>Reason: {reason}"
+  released: "You have been released from jail."
+  expired: "Your jail time has expired. You are now free!"
+  command-blocked: "You cannot use commands while jailed!"
+  announce: "<red>[Jail]</red> <yellow>{player}</yellow> was jailed by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+
+# === Unjail ===
+unjail:
+  success: "Released <yellow>{player}</yellow> from jail."
+  not-jailed: "<yellow>{player}</yellow> is not jailed!"
+  usage: "Usage: /unjail <player>"
+
+# === Set Jail ===
+setjail:
+  success: "Jail location <yellow>{name}</yellow> set."
+  already-exists: "Jail <yellow>{name}</yellow> already exists!"
+  usage: "Usage: /setjail <name>"
+
+# === Delete Jail ===
+deljail:
+  success: "Deleted jail <yellow>{name}</yellow>."
+  not-found: "Jail <yellow>{name}</yellow> not found!"
+  usage: "Usage: /deljail <name>"
+
+# === Jail List ===
+jails:
+  header: "<gold><bold>Jail Locations</bold></gold>"
+  entry: " <gray>- <yellow>{name}</yellow> <gray>({world}, {x}, {y}, {z})"
+  empty: "No jail locations."
+
+# === Jail Info ===
+jailinfo:
+  header: "<gold><bold>Jail Info: {player}</bold></gold>"
+  jail-name: " <gray>Jail: <yellow>{jail}"
+  reason: " <gray>Reason: <yellow>{reason}"
+  jailed-by: " <gray>By: <yellow>{staff}"
+  time-remaining: " <gray>Remaining: <yellow>{duration}"
+  permanent: " <gray>Duration: <red>Permanent"
+  not-jailed: "<yellow>{player}</yellow> is not jailed."
+  usage: "Usage: /jailinfo <player>"
+
+# === Offline Player Commands ===
+offline:
+  tpoff-success: "Teleporting to <yellow>{player}</yellow>'s last location."
+  tpoff-no-data: "No saved location for <yellow>{player}</yellow>."
+  getposoff-location: "<gold>{player}'s last location:</gold> <gray>{world} {x} {y} {z}"
+  no-data: "No data found for <yellow>{player}</yellow>."
+  invseeoff-title: "OFFLINE - {player}'s Inventory"
+  echestseeoff-title: "OFFLINE - {player}'s Ender Chest"
+  no-snapshot: "No inventory data for <yellow>{player}</yellow>."
 

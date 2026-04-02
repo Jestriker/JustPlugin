@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.InputValidator;
 
 import java.util.List;
 
@@ -30,6 +31,10 @@ public class SetWarpCommand implements TabExecutor {
             return true;
         }
         String name = args[0];
+        if (!InputValidator.isValidName(name)) {
+            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-name")));
+            return true;
+        }
         plugin.getWarpManager().setWarp(name, player.getLocation());
         player.sendMessage(CC.success("Warp <yellow>" + name + "</yellow> has been set."));
         plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set warp <yellow>" + name + "</yellow>");

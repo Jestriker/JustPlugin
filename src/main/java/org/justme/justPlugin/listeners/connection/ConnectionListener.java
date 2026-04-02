@@ -53,9 +53,23 @@ public class ConnectionListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+
+        // Load player data into cache early so subsequent reads are fast
+        plugin.getDataManager().loadPlayerDataToCache(player.getUniqueId());
+
         plugin.getEconomyManager().loadPlayer(player.getUniqueId());
         plugin.getIgnoreManager().loadPlayer(player.getUniqueId());
         plugin.getVanishManager().handleJoin(player);
+        plugin.getAfkManager().handleJoin(player.getUniqueId());
+
+        // Load nickname and tag data, apply display name
+        if (plugin.getNickManager() != null) {
+            plugin.getNickManager().loadPlayer(player.getUniqueId());
+            plugin.getNickManager().applyDisplayName(player);
+        }
+        if (plugin.getTagManager() != null) {
+            plugin.getTagManager().loadPlayer(player.getUniqueId());
+        }
 
         // Restore persistent player states (fly, speed, god, vanish)
         plugin.getPlayerStateManager().loadState(player);
@@ -78,6 +92,10 @@ public class ConnectionListener implements Listener {
         if (plugin.getVanishManager().isVanished(player.getUniqueId())) {
             event.joinMessage(null);
             plugin.getVanishManager().handleVanishedPlayerJoin(player);
+        } else {
+            // Suppress vanilla join message and send custom one via JoinLeaveManager
+            event.joinMessage(null);
+            plugin.getJoinLeaveManager().handleJoin(player, !player.hasPlayedBefore());
         }
 
         // Join MOTD (player join message)
@@ -121,6 +139,19 @@ public class ConnectionListener implements Listener {
             }, 40L);
         }
 
+        // Notify about unread mail (delayed so it appears after other join messages)
+        if (plugin.getCommandSettings().isEnabled("mail")
+                && player.hasPermission("justplugin.mail")) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (!player.isOnline()) return;
+                int unread = plugin.getMailManager().getUnreadCount(player.getUniqueId());
+                if (unread > 0) {
+                    player.sendMessage(CC.info(plugin.getMessageManager().raw("chat.mail.join-unread",
+                            "{count}", String.valueOf(unread))));
+                }
+            }, 80L);
+        }
+
         // Maintenance mode join warning - sent last so it's noticeable
         if (plugin.getCommandSettings().isEnabled("maintenance")
                 && plugin.getMaintenanceManager().isActive()) {
@@ -145,6 +176,9 @@ public class ConnectionListener implements Listener {
         Player player = event.getPlayer();
         java.util.UUID uuid = player.getUniqueId();
 
+        // Clean up AFK state
+        plugin.getAfkManager().handleQuit(uuid);
+
         // Save persistent player states before cleanup
         plugin.getPlayerStateManager().saveState(player);
 
@@ -152,8 +186,21 @@ public class ConnectionListener implements Listener {
         plugin.getPlayerListener().saveBackLocation(uuid);
         plugin.getPlayerListener().saveDeathLocation(uuid);
 
-        // Persist inventory snapshot for offline /invsee
+        // Persist inventory snapshot for offline /invsee and /echestsee
         plugin.getPlayerListener().saveInventorySnapshot(player);
+
+        // Save last location for offline commands
+        org.bukkit.configuration.file.YamlConfiguration data = plugin.getDataManager().getPlayerData(uuid);
+        data.set("last-location.world", player.getLocation().getWorld().getName());
+        data.set("last-location.x", player.getLocation().getX());
+        data.set("last-location.y", player.getLocation().getY());
+        data.set("last-location.z", player.getLocation().getZ());
+        data.set("last-location.yaw", player.getLocation().getYaw());
+        data.set("last-location.pitch", player.getLocation().getPitch());
+        // Save XP
+        data.set("xp-level", player.getLevel());
+        data.set("xp-progress", player.getExp());
+        plugin.getDataManager().savePlayerData(uuid, data);
 
         plugin.getEconomyManager().unloadPlayer(uuid);
         plugin.getIgnoreManager().unloadPlayer(uuid);
@@ -186,7 +233,14 @@ public class ConnectionListener implements Listener {
         // If quitting player is vanished, suppress real quit message
         if (plugin.getVanishManager().isVanished(uuid)) {
             event.quitMessage(null);
+        } else {
+            // Suppress vanilla quit message and send custom one via JoinLeaveManager
+            event.quitMessage(null);
+            plugin.getJoinLeaveManager().handleQuit(player);
         }
+
+        // Save and unload player data from cache
+        plugin.getDataManager().unloadPlayerData(uuid);
     }
 }
 

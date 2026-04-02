@@ -49,3 +49,12 @@ friendlyfire:
   disabled: "PvP has been <red>disabled</red> server-wide."
   usage: "Usage: /friendlyfire <enable|disable>"
 
+# === Spawn Protection ===
+spawn-protection:
+  denied: "You cannot do that in the spawn area."
+
+# === Seed Protection ===
+seed-protection:
+  denied: "The world seed is protected on this server."
+  staff-alert: "<red>[Seed]</red> <yellow>{player}</yellow> tried to view the world seed."
+

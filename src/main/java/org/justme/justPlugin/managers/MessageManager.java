@@ -47,7 +47,9 @@ public class MessageManager {
             "trade.yml",
             "maintenance.yml",
             "info.yml",
-            "misc.yml"
+            "misc.yml",
+            "nick.yml",
+            "kits.yml"
     };
 
     public MessageManager(JustPlugin plugin) {

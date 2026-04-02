@@ -5,26 +5,29 @@ import org.justme.justPlugin.JustPlugin;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EconomyManager {
 
     private final JustPlugin plugin;
     private final DataManager dataManager;
     private final double startingBalance;
+    private final double maxBalance;
 
     // Vault bridge - null if not using Vault
     private VaultEconomyBridge vaultBridge;
     private boolean usingVault = false;
 
-    // Cache (used only when provider is "justplugin")
-    private final Map<UUID, Double> balances = new HashMap<>();
-    private final Set<UUID> payToggleOff = new HashSet<>();
-    private final Set<UUID> baltopHidden = new HashSet<>();
+    // Cache (used only when provider is "justplugin") - thread-safe for async access
+    private final Map<UUID, Double> balances = new ConcurrentHashMap<>();
+    private final Set<UUID> payToggleOff = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> baltopHidden = ConcurrentHashMap.newKeySet();
 
     public EconomyManager(JustPlugin plugin) {
         this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
         this.startingBalance = plugin.getConfig().getDouble("economy.starting-balance", 100.0);
+        this.maxBalance = plugin.getConfig().getDouble("economy.max-balance", 1_000_000_000_000.0);
     }
 
     /**
@@ -83,6 +86,11 @@ public class EconomyManager {
             vaultBridge.setBalance(uuid, amount);
             return;
         }
+        // Sanitize: reject NaN/Infinite, clamp to [0, maxBalance]
+        if (Double.isNaN(amount) || Double.isInfinite(amount)) {
+            amount = 0;
+        }
+        amount = Math.max(0, Math.min(amount, maxBalance));
         balances.put(uuid, amount);
         saveBalance(uuid);
     }
@@ -92,7 +100,23 @@ public class EconomyManager {
             vaultBridge.addBalance(uuid, amount);
             return;
         }
-        setBalance(uuid, getBalance(uuid) + amount);
+        double current = getBalance(uuid);
+        // Overflow protection: check if adding would exceed max balance
+        double newBalance = current + amount;
+        if (newBalance > maxBalance) {
+            newBalance = maxBalance;
+        }
+        if (Double.isNaN(newBalance) || Double.isInfinite(newBalance)) {
+            newBalance = current; // keep unchanged on overflow
+        }
+        setBalance(uuid, newBalance);
+    }
+
+    /**
+     * @return the configured maximum balance.
+     */
+    public double getMaxBalance() {
+        return maxBalance;
     }
 
     public boolean removeBalance(UUID uuid, double amount) {

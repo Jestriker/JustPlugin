@@ -1,0 +1,39 @@
+# ==========================================
+# Nickname & Tag Messages
+# ==========================================
+# Messages for /nick, /tag, /tagcreate, /tagdelete, /taglist.
+#
+# Placeholders:
+#   {nick}      - The nickname being set
+#   {max}       - Maximum nickname length
+#   {tag}       - Tag ID or display
+#   {display}   - Tag display string
+#   {count}     - Number of items in a list
+# ==========================================
+
+# === Nickname ===
+usage: "Usage: /nick <name|off|reset>"
+set: "Nickname set to: {nick}"
+removed: "Your nickname has been removed."
+no-nickname: "You don't have a nickname set."
+empty: "Nickname cannot be empty."
+too-long: "Nickname is too long! Maximum length: <yellow>{max}</yellow> characters."
+blocked-word: "That nickname contains a blocked word."
+duplicate: "That nickname is already in use by another player."
+
+# === Tags ===
+tag-equipped: "Tag equipped: {tag}"
+tag-removed: "Your tag has been removed."
+tag-no-tag: "You don't have a tag equipped."
+tag-not-found: "Tag <yellow>{tag}</yellow> does not exist."
+tag-no-permission: "You don't have permission to use the <yellow>{tag}</yellow> tag."
+
+# === Tag Admin ===
+tagcreate-usage: "Usage: /tagcreate <id> <prefix|suffix> <display...>"
+tagcreate-invalid-type: "Type must be <yellow>prefix</yellow> or <yellow>suffix</yellow>."
+tagcreate-exists: "Tag <yellow>{tag}</yellow> already exists."
+tagcreate-success: "Tag <yellow>{tag}</yellow> created with display: {display}"
+tagdelete-usage: "Usage: /tagdelete <id>"
+tagdelete-success: "Tag <yellow>{tag}</yellow> has been deleted."
+taglist-empty: "No tags have been created yet."
+taglist-header: "<gold><bold>Tags</bold></gold> <gray>({count}):"

@@ -58,6 +58,8 @@ public class ScoreboardManager {
     private BukkitTask pingTask;
     private final Map<UUID, Scoreboard> playerBoards = new HashMap<>();
     private final Map<UUID, Integer> lastPing = new HashMap<>();
+    // Stores previous line content per player for diff-based updates
+    private final Map<UUID, String[]> previousLines = new HashMap<>();
     // Animation engine
     private AnimationEngine animationEngine;
 
@@ -250,6 +252,7 @@ public class ScoreboardManager {
     public void handleQuit(UUID uuid) {
         playerBoards.remove(uuid);
         lastPing.remove(uuid);
+        previousLines.remove(uuid);
     }
 
     public boolean isEnabled() {
@@ -331,12 +334,9 @@ public class ScoreboardManager {
     }
 
     private void updatePlayer(Player player) {
-        Scoreboard board = playerBoards.get(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        Scoreboard board = playerBoards.get(uuid);
         if (board == null) return;
-
-        // Remove old objective
-        Objective old = board.getObjective("jp_sidebar");
-        if (old != null) old.unregister();
 
         // Build title - apply wave gradient if enabled
         String currentTitle;
@@ -346,13 +346,19 @@ public class ScoreboardManager {
             currentTitle = title;
         }
 
-        // Create new objective
         String resolvedTitle = PlaceholderResolver.resolve(player, plugin, currentTitle);
         resolvedTitle = org.justme.justPlugin.util.PAPIHook.setPlaceholders(player, resolvedTitle);
         Component titleComponent = CC.translate(resolvedTitle);
-        Objective objective = board.registerNewObjective("jp_sidebar", Criteria.DUMMY, titleComponent);
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        objective.numberFormat(NumberFormat.blank());
+
+        // Get or create the objective (avoid unregister/re-register to reduce flicker)
+        Objective objective = board.getObjective("jp_sidebar");
+        if (objective == null) {
+            objective = board.registerNewObjective("jp_sidebar", Criteria.DUMMY, titleComponent);
+            objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+            objective.numberFormat(NumberFormat.blank());
+        } else {
+            objective.displayName(titleComponent);
+        }
 
         // Filter lines based on conditions
         List<LineEntry> visibleLines = new ArrayList<>();
@@ -369,6 +375,11 @@ public class ScoreboardManager {
         // Bukkit sidebar shows lines in descending score order.
         // We assign scores from visibleLines.size() down to 1.
         int maxLines = Math.min(visibleLines.size(), 15); // Sidebar supports max 15 lines
+
+        // Get previous lines for diff-based updates
+        String[] prevLines = previousLines.get(uuid);
+        String[] newLines = new String[maxLines];
+
         for (int i = 0; i < maxLines; i++) {
             LineEntry entry = visibleLines.get(i);
             String lineText = entry.text;
@@ -399,8 +410,11 @@ public class ScoreboardManager {
             lineText = PlaceholderResolver.resolve(player, plugin, lineText);
             lineText = org.justme.justPlugin.util.PAPIHook.setPlaceholders(player, lineText);
 
-            // Convert to Component
-            Component lineComponent = CC.translate(lineText);
+            newLines[i] = lineText;
+
+            // Only update the team prefix if the line content actually changed
+            boolean changed = prevLines == null || prevLines.length != maxLines
+                    || i >= prevLines.length || !lineText.equals(prevLines[i]);
 
             // Use a unique fake player entry for each line
             // We use a team approach to avoid flicker and support duplicates
@@ -408,6 +422,7 @@ public class ScoreboardManager {
             var team = board.getTeam(teamName);
             if (team == null) {
                 team = board.registerNewTeam(teamName);
+                changed = true; // New team, must set everything
             }
 
             // Use invisible unique entries (color codes that are unique per line)
@@ -415,11 +430,18 @@ public class ScoreboardManager {
             if (!team.hasEntry(fakeEntry)) {
                 team.addEntry(fakeEntry);
             }
-            team.prefix(lineComponent);
-            team.suffix(Component.empty());
+
+            if (changed) {
+                Component lineComponent = CC.translate(lineText);
+                team.prefix(lineComponent);
+                team.suffix(Component.empty());
+            }
 
             objective.getScore(fakeEntry).setScore(maxLines - i);
         }
+
+        // Store current lines for next diff comparison
+        previousLines.put(uuid, newLines);
 
         // Clean up extra teams from previous renders that are no longer needed
         for (int i = maxLines; i < 15; i++) {

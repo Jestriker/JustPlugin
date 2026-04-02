@@ -52,9 +52,17 @@ public final class PlaceholderResolver {
 
     /**
      * Replace all {placeholder} tokens in the input text for the given player.
+     * Includes early-return optimizations to skip expensive resolution when possible.
      */
     public static String resolve(Player player, JustPlugin plugin, String text) {
-        if (text == null || !text.contains("{")) return text;
+        if (text == null) return text;
+
+        // Early return if text contains no placeholder markers at all
+        if (!text.contains("{")) return text;
+
+        // Early return if there are no valid placeholders (no closing brace after opening)
+        int firstOpen = text.indexOf('{');
+        if (firstOpen == -1 || text.indexOf('}', firstOpen + 1) == -1) return text;
 
         StringBuilder sb = new StringBuilder(text.length());
         int len = text.length();
@@ -77,6 +85,14 @@ public final class PlaceholderResolver {
             i = close + 1;
         }
         return sb.toString();
+    }
+
+    /**
+     * Check if a specific placeholder name is present in the text.
+     * Used for lazy evaluation - skip expensive resolution for absent placeholders.
+     */
+    public static boolean containsPlaceholder(String text, String placeholderName) {
+        return text.contains("{" + placeholderName + "}");
     }
 
     @SuppressWarnings("deprecation")
@@ -334,6 +350,9 @@ public final class PlaceholderResolver {
                 yield (link == null || link.isEmpty() || link.equalsIgnoreCase("https://discord.gg/example"))
                         ? "Undefined Discord Link" : link;
             }
+
+            // ===== AFK =====
+            case "afk", "afk_status" -> plugin.getAfkManager().isAfk(uuid) ? "AFK" : "";
 
             // ===== Misc =====
             case "empty", "blank" -> "";

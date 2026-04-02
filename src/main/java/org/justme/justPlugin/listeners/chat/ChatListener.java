@@ -69,12 +69,35 @@ public class ChatListener implements Listener {
         event.renderer((source, sourceDisplayName, message, viewer) -> {
             String prefix = getLuckPermsPrefix(source);
             String suffix = getLuckPermsSuffix(source);
-            Component prefixComponent = (prefix != null && !prefix.isEmpty())
-                    ? CC.colorize(prefix) : Component.empty();
-            Component suffixComponent = (suffix != null && !suffix.isEmpty())
-                    ? CC.colorize(suffix) : Component.empty();
 
-            Component nameBlock = prefixComponent.append(sourceDisplayName).append(suffixComponent);
+            // Prepend tag prefix if equipped
+            String tagPrefix = plugin.getTagManager() != null
+                    ? plugin.getTagManager().getEquippedPrefix(source.getUniqueId()) : "";
+            String tagSuffix = plugin.getTagManager() != null
+                    ? plugin.getTagManager().getEquippedSuffix(source.getUniqueId()) : "";
+
+            Component prefixComponent = Component.empty();
+            if (!tagPrefix.isEmpty()) {
+                prefixComponent = prefixComponent.append(CC.translate(tagPrefix));
+            }
+            if (prefix != null && !prefix.isEmpty()) {
+                prefixComponent = prefixComponent.append(CC.colorize(prefix));
+            }
+
+            Component suffixComponent = Component.empty();
+            if (suffix != null && !suffix.isEmpty()) {
+                suffixComponent = suffixComponent.append(CC.colorize(suffix));
+            }
+            if (!tagSuffix.isEmpty()) {
+                suffixComponent = suffixComponent.append(CC.translate(tagSuffix));
+            }
+
+            // Use nickname as display name if set
+            Component displayName = (plugin.getNickManager() != null && plugin.getNickManager().hasNickname(source.getUniqueId()))
+                    ? plugin.getNickManager().getDisplayName(source)
+                    : sourceDisplayName;
+
+            Component nameBlock = prefixComponent.append(displayName).append(suffixComponent);
 
             if (hoverEnabled) {
                 List<String> hoverLines = plugin.getConfig().getStringList("chat.hover.lines");

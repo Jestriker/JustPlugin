@@ -12,14 +12,15 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class VanishManager {
 
     private final JustPlugin plugin;
-    private final Set<UUID> vanished = new HashSet<>();
-    private final Set<UUID> superVanished = new HashSet<>();
-    private final Map<UUID, GameMode> previousGameModes = new HashMap<>();
-    private final Set<UUID> playerListHidden = new HashSet<>();
+    private final Set<UUID> vanished = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> superVanished = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, GameMode> previousGameModes = new ConcurrentHashMap<>();
+    private final Set<UUID> playerListHidden = ConcurrentHashMap.newKeySet();
 
     public VanishManager(JustPlugin plugin) {
         this.plugin = plugin;

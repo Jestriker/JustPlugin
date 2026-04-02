@@ -358,7 +358,7 @@ public class WebEditorManager {
         }
 
         // The page itself embeds the auth token so JS can use it for API calls.
-        String html = WebEditorPage.getHtml(authToken);
+        String html = WebEditorPage.getHtml(authToken, getPort());
         sendResponse(exchange, 200, "text/html; charset=utf-8", html);
     }
 
@@ -449,7 +449,43 @@ public class WebEditorManager {
         sendResponse(exchange, 200, "application/json", json.toString());
     }
 
+    /**
+     * Validate Origin/Referer header for CSRF protection on POST requests.
+     * Returns true if the request is valid, false if it should be rejected.
+     * Allows requests with no Origin AND no Referer (direct API calls).
+     */
+    private boolean validateCsrf(HttpExchange exchange) {
+        int port = getPort();
+        String bindAddress = plugin.getConfig().getString("web-editor.bind-address", "127.0.0.1");
+        String expectedHost = ("0.0.0.0".equals(bindAddress) ? "localhost" : bindAddress) + ":" + port;
+
+        String origin = exchange.getRequestHeaders().getFirst("Origin");
+        if (origin != null) {
+            // Origin header present - validate it
+            return origin.equals("http://" + expectedHost)
+                    || origin.equals("http://localhost:" + port)
+                    || origin.equals("http://127.0.0.1:" + port);
+        }
+
+        String referer = exchange.getRequestHeaders().getFirst("Referer");
+        if (referer != null) {
+            // No Origin, but Referer present - validate it
+            return referer.startsWith("http://" + expectedHost + "/")
+                    || referer.startsWith("http://localhost:" + port + "/")
+                    || referer.startsWith("http://127.0.0.1:" + port + "/");
+        }
+
+        // No Origin and no Referer - allow (direct API calls)
+        return true;
+    }
+
     private void handlePostConfig(HttpExchange exchange, String fileId) throws IOException {
+        // CSRF validation for POST requests
+        if (!validateCsrf(exchange)) {
+            sendResponse(exchange, 403, "application/json", "{\"error\":\"Forbidden. Origin validation failed.\"}");
+            return;
+        }
+
         // Read request body with size limit
         String body;
         try (InputStream is = exchange.getRequestBody()) {

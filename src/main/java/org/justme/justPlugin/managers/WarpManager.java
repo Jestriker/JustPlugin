@@ -14,6 +14,9 @@ public class WarpManager {
     private final DataManager dataManager;
     private final Map<String, Location> warps = new LinkedHashMap<>();
 
+    // Pre-computed immutable list for fast tab completion
+    private volatile List<String> cachedWarpNames = List.of();
+
     public WarpManager(JustPlugin plugin) {
         this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
@@ -24,7 +27,10 @@ public class WarpManager {
         warps.clear();
         YamlConfiguration config = dataManager.getWarpsConfig();
         ConfigurationSection section = config.getConfigurationSection("warps");
-        if (section == null) return;
+        if (section == null) {
+            updateWarpNameCache();
+            return;
+        }
         for (String name : section.getKeys(false)) {
             ConfigurationSection ws = section.getConfigurationSection(name);
             if (ws == null) continue;
@@ -36,6 +42,11 @@ public class WarpManager {
                     (float) ws.getDouble("yaw"), (float) ws.getDouble("pitch")
             ));
         }
+        updateWarpNameCache();
+    }
+
+    private void updateWarpNameCache() {
+        cachedWarpNames = List.copyOf(warps.keySet());
     }
 
     public boolean warpExists(String name) {
@@ -50,14 +61,24 @@ public class WarpManager {
         return Collections.unmodifiableSet(warps.keySet());
     }
 
+    /**
+     * Returns a pre-computed immutable list of warp names for fast tab completion.
+     * This avoids creating a new collection on every tab completion request.
+     */
+    public List<String> getWarpNameList() {
+        return cachedWarpNames;
+    }
+
     public void setWarp(String name, Location location) {
         warps.put(name.toLowerCase(), location);
+        updateWarpNameCache();
         saveWarp(name.toLowerCase(), location);
     }
 
     public boolean deleteWarp(String name) {
         if (!warps.containsKey(name.toLowerCase())) return false;
         warps.remove(name.toLowerCase());
+        updateWarpNameCache();
         YamlConfiguration config = dataManager.getWarpsConfig();
         config.set("warps." + name.toLowerCase(), null);
         dataManager.saveWarps();

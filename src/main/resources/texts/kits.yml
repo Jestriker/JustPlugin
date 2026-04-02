@@ -1,0 +1,100 @@
+# ==========================================
+# Kit System Messages
+# ==========================================
+# Messages used by the kit system (/kit, /kitcreate, /kitedit, etc.)
+#
+# Supports MiniMessage formatting: https://docs.advntr.dev/minimessage/format.html
+# Colors: <red>, <green>, <yellow>, <gray>, <gold>, <aqua>, etc.
+# Formatting: <bold>, <italic>, <underlined>, <strikethrough>
+# Gradients: <gradient:#00aaff:#00ffaa>text</gradient>
+# Hex colors: <#ff6b6b>text</#ff6b6b>
+#
+# Placeholders are listed above each message.
+# ==========================================
+
+# --- Player Kit Messages ---
+
+# Shown when no kits have been created on the server.
+no-kits-exist: "There are no kits available on this server."
+
+# Shown when a player has no permission for any available kit.
+no-kits-available: "You don't have permission to use any kits."
+
+# Shown when a kit is not found.
+# Placeholders: {kit} - kit name
+kit-not-found: "Kit <yellow>{kit}</yellow> not found!"
+
+# Shown when a player doesn't have permission for a specific kit.
+# Placeholders: {kit} - kit display name
+no-permission: "You don't have permission to use the <yellow>{kit}</yellow> kit."
+
+# Shown when a kit is disabled.
+# Placeholders: {kit} - kit display name
+kit-disabled: "The <yellow>{kit}</yellow> kit is currently disabled."
+
+# Shown when a player is on cooldown for a kit.
+# Placeholders: {kit} - kit display name, {time} - formatted remaining time
+on-cooldown: "You must wait <yellow>{time}</yellow> before claiming the <yellow>{kit}</yellow> kit again."
+
+# Shown when a player successfully claims a kit.
+# Placeholders: {kit} - kit display name
+kit-claimed: "You received the <yellow>{kit}</yellow> kit!"
+
+# --- Admin Kit Messages ---
+
+# Shown when a kit is successfully created.
+# Placeholders: {kit} - kit display name
+kit-created: "Kit <yellow>{kit}</yellow> has been created!"
+
+# Shown when a kit is successfully updated.
+# Placeholders: {kit} - kit display name
+kit-updated: "Kit <yellow>{kit}</yellow> has been updated!"
+
+# Shown when a kit already exists during creation.
+# Placeholders: {kit} - kit name
+kit-already-exists: "A kit named <yellow>{kit}</yellow> already exists!"
+
+# Shown when a kit is published.
+# Placeholders: {kit} - kit display name
+kit-published: "Kit <yellow>{kit}</yellow> has been published and is now available to players."
+
+# Shown when a kit is archived (soft delete).
+# Placeholders: {kit} - kit display name
+kit-archived: "Kit <yellow>{kit}</yellow> has been archived."
+
+# Shown when a kit is permanently deleted.
+# Placeholders: {kit} - kit display name
+kit-deleted-permanent: "Kit <yellow>{kit}</yellow> has been permanently deleted."
+
+# Shown when a kit is renamed.
+# Placeholders: {old} - old name, {new} - new name
+kit-renamed: "Kit <yellow>{old}</yellow> has been renamed to <yellow>{new}</yellow>."
+
+# Shown when a rename operation fails.
+rename-failed: "Failed to rename the kit. The new name may already be in use."
+
+# Shown when a kit is disabled by an admin.
+# Placeholders: {kit} - kit display name
+kit-disabled-msg: "Kit <yellow>{kit}</yellow> has been disabled."
+
+# Shown when a kit is enabled by an admin.
+# Placeholders: {kit} - kit display name
+kit-enabled-msg: "Kit <yellow>{kit}</yellow> has been enabled."
+
+# Shown when a kit is restored from archive.
+# Placeholders: {kit} - kit name
+kit-restored: "Kit <yellow>{kit}</yellow> has been restored from the archive."
+
+# Shown when trying to restore a kit that is not archived.
+# Placeholders: {kit} - kit name
+kit-not-archived: "Kit <yellow>{kit}</yellow> is not archived."
+
+# Shown when there are no archived kits.
+no-archived-kits: "There are no archived kits."
+
+# Shown when all archived kits are deleted.
+# Placeholders: {count} - number of kits deleted
+all-archives-deleted: "Deleted <yellow>{count}</yellow> archived kit(s)."
+
+# Shown when a kit edit/creation is cancelled.
+edit-cancelled: "Kit editing cancelled."

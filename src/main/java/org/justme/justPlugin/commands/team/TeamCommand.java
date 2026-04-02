@@ -11,6 +11,7 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.managers.TeamManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.InputValidator;
 
 import java.util.List;
 import java.util.UUID;
@@ -43,6 +44,10 @@ public class TeamCommand implements TabExecutor {
             case "create" -> {
                 if (args.length < 2) {
                     player.sendMessage(CC.error("Usage: /team create <name>"));
+                    return true;
+                }
+                if (!InputValidator.isValidName(args[1])) {
+                    player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-name")));
                     return true;
                 }
                 if (tm.getPlayerTeam(player.getUniqueId()) != null) {

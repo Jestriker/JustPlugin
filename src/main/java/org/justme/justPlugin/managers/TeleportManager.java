@@ -312,8 +312,26 @@ public class TeleportManager {
     private void executeTeleport(Player player, Location destination, boolean useSafeLocation) {
         Location finalLoc = useSafeLocation ? getSafeLocation(destination) : destination;
         setBackLocation(player.getUniqueId(), player.getLocation());
-        player.teleportAsync(finalLoc);
-        player.sendMessage(CC.success("Teleported!"));
+        player.teleportAsync(finalLoc).thenAccept(success -> {
+            // Schedule back on the main thread since thenAccept may run asynchronously
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!success || !player.isOnline()) return;
+                player.sendMessage(CC.success("Teleported!"));
+                // Post-teleport safety check: verify destination is still safe 1 tick later
+                // This guards against race conditions where the environment changes during teleport
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (!player.isOnline()) return;
+                    Location currentLoc = player.getLocation();
+                    if (!isLocationSafe(currentLoc)) {
+                        Location safeLoc = getSafeLocation(currentLoc);
+                        if (safeLoc != null && isLocationSafe(safeLoc)) {
+                            player.teleportAsync(safeLoc);
+                            player.sendMessage(CC.warning("You were moved to a safe location nearby."));
+                        }
+                    }
+                }, 1L);
+            });
+        });
     }
 
     /**

@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PlayerListener {
 
     private final JustPlugin plugin;
-    private final Set<UUID> godMode = new HashSet<>();
+    private final Set<UUID> godMode = ConcurrentHashMap.newKeySet();
     private final Map<UUID, Location> deathLocations = new ConcurrentHashMap<>();
 
     public PlayerListener(JustPlugin plugin) {
@@ -139,6 +139,12 @@ public class PlayerListener {
         // Save offhand
         ItemStack offhand = player.getInventory().getItemInOffHand();
         data.set("inventory.offhand", offhand.getType() != Material.AIR ? offhand : null);
+
+        // Save ender chest (27 slots)
+        ItemStack[] enderContents = player.getEnderChest().getContents();
+        for (int i = 0; i < 27; i++) {
+            data.set("enderchest.slot_" + i, (i < enderContents.length && enderContents[i] != null) ? enderContents[i] : null);
+        }
 
         plugin.getDataManager().savePlayerData(uuid, data);
     }

@@ -85,3 +85,18 @@ startup:
   warnings-header: "<gray>[<gradient:#ff6b6b:#ee5a24>JustPlugin</gradient><gray>] <yellow><bold>Startup Warnings:</bold></yellow>"
   warnings-footer: "  <dark_gray>Check config.yml for details."
 
+# === Backup ===
+# Placeholders: {filename}, {size}, {error}, {date}
+backup:
+  exporting: "Creating backup..."
+  export-success: "Backup created: <yellow>{filename}</yellow> ({size})"
+  export-failed: "Backup failed: <red>{error}</red>"
+  import-confirm: "This will overwrite data! Type <yellow>/jpbackup import confirm</yellow>"
+  import-success: "Backup imported. <yellow>Restart recommended.</yellow>"
+  list-header: "<gold><bold>Backups</bold></gold>"
+  list-entry: " <gray>- <yellow>{filename}</yellow> ({size}, {date})"
+  list-empty: "No backups."
+  deleted: "Deleted: <yellow>{filename}</yellow>"
+  not-found: "Backup not found."
+  usage: "Usage: /jpbackup <export|import|list|delete>"
+

@@ -10,6 +10,8 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 import org.justme.justPlugin.util.TimeUtil;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 
 public class BanManager {
@@ -330,14 +332,77 @@ public class BanManager {
 
     public boolean isIpBanned(String ip) {
         YamlConfiguration config = dataManager.getBansConfig();
+        // First check exact IP match
         String safePath = ip.replace(".", "_").replace(":", "_");
-        if (!config.contains("ipbans." + safePath)) return false;
-        long expires = config.getLong("ipbans." + safePath + ".expires", -1L);
-        if (expires != -1L && System.currentTimeMillis() > expires) {
-            unbanIp(ip);
+        if (config.contains("ipbans." + safePath)) {
+            long expires = config.getLong("ipbans." + safePath + ".expires", -1L);
+            if (expires != -1L && System.currentTimeMillis() > expires) {
+                unbanIp(ip);
+            } else {
+                return true;
+            }
+        }
+        // Then check CIDR subnet bans
+        ConfigurationSection ipbans = config.getConfigurationSection("ipbans");
+        if (ipbans != null) {
+            for (String key : ipbans.getKeys(false)) {
+                String bannedIp = config.getString("ipbans." + key + ".ip", "");
+                if (bannedIp.contains("/")) {
+                    // This is a CIDR ban entry
+                    long expires = config.getLong("ipbans." + key + ".expires", -1L);
+                    if (expires != -1L && System.currentTimeMillis() > expires) {
+                        unbanIp(bannedIp);
+                        continue;
+                    }
+                    if (isInSubnet(ip, bannedIp)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if an IP address falls within a CIDR subnet range.
+     * For example, isInSubnet("192.168.1.50", "192.168.1.0/24") returns true.
+     *
+     * @param ip   the IP address to check
+     * @param cidr the CIDR notation subnet (e.g., "192.168.1.0/24")
+     * @return true if the IP is within the subnet
+     */
+    public static boolean isInSubnet(String ip, String cidr) {
+        try {
+            String[] parts = cidr.split("/");
+            if (parts.length != 2) return false;
+            InetAddress subnetAddress = InetAddress.getByName(parts[0]);
+            int prefixLength = Integer.parseInt(parts[1]);
+
+            InetAddress checkAddress = InetAddress.getByName(ip);
+
+            byte[] subnetBytes = subnetAddress.getAddress();
+            byte[] checkBytes = checkAddress.getAddress();
+
+            // IPv4 and IPv6 must match in length
+            if (subnetBytes.length != checkBytes.length) return false;
+
+            // Compare bit by bit up to the prefix length
+            int fullBytes = prefixLength / 8;
+            int remainingBits = prefixLength % 8;
+
+            for (int i = 0; i < fullBytes; i++) {
+                if (subnetBytes[i] != checkBytes[i]) return false;
+            }
+
+            if (remainingBits > 0 && fullBytes < subnetBytes.length) {
+                int mask = 0xFF << (8 - remainingBits);
+                if ((subnetBytes[fullBytes] & mask) != (checkBytes[fullBytes] & mask)) return false;
+            }
+
+            return true;
+        } catch (UnknownHostException | NumberFormatException e) {
             return false;
         }
-        return true;
     }
 
     /**

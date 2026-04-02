@@ -16,6 +16,15 @@ discord-link: "https://discord.gg/example"
 timezone: "UTC"
 
 # ==========================================
+# Data / Caching Settings
+# ==========================================
+
+# How often (in minutes) cached player data is auto-saved to disk.
+# Lower values reduce data loss on crashes but increase disk I/O.
+data:
+  auto-save-interval: 5
+
+# ==========================================
 # Staff Groups
 # ==========================================
 # LuckPerms groups that count as "staff" for the {online_staff} placeholder.
@@ -58,6 +67,21 @@ chat:
     click-to-view-permission: "justplugin.stats.others"
 
 # ==========================================
+# Nickname Settings
+# ==========================================
+nickname:
+  # Maximum plain-text length of a nickname (not counting MiniMessage tags).
+  max-length: 16
+  # Whether to allow multiple players to use the same nickname.
+  allow-duplicates: true
+  # List of blocked words (case-insensitive, checked against plain text of nickname).
+  blocked-words:
+    - "admin"
+    - "moderator"
+    - "server"
+    - "console"
+
+# ==========================================
 # Economy Settings
 # ==========================================
 economy:
@@ -74,6 +98,10 @@ economy:
   # Currency symbol displayed before amounts (e.g. "$100.00").
   # When provider is "vault", this is ignored - Vault's economy plugin provides formatting.
   currency-symbol: "$"
+  # Maximum balance a player can hold. Prevents overflow exploits.
+  max-balance: 1000000000000
+  # Cooldown in seconds between /pay uses to prevent spam. Set to 0 to disable.
+  pay-cooldown: 5
   # Whether to show the currency symbol in the scoreboard's {balance_short} placeholder.
   # When false, scoreboard shows "25.70K" instead of "$25.70K".
   show-symbol-scoreboard: false
@@ -168,6 +196,14 @@ homes:
   max-homes: 3
 
 # ==========================================
+# Kit System
+# ==========================================
+kits:
+  # Number of days before archived kits are automatically deleted.
+  # Set to 0 to disable automatic deletion of archived kits.
+  archive-retention-days: 30
+
+# ==========================================
 # Warning System
 # Configurable punishments per warning level.
 # Supported actions: ChatMessage, Kick, TempBan <duration>, Ban, ChatMute, ChatTempMute <duration>, NoPunishment
@@ -185,6 +221,21 @@ warns:
   # Text shown to players in warnings/bans about where to appeal.
   # Defaults to the value of discord-link if not set.
   appeal-source: ""
+
+# ==========================================
+# Jail Settings
+# ==========================================
+jail:
+  # Set jailed players to adventure mode (prevents block breaking/placing)
+  adventure-mode: true
+  # Block commands while jailed
+  block-commands: true
+  # Commands allowed while jailed (if block-commands is true)
+  allowed-commands:
+    - "/msg"
+    - "/r"
+  # Default reason when no reason is specified
+  default-reason: "Jailed by an operator"
 
 # ==========================================
 # Default Reasons
@@ -318,6 +369,21 @@ entity-clear:
   excessive-mob-threshold: 50
   excessive-armorstand-threshold: 30
   excessive-itemframe-threshold: 30
+
+# ==========================================
+# AFK Settings
+# ==========================================
+afk:
+  # Seconds of inactivity before a player is automatically marked AFK. Set to 0 to disable.
+  auto-afk-seconds: 300
+  # Whether to broadcast AFK status changes to all players.
+  broadcast: true
+  # Prefix added to the player's tab list name when AFK. Supports MiniMessage.
+  tab-prefix: "<gray>[AFK] </gray>"
+  # Seconds of AFK before kicking the player. Set to 0 to disable AFK kick.
+  kick-after-seconds: 0
+  # Permission that bypasses AFK kick.
+  kick-bypass-permission: "justplugin.afk.kickbypass"
 
 # ==========================================
 # Spawn Settings
@@ -459,6 +525,18 @@ command-settings:
     enabled: true
   banlist:
     enabled: true
+  jail:
+    enabled: true
+  unjail:
+    enabled: true
+  setjail:
+    enabled: true
+  deljail:
+    enabled: true
+  jails:
+    enabled: true
+  jailinfo:
+    enabled: true
 
   # --- Player ---
   fly:
@@ -504,6 +582,8 @@ command-settings:
   chat:
     enabled: true
   teammsg:
+    enabled: true
+  mail:
     enabled: true
 
   # --- Virtual Inventories ---
@@ -588,6 +668,10 @@ command-settings:
   scoreboard:
     enabled: true
 
+  # --- AFK ---
+  afk:
+    enabled: true
+
   # --- Ranks (LuckPerms Integration) ---
   rank:
     enabled: false
@@ -598,6 +682,58 @@ command-settings:
 
   # --- Maintenance ---
   maintenance:
+    enabled: true
+
+  # --- Kits ---
+  kit:
+    enabled: true
+  kitpreview:
+    enabled: true
+  kitcreate:
+    enabled: true
+  kitedit:
+    enabled: true
+  kitrename:
+    enabled: true
+  kitdelete:
+    enabled: true
+  kitpublish:
+    enabled: true
+  kitdisable:
+    enabled: true
+  kitenable:
+    enabled: true
+  kitarchive:
+    enabled: true
+  kitlist:
+    enabled: true
+
+  # --- Nicknames & Tags ---
+  nick:
+    enabled: true
+  tag:
+    enabled: true
+  tagcreate:
+    enabled: true
+  tagdelete:
+    enabled: true
+  taglist:
+    enabled: true
+
+  # --- Backup ---
+  jpbackup:
+    enabled: true
+
+  # --- Offline Player Commands ---
+  tpoff:
+    enabled: true
+  getposoff:
+    enabled: true
+  getdeathposoff:
+    enabled: true
+  invseeoff:
+    enabled: true
+  echestseeoff:
     enabled: true
 
 # ==========================================
@@ -625,6 +761,13 @@ command-settings:
 # ==========================================
 
 # ==========================================
+# Mail System
+# ==========================================
+mail:
+  # Maximum number of mail messages a player can have in their mailbox.
+  max-per-player: 50
+
+# ==========================================
 # Ranks System (LuckPerms Integration)
 # ==========================================
 # This system is DISABLED by default. Enable it above in commands.rank.enabled.
@@ -643,4 +786,64 @@ command-settings:
 #
 # Every action requires its own permission (justplugin.rank.groups.*,
 # justplugin.rank.players.*). See PERMISSIONS.md for the full list.
+
+# ==========================================
+# Spawn Protection
+# ==========================================
+# Prevents block breaking, block placing, PvP, and explosions within
+# a configurable radius of the world spawn point.
+# Players with justplugin.spawnprotection.bypass can bypass all restrictions.
+# ==========================================
+spawn-protection:
+  enabled: false
+  radius: 50
+  prevent-block-break: true
+  prevent-block-place: true
+  prevent-pvp: true
+  prevent-explosions: true
+
+# ==========================================
+# Seed Protection
+# ==========================================
+# Prevents players from viewing the world seed via /seed.
+# Players with justplugin.seedprotection.bypass can still use /seed.
+# Staff with justplugin.seedprotection.notify receive alerts.
+# ==========================================
+seed-protection:
+  enabled: false
+  alert-staff: true
+  log-to-webhook: true
+
+# ==========================================
+# Join/Leave Messages
+# ==========================================
+# Custom join and leave messages with MiniMessage formatting.
+# Modes: "none" (no messages), "all" (everyone sees), "staff-only" (only staff groups),
+#        "op-only" (only OPs), "group-based" (different format per LuckPerms primary group).
+# Placeholders: {player}, {online}, {max}
+join-leave:
+  mode: "all"
+  join-message: "<green>+</green> <yellow>{player}</yellow> <gray>joined the server."
+  leave-message: "<red>-</red> <yellow>{player}</yellow> <gray>left the server."
+  first-join-message: "<gold>★</gold> <yellow>{player}</yellow> <gray>joined for the first time! Welcome!"
+  group-messages:
+    admin:
+      join: "<red>[Admin]</red> <yellow>{player}</yellow> <gray>has joined."
+      leave: "<red>[Admin]</red> <yellow>{player}</yellow> <gray>has left."
+    default:
+      join: "<green>+</green> <yellow>{player}</yellow> <gray>joined."
+      leave: "<red>-</red> <yellow>{player}</yellow> <gray>left."
+
+# ==========================================
+# Backup System
+# ==========================================
+# Export/import plugin data folder as ZIP archives.
+# Backups are stored in plugins/JustPlugin/backups/.
+backup:
+  # Enable daily auto-backup. Runs async to avoid lag.
+  auto-backup: false
+  # Maximum number of backup files to keep. Oldest are deleted when exceeded.
+  max-backups: 7
+  # Include config.yml in backups.
+  include-config: true
 

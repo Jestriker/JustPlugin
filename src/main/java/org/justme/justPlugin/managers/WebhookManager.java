@@ -21,6 +21,16 @@ public class WebhookManager {
     private final JustPlugin plugin;
     private final HttpClient httpClient;
 
+    // Retry configuration: exponential backoff delays in milliseconds
+    private static final long[] RETRY_DELAYS_MS = {1000L, 3000L, 10000L};
+    private static final int MAX_ATTEMPTS = 3;
+
+    // Circuit breaker: pause sending after consecutive failures
+    private static final int CIRCUIT_BREAKER_THRESHOLD = 10;
+    private static final long CIRCUIT_BREAKER_PAUSE_MS = 5 * 60 * 1000L; // 5 minutes
+    private int consecutiveFailures = 0;
+    private long circuitOpenUntil = 0;
+
     public WebhookManager(JustPlugin plugin) {
         this.plugin = plugin;
         this.httpClient = HttpClient.newBuilder()
@@ -69,11 +79,7 @@ public class WebhookManager {
         String json = buildEmbed(title, plainMessage, color, executor);
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                sendRawSync(url, json);
-            } catch (Exception e) {
-                plugin.getLogger().warning("Failed to send webhook log: " + e.getMessage());
-            }
+            sendWithRetry(url, json);
         });
     }
 
@@ -114,6 +120,65 @@ public class WebhookManager {
                   ]
                 }
                 """.formatted(safeTitle, safeDesc, color, timestamp, safeExec);
+    }
+
+    /**
+     * Check if the circuit breaker is currently open (pausing webhook sends).
+     */
+    private boolean isCircuitOpen() {
+        if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
+            if (System.currentTimeMillis() < circuitOpenUntil) {
+                return true;
+            }
+            // Pause period expired - reset and allow a retry
+            consecutiveFailures = 0;
+            plugin.getLogger().info("Webhook circuit breaker reset, resuming sends.");
+        }
+        return false;
+    }
+
+    private void recordSuccess() {
+        consecutiveFailures = 0;
+    }
+
+    private void recordFailure() {
+        consecutiveFailures++;
+        if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
+            circuitOpenUntil = System.currentTimeMillis() + CIRCUIT_BREAKER_PAUSE_MS;
+            plugin.getLogger().warning("Webhook circuit breaker activated after " + consecutiveFailures
+                    + " consecutive failures. Pausing webhook sends for 5 minutes.");
+        }
+    }
+
+    /**
+     * Send a webhook request with exponential backoff retry (max 3 attempts).
+     * Respects the circuit breaker - skips sending if circuit is open.
+     */
+    private void sendWithRetry(String url, String json) {
+        if (isCircuitOpen()) {
+            return;
+        }
+
+        for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+            try {
+                sendRawSync(url, json);
+                recordSuccess();
+                return;
+            } catch (Exception e) {
+                if (attempt < MAX_ATTEMPTS - 1) {
+                    try {
+                        Thread.sleep(RETRY_DELAYS_MS[attempt]);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                } else {
+                    recordFailure();
+                    plugin.getLogger().warning("Failed to send webhook log after " + MAX_ATTEMPTS
+                            + " attempts: " + e.getMessage());
+                }
+            }
+        }
     }
 
     private CompletableFuture<Integer> sendRawAsync(String url, String json) {

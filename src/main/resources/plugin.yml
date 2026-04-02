@@ -61,6 +61,18 @@ commands:
     description: Confirm teleport to an unsafe destination (used by TP Anyway button)
     usage: /tpunsafeconfirm
     permission: justplugin.tppos
+  tpoff:
+    description: Teleport to an offline player's last location
+    usage: /tpoff <player>
+    permission: justplugin.tpoff
+  getposoff:
+    description: Get an offline player's last known position
+    usage: /getposoff <player>
+    permission: justplugin.getposoff
+  getdeathposoff:
+    description: Get an offline player's last death position
+    usage: /getdeathposoff <player>
+    permission: justplugin.getdeathposoff
 
   # === Warps ===
   warp:
@@ -192,6 +204,14 @@ commands:
     usage: /echestsee <player>
     permission: justplugin.echestsee
     aliases: [openec]
+  invseeoff:
+    description: View an offline player's saved inventory (read-only)
+    usage: /invseeoff <player>
+    permission: justplugin.invseeoff
+  echestseeoff:
+    description: View an offline player's saved ender chest (read-only)
+    usage: /echestseeoff <player>
+    permission: justplugin.echestseeoff
   mute:
     description: Permanently mute a player
     usage: /mute <player> [reason]
@@ -239,6 +259,34 @@ commands:
     usage: /baniplist [page]
     permission: justplugin.banlist
     aliases: [ipbans, ipbanlist]
+  jail:
+    description: Jail a player
+    usage: /jail <player> [duration] [reason]
+    permission: justplugin.jail
+  unjail:
+    description: Release a player from jail
+    usage: /unjail <player>
+    permission: justplugin.unjail
+    aliases: [unjailplayer]
+  setjail:
+    description: Set a jail location
+    usage: /setjail <name>
+    permission: justplugin.setjail
+    aliases: [createjail]
+  deljail:
+    description: Delete a jail location
+    usage: /deljail <name>
+    permission: justplugin.deljail
+    aliases: [removejail, rmjail]
+  jails:
+    description: List all jail locations
+    usage: /jails
+    permission: justplugin.jails
+    aliases: [jaillist]
+  jailinfo:
+    description: View jail info for a player
+    usage: /jailinfo <player>
+    permission: justplugin.jailinfo
 
   # === Player ===
   fly:
@@ -331,6 +379,12 @@ commands:
     permission: justplugin.getdeathpos
     aliases: [getdeathcoords, deathpos, deathcoords]
 
+  # === AFK ===
+  afk:
+    description: Toggle AFK status
+    usage: /afk
+    permission: justplugin.afk
+
   # === Chat ===
   msg:
     description: Send a private message
@@ -375,6 +429,10 @@ commands:
     usage: /clearchat [reason]
     permission: justplugin.clearchat
     aliases: [cc, chatclear]
+  mail:
+    description: Send and read offline mail
+    usage: /mail <send|read|clear|clearall>
+    permission: justplugin.mail
 
   # === Virtual Inventories ===
   anvil:
@@ -541,6 +599,60 @@ commands:
     permission: justplugin.scoreboard.reload
     aliases: [reloadsb]
 
+  # === Kits ===
+  kit:
+    description: Open kit selection GUI or claim a kit
+    usage: /kit [name]
+    permission: justplugin.kit
+    aliases: [kits]
+  kitpreview:
+    description: Preview a kit's contents
+    usage: /kitpreview <name>
+    permission: justplugin.kit.preview
+  kitcreate:
+    description: Create a new kit
+    usage: /kitcreate
+    permission: justplugin.kit.create
+  kitedit:
+    description: Edit an existing kit
+    usage: /kitedit <name>
+    permission: justplugin.kit.edit
+  kitrename:
+    description: Rename a kit
+    usage: /kitrename <old> <new>
+    permission: justplugin.kit.rename
+  kitdelete:
+    description: Delete a kit (archives by default, use 'permanent' flag for permanent)
+    usage: /kitdelete <name> [permanent]
+    permission: justplugin.kit.delete
+  kitpublish:
+    description: Publish a kit to make it available to players
+    usage: /kitpublish <name>
+    permission: justplugin.kit.publish
+  kitdisable:
+    description: Disable a kit
+    usage: /kitdisable <name>
+    permission: justplugin.kit.disable
+  kitenable:
+    description: Enable a disabled kit
+    usage: /kitenable <name>
+    permission: justplugin.kit.disable
+  kitarchive:
+    description: Manage archived kits
+    usage: /kitarchive [restore|delete|deleteall] [name]
+    permission: justplugin.kit.archive
+  kitlist:
+    description: List all kits with statuses
+    usage: /kitlist
+    permission: justplugin.kit.list
+
+  # === Backup ===
+  jpbackup:
+    description: Backup and restore plugin data
+    usage: /jpbackup <export|import|list|delete>
+    permission: justplugin.backup
+    aliases: [backup]
+
   # === Overrides ===
   help:
     description: Show plugin help
@@ -593,6 +705,30 @@ commands:
     usage: /skinunban <name>
     permission: justplugin.skinunban
 
+  # === Nicknames & Tags ===
+  nick:
+    description: Set or remove your nickname
+    usage: /nick <name|off|reset>
+    permission: justplugin.nick
+    aliases: [nickname]
+  tag:
+    description: Open the tag selector or equip a tag
+    usage: /tag [name|off]
+    permission: justplugin.tag
+    aliases: [tags]
+  tagcreate:
+    description: Create a new tag
+    usage: /tagcreate <id> <prefix|suffix> <display...>
+    permission: justplugin.tag.create
+  tagdelete:
+    description: Delete a tag
+    usage: /tagdelete <id>
+    permission: justplugin.tag.delete
+  taglist:
+    description: List all tags
+    usage: /taglist
+    permission: justplugin.tag.list
+
 permissions:
   justplugin.*:
     description: All JustPlugin permissions
@@ -637,6 +773,14 @@ permissions:
       justplugin.sudo: true
       justplugin.invsee: true
       justplugin.echestsee: true
+      justplugin.invseeoff: true
+      justplugin.echestseeoff: true
+      justplugin.tpoff: true
+      justplugin.getposoff: true
+      justplugin.getdeathposoff: true
+      justplugin.spawnprotection.bypass: true
+      justplugin.seedprotection.bypass: true
+      justplugin.seedprotection.notify: true
       justplugin.mute: true
       justplugin.tempmute: true
       justplugin.unmute: true
@@ -793,11 +937,35 @@ permissions:
       justplugin.rank.players.permissions.remove: true
       justplugin.rank.players.permissions.toggle: true
       justplugin.rank.players.permissions.expiry: true
+      justplugin.afk: true
+      justplugin.afk.kickbypass: true
       justplugin.skin: true
       justplugin.skin.others: true
       justplugin.skin.bypassban: true
       justplugin.skinban: true
       justplugin.skinunban: true
+      justplugin.kit: true
+      justplugin.kit.preview: true
+      justplugin.kit.create: true
+      justplugin.kit.edit: true
+      justplugin.kit.rename: true
+      justplugin.kit.delete: true
+      justplugin.kit.delete.permanent: true
+      justplugin.kit.publish: true
+      justplugin.kit.disable: true
+      justplugin.kit.archive: true
+      justplugin.kit.archive.restore: true
+      justplugin.kit.archive.delete: true
+      justplugin.kit.list: true
+      justplugin.kit.cooldownbypass: true
+      justplugin.nick: true
+      justplugin.nick.color: true
+      justplugin.nick.format: true
+      justplugin.nick.rainbow: true
+      justplugin.tag: true
+      justplugin.tag.create: true
+      justplugin.tag.delete: true
+      justplugin.tag.list: true
   justplugin.player:
     description: Basic player permissions (grant to all players via a permissions plugin)
     default: false
@@ -851,6 +1019,11 @@ permissions:
       justplugin.loom: true
       justplugin.smithingtable: true
       justplugin.enchantingtable: true
+      justplugin.afk: true
+      justplugin.kit: true
+      justplugin.kit.preview: true
+      justplugin.nick: true
+      justplugin.tag: true
 
   # --- Basic command permissions ---
   justplugin.tpaccept:
@@ -1269,5 +1442,63 @@ permissions:
     default: false
   justplugin.maintenance.bypass:
     description: Join the server even when maintenance mode is active
+    default: false
+
+  # --- Offline Player Commands ---
+  justplugin.tpoff:
+    description: Teleport to an offline player's last location
+    default: false
+  justplugin.getposoff:
+    description: Get an offline player's last known position
+    default: false
+  justplugin.getdeathposoff:
+    description: Get an offline player's last death position
+    default: false
+  justplugin.invseeoff:
+    description: View an offline player's saved inventory (read-only)
+    default: false
+  justplugin.echestseeoff:
+    description: View an offline player's saved ender chest (read-only)
+    default: false
+
+  # --- Spawn Protection ---
+  justplugin.spawnprotection.bypass:
+    description: Bypass spawn protection restrictions
+    default: false
+
+  # --- Seed Protection ---
+  justplugin.seedprotection.bypass:
+    description: Bypass seed protection and view the world seed
+    default: false
+  justplugin.seedprotection.notify:
+    description: Receive alerts when players try to view the seed
+    default: false
+
+  # --- Nicknames ---
+  justplugin.nick:
+    description: Set or remove your nickname
+    default: false
+  justplugin.nick.color:
+    description: Use color tags in nicknames
+    default: false
+  justplugin.nick.format:
+    description: Use formatting tags (bold, italic, etc.) in nicknames
+    default: false
+  justplugin.nick.rainbow:
+    description: Use rainbow and gradient tags in nicknames
+    default: false
+
+  # --- Tags ---
+  justplugin.tag:
+    description: Open tag selector and equip tags
+    default: false
+  justplugin.tag.create:
+    description: Create new tags
+    default: false
+  justplugin.tag.delete:
+    description: Delete tags
+    default: false
+  justplugin.tag.list:
+    description: List all tags (admin)
     default: false
 
