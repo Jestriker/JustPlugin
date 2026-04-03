@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Release%20Version-1.3-blue" alt="Release Version" />
+  <img src="https://img.shields.io/badge/Release%20Version-1.4-blue" alt="Release Version" />
   <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
   <img src="https://img.shields.io/badge/Available%20on-Paper-purple" alt="Paper" />
   <img src="https://img.shields.io/badge/Built%20with-Java%2025-orange" alt="Java 25" />
@@ -24,7 +24,7 @@
 
 ## 🚀 Overview
 
-JustPlugin replaces dozens of separate plugins with a single JAR. Economy, teleportation, moderation, teams, trading, vanish, warnings, mutes, skins, scoreboard, maintenance mode, and **100+ commands** - all built from scratch with performance and simplicity in mind.
+JustPlugin replaces dozens of separate plugins with a single JAR. Economy, teleportation, moderation, jail, kits, AFK, mail, nicknames, tags, teams, trading, vanish, warnings, mutes, skins, scoreboard, maintenance mode, and **200+ commands** - all built from scratch with performance and simplicity in mind.
 
 Every command can be individually enabled or disabled. Every permission is granular and hierarchical. Every feature just works out of the box.
 
@@ -60,6 +60,23 @@ Every command can be individually enabled or disabled. Every permission is granu
 - `/kick`, `/sudo`, `/invsee`, `/echestsee`, `/deathitems`
 - `/oplist`, `/banlist` - paginated lists with full details
 - **Punishment announcements** - configurable per-type (staff-only by default)
+
+### 🔒 Jail System
+- `/jail <player> [duration] [reason]` - jail a player with optional duration and reason
+- `/unjail`, `/setjail`, `/deljail`, `/jails`, `/jailinfo`
+- Multiple jail locations with named identifiers
+- Temporary and permanent jails with configurable defaults
+- Jailed players are restricted from movement, commands, and interactions
+- Persists across restarts
+
+### 🎒 Kit System
+- `/kit` - opens kit selection GUI, `/kit <name>` to claim directly
+- `/kitpreview`, `/kitcreate`, `/kitedit`, `/kitrename`, `/kitdelete`
+- `/kitpublish`, `/kitdisable`, `/kitenable`, `/kitarchive`, `/kitlist`
+- Full lifecycle management: Pending -> Published -> Archived
+- Per-kit permissions (`justplugin.kits.<name>`), cooldowns, and auto-equip armor
+- GUI preview and selection interface
+- Full docs in `KITS.md`
 
 ### 👻 Vanish
 - `/vanish` - hidden from tab, player count, name autocomplete, and server list
@@ -119,8 +136,32 @@ Every command can be individually enabled or disabled. Every permission is granu
 - `/msg`, `/r` with clickable **[Reply]** buttons
 - `/ignore add/remove/list/clearlist`
 - `/announce`, `/clearchat`, `/itemname`, `/shareitem`
+- `/mail send/read/clear/clearall` - offline mail system
 - **Hover stats tooltip** - hovering over a player's name in chat shows configurable stats (balance, kills, deaths, playtime, K/D)
 - Click-to-view stats with permission check
+- **Custom join/leave messages** - 5 modes: none, all, staff-only, op-only, group-based
+
+### 💤 AFK System
+- `/afk` - toggle AFK status manually
+- **Auto-AFK** - players are automatically marked AFK after configurable idle time
+- **Idle kick** - optionally kick players who remain AFK too long
+- AFK status shown in tab list and chat
+
+### 📧 Mail System
+- `/mail send <player> <message>` - send mail to online or offline players
+- `/mail read` - read your inbox with pagination
+- `/mail clear` - clear your own mail
+- `/mail clearall` - clear all mail (admin)
+- Notifications on login for unread mail
+
+### 🎨 Nickname & Tags
+- `/nick <name>` - set a custom display name with MiniMessage formatting
+- `/nick off` / `/nick reset` - remove your nickname
+- Color permissions: `justplugin.nick.color`, `.format`, `.rainbow`
+- `/tag` - opens tag selection GUI
+- `/tagcreate <id> <prefix|suffix> <display>` - create custom tags
+- `/tagdelete <id>`, `/taglist` - manage server tags
+- Tags display as prefixes or suffixes in chat
 
 ### 🏷️ Ranks (LuckPerms)
 - `/rank` - full management GUI for groups and players
@@ -135,16 +176,51 @@ Every command can be individually enabled or disabled. Every permission is granu
 - **VanishAPI** - vanish state checks
 - Full docs in `ECOSYSTEM.md`
 
+### 💾 Database Support
+- **SQLite**, **MySQL**, and **YAML** storage backends
+- Configured via `database.yml` - switch backends without data loss
+- All player data, economy, punishments, and more stored in the configured backend
+
+### 📦 Backup & Export
+- `/jpbackup export` - create a full plugin data backup
+- `/jpbackup import <file>` - restore from a backup with confirmation
+- `/jpbackup list` - list available backups
+- `/jpbackup delete <file>` - delete a backup
+- All backup I/O runs asynchronously
+
+### 🔒 Spawn Protection
+- Configurable radius around spawn where building is restricted
+- Disabled by default - opt-in via `config.yml`
+- Bypass with `justplugin.spawnprotection.bypass`
+
+### 🌱 Seed Protection
+- Blocks the `/seed` command from non-permitted players
+- Notify staff when someone attempts to use it
+- Bypass with `justplugin.seedprotection.bypass`
+
+### 📡 Offline Player Commands
+- `/tpoff <player>` - teleport to an offline player's last location
+- `/getposoff <player>` - view an offline player's last known position
+- `/getdeathposoff <player>` - view an offline player's last death location
+- `/invseeoff <player>` - view an offline player's inventory
+- `/echestseeoff <player>` - view an offline player's ender chest
+
 ### 📦 More Features
 - **Modular Listener Architecture** - event handling split into 6 categorized sub-listeners (connection, chat, combat, player, server, inventory) for clean separation of concerns
-- **Web Config Editor** - browser-based config editing with security
-- **Discord Webhook Logging** - color-coded embeds for every staff action
+- **Web Config Editor** - browser-based config editing with security (CSRF protection)
+- **Discord Webhook Logging** - color-coded embeds for every staff action (with retry logic)
 - **Entity Clear System** - ClearLag replacement with warnings and notifications
 - **Virtual Inventories** - `/anvil`, `/craft`, `/grindstone`, `/enderchest`, and more
-- **PlaceholderAPI Support** - all JustPlugin placeholders available to other plugins
+- **PlaceholderAPI Support** - all JustPlugin placeholders available to other plugins (optimized caching)
 - **bStats Metrics** - anonymous usage statistics
 - **Stats GUI** - `/stats` opens an interactive stats inventory
 - **Config Migration** - auto-adds new settings on upgrade without wiping existing values
+- **Async I/O** - all file operations run off the main thread for better performance
+- **Thread Safety** - concurrent data access protected throughout the plugin
+- **Graceful Shutdown** - all data saved cleanly on server stop
+- **IP Ban Subnets** - CIDR notation support for IP bans (e.g., `192.168.1.0/24`)
+- **Input Sanitization** - all user inputs are validated and sanitized
+- **Tab Completion Cache** - cached tab completions for better performance
 
 ---
 
@@ -152,7 +228,7 @@ Every command can be individually enabled or disabled. Every permission is granu
 
 1. Drop `JustPlugin.jar` into your server's `plugins/` folder
 2. Start the server - all config files are auto-generated with comments
-3. Customize `config.yml`, `scoreboard.yml`, `motd.yml`, `maintenance/config.yml`, `icon.yml`, `stats.yml`
+3. Customize `config.yml`, `database.yml`, `scoreboard.yml`, `motd.yml`, `maintenance/config.yml`, `icon.yml`, `stats.yml`
 4. Set up permissions with [LuckPerms](https://luckperms.net/) or any permissions plugin
 5. Optionally configure Discord webhook logging with `/setlogswebhook <url>`
 
@@ -202,9 +278,11 @@ Every command can be individually enabled or disabled. Every permission is granu
 |------|----------|
 | `PERMISSIONS.md` | Complete permission list with hierarchy |
 | `COMMANDS.md` | All commands with usage and permissions |
+| `KITS.md` | Kit system guide with lifecycle and configuration |
 | `SCOREBOARD.md` | Placeholder variables and scoreboard config guide |
 | `FORMATTING.md` | MiniMessage formatting guide |
 | `ECOSYSTEM.md` | Developer API documentation |
+| `CHANGELOG.md` | Version history and release notes |
 
 ---
 
@@ -220,8 +298,29 @@ JustPlugin uses a **modular listener architecture**. Event handling is split int
 | `PlayerEventListener` | `listeners.player` | Death, respawn, teleport, movement, advancements |
 | `ServerListener` | `listeners.server` | Server list ping (MOTD, icons, vanish hiding), tab completion |
 | `InventoryListener` | `listeners.inventory` | PayNote redemption |
+| `JailListener` | `listeners.jail` | Jail movement/command/interaction restrictions |
+| `SpawnProtectionListener` | `listeners.spawn` | Spawn area build protection |
+| `SeedProtectionListener` | `listeners.seed` | /seed command blocking |
+| `AfkListener` | `listeners.player` | AFK detection (movement, chat, interaction) |
 
 Shared state (god mode, death locations, persistence) lives in `PlayerListener`, which acts as a utility class accessed by all sub-listeners via `plugin.getPlayerListener()`.
+
+### Manager Architecture
+
+JustPlugin uses 40+ specialized manager classes for clean separation of concerns:
+
+| Manager | Purpose |
+|---------|---------|
+| `DatabaseManager` | SQLite/MySQL/YAML storage backend |
+| `JailManager` | Jail locations, jailed players, durations |
+| `KitManager` | Kit definitions, cooldowns, lifecycle |
+| `AfkManager` | AFK state, auto-AFK, idle kick |
+| `MailManager` | Offline mail storage and delivery |
+| `NickManager` | Nickname storage and formatting |
+| `TagManager` | Tag definitions and player tag assignments |
+| `BackupManager` | Async backup/restore operations |
+| `SpawnProtectionManager` | Spawn area protection radius |
+| ...and 30+ more | Economy, warps, homes, punishments, vanish, teams, etc. |
 
 ---
 

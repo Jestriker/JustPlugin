@@ -1,20 +1,24 @@
 # 📋 JustPlugin - Command Reference
 
-> **Version:** 1.3  
+> **Version:** 1.4  
 > **Author:** JustMe  
-> **Last Updated:** March 29, 2026
+> **Last Updated:** April 3, 2026
 
 ---
 
 ## Table of Contents
 
 - [Teleportation](#-teleportation)
+- [Offline Player Commands](#-offline-player-commands)
 - [Warps](#-warps)
 - [Homes](#-homes)
 - [Economy](#-economy)
 - [Moderation](#-moderation)
+- [Jail](#-jail)
 - [Player](#-player)
 - [Chat](#-chat)
+- [Kits](#-kits)
+- [Personalization](#-personalization)
 - [Virtual Inventories](#-virtual-inventories)
 - [Info](#-info)
 - [Items](#-items)
@@ -50,6 +54,28 @@
 - **Random teleport** (`/tpr`) opens a GUI with three dimension options: Overworld (grass block), Nether (netherrack), and The End (end stone). Nether requires `justplugin.wild.nether`, End requires `justplugin.wild.end`. Finds a safe location within the configured wild range (default: 5000 blocks, min 500 from 0,0). Loads chunks asynchronously. Multiple retry attempts for safe locations.
 - **Back** stores your location before each teleport and death. Uses safety checks, cooldown countdown, and delay like all other teleport features.
 - **SetSpawn** validates that the block below is solid and safe (no lava, magma, cactus, fire, etc.).
+
+---
+
+## 📡 Offline Player Commands
+
+| Command | Usage | Description | Permission | Aliases |
+|---------|-------|-------------|------------|---------|
+| `/tpoff` | `/tpoff <player>` | Teleport to an offline player's last known location | `justplugin.tpoff` | - |
+| `/getposoff` | `/getposoff <player>` | View an offline player's last known position | `justplugin.getposoff` | - |
+| `/getdeathposoff` | `/getdeathposoff <player>` | View an offline player's last death location | `justplugin.getdeathposoff` | - |
+| `/invseeoff` | `/invseeoff <player>` | View an offline player's inventory | `justplugin.invseeoff` | - |
+| `/echestseeoff` | `/echestseeoff <player>` | View an offline player's ender chest | `justplugin.echestseeoff` | - |
+
+### Details
+
+- All offline commands work by reading the player's saved data files.
+- **TpOff** teleports you to the exact location where the offline player last logged out.
+- **GetPosOff** displays the offline player's last known coordinates, world, yaw, and pitch.
+- **GetDeathPosOff** displays the offline player's last death location.
+- **InvseeOff** opens a read-only view of the offline player's inventory (armor, offhand, all slots).
+- **EchestSeeOff** opens a read-only view of the offline player's ender chest.
+- The target player must have joined the server at least once.
 
 ---
 
@@ -174,6 +200,32 @@
 
 ---
 
+## 🔒 Jail
+
+| Command | Usage | Description | Permission | Aliases |
+|---------|-------|-------------|------------|---------|
+| `/jail` | `/jail <player> [duration] [reason]` | Jail a player (permanent or temporary) | `justplugin.jail` | - |
+| `/unjail` | `/unjail <player>` | Release a player from jail | `justplugin.unjail` | - |
+| `/setjail` | `/setjail <name>` | Set a jail location at your current position | `justplugin.setjail` | - |
+| `/deljail` | `/deljail <name>` | Delete a jail location | `justplugin.deljail` | - |
+| `/jails` | `/jails` | List all jail locations | `justplugin.jails` | `jaillist` |
+| `/jailinfo` | `/jailinfo <player>` | View jail details for a player (reason, duration, jailed by) | `justplugin.jailinfo` | - |
+
+### Details
+
+- **Jail** teleports the target to a random (or specified) jail location and restricts their movement, commands, and interactions.
+- **Duration format** uses the same format as temp bans: `1d2h30m` (days, hours, minutes, seconds). No duration means permanent.
+- **Unjail** releases the player and teleports them back to their pre-jail location.
+- **SetJail** creates a named jail location at your current position. You must set at least one jail before using `/jail`.
+- **DelJail** permanently removes a jail location.
+- **Jails** lists all configured jail locations with their coordinates and world.
+- **JailInfo** shows whether a player is jailed, the jail name, reason, who jailed them, and remaining duration (if temporary).
+- Jailed players are restricted from: moving outside the jail area, using most commands, breaking/placing blocks, and interacting with entities.
+- Jail data persists across server restarts.
+- Works for both online and offline players (offline players are jailed on next login).
+
+---
+
 ## 🎮 Player
 
 | Command | Usage | Description | Permission | Aliases |
@@ -198,9 +250,11 @@
 | `/feed` | `/feed [player]` | Restore full hunger and saturation | `justplugin.feed` | - |
 | `/getpos` | `/getpos [player]` | Display current coordinates, world, yaw, and pitch | - (public for self) | `whereami`, `position`, `getcoords`, `coords` |
 | `/getdeathpos` | `/getdeathpos [player]` | Display last death location | Configurable for self | `getdeathcoords`, `deathpos`, `deathcoords` |
+| `/afk` | `/afk` | Toggle AFK (Away From Keyboard) status | `justplugin.afk` | `away` |
 
 ### Details
 
+- **AFK:** Toggles your AFK status. When AFK, a tag is shown in tab list and chat. Auto-AFK triggers after a configurable idle time (default: 5 minutes). Players who remain AFK can optionally be kicked after a configurable duration. Players with `justplugin.afk.kickbypass` are never kicked for being AFK. Movement, chat, and interaction automatically clear AFK status.
 - **Fly:** `justplugin.fly` for self, `justplugin.fly.others` for other players.
 - **Gamemode:** `justplugin.gamemode` for self, `justplugin.gamemode.others` for other players. Works from console when specifying a player.
 - **God mode:** Fully heals, restores food/saturation, extinguishes fire, and removes all negative potion effects. `justplugin.god` for self, `justplugin.god.others` for others.
@@ -227,9 +281,16 @@
 | `/chat` | `/chat <all \| team>` | Switch your chat mode between global and team chat | `justplugin.chat` | - |
 | `/teammsg` | `/teammsg <message>` | Send a one-off message to your team (doesn't change chat mode) | `justplugin.chat` | `tmsg`, `tm` |
 | `/clearchat` | `/clearchat [reason]` | Clear the chat for all online players | `justplugin.clearchat` | `cc`, `chatclear` |
+| `/mail` | `/mail <send\|read\|clear\|clearall> [args]` | Send, read, or manage offline mail | `justplugin.mail` | - |
 
 ### Details
 
+- **Mail** is an offline messaging system. Subcommands:
+  - `/mail send <player> <message>` - send mail to any player (online or offline). Requires `justplugin.mail.send`.
+  - `/mail read [page]` - read your inbox with pagination (10 per page).
+  - `/mail clear` - clear all your received mail.
+  - `/mail clearall` - clear all mail for all players (admin).
+  - Players are notified of unread mail on login.
 - **Private messages** respect the ignore system. Ignored players cannot send you `/msg` or `/r`.
 - **Reply** remembers the last player you messaged. Respects ignore.
 - **Announce** formats as `[Announcement]` in red bold, with yellow message text.
@@ -238,6 +299,61 @@
 - **TeamMsg** sends a message to your team directly without changing your current chat mode.
 - **Ignore** blocks: `/msg`, `/r`, `/tpa`, `/tpahere`, `/trade` requests, and global chat messages from the ignored player. The ignored player is notified when they are added/removed. Subcommands: `add <player>` (add to ignore list), `remove <player>` (remove from ignore list, works for offline players too), `list` (view all ignored players with online/offline status), `clearlist` (wipe the entire ignore list).
 - **ClearChat** sends 100 blank lines to every online player, then optionally shows a configurable post-clear message. Logs to staff and webhook with the executor and reason (if provided).
+
+---
+
+## 🎒 Kits
+
+| Command | Usage | Description | Permission | Aliases |
+|---------|-------|-------------|------------|---------|
+| `/kit` | `/kit [name]` | Open kit selection GUI (no args) or claim a specific kit | `justplugin.kit` | - |
+| `/kitpreview` | `/kitpreview <name>` | Preview a kit's contents in a GUI | `justplugin.kit.preview` | - |
+| `/kitcreate` | `/kitcreate` | Create a new kit via GUI (from your current inventory) | `justplugin.kit.create` | - |
+| `/kitedit` | `/kitedit <name>` | Edit an existing kit's items | `justplugin.kit.edit` | - |
+| `/kitrename` | `/kitrename <old> <new>` | Rename a kit | `justplugin.kit.rename` | - |
+| `/kitdelete` | `/kitdelete <name> [permanent]` | Archive a kit (or permanently delete with `permanent` flag) | `justplugin.kit.delete` | - |
+| `/kitpublish` | `/kitpublish <name>` | Publish a pending kit for players | `justplugin.kit.publish` | - |
+| `/kitdisable` | `/kitdisable <name>` | Temporarily disable a published kit | `justplugin.kit.disable` | - |
+| `/kitenable` | `/kitenable <name>` | Re-enable a disabled kit | `justplugin.kit.disable` | - |
+| `/kitarchive` | `/kitarchive [restore\|delete\|deleteall] [name]` | Manage archived kits | `justplugin.kit.archive` | - |
+| `/kitlist` | `/kitlist` | List all kits with their current status | `justplugin.kit.list` | - |
+
+### Details
+
+- **Kit** opens a GUI showing all published kits the player has permission for. Each kit requires `justplugin.kits.<name>` to claim.
+- **Kit Lifecycle:** Kits go through stages: Pending (just created) -> Published (available to players) -> Archived (soft-deleted). Kits can also be Disabled (temporarily unavailable).
+- **Cooldowns** are per-kit and configurable. Players with `justplugin.kit.cooldownbypass` bypass all kit cooldowns.
+- **Auto-equip armor** - helmets, chestplates, leggings, and boots are automatically equipped to the correct armor slot when claiming.
+- **Permanent delete** requires `justplugin.kit.delete.permanent` permission.
+- **Archive** has subcommands: `restore <name>` (requires `justplugin.kit.archive.restore`), `delete <name>` (requires `justplugin.kit.archive.delete`), `deleteall`.
+- **Archive retention** - archived kits are auto-deleted after a configurable number of days (default: 30).
+- Full documentation in `KITS.md`.
+
+---
+
+## 🎨 Personalization
+
+| Command | Usage | Description | Permission | Aliases |
+|---------|-------|-------------|------------|---------|
+| `/nick` | `/nick <name \| off \| reset>` | Set a custom display name or remove it | `justplugin.nick` | `nickname` |
+| `/tag` | `/tag [name \| off]` | Open tag GUI (no args), equip a tag, or remove it | `justplugin.tag` | - |
+| `/tagcreate` | `/tagcreate <id> <prefix\|suffix> <display...>` | Create a new tag | `justplugin.tag.create` | - |
+| `/tagdelete` | `/tagdelete <id>` | Delete a tag | `justplugin.tag.delete` | - |
+| `/taglist` | `/taglist` | List all available tags | `justplugin.tag.list` | - |
+
+### Details
+
+- **Nick** sets your display name shown in chat, tab list, and other player-facing locations. Supports MiniMessage formatting.
+  - `/nick off` or `/nick reset` removes your nickname and reverts to your username.
+  - Color formatting requires `justplugin.nick.color`. Advanced formatting (bold, italic, etc.) requires `justplugin.nick.format`. Rainbow gradient requires `justplugin.nick.rainbow`.
+  - Tags the player doesn't have permission for are automatically stripped from the input.
+  - Nickname length is validated (configurable min/max in `config.yml`).
+- **Tag** opens a GUI showing all available tags. Click a tag to equip it. Use `/tag off` to remove.
+  - Tags are displayed as prefixes or suffixes in chat (configurable per tag).
+  - Each tag requires no additional per-tag permission - any player with `justplugin.tag` can equip available tags.
+- **TagCreate** creates a new tag with an ID, type (prefix or suffix), and display text (supports MiniMessage formatting).
+- **TagDelete** permanently removes a tag. Players who had it equipped lose it.
+- **TagList** shows all tags with their IDs, types, and display text.
 
 ---
 
@@ -363,9 +479,16 @@
 | `/skin` | `/skin <set \| clear> [name] [player]` | Set, clear, or reset your skin | `justplugin.skin` | `setskin` |
 | `/skinban` | `/skinban [name \| list]` | Ban a skin name from being used, or list all banned skins | `justplugin.skinban` | - |
 | `/skinunban` | `/skinunban <name>` | Unban a skin name | `justplugin.skinunban` | - |
+| `/jpbackup` | `/jpbackup <export\|import\|list\|delete> [file]` | Manage plugin data backups | `justplugin.backup` | `backup` |
 
 ### Details
 
+- **Backup** manages full plugin data backups:
+  - `/jpbackup export` - creates a timestamped backup of all plugin data. Requires `justplugin.backup.export`.
+  - `/jpbackup import <file>` - restores from a backup file with confirmation prompt. Requires `justplugin.backup.import`.
+  - `/jpbackup list` - lists all available backup files with sizes and dates. Requires `justplugin.backup.list`.
+  - `/jpbackup delete <file>` - deletes a backup file. Requires `justplugin.backup.delete`.
+  - All backup operations run asynchronously to avoid server lag.
 - **Trade** opens a split GUI where both players place items and must both click "Accept" to finalize. Closing the GUI returns items. Trade requests have a configurable timeout (default: 60s). Requests are cancelled if either player logs off (the other is notified). Blocked by the ignore system.
 - **Discord set** requires `justplugin.discord.set`. The link is clickable in chat.
 - **Apply Edits** requires a session code generated by the self-hosted web config editor. Enable the web editor in `config.yml` under `web-editor.enabled`, then open `http://localhost:8585` in your browser. Edit settings, click "Save & Generate Code", and run `/applyedits <code>` in-game. Session codes expire after 10 minutes. This is the **highest-level** admin permission in the plugin.

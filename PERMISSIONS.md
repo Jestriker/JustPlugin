@@ -1,8 +1,8 @@
 # JustPlugin - Permissions Reference
 
-> **Version:** 1.3  
+> **Version:** 1.4  
 > **Author:** JustMe  
-> **Last Updated:** March 29, 2026
+> **Last Updated:** April 3, 2026
 
 > **IMPORTANT:** OPs do NOT have any permissions by default. All permissions must be granted  
 > through a permissions plugin (e.g., LuckPerms). Grant `justplugin.player` to your default  
@@ -17,12 +17,16 @@
 - [Default Player Permission](#-default-player-permission-justpluginplayer)
 - [All Permissions (Detailed)](#all-permissions-detailed)
   - [Teleportation](#-teleportation-permissions)
+  - [Offline Player Commands](#-offline-player-command-permissions)
   - [Warp](#-warp-permissions)
   - [Home](#-home-permissions)
   - [Economy](#-economy-permissions)
   - [Moderation](#-moderation-permissions)
+  - [Jail](#-jail-permissions)
   - [Player](#-player-permissions)
   - [Chat](#-chat-permissions)
+  - [Kits](#-kit-permissions)
+  - [Personalization](#-personalization-permissions)
   - [Virtual Inventories](#-virtual-inventory-permissions)
   - [Info](#-info-permissions)
   - [Items](#-items-permissions)
@@ -65,6 +69,11 @@ justplugin.*                          <- Grants EVERYTHING (must be explicitly a
 |   +-- justplugin.trade
 |   +-- justplugin.tab
 |   +-- justplugin.rank                  <- Open ranks GUI (requires LuckPerms)
+|   +-- justplugin.afk                   <- Toggle AFK status
+|   +-- justplugin.mail                  <- Read and manage own mail
+|   +-- justplugin.nick                  <- Set nickname
+|   +-- justplugin.tag                   <- Equip tags from GUI
+|   +-- justplugin.kit                   <- Claim kits
 |
 |   [No permission needed - public commands]
 |   +-- /getpos (self)                   <- Always public, no permission
@@ -195,6 +204,47 @@ justplugin.*                          <- Grants EVERYTHING (must be explicitly a
 |   +-- justplugin.announce.tempmute  <- See temp mute announcements
 |   +-- justplugin.announce.warn      <- See warning announcements
 |   +-- justplugin.announce.kick      <- See kick announcements
+|   +-- justplugin.jail               <- Jail players
+|   +-- justplugin.unjail             <- Release jailed players
+|   +-- justplugin.setjail            <- Create jail locations
+|   +-- justplugin.deljail            <- Delete jail locations
+|   +-- justplugin.jails              <- List jail locations
+|   +-- justplugin.jailinfo           <- View jail details for a player
+|   +-- justplugin.kit.preview        <- Preview kit contents
+|   +-- justplugin.kit.create         <- Create new kits
+|   +-- justplugin.kit.edit           <- Edit existing kits
+|   +-- justplugin.kit.rename         <- Rename kits
+|   +-- justplugin.kit.delete         <- Archive kits (soft delete)
+|   +-- justplugin.kit.delete.permanent <- Permanently delete kits
+|   +-- justplugin.kit.publish        <- Publish kits
+|   +-- justplugin.kit.disable        <- Disable/enable kits
+|   +-- justplugin.kit.archive        <- View archived kits
+|   +-- justplugin.kit.archive.restore <- Restore archived kits
+|   +-- justplugin.kit.archive.delete <- Permanently delete archived kits
+|   +-- justplugin.kit.list           <- List all kits with statuses
+|   +-- justplugin.kit.cooldownbypass <- Bypass kit cooldowns
+|   +-- justplugin.kits.<kitName>     <- Per-kit claim permission
+|   +-- justplugin.afk.kickbypass     <- Never kicked for being AFK
+|   +-- justplugin.mail.send          <- Send mail to other players
+|   +-- justplugin.nick.color         <- Use color codes in nicknames
+|   +-- justplugin.nick.format        <- Use formatting (bold, italic, etc.) in nicknames
+|   +-- justplugin.nick.rainbow       <- Use rainbow gradient in nicknames
+|   +-- justplugin.tag.create         <- Create new tags
+|   +-- justplugin.tag.delete         <- Delete tags
+|   +-- justplugin.tag.list           <- List all tags
+|   +-- justplugin.backup             <- Base backup permission
+|   +-- justplugin.backup.export      <- Create backups
+|   +-- justplugin.backup.import      <- Restore from backups
+|   +-- justplugin.backup.list        <- List backups
+|   +-- justplugin.backup.delete      <- Delete backups
+|   +-- justplugin.tpoff              <- Teleport to offline player's location
+|   +-- justplugin.getposoff          <- View offline player's position
+|   +-- justplugin.getdeathposoff     <- View offline player's death position
+|   +-- justplugin.invseeoff          <- View offline player's inventory
+|   +-- justplugin.echestseeoff       <- View offline player's ender chest
+|   +-- justplugin.spawnprotection.bypass <- Bypass spawn protection
+|   +-- justplugin.seedprotection.bypass  <- Bypass seed protection
+|   +-- justplugin.seedprotection.notify  <- Notified when /seed is attempted
 ```
 
 ---
@@ -250,6 +300,11 @@ Includes all permissions listed in this document.
 | `justplugin.tab` | Refresh tab list |
 | `justplugin.playerlist` | View advanced player list |
 | `justplugin.deathitems` | View and restore own death items |
+| `justplugin.afk` | Toggle AFK status |
+| `justplugin.mail` | Read and manage own mail |
+| `justplugin.nick` | Set nickname |
+| `justplugin.tag` | Equip tags from GUI |
+| `justplugin.kit` | Claim kits |
 
 ### Not in `justplugin.player` - Always Public (no permission needed):
 
@@ -286,6 +341,18 @@ Includes all permissions listed in this document.
 | `justplugin.teleport.bypass` | Legacy bypass for teleport warmup (use per-command `.cooldownbypass` instead) | `op` | All teleport commands |
 
 > **Note:** `/tpaccept`, `/tpacancel`, and `/tpreject` have no permission requirement - any player can accept/cancel/reject requests.
+
+---
+
+### 📡 Offline Player Command Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.tpoff` | Teleport to an offline player's last known location | `op` | `/tpoff` |
+| `justplugin.getposoff` | View an offline player's last known position | `op` | `/getposoff` |
+| `justplugin.getdeathposoff` | View an offline player's last death location | `op` | `/getdeathposoff` |
+| `justplugin.invseeoff` | View an offline player's inventory | `op` | `/invseeoff` |
+| `justplugin.echestseeoff` | View an offline player's ender chest | `op` | `/echestseeoff` |
 
 ---
 
@@ -357,6 +424,19 @@ Includes all permissions listed in this document.
 
 ---
 
+### 🔒 Jail Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.jail` | Jail a player (permanent or temporary) | `op` | `/jail` |
+| `justplugin.unjail` | Release a player from jail | `op` | `/unjail` |
+| `justplugin.setjail` | Create a named jail location | `op` | `/setjail` |
+| `justplugin.deljail` | Delete a jail location | `op` | `/deljail` |
+| `justplugin.jails` | List all jail locations | `op` | `/jails` |
+| `justplugin.jailinfo` | View jail details for a specific player | `op` | `/jailinfo` |
+
+---
+
 ### 🎮 Player Permissions
 
 | Permission | Description | Default | Commands |
@@ -384,6 +464,8 @@ Includes all permissions listed in this document.
 | `justplugin.getpos.others` | View another player's current position | `op` | `/getpos <player>` |
 | `justplugin.getdeathpos` | View your own death location (configurable) | `true` (player) | `/getdeathpos` |
 | `justplugin.getdeathpos.others` | View another player's death location | `op` | `/getdeathpos <player>` |
+| `justplugin.afk` | Toggle AFK status | `true` (player) | `/afk` |
+| `justplugin.afk.kickbypass` | Never kicked for being AFK | `op` | - |
 
 > **Note:** `/getpos` (self) requires **no permission** - it is always public. Self-use permission for `/getdeathpos` is configurable via `commands.getdeathpos.require-permission-self` in `config.yml`.
 
@@ -399,6 +481,47 @@ Includes all permissions listed in this document.
 | `justplugin.sharecoords` | Share your coordinates in chat | `true` (player) | `/sharecoords` |
 | `justplugin.sharedeathcoords` | Share your death coordinates in chat | `true` (player) | `/sharedeathcoords` |
 | `justplugin.chat` | Switch between global and team chat modes | `true` (player) | `/chat` |
+| `justplugin.mail` | Read and manage own mail | `true` (player) | `/mail read`, `/mail clear` |
+| `justplugin.mail.send` | Send mail to other players | `true` (player) | `/mail send` |
+
+---
+
+### 🎒 Kit Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.kit` | Open kit selection GUI and claim kits | `true` (player) | `/kit` |
+| `justplugin.kit.preview` | Preview a kit's contents | `true` (player) | `/kitpreview` |
+| `justplugin.kits.<kitName>` | Permission to claim a specific kit (per-kit) | varies | `/kit <name>` |
+| `justplugin.kit.create` | Create new kits | `op` | `/kitcreate` |
+| `justplugin.kit.edit` | Edit existing kits | `op` | `/kitedit` |
+| `justplugin.kit.rename` | Rename kits | `op` | `/kitrename` |
+| `justplugin.kit.delete` | Archive a kit (soft delete) | `op` | `/kitdelete` |
+| `justplugin.kit.delete.permanent` | Permanently delete a kit | `op` | `/kitdelete <name> permanent` |
+| `justplugin.kit.publish` | Publish a pending kit for players | `op` | `/kitpublish` |
+| `justplugin.kit.disable` | Disable or re-enable a published kit | `op` | `/kitdisable`, `/kitenable` |
+| `justplugin.kit.archive` | View archived kits | `op` | `/kitarchive` |
+| `justplugin.kit.archive.restore` | Restore an archived kit | `op` | `/kitarchive restore` |
+| `justplugin.kit.archive.delete` | Permanently delete archived kits | `op` | `/kitarchive delete`, `/kitarchive deleteall` |
+| `justplugin.kit.list` | List all kits with their statuses | `op` | `/kitlist` |
+| `justplugin.kit.cooldownbypass` | Bypass all kit cooldowns | `false` | `/kit` |
+
+> **Note:** `justplugin.kit.cooldownbypass` is **NOT** included in `justplugin.*` - it must be explicitly granted.
+
+---
+
+### 🎨 Personalization Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.nick` | Set a custom display name | `true` (player) | `/nick` |
+| `justplugin.nick.color` | Use color codes in nicknames | `op` | `/nick` |
+| `justplugin.nick.format` | Use formatting (bold, italic, underline, etc.) in nicknames | `op` | `/nick` |
+| `justplugin.nick.rainbow` | Use rainbow gradient in nicknames | `op` | `/nick` |
+| `justplugin.tag` | Equip and unequip tags from the tag GUI | `true` (player) | `/tag` |
+| `justplugin.tag.create` | Create new tags | `op` | `/tagcreate` |
+| `justplugin.tag.delete` | Delete tags | `op` | `/tagdelete` |
+| `justplugin.tag.list` | List all available tags | `op` | `/taglist` |
 
 ---
 
@@ -479,6 +602,21 @@ Includes all permissions listed in this document.
 | `justplugin.skin.bypassban` | Bypass skin bans (use banned skin names) | `op` | `/skin set` |
 | `justplugin.skinban` | Ban skin names from being used | `op` | `/skinban` |
 | `justplugin.skinunban` | Unban skin names | `op` | `/skinunban` |
+| `justplugin.backup` | Base backup permission | `op` | `/jpbackup` |
+| `justplugin.backup.export` | Create plugin data backups | `op` | `/jpbackup export` |
+| `justplugin.backup.import` | Restore from backup files | `op` | `/jpbackup import` |
+| `justplugin.backup.list` | List available backups | `op` | `/jpbackup list` |
+| `justplugin.backup.delete` | Delete backup files | `op` | `/jpbackup delete` |
+
+---
+
+### 🛡️ Protection Permissions
+
+| Permission | Description | Default | Commands |
+|------------|-------------|---------|----------|
+| `justplugin.spawnprotection.bypass` | Bypass spawn protection (build inside protected radius) | `op` | - |
+| `justplugin.seedprotection.bypass` | Bypass seed protection (use /seed command) | `op` | `/seed` |
+| `justplugin.seedprotection.notify` | Receive notifications when a player attempts to use /seed | `op` | - |
 
 ---
 

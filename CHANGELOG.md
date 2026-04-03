@@ -1,5 +1,113 @@
 # JustPlugin - Changelog
 
+## v1.4 - Database, Jail, Kits, AFK, Mail & 28+ New Features
+**Released:** April 3, 2026
+
+### What's New
+
+#### Database Support
+- **Multi-backend storage** - choose between SQLite, MySQL, or YAML via `database.yml`
+- Switch backends without data loss - all player data, economy, punishments, and more supported
+
+#### Jail System
+- `/jail <player> [duration] [reason]` - jail players with temporary or permanent sentences
+- `/unjail`, `/setjail`, `/deljail`, `/jails`, `/jailinfo` - full jail management
+- Multiple named jail locations with random selection
+- Jailed players are restricted from movement, commands, and interactions
+- Persists across restarts. Works for offline players (jailed on next login)
+
+#### Kit System
+- `/kit` - GUI-based kit selection and claiming
+- `/kitpreview`, `/kitcreate`, `/kitedit`, `/kitrename`, `/kitdelete`
+- `/kitpublish`, `/kitdisable`, `/kitenable`, `/kitarchive`, `/kitlist`
+- Full lifecycle: Pending -> Published -> Archived
+- Per-kit permissions (`justplugin.kits.<name>`), cooldowns, auto-equip armor
+- Archive retention with configurable auto-delete (default: 30 days)
+- Full documentation in `KITS.md`
+
+#### AFK System
+- `/afk` - toggle AFK status manually
+- Auto-AFK after configurable idle time
+- Optional idle kick with bypass permission (`justplugin.afk.kickbypass`)
+- AFK status shown in tab list and chat
+- Movement, chat, and interaction auto-clear AFK
+
+#### Mail System
+- `/mail send <player> <message>` - offline messaging to any player
+- `/mail read`, `/mail clear`, `/mail clearall` - inbox management with pagination
+- Notifications on login for unread mail
+
+#### Nickname System
+- `/nick <name>` - custom display name with MiniMessage formatting
+- `/nick off` / `/nick reset` - remove nickname
+- Granular color permissions: `justplugin.nick.color`, `.format`, `.rainbow`
+- Configurable min/max length validation
+
+#### Tag System
+- `/tag` - GUI-based tag selection and equipping
+- `/tagcreate <id> <prefix|suffix> <display>` - admin tag creation
+- `/tagdelete`, `/taglist` - tag management
+- Tags display as prefixes or suffixes in chat
+
+#### Backup & Export System
+- `/jpbackup export` - create full plugin data backups
+- `/jpbackup import <file>` - restore with confirmation
+- `/jpbackup list`, `/jpbackup delete` - backup management
+- All I/O runs asynchronously
+
+#### Offline Player Commands
+- `/tpoff <player>` - teleport to offline player's last location
+- `/getposoff <player>` - view offline player's last known position
+- `/getdeathposoff <player>` - view offline player's last death location
+- `/invseeoff <player>` - view offline player's inventory
+- `/echestseeoff <player>` - view offline player's ender chest
+
+#### Spawn Protection
+- Configurable radius around spawn where building is restricted
+- Disabled by default - opt-in via `config.yml`
+- Bypass with `justplugin.spawnprotection.bypass`
+
+#### Seed Protection
+- Blocks `/seed` command from non-permitted players
+- Staff notifications on attempted use
+- Bypass with `justplugin.seedprotection.bypass`
+
+#### Custom Join/Leave Messages
+- 5 visibility modes: none, all, staff-only, op-only, group-based
+- Fully configurable message templates
+
+### Performance & Security Improvements
+
+- **Async I/O** - all file read/write operations run off the main thread
+- **Thread safety** - concurrent data access protected throughout the plugin
+- **Balance overflow protection** - prevents integer overflow in economy operations
+- **Pay rate limiting** - prevents payment spam abuse
+- **Input sanitization** - all user inputs are validated and sanitized
+- **Teleport safety enhancements** - improved hazard detection
+- **IP ban subnets (CIDR)** - ban entire IP ranges (e.g., `192.168.1.0/24`)
+- **Webhook retry logic** - automatic retry with backoff for failed Discord webhook deliveries
+- **Web editor CSRF protection** - prevents cross-site request forgery attacks
+- **Scoreboard flicker fix** - eliminates visual flickering on scoreboard updates
+- **Placeholder performance** - optimized caching for PlaceholderAPI
+- **Web page extraction** - improved web config editor page handling
+- **Tab completion cache** - cached completions for better performance
+- **Graceful shutdown** - all data saved cleanly on server stop
+
+### Config Changes
+- New `database.yml` configuration file for storage backend selection
+- New jail settings in `config.yml` under `jail`
+- New kit settings in `config.yml` under `kits`
+- New AFK settings in `config.yml` under `afk`
+- New mail settings in `config.yml` under `mail`
+- New nickname settings in `config.yml` under `nick`
+- New tag settings in `config.yml` under `tags`
+- New spawn protection settings in `config.yml` under `spawn-protection`
+- New seed protection settings in `config.yml` under `seed-protection`
+- New join/leave message settings in `config.yml`
+- Config auto-migrates - new settings are added automatically on load
+
+---
+
 ## v1.3 - Architecture Refactor & Listener Modularization
 **Released:** March 29, 2026
 
