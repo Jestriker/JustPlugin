@@ -1,0 +1,154 @@
+# ==========================================
+# Automated Messages Configuration
+# ==========================================
+# Send automated messages to players at configurable intervals or times.
+# Disabled by default. Set enabled to true to activate.
+#
+# Each message has:
+#   - id: Unique identifier
+#   - text: The message content (supports MiniMessage formatting)
+#   - mode: How/when to send ("interval", "schedule", "on-the-hour", "on-the-half-hour")
+#   - enabled: Whether this specific message is active
+#   - permission: Optional - only send to players with this permission (empty = all players)
+#   - worlds: Optional - only send in these worlds (empty = all worlds)
+#
+# ==========================================
+# MODE OPTIONS:
+#
+# 1. "interval" - Send every X time units
+#    interval: "10m"          # Every 10 minutes
+#    interval: "1h"           # Every 1 hour
+#    interval: "30s"          # Every 30 seconds
+#    interval: "2h30m"        # Every 2 hours 30 minutes
+#
+# 2. "schedule" - Send at specific times of day (server timezone from config.yml)
+#    times:
+#      - "12:00"              # Every day at noon
+#      - "00:00"              # Every day at midnight
+#      - "08:00"              # Every day at 8 AM
+#      - "18:30"              # Every day at 6:30 PM
+#
+# 3. "on-the-hour" - Send every full hour (1:00, 2:00, 3:00, etc.)
+#    (no extra config needed)
+#
+# 4. "on-the-half-hour" - Send every 30 minutes on the clock (:00 and :30)
+#    (no extra config needed)
+#
+# ==========================================
+# FORMAT OPTIONS:
+#
+# prefix: The prefix shown before each message. Set to "" to disable.
+# Default prefix: "<gradient:#00aaff:#00ffaa><bold>Server</bold></gradient> <dark_gray>» <reset>"
+#
+# sound: Optional sound to play when message is sent.
+#   Set to "" or remove to disable sound.
+#   Example: "ENTITY_EXPERIENCE_ORB_PICKUP"
+#
+# ==========================================
+
+enabled: false
+
+# Default prefix for all automated messages (can be overridden per message)
+prefix: "<gradient:#00aaff:#00ffaa><bold>Server</bold></gradient> <dark_gray>\u00BB <reset>"
+
+# Default sound (empty = no sound)
+sound: ""
+
+messages:
+  # === EXAMPLE 1: Interval-based (every 10 minutes) ===
+  discord-reminder:
+    enabled: true
+    mode: "interval"
+    interval: "10m"
+    text:
+      - "<yellow>Join our Discord!</yellow> <gray>discord.gg/example"
+    # Only players without a specific permission see this (optional)
+    permission: ""
+    # Send in all worlds (optional, empty = all)
+    worlds: []
+    # Override the global prefix for this message (optional)
+    # prefix: "<gold>[Discord]</gold> "
+    # Override sound for this message (optional)
+    # sound: "BLOCK_NOTE_BLOCK_CHIME"
+
+  # === EXAMPLE 2: Interval-based (every hour) with multiple lines ===
+  rules-reminder:
+    enabled: true
+    mode: "interval"
+    interval: "1h"
+    text:
+      - "<red><bold>Server Rules</bold></red>"
+      - " <gray>1. No griefing or stealing"
+      - " <gray>2. Be respectful to all players"
+      - " <gray>3. No hacking or exploiting"
+      - " <gray>4. Have fun!"
+    permission: ""
+    worlds: []
+
+  # === EXAMPLE 3: Schedule-based (specific times) ===
+  restart-warning:
+    enabled: false
+    mode: "schedule"
+    times:
+      - "03:50"
+      - "15:50"
+    text:
+      - "<red><bold>Warning: Server restart in 10 minutes!</bold></red>"
+    permission: ""
+    worlds: []
+
+  # === EXAMPLE 4: On the hour (every full hour) ===
+  hourly-tip:
+    enabled: false
+    mode: "on-the-hour"
+    text:
+      - "<aqua>Tip:</aqua> <gray>Use <yellow>/kit</yellow> to claim free items!"
+    permission: ""
+    worlds: []
+
+  # === EXAMPLE 5: On the half hour ===
+  vote-reminder:
+    enabled: false
+    mode: "on-the-half-hour"
+    text:
+      - "<green>Vote for us!</green> <gray>Use <yellow>/vote</yellow> to support the server."
+    permission: ""
+    worlds: []
+
+  # === EXAMPLE 6: Short interval (every 5 minutes) with permission filter ===
+  donor-thanks:
+    enabled: false
+    mode: "interval"
+    interval: "5m"
+    text:
+      - "<gold>Thank you for supporting the server!</gold>"
+    # Only players with this permission see it
+    permission: "group.donor"
+    worlds: []
+
+  # === EXAMPLE 7: World-specific message ===
+  nether-warning:
+    enabled: false
+    mode: "interval"
+    interval: "15m"
+    text:
+      - "<red>Warning: You are in the Nether!</red> <gray>Watch out for lava and ghasts."
+    permission: ""
+    worlds:
+      - "world_nether"
+
+  # === EXAMPLE 8: Rotating messages (multiple messages cycle) ===
+  tips-rotation:
+    enabled: false
+    mode: "interval"
+    interval: "3m"
+    # When multiple text blocks are defined as a list of lists, they rotate
+    rotate: true
+    text-list:
+      - - "<aqua>Tip:</aqua> <gray>Set a home with <yellow>/sethome</yellow>!"
+      - - "<aqua>Tip:</aqua> <gray>Check your balance with <yellow>/balance</yellow>!"
+      - - "<aqua>Tip:</aqua> <gray>Teleport to friends with <yellow>/tpa <player></yellow>!"
+      - - "<aqua>Tip:</aqua> <gray>Report bugs on our Discord!"
+      - - "<aqua>Tip:</aqua> <gray>Use <yellow>/mail send</yellow> to message offline players!"
+    permission: ""
+    worlds: []

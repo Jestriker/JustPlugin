@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Release%20Version-1.4-blue" alt="Release Version" />
+  <img src="https://img.shields.io/badge/Release%20Version-1.5-blue" alt="Release Version" />
   <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
   <img src="https://img.shields.io/badge/Available%20on-Paper-blue?logo=paper" alt="Paper" />
   <img src="https://img.shields.io/badge/Available%20on-Purpur-purple" alt="Purpur" />
@@ -210,6 +210,15 @@ Every command can be individually enabled or disabled. Every permission is granu
 - `/getdeathposoff <player>` - view an offline player's last death location
 - `/invseeoff <player>` - view an offline player's inventory
 - `/echestseeoff <player>` - view an offline player's ender chest
+
+### 📢 Automated Messages
+- Configurable automated broadcast messages at intervals or specific times
+- 4 scheduling modes: `interval` (e.g. every 10m), `schedule` (specific times), `on-the-hour`, `on-the-half-hour`
+- Rotating message support (cycle through a list of tips/reminders)
+- Per-message permission and world filtering
+- Custom prefix, sound effects, MiniMessage formatting
+- `/automessage reload|list|toggle|send` for management
+- Fully configured in dedicated `automessages.yml`
 
 ### 📦 More Features
 - **Modular Listener Architecture** - event handling split into 6 categorized sub-listeners (connection, chat, combat, player, server, inventory) for clean separation of concerns

@@ -1,8 +1,8 @@
 # 🔌 JustPlugin - Ecosystem Developer Guide
 
-> **Version:** 1.4  
+> **Version:** 1.5  
 > **API Package:** `org.justme.justPlugin.api`  
-> **Minecraft:** 1.21.11 (Paper)  
+> **Minecraft:** 1.21.11 (Paper, Purpur, Folia)  
 > **Last Updated:** April 3, 2026
 
 ---

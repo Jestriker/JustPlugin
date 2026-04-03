@@ -96,6 +96,10 @@ public class WebEditorManager {
         CONFIG_FILES.put("texts-maintenance", "texts/maintenance.yml");
         CONFIG_FILES.put("texts-info", "texts/info.yml");
         CONFIG_FILES.put("texts-misc", "texts/misc.yml");
+        CONFIG_FILES.put("texts-kits", "texts/kits.yml");
+        CONFIG_FILES.put("texts-nick", "texts/nick.yml");
+        CONFIG_FILES.put("database", "database.yml");
+        CONFIG_FILES.put("automessages", "automessages.yml");
     }
 
     /**
@@ -598,6 +602,10 @@ public class WebEditorManager {
             case "texts-maintenance" -> "Maintenance Messages";
             case "texts-info" -> "Info Messages";
             case "texts-misc" -> "Misc Messages";
+            case "texts-kits" -> "Kit Messages";
+            case "texts-nick" -> "Nickname & Tag Messages";
+            case "database" -> "Database";
+            case "automessages" -> "Auto Messages";
             default -> fileId;
         };
     }
@@ -609,6 +617,8 @@ public class WebEditorManager {
             case "motd", "scoreboard", "icon" -> "Display";
             case "stats" -> "Display";
             case "maintenance" -> "System";
+            case "database" -> "System";
+            case "automessages" -> "System";
             default -> "Other";
         };
     }
@@ -636,6 +646,10 @@ public class WebEditorManager {
             case "texts-maintenance" -> "\uD83D\uDD27"; // 🔧
             case "texts-info" -> "\u2139\uFE0F"; // ℹ️
             case "texts-misc" -> "\uD83D\uDCE6"; // 📦
+            case "texts-kits" -> "\uD83C\uDF81"; // 🎁
+            case "texts-nick" -> "\uD83C\uDFF7\uFE0F"; // 🏷️
+            case "database" -> "\uD83D\uDDC4\uFE0F"; // 🗄️
+            case "automessages" -> "\uD83D\uDCE2"; // 📢
             default -> "\uD83D\uDCC4"; // 📄
         };
     }

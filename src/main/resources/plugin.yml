@@ -647,6 +647,13 @@ commands:
     usage: /kitlist
     permission: justplugin.kit.list
 
+  # === Auto Messages ===
+  automessage:
+    description: Manage automated messages
+    usage: /automessage <reload|list|toggle|send> [id]
+    permission: justplugin.automessage
+    aliases: [automsg, amsg]
+
   # === Backup ===
   jpbackup:
     description: Backup and restore plugin data
@@ -967,6 +974,11 @@ permissions:
       justplugin.tag.create: true
       justplugin.tag.delete: true
       justplugin.tag.list: true
+      justplugin.automessage: true
+      justplugin.automessage.reload: true
+      justplugin.automessage.list: true
+      justplugin.automessage.toggle: true
+      justplugin.automessage.send: true
   justplugin.player:
     description: Basic player permissions (grant to all players via a permissions plugin)
     default: false
@@ -1501,5 +1513,22 @@ permissions:
     default: false
   justplugin.tag.list:
     description: List all tags (admin)
+    default: false
+
+  # --- Auto Messages ---
+  justplugin.automessage:
+    description: Base permission for automated messages command
+    default: false
+  justplugin.automessage.reload:
+    description: Reload automated messages configuration
+    default: false
+  justplugin.automessage.list:
+    description: List all configured automated messages
+    default: false
+  justplugin.automessage.toggle:
+    description: Enable or disable specific automated messages
+    default: false
+  justplugin.automessage.send:
+    description: Force-send an automated message immediately
     default: false
 

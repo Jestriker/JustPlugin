@@ -668,6 +668,10 @@ command-settings:
   scoreboard:
     enabled: true
 
+  # --- Auto Messages ---
+  automessage:
+    enabled: true
+
   # --- AFK ---
   afk:
     enabled: true

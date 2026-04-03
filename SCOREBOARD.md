@@ -1,6 +1,6 @@
 # 📊 JustPlugin - Scoreboard System
 
-> **Version:** 1.4  
+> **Version:** 1.5  
 > **Config File:** `scoreboard.yml`  
 > **Author:** JustMe  
 > **Last Updated:** March 29, 2026

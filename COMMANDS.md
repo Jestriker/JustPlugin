@@ -1,6 +1,6 @@
 # 📋 JustPlugin - Command Reference
 
-> **Version:** 1.4  
+> **Version:** 1.5  
 > **Author:** JustMe  
 > **Last Updated:** April 3, 2026
 
@@ -510,6 +510,14 @@
   - `/skin clear <player>` - reset another player's skin (requires `justplugin.skin.others`)
   - Auto-applies stored skins on join. Works for cracked players. **Disabled by default** - opt-in via config.
 - **SkinBan** bans a skin name so no player can use it. Use `/skinban list` to view all banned skins.
+- **Auto Messages** manages automated broadcast messages:
+  - `/automessage reload` - reload automessages.yml. Requires `justplugin.automessage.reload`.
+  - `/automessage list` - list all configured messages with status. Requires `justplugin.automessage.list`.
+  - `/automessage toggle <id>` - enable/disable a specific message. Requires `justplugin.automessage.toggle`.
+  - `/automessage send <id>` - force-send a message immediately. Requires `justplugin.automessage.send`.
+  - 4 scheduling modes: interval (e.g. every 10m), schedule (specific times), on-the-hour, on-the-half-hour.
+  - Per-message permission filtering, world filtering, rotating messages, custom prefix and sound.
+  - Configure in `automessages.yml` (disabled by default).
 - **SkinUnban** unbans a previously banned skin name.
 
 ---

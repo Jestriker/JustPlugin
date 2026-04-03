@@ -1,6 +1,6 @@
 # JustPlugin - Permissions Reference
 
-> **Version:** 1.4  
+> **Version:** 1.5  
 > **Author:** JustMe  
 > **Last Updated:** April 3, 2026
 
@@ -237,6 +237,11 @@ justplugin.*                          <- Grants EVERYTHING (must be explicitly a
 |   +-- justplugin.backup.import      <- Restore from backups
 |   +-- justplugin.backup.list        <- List backups
 |   +-- justplugin.backup.delete      <- Delete backups
+|   +-- justplugin.automessage          <- Base auto message permission
+|   +-- justplugin.automessage.reload   <- Reload auto messages config
+|   +-- justplugin.automessage.list     <- List configured messages
+|   +-- justplugin.automessage.toggle   <- Enable/disable messages
+|   +-- justplugin.automessage.send     <- Force-send a message
 |   +-- justplugin.tpoff              <- Teleport to offline player's location
 |   +-- justplugin.getposoff          <- View offline player's position
 |   +-- justplugin.getdeathposoff     <- View offline player's death position
@@ -607,6 +612,11 @@ Includes all permissions listed in this document.
 | `justplugin.backup.import` | Restore from backup files | `op` | `/jpbackup import` |
 | `justplugin.backup.list` | List available backups | `op` | `/jpbackup list` |
 | `justplugin.backup.delete` | Delete backup files | `op` | `/jpbackup delete` |
+| `justplugin.automessage` | Base auto message permission | `op` | `/automessage` |
+| `justplugin.automessage.reload` | Reload auto messages config | `op` | `/automessage reload` |
+| `justplugin.automessage.list` | List configured messages | `op` | `/automessage list` |
+| `justplugin.automessage.toggle` | Enable/disable specific messages | `op` | `/automessage toggle` |
+| `justplugin.automessage.send` | Force-send a message now | `op` | `/automessage send` |
 
 ---
 

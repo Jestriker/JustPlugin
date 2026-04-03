@@ -100,3 +100,16 @@ backup:
   not-found: "Backup not found."
   usage: "Usage: /jpbackup <export|import|list|delete>"
 
+# === Auto Messages ===
+automessage:
+  reloaded: "Automated messages reloaded. <yellow>{count}</yellow> messages loaded."
+  list-header: "<gold><bold>Automated Messages</bold></gold> <gray>({count} total):"
+  list-entry-enabled: " <green>●</green> <yellow>{id}</yellow> <gray>- {mode} - {detail}"
+  list-entry-disabled: " <red>●</red> <yellow>{id}</yellow> <gray>- {mode} - {detail} <dark_gray>(disabled)"
+  toggled-on: "Message <yellow>{id}</yellow> is now <green>enabled</green>."
+  toggled-off: "Message <yellow>{id}</yellow> is now <red>disabled</red>."
+  sent: "Force-sent message <yellow>{id}</yellow>."
+  not-found: "Message <yellow>{id}</yellow> not found."
+  none-configured: "No automated messages configured."
+  usage: "Usage: /automessage <reload | list | toggle | send> [id]"
+

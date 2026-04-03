@@ -1,5 +1,38 @@
 # JustPlugin - Changelog
 
+## v1.5 - Folia Support, Automated Messages & Platform Expansion
+**Released:** April 3, 2026
+
+### What's New
+
+#### Native Folia Support
+- **SchedulerUtil compatibility layer** - detects Folia at runtime and routes all scheduler calls appropriately
+- Replaced 75+ `Bukkit.getScheduler()` calls across 27 files with Folia-compatible wrappers
+- Entity-bound, global, async, and location-based schedulers all supported
+- All synchronous teleports converted to `teleportAsync()`
+- `folia-supported: true` flag in plugin.yml
+- Plugin now runs natively on **Paper, Purpur, and Folia**
+
+#### Automated Messages System
+- Configurable automated broadcast messages sent to players at intervals or specific times
+- 4 scheduling modes: `interval`, `schedule` (specific times of day), `on-the-hour`, `on-the-half-hour`
+- Rotating message support - cycle through multiple messages
+- Per-message permission filtering and world filtering
+- Custom prefix, sound effects, full MiniMessage formatting
+- `/automessage reload|list|toggle|send` management commands
+- Dedicated `automessages.yml` config file with 8 examples
+- Disabled by default
+
+#### Web Editor Expansion
+- Added `database.yml`, `automessages.yml`, `texts/kits.yml`, `texts/nick.yml` to the browser-based config editor
+- All 25+ config files now editable from the web interface
+
+#### Platform Support
+- Official support for Paper, Purpur, and Folia
+- Version bumped to 1.5
+
+---
+
 ## v1.4 - Database, Jail, Kits, AFK, Mail & 28+ New Features
 **Released:** April 3, 2026
 

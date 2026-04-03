@@ -77,6 +77,7 @@ public final class JustPlugin extends JavaPlugin {
     private org.justme.justPlugin.gui.TagGui tagGui;
     private MessageManager messageManager;
     private JoinLeaveManager joinLeaveManager;
+    private AutoMessageManager autoMessageManager;
     private BackupManager backupManager;
     private SpawnProtectionManager spawnProtectionManager;
     private KitManager kitManager;
@@ -135,6 +136,8 @@ public final class JustPlugin extends JavaPlugin {
         afkManager.start();
         mailManager = new MailManager(this);
         motdManager = new MotdManager(this);
+        autoMessageManager = new AutoMessageManager(this);
+        autoMessageManager.start();
         webEditorManager = new WebEditorManager(this);
         webEditorManager.start();
         joinLeaveManager = new JoinLeaveManager(this);
@@ -280,6 +283,11 @@ public final class JustPlugin extends JavaPlugin {
             motdManager.shutdown();
         }
 
+        // Stop auto messages
+        if (autoMessageManager != null) {
+            autoMessageManager.stop();
+        }
+
         // Stop backup auto-task
         if (backupManager != null) {
             backupManager.shutdown();
@@ -371,6 +379,12 @@ public final class JustPlugin extends JavaPlugin {
             console.sendMessage(CC.translate("                        <red>✘</red> <gray> Web editor <red>failed to start</red>"));
         } else {
             console.sendMessage(CC.translate("                        <dark_gray>○</dark_gray> <dark_gray> Web editor <gray>disabled</gray> <dark_gray>(enable in config: web-editor.enabled)"));
+        }
+        if (autoMessageManager != null && autoMessageManager.isEnabled()) {
+            long active = autoMessageManager.getMessages().values().stream().filter(m -> m.enabled).count();
+            console.sendMessage(CC.translate("                        <green>✔</green> <gray> Auto messages <green>active</green> <dark_gray>(" + active + "/" + autoMessageManager.getMessageCount() + " messages)"));
+        } else {
+            console.sendMessage(CC.translate("                        <dark_gray>○</dark_gray> <dark_gray> Auto messages <gray>disabled</gray> <dark_gray>(enable in automessages.yml)"));
         }
         console.sendMessage(net.kyori.adventure.text.Component.empty());
         console.sendMessage(CC.translate("  <gradient:#00aaff:#00ffaa>Successfully enabled.</gradient> <gray>(took " + loadTimeMs + "ms)"));
@@ -542,6 +556,9 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("tagcreate", tagAdmin);
         registerCmd("tagdelete", tagAdmin);
         registerCmd("taglist", tagAdmin);
+
+        // Auto Messages
+        registerCmd("automessage", new AutoMessageCommand(this));
 
         // Backup
         registerCmd("jpbackup", new BackupCommand(this));
@@ -762,6 +779,7 @@ public final class JustPlugin extends JavaPlugin {
     public MessageManager getMessageManager() { return messageManager; }
     public SpawnProtectionManager getSpawnProtectionManager() { return spawnProtectionManager; }
     public JoinLeaveManager getJoinLeaveManager() { return joinLeaveManager; }
+    public AutoMessageManager getAutoMessageManager() { return autoMessageManager; }
     public BackupManager getBackupManager() { return backupManager; }
     public KitManager getKitManager() { return kitManager; }
     public org.justme.justPlugin.gui.kits.KitSelectionGui getKitSelectionGui() { return kitSelectionGui; }

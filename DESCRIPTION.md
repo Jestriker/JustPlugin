@@ -1,15 +1,16 @@
-![Release Version](https://img.shields.io/badge/Release%20Version-1.4-blue)
+![Release Version](https://img.shields.io/badge/Release%20Version-1.5-blue)
 ![License](https://img.shields.io/badge/License-MIT-blue)
-![Paper](https://img.shields.io/badge/Available%20on-Paper-purple)
-![Java 25](https://img.shields.io/badge/Built%20with-Java%2025-orange)
-![Folia](https://img.shields.io/badge/Available%20on-Folia-cyan)
+![Paper](https://img.shields.io/badge/Available%20on-Paper-blue)
+![Purpur](https://img.shields.io/badge/Available%20on-Purpur-purple)
+![Folia](https://img.shields.io/badge/Available%20on-Folia-green)
+![Java 21](https://img.shields.io/badge/Built%20with-Java%2021-orange)
 ![bStats Servers](https://img.shields.io/bstats/servers/30446)
 ![Discord](https://img.shields.io/discord/1482382694443913249)
 ![GitHub Stars](https://img.shields.io/github/stars/Jestriker/JustPlugin)
 
 # JustPlugin - All-in-One Server Essentials
 
-A lightweight, fully configurable server management plugin for Paper 1.21.11+ that replaces dozens of separate plugins with a single JAR. 200+ commands, 40+ managers, and every feature built from scratch with performance and simplicity in mind. Every command can be individually enabled or disabled. Every permission is granular and hierarchical.
+A lightweight, fully configurable server management plugin for Paper, Purpur, and Folia 1.21.11+ that replaces dozens of separate plugins with a single JAR. 200+ commands, 40+ managers, native Folia support, and every feature built from scratch with performance and simplicity in mind. Every command can be individually enabled or disabled. Every permission is granular and hierarchical.
 
 ## Core Features
 
