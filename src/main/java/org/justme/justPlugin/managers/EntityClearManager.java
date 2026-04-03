@@ -76,38 +76,42 @@ public class EntityClearManager {
         boolean clearFriendly = plugin.getConfig().getBoolean("entity-clear.clear-friendly", false);
 
         for (World world : Bukkit.getWorlds()) {
-            for (Entity entity : world.getEntities()) {
-                // Skip players
-                if (entity instanceof Player) continue;
+            // On Folia, entity iteration must happen in each entity's region.
+            // We iterate loaded chunks and their entities to stay region-safe.
+            for (Chunk chunk : world.getLoadedChunks()) {
+                for (Entity entity : chunk.getEntities()) {
+                    // Skip players
+                    if (entity instanceof Player) continue;
 
-                // Skip named entities (custom-named mobs shouldn't be cleared)
-                if (entity.customName() != null) continue;
+                    // Skip named entities (custom-named mobs shouldn't be cleared)
+                    if (entity.customName() != null) continue;
 
-                // Clear dropped items
-                if (clearItems && entity instanceof Item item) {
-                    // Don't clear items in item frames
-                    if (item.getPickupDelay() != Short.MAX_VALUE) {
-                        entity.remove();
-                        itemsRemoved++;
+                    // Clear dropped items
+                    if (clearItems && entity instanceof Item item) {
+                        // Don't clear items in item frames
+                        if (item.getPickupDelay() != Short.MAX_VALUE) {
+                            entity.remove();
+                            itemsRemoved++;
+                        }
+                        continue;
                     }
-                    continue;
-                }
 
-                // Clear hostile mobs
-                if (clearHostile && entity instanceof Monster) {
-                    if (!entity.isPersistent() && entity.getPassengers().isEmpty()) {
-                        entity.remove();
-                        mobsRemoved++;
+                    // Clear hostile mobs
+                    if (clearHostile && entity instanceof Monster) {
+                        if (!entity.isPersistent() && entity.getPassengers().isEmpty()) {
+                            entity.remove();
+                            mobsRemoved++;
+                        }
+                        continue;
                     }
-                    continue;
-                }
 
-                // Clear friendly mobs
-                if (clearFriendly && entity instanceof Animals) {
-                    if (!entity.isPersistent() && entity.getPassengers().isEmpty()
-                            && !(entity instanceof Tameable tameable && tameable.isTamed())) {
-                        entity.remove();
-                        mobsRemoved++;
+                    // Clear friendly mobs
+                    if (clearFriendly && entity instanceof Animals) {
+                        if (!entity.isPersistent() && entity.getPassengers().isEmpty()
+                                && !(entity instanceof Tameable tameable && tameable.isTamed())) {
+                            entity.remove();
+                            mobsRemoved++;
+                        }
                     }
                 }
             }
