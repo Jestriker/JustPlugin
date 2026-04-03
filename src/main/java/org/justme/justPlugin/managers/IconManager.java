@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.util.CachedServerIcon;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -83,7 +84,7 @@ public class IconManager {
     }
 
     private void fetchAsync() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtil.runAsync(plugin, () -> {
             try {
                 URI uri = URI.create(iconUrl);
                 HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
@@ -121,7 +122,7 @@ public class IconManager {
 
                 // Load the icon on the main thread (Bukkit requires main thread for loadServerIcon)
                 final BufferedImage finalImage = image;
-                Bukkit.getScheduler().runTask(plugin, () -> {
+                SchedulerUtil.runTask(plugin, () -> {
                     try {
                         cachedIcon = Bukkit.loadServerIcon(finalImage);
                         plugin.getLogger().info("[Icon] Server icon loaded from URL and cached.");

@@ -20,9 +20,9 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.Sound;
-import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -167,7 +167,7 @@ public class TradeManager implements Listener {
     }
 
     private void startExpiryTask() {
-        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        SchedulerUtil.runTaskTimer(plugin, () -> {
             long now = System.currentTimeMillis();
             long timeout = requestTimeout * 1000L;
             var it = requestTimestamps.entrySet().iterator();
@@ -315,7 +315,7 @@ public class TradeManager implements Listener {
     // ====================================================================
 
     private void syncAfterClick(TradeSession s, UUID clickerUuid) {
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        SchedulerUtil.runTaskLater(plugin, () -> {
             if (!activeSessions.containsKey(clickerUuid)) return;
             boolean isP1 = clickerUuid.equals(s.player1);
             Inventory src = isP1 ? s.inv1 : s.inv2;
@@ -376,7 +376,7 @@ public class TradeManager implements Listener {
     private void startCountdown(TradeSession s) {
         if (s.countdownTask != null) return;
         s.countdownValue = 5;
-        s.countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        s.countdownTask = SchedulerUtil.runTaskTimer(plugin, () -> {
             if (!activeSessions.containsKey(s.player1)) { cancelCountdown(s); return; }
             if (!s.player1Accepted || !s.player2Accepted) { cancelCountdown(s); return; }
 
@@ -429,7 +429,7 @@ public class TradeManager implements Listener {
         awaitingCoinInput.add(uuid);
         player.closeInventory();
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        SchedulerUtil.runForEntityLater(plugin, player, () -> {
             if (!activeSessions.containsKey(uuid)) {
                 awaitingCoinInput.remove(uuid);
                 return;
@@ -466,7 +466,7 @@ public class TradeManager implements Listener {
         if (signLoc == null) return; // Not our sign
 
         // Restore original block
-        Bukkit.getScheduler().runTaskLater(plugin, () -> signLoc.getBlock().setType(Material.AIR, false), 1L);
+        SchedulerUtil.runTaskLater(plugin, () -> signLoc.getBlock().setType(Material.AIR, false), 1L);
 
         awaitingCoinInput.remove(uuid);
 
@@ -525,7 +525,7 @@ public class TradeManager implements Listener {
     private void reopen(Player player, TradeSession s) {
         boolean isP1 = player.getUniqueId().equals(s.player1);
         Inventory inv = isP1 ? s.inv1 : s.inv2;
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        SchedulerUtil.runForEntityLater(plugin, player, () -> {
             if (activeSessions.containsKey(player.getUniqueId())) player.openInventory(inv);
         }, 1L);
     }
@@ -806,7 +806,7 @@ public class TradeManager implements Listener {
         Inventory tradeInv = isP1 ? s.inv1 : s.inv2;
         if (!event.getInventory().equals(tradeInv)) return;
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        SchedulerUtil.runTaskLater(plugin, () -> {
             if (activeSessions.containsKey(player.getUniqueId())) {
                 cancelTrade(s, player.getName() + " closed the trade window.");
             }
@@ -852,7 +852,7 @@ public class TradeManager implements Listener {
         boolean player2Accepted = false;
         long player1Coins = 0;
         long player2Coins = 0;
-        BukkitTask countdownTask = null;
+        SchedulerUtil.CancellableTask countdownTask = null;
         int countdownValue = 5;
         boolean committed = false;
 

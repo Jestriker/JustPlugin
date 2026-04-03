@@ -8,6 +8,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +61,7 @@ public class SetLogsWebhookCommand implements TabExecutor {
         sender.sendMessage(CC.line("<gray>This may take a few seconds."));
 
         plugin.getWebhookManager().sendTest(url).thenAccept(status -> {
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
+            SchedulerUtil.runTask(plugin, () -> {
                 if (status >= 200 && status < 300) {
                     sender.sendMessage(CC.success("Test webhook sent successfully! <gray>(HTTP " + status + ")"));
                     sender.sendMessage(CC.line("Check your Discord channel for the test message."));
@@ -124,7 +125,7 @@ public class SetLogsWebhookCommand implements TabExecutor {
         sender.sendMessage(CC.info("Retrying test webhook... This may take a few seconds."));
 
         plugin.getWebhookManager().sendTest(url).thenAccept(status -> {
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
+            SchedulerUtil.runTask(plugin, () -> {
                 if (status >= 200 && status < 300) {
                     sender.sendMessage(CC.success("Test webhook sent successfully! <gray>(HTTP " + status + ")"));
 

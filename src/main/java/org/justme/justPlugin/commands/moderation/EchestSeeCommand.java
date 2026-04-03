@@ -9,10 +9,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.scheduler.BukkitTask;
+import org.justme.justPlugin.util.SchedulerUtil.CancellableTask;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,7 @@ public class EchestSeeCommand implements TabExecutor, Listener {
     // viewer UUID -> target UUID
     private final Map<UUID, UUID> openSessions = new ConcurrentHashMap<>();
     // viewer UUID -> refresh task
-    private final Map<UUID, BukkitTask> refreshTasks = new ConcurrentHashMap<>();
+    private final Map<UUID, CancellableTask> refreshTasks = new ConcurrentHashMap<>();
 
     public EchestSeeCommand(JustPlugin plugin) {
         this.plugin = plugin;
@@ -59,7 +60,7 @@ public class EchestSeeCommand implements TabExecutor, Listener {
         // Start periodic refresh task (every 20 ticks = 1 second)
         // Since we're using the real ender chest inventory object, changes sync automatically
         // but we add a task to detect if target logs off
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        CancellableTask task = SchedulerUtil.runTaskTimer(plugin, () -> {
             Player t = Bukkit.getPlayer(target.getUniqueId());
             if (t == null || !player.isOnline()) {
                 cancelSession(player.getUniqueId());
@@ -82,7 +83,7 @@ public class EchestSeeCommand implements TabExecutor, Listener {
 
     private void cancelSession(UUID viewerUuid) {
         openSessions.remove(viewerUuid);
-        BukkitTask task = refreshTasks.remove(viewerUuid);
+        CancellableTask task = refreshTasks.remove(viewerUuid);
         if (task != null) task.cancel();
     }
 

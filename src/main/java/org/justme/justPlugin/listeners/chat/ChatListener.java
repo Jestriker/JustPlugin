@@ -3,7 +3,6 @@ package org.justme.justPlugin.listeners.chat;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -12,6 +11,7 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.ChatManager;
 import org.justme.justPlugin.managers.MuteManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 import org.justme.justPlugin.util.PAPIHook;
 import org.justme.justPlugin.util.PlaceholderResolver;
 import org.justme.justPlugin.util.TimeUtil;
@@ -39,7 +39,7 @@ public class ChatListener implements Listener {
         if (plugin.getRankGuiManager() != null && plugin.getRankGuiManager().hasPendingInput(player.getUniqueId())) {
             event.setCancelled(true);
             String message = PlainTextComponentSerializer.plainText().serialize(event.message());
-            Bukkit.getScheduler().runTask(plugin, () ->
+            SchedulerUtil.runTask(plugin, () ->
                     plugin.getRankGuiManager().handleChatInput(player, message)
             );
             return;
@@ -144,7 +144,7 @@ public class ChatListener implements Listener {
         if (mode == ChatManager.ChatMode.TEAM) {
             event.setCancelled(true);
             String message = PlainTextComponentSerializer.plainText().serialize(event.message());
-            Bukkit.getScheduler().runTask(plugin, () ->
+            SchedulerUtil.runTask(plugin, () ->
                     plugin.getChatManager().sendTeamMessage(player, message)
             );
         } else {

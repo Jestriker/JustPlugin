@@ -6,9 +6,9 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 import org.justme.justPlugin.util.TimeUtil;
 
 import java.io.File;
@@ -32,7 +32,7 @@ public class JailManager {
     // Jailed players: UUID -> JailEntry
     private final Map<UUID, JailEntry> jailedPlayers = new ConcurrentHashMap<>();
 
-    private BukkitTask expiryTask;
+    private SchedulerUtil.CancellableTask expiryTask;
 
     public static class JailEntry {
         public final UUID uuid;
@@ -129,7 +129,7 @@ public class JailManager {
     // ==================== Expiry Task ====================
 
     private void startExpiryTask() {
-        expiryTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        expiryTask = SchedulerUtil.runTaskTimer(plugin, () -> {
             List<UUID> expired = new ArrayList<>();
             for (Map.Entry<UUID, JailEntry> entry : jailedPlayers.entrySet()) {
                 if (entry.getValue().isExpired()) {
@@ -174,7 +174,7 @@ public class JailManager {
         jailedPlayers.put(target.getUniqueId(), entry);
 
         // Teleport to jail
-        target.teleport(jailLoc);
+        target.teleportAsync(jailLoc);
 
         // Set adventure mode if configured
         if (plugin.getConfig().getBoolean("jail.adventure-mode", true)) {
@@ -228,7 +228,7 @@ public class JailManager {
                     );
                 }
             }
-            player.teleport(spawn);
+            player.teleportAsync(spawn);
 
             // Notify
             if (expired) {
@@ -276,8 +276,8 @@ public class JailManager {
         Location jailLoc = jailLocations.get(entry.jailName);
         if (jailLoc != null) {
             // Delay by 1 tick to ensure player is fully loaded
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                player.teleport(jailLoc);
+            SchedulerUtil.runForEntityLater(plugin, player, () -> {
+                player.teleportAsync(jailLoc);
                 if (plugin.getConfig().getBoolean("jail.adventure-mode", true)) {
                     player.setGameMode(GameMode.ADVENTURE);
                 }

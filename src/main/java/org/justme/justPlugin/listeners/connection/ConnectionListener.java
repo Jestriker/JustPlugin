@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.TeleportManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 import org.justme.justPlugin.util.PlaceholderResolver;
 
 /**
@@ -117,7 +118,7 @@ public class ConnectionListener implements Listener {
         }
 
         // Show scoreboard (delayed slightly so the player is fully loaded)
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        SchedulerUtil.runForEntityLater(plugin, player, () -> {
             if (player.isOnline()) {
                 plugin.getScoreboardManager().show(player);
             }
@@ -127,7 +128,7 @@ public class ConnectionListener implements Listener {
         if (!plugin.getStartupWarnings().isEmpty()
                 && (player.hasPermission("justplugin.admin"))
                 && plugin.getWarnedStaff().add(player.getUniqueId())) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            SchedulerUtil.runForEntityLater(plugin, player, () -> {
                 if (!player.isOnline()) return;
                 player.sendMessage(Component.empty());
                 player.sendMessage(CC.translate("<gray>[<gradient:#ff6b6b:#ee5a24>JustPlugin</gradient><gray>] <yellow><bold>Startup Warnings:</bold></yellow>"));
@@ -142,7 +143,7 @@ public class ConnectionListener implements Listener {
         // Notify about unread mail (delayed so it appears after other join messages)
         if (plugin.getCommandSettings().isEnabled("mail")
                 && player.hasPermission("justplugin.mail")) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            SchedulerUtil.runForEntityLater(plugin, player, () -> {
                 if (!player.isOnline()) return;
                 int unread = plugin.getMailManager().getUnreadCount(player.getUniqueId());
                 if (unread > 0) {
@@ -155,7 +156,7 @@ public class ConnectionListener implements Listener {
         // Maintenance mode join warning - sent last so it's noticeable
         if (plugin.getCommandSettings().isEnabled("maintenance")
                 && plugin.getMaintenanceManager().isActive()) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            SchedulerUtil.runForEntityLater(plugin, player, () -> {
                 if (!player.isOnline()) return;
                 String warning = plugin.getMaintenanceManager().getJoinWarning();
                 if (warning != null && !warning.isEmpty()) {

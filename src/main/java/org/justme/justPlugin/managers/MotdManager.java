@@ -2,8 +2,8 @@ package org.justme.justPlugin.managers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class MotdManager {
     private String motdMode = "static"; // "static", "cycle", "random"
     private long motdDelayMs = 30_000;
     private int currentProfileIndex = 0;
-    private BukkitTask cycleTask;
+    private SchedulerUtil.CancellableTask cycleTask;
 
     public MotdManager(JustPlugin plugin) {
         this.plugin = plugin;
@@ -170,7 +170,7 @@ public class MotdManager {
         stopCycleTask();
         if ("cycle".equals(motdMode) && serverMotdProfiles.size() > 1) {
             long ticks = Math.max(20, motdDelayMs / 50);
-            cycleTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            cycleTask = SchedulerUtil.runTaskTimer(plugin, () -> {
                 currentProfileIndex = (currentProfileIndex + 1) % serverMotdProfiles.size();
             }, ticks, ticks);
         }

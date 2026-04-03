@@ -65,7 +65,7 @@ public class TpOffCommand implements TabExecutor {
         float pitch = (float) data.getDouble("last-location.pitch");
 
         Location loc = new Location(world, x, y, z, yaw, pitch);
-        player.teleport(loc);
+        player.teleportAsync(loc);
 
         String name = offline.getName() != null ? offline.getName() : args[0];
         player.sendMessage(plugin.getMessageManager().success("moderation.offline.tpoff-success",

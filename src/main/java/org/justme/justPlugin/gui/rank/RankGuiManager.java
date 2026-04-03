@@ -30,6 +30,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -91,11 +92,11 @@ public class RankGuiManager implements Listener {
             // Re-open current screen
             RankSession session = sessions.get(player.getUniqueId());
             if (session != null) {
-                Bukkit.getScheduler().runTask(plugin, () -> renderCurrentScreen(player, session));
+                SchedulerUtil.runTask(plugin, () -> renderCurrentScreen(player, session));
             }
             return true;
         }
-        Bukkit.getScheduler().runTask(plugin, () -> cb.accept(message));
+        SchedulerUtil.runTask(plugin, () -> cb.accept(message));
         return true;
     }
 
@@ -441,7 +442,7 @@ public class RankGuiManager implements Listener {
         UUID targetUUID = UUID.fromString(session.getSelectedPlayerUUID());
 
         lp().getUserManager().loadUser(targetUUID).thenAcceptAsync(user -> {
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            SchedulerUtil.runTask(plugin, () -> {
                 Inventory inv = Bukkit.createInventory(null, 36,
                         CC.translate(GUI_PREFIX + " - " + session.getSelectedPlayerName() + "'s Groups"));
                 fill(inv, Material.BLACK_STAINED_GLASS_PANE);
@@ -484,7 +485,7 @@ public class RankGuiManager implements Listener {
         UUID targetUUID = UUID.fromString(session.getSelectedPlayerUUID());
 
         lp().getUserManager().loadUser(targetUUID).thenAcceptAsync(user -> {
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            SchedulerUtil.runTask(plugin, () -> {
                 Inventory inv = Bukkit.createInventory(null, 54,
                         CC.translate(GUI_PREFIX + " - Perms: " + session.getSelectedPlayerName()));
                 fill(inv, Material.BLACK_STAINED_GLASS_PANE);
@@ -637,7 +638,7 @@ public class RankGuiManager implements Listener {
         if (slot == 50 && player.hasPermission("justplugin.rank.groups.create")) {
             requestSignInput(player, "New group name", name -> {
                 lp().getGroupManager().createAndLoadGroup(name.toLowerCase().replaceAll("\\s+", "_"))
-                        .thenRunAsync(() -> Bukkit.getScheduler().runTask(plugin, () -> {
+                        .thenRunAsync(() -> SchedulerUtil.runTask(plugin, () -> {
                             player.sendMessage(CC.success("Group <yellow>" + name + "</yellow> created!"));
                             openGroupList(player, session);
                         }));
@@ -674,14 +675,14 @@ public class RankGuiManager implements Listener {
                 if (newName.equalsIgnoreCase(CLEAR_KEYWORD)) {
                     // Clear display name - don't add a new node
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                            Bukkit.getScheduler().runTask(plugin, () -> {
+                            SchedulerUtil.runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Display name cleared for <yellow>" + groupName + "</yellow>."));
                                 openGroupActions(player, session);
                             }));
                 } else {
                     group.data().add(DisplayNameNode.builder(newName).build());
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                            Bukkit.getScheduler().runTask(plugin, () -> {
+                            SchedulerUtil.runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Display name updated to <yellow>" + newName + "</yellow>!"));
                                 openGroupActions(player, session);
                             }));
@@ -698,14 +699,14 @@ public class RankGuiManager implements Listener {
                 if (prefix.equalsIgnoreCase(CLEAR_KEYWORD)) {
                     // Clear prefix - don't add a new node
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                            Bukkit.getScheduler().runTask(plugin, () -> {
+                            SchedulerUtil.runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Prefix cleared for <yellow>" + groupName + "</yellow>."));
                                 openGroupActions(player, session);
                             }));
                 } else {
                     group.data().add(PrefixNode.builder(prefix, getGroupWeight(group)).build());
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                            Bukkit.getScheduler().runTask(plugin, () -> {
+                            SchedulerUtil.runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Prefix updated to <yellow>" + prefix + "</yellow>!"));
                                 openGroupActions(player, session);
                             }));
@@ -722,14 +723,14 @@ public class RankGuiManager implements Listener {
                 if (suffix.equalsIgnoreCase(CLEAR_KEYWORD)) {
                     // Clear suffix - don't add a new node
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                            Bukkit.getScheduler().runTask(plugin, () -> {
+                            SchedulerUtil.runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Suffix cleared for <yellow>" + groupName + "</yellow>."));
                                 openGroupActions(player, session);
                             }));
                 } else {
                     group.data().add(SuffixNode.builder(suffix, getGroupWeight(group)).build());
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                            Bukkit.getScheduler().runTask(plugin, () -> {
+                            SchedulerUtil.runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Suffix updated to <yellow>" + suffix + "</yellow>!"));
                                 openGroupActions(player, session);
                             }));
@@ -751,7 +752,7 @@ public class RankGuiManager implements Listener {
                 }
                 group.data().clear(NodeType.INHERITANCE::matches);
                 lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                        Bukkit.getScheduler().runTask(plugin, () -> {
+                        SchedulerUtil.runTask(plugin, () -> {
                             player.sendMessage(CC.success("Removed all parent groups from <yellow>" + groupName + "</yellow>."));
                             openGroupActions(player, session);
                         }));
@@ -768,7 +769,7 @@ public class RankGuiManager implements Listener {
                     }
                     group.data().add(InheritanceNode.builder(parentName.toLowerCase()).build());
                     lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                            Bukkit.getScheduler().runTask(plugin, () -> {
+                            SchedulerUtil.runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Added parent <yellow>" + parentName + "</yellow>!"));
                                 openGroupActions(player, session);
                             }));
@@ -785,7 +786,7 @@ public class RankGuiManager implements Listener {
         // Delete (slot 40)
         if (slot == 40 && player.hasPermission("justplugin.rank.groups.delete") && !groupName.equals("default")) {
             lp().getGroupManager().deleteGroup(lp().getGroupManager().getGroup(groupName))
-                    .thenRunAsync(() -> Bukkit.getScheduler().runTask(plugin, () -> {
+                    .thenRunAsync(() -> SchedulerUtil.runTask(plugin, () -> {
                         player.sendMessage(CC.success("Group <yellow>" + groupName + "</yellow> deleted!"));
                         openGroupList(player, session);
                     }));
@@ -811,7 +812,7 @@ public class RankGuiManager implements Listener {
                 if (group == null) return;
                 group.data().add(Node.builder(perm).build());
                 lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                        Bukkit.getScheduler().runTask(plugin, () -> {
+                        SchedulerUtil.runTask(plugin, () -> {
                             player.sendMessage(CC.success("Added permission <yellow>" + perm + "</yellow>!"));
                             openGroupPermissions(player, session);
                         }));
@@ -834,13 +835,13 @@ public class RankGuiManager implements Listener {
                 group.data().remove(existing);
                 group.data().add(existing.toBuilder().value(!existing.getValue()).build());
                 lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                        Bukkit.getScheduler().runTask(plugin, () -> openGroupPermissions(player, session)));
+                        SchedulerUtil.runTask(plugin, () -> openGroupPermissions(player, session)));
             }
         } else if (event.isRightClick() && player.hasPermission("justplugin.rank.groups.permissions.remove")) {
             // Remove
             group.data().clear(n -> n.getKey().equals(permKey) && n.getType() == NodeType.PERMISSION);
             lp().getGroupManager().saveGroup(group).thenRunAsync(() ->
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    SchedulerUtil.runTask(plugin, () -> {
                         player.sendMessage(CC.success("Removed permission <yellow>" + permKey + "</yellow>."));
                         openGroupPermissions(player, session);
                     }));
@@ -914,7 +915,7 @@ public class RankGuiManager implements Listener {
         lp().getUserManager().loadUser(targetUUID).thenAcceptAsync(user -> {
             user.data().clear(NodeType.INHERITANCE.predicate(n -> n.getGroupName().equalsIgnoreCase(groupName)));
             lp().getUserManager().saveUser(user).thenRunAsync(() ->
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    SchedulerUtil.runTask(plugin, () -> {
                         player.sendMessage(CC.success("Removed <yellow>" + session.getSelectedPlayerName() +
                                 "</yellow> from group <yellow>" + groupName + "</yellow>."));
                         openPlayerGroupsList(player, session);
@@ -941,7 +942,7 @@ public class RankGuiManager implements Listener {
                 lp().getUserManager().loadUser(targetUUID).thenAcceptAsync(user -> {
                     user.data().add(Node.builder(perm).build());
                     lp().getUserManager().saveUser(user).thenRunAsync(() ->
-                            Bukkit.getScheduler().runTask(plugin, () -> {
+                            SchedulerUtil.runTask(plugin, () -> {
                                 player.sendMessage(CC.success("Added permission <yellow>" + perm + "</yellow>!"));
                                 openPlayerPermissions(player, session);
                             }));
@@ -964,12 +965,12 @@ public class RankGuiManager implements Listener {
                     user.data().remove(existing);
                     user.data().add(existing.toBuilder().value(!existing.getValue()).build());
                     lp().getUserManager().saveUser(user).thenRunAsync(() ->
-                            Bukkit.getScheduler().runTask(plugin, () -> openPlayerPermissions(player, session)));
+                            SchedulerUtil.runTask(plugin, () -> openPlayerPermissions(player, session)));
                 }
             } else if (event.isRightClick() && player.hasPermission("justplugin.rank.players.permissions.remove")) {
                 user.data().clear(n -> n.getKey().equals(permKey) && n.getType() == NodeType.PERMISSION);
                 lp().getUserManager().saveUser(user).thenRunAsync(() ->
-                        Bukkit.getScheduler().runTask(plugin, () -> {
+                        SchedulerUtil.runTask(plugin, () -> {
                             player.sendMessage(CC.success("Removed permission <yellow>" + permKey + "</yellow>."));
                             openPlayerPermissions(player, session);
                         }));
@@ -991,7 +992,7 @@ public class RankGuiManager implements Listener {
         lp().getUserManager().loadUser(targetUUID).thenAcceptAsync(user -> {
             user.data().add(InheritanceNode.builder(groupName.toLowerCase()).build());
             lp().getUserManager().saveUser(user).thenRunAsync(() ->
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    SchedulerUtil.runTask(plugin, () -> {
                         player.sendMessage(CC.success("Added <yellow>" + session.getSelectedPlayerName() +
                                 "</yellow> to group <yellow>" + groupName + "</yellow>!"));
                         openPlayerActions(player, session);

@@ -15,6 +15,7 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.managers.KitManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 
@@ -155,7 +156,7 @@ public class KitSelectionGui implements Listener {
             // Preview
             if (player.hasPermission("justplugin.kit.preview") && player.hasPermission(kit.permission)) {
                 player.closeInventory();
-                Bukkit.getScheduler().runTaskLater(plugin, () ->
+                SchedulerUtil.runForEntityLater(plugin, player, () ->
                         plugin.getKitPreviewGui().open(player, kit), 1L);
             }
             return;

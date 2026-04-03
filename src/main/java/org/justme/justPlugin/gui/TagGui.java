@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.TagManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -154,7 +155,7 @@ public class TagGui implements Listener {
 
         // Refresh the GUI
         player.closeInventory();
-        Bukkit.getScheduler().runTaskLater(plugin, () -> open(player), 2L);
+        SchedulerUtil.runForEntityLater(plugin, player, () -> open(player), 2L);
     }
 
     private ItemStack makeItem(Material material, String name) {

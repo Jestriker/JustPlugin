@@ -17,6 +17,7 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.managers.TeamManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 
@@ -372,7 +373,7 @@ public class HomeGui implements Listener {
                         player.sendMessage(CC.success("Home <yellow>" + name + "</yellow> has been deleted."));
                         player.closeInventory();
                         // Re-open refreshed GUI
-                        Bukkit.getScheduler().runTaskLater(plugin, () -> open(player), 2L);
+                        SchedulerUtil.runForEntityLater(plugin, player, () -> open(player), 2L);
                     } else {
                         player.sendMessage(CC.error("Failed to delete home <yellow>" + name + "</yellow>."));
                     }
@@ -405,7 +406,7 @@ public class HomeGui implements Listener {
                 if (plugin.getHomeManager().setHome(player.getUniqueId(), name, player.getLocation())) {
                     player.sendMessage(CC.success("Home <yellow>" + name + "</yellow> has been set at your current location."));
                     player.closeInventory();
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> open(player), 2L);
+                    SchedulerUtil.runForEntityLater(plugin, player, () -> open(player), 2L);
                 } else {
                     player.sendMessage(CC.error("You have reached the maximum number of homes!"));
                 }

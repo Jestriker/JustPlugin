@@ -1,7 +1,7 @@
 package org.justme.justPlugin.managers;
 
-import org.bukkit.Bukkit;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -78,7 +78,7 @@ public class WebhookManager {
         String title = "[" + category.toUpperCase() + "] Log";
         String json = buildEmbed(title, plainMessage, color, executor);
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtil.runAsync(plugin, () -> {
             sendWithRetry(url, json);
         });
     }

@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -15,6 +14,7 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.AnimationEngine;
 import org.justme.justPlugin.util.CC;
 import org.justme.justPlugin.util.PlaceholderResolver;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,9 +53,9 @@ public class ScoreboardManager {
     // Ping refresh settings
     private int pingRefreshInterval; // ticks
 
-    private BukkitTask updateTask;
-    private BukkitTask waveTask;
-    private BukkitTask pingTask;
+    private SchedulerUtil.CancellableTask updateTask;
+    private SchedulerUtil.CancellableTask waveTask;
+    private SchedulerUtil.CancellableTask pingTask;
     private final Map<UUID, Scoreboard> playerBoards = new HashMap<>();
     private final Map<UUID, Integer> lastPing = new HashMap<>();
     // Stores previous line content per player for diff-based updates
@@ -76,19 +76,19 @@ public class ScoreboardManager {
     public void start() {
         if (!enabled) return;
         long interval = Math.max(1, updateInterval);
-        updateTask = Bukkit.getScheduler().runTaskTimer(plugin, this::updateAll, 20L * 2, interval);
+        updateTask = SchedulerUtil.runTaskTimer(plugin, this::updateAll, 20L * 2, interval);
 
         // Wave animation task - advances the wave frame every waveSpeed ticks (default: 20 = 1 second)
         if (waveEnabled) {
             long waveInterval = Math.max(1, waveSpeed);
-            waveTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            waveTask = SchedulerUtil.runTaskTimer(plugin, () -> {
                 waveFrame = (waveFrame + 1) % 20; // 20 frames for smooth wave
             }, waveInterval, waveInterval);
         }
 
         // Ping refresh task - checks every 5 seconds (100 ticks) by default
         long pingInterval = Math.max(20, pingRefreshInterval);
-        pingTask = Bukkit.getScheduler().runTaskTimer(plugin, this::refreshPingIfChanged, pingInterval, pingInterval);
+        pingTask = SchedulerUtil.runTaskTimer(plugin, this::refreshPingIfChanged, pingInterval, pingInterval);
 
         // Start animation engine
         if (animationEngine.hasAnimations()) {

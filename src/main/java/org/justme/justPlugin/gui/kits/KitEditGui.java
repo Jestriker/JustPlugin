@@ -18,6 +18,7 @@ import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.managers.KitManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -235,14 +236,14 @@ public class KitEditGui implements Listener {
                 chatInputMode.remove(uuid);
                 pendingKitNames.put(uuid, message.toLowerCase());
                 // Open the edit GUI on the main thread
-                Bukkit.getScheduler().runTask(plugin, () -> openCreateInventory(player, message.toLowerCase()));
+                SchedulerUtil.runTask(plugin, () -> openCreateInventory(player, message.toLowerCase()));
             }
             case "settings" -> {
                 if (message.equalsIgnoreCase("done")) {
                     chatInputMode.remove(uuid);
                     // Re-open the edit GUI
                     String kitName = editingSessions.get(uuid);
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    SchedulerUtil.runTask(plugin, () -> {
                         if (kitName == null) {
                             // Creating new - reopen create GUI
                             String newName = pendingKitNames.get(uuid);

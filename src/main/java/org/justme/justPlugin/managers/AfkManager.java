@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +19,7 @@ public class AfkManager {
     private final JustPlugin plugin;
     private final ConcurrentHashMap<UUID, Boolean> afkPlayers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long> lastActivity = new ConcurrentHashMap<>();
-    private int taskId = -1;
+    private SchedulerUtil.CancellableTask task;
 
     public AfkManager(JustPlugin plugin) {
         this.plugin = plugin;
@@ -29,16 +30,16 @@ public class AfkManager {
      */
     public void start() {
         int checkInterval = 20; // every second (20 ticks)
-        taskId = Bukkit.getScheduler().runTaskTimer(plugin, this::checkIdlePlayers, 100L, checkInterval).getTaskId();
+        task = SchedulerUtil.runTaskTimer(plugin, this::checkIdlePlayers, 100L, checkInterval);
     }
 
     /**
      * Stop the idle-check task.
      */
     public void stop() {
-        if (taskId != -1) {
-            Bukkit.getScheduler().cancelTask(taskId);
-            taskId = -1;
+        if (task != null) {
+            task.cancel();
+            task = null;
         }
     }
 

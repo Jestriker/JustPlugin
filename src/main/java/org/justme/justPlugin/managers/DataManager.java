@@ -2,8 +2,8 @@ package org.justme.justPlugin.managers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class DataManager {
     // In-memory cache for player data - avoids repeated disk reads
     private final ConcurrentHashMap<UUID, YamlConfiguration> playerDataCache = new ConcurrentHashMap<>();
 
-    private BukkitTask autoSaveTask;
+    private SchedulerUtil.CancellableTask autoSaveTask;
 
     public DataManager(JustPlugin plugin) {
         this.plugin = plugin;
@@ -73,7 +73,7 @@ public class DataManager {
      * Saves player data asynchronously to avoid blocking the main thread.
      */
     public void savePlayerDataAsync(UUID uuid, YamlConfiguration config) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> savePlayerData(uuid, config));
+        SchedulerUtil.runAsync(plugin, () -> savePlayerData(uuid, config));
     }
 
     /**
@@ -111,7 +111,7 @@ public class DataManager {
      * Saves warps asynchronously.
      */
     public void saveWarpsAsync() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, this::saveWarps);
+        SchedulerUtil.runAsync(plugin, this::saveWarps);
     }
 
     public void reloadWarps() {
@@ -135,7 +135,7 @@ public class DataManager {
      * Saves bans asynchronously.
      */
     public void saveBansAsync() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, this::saveBans);
+        SchedulerUtil.runAsync(plugin, this::saveBans);
     }
 
     public void reloadBans() {
@@ -159,7 +159,7 @@ public class DataManager {
      * Saves teams asynchronously.
      */
     public void saveTeamsAsync() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, this::saveTeams);
+        SchedulerUtil.runAsync(plugin, this::saveTeams);
     }
 
     public void reloadTeams() {
@@ -181,7 +181,7 @@ public class DataManager {
     public void startAutoSave() {
         int intervalMinutes = plugin.getConfig().getInt("data.auto-save-interval", 5);
         long intervalTicks = intervalMinutes * 60L * 20L; // minutes -> ticks
-        autoSaveTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+        autoSaveTask = SchedulerUtil.runAsyncTimer(plugin, () -> {
             for (var entry : playerDataCache.entrySet()) {
                 savePlayerData(entry.getKey(), entry.getValue());
             }

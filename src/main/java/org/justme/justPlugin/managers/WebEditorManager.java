@@ -11,6 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -51,7 +52,7 @@ public class WebEditorManager {
     private final JustPlugin plugin;
     private HttpServer server;
     private final Map<String, PendingSession> sessions = new ConcurrentHashMap<>();
-    private int taskId = -1;
+    private SchedulerUtil.CancellableTask cleanupTask;
 
     /** Cryptographically secure RNG for session codes and auth token. */
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
@@ -152,7 +153,7 @@ public class WebEditorManager {
             server.start();
 
             // Schedule cleanup of expired sessions and rate limit counters (every 60 seconds)
-            taskId = Bukkit.getScheduler().runTaskTimer(plugin, this::periodicCleanup, 20L * 60, 20L * 60).getTaskId();
+            cleanupTask = SchedulerUtil.runTaskTimer(plugin, this::periodicCleanup, 20L * 60, 20L * 60);
 
             plugin.getLogger().info("Web editor started on " + bindAddress + ":" + port);
             plugin.getLogger().info("Web editor auth token: " + authToken);
@@ -172,9 +173,9 @@ public class WebEditorManager {
             server.stop(0);
             server = null;
         }
-        if (taskId != -1) {
-            Bukkit.getScheduler().cancelTask(taskId);
-            taskId = -1;
+        if (cleanupTask != null) {
+            cleanupTask.cancel();
+            cleanupTask = null;
         }
         sessions.clear();
         rateLimitMap.clear();

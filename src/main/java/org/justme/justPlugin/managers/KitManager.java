@@ -7,8 +7,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class KitManager {
     // Per-player cooldowns: playerUUID -> (kitName -> claimTimeMillis)
     private final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
 
-    private BukkitTask cleanupTask;
+    private SchedulerUtil.CancellableTask cleanupTask;
 
     // Armor material name suffixes for auto-equip detection
     private static final Set<String> HELMET_SUFFIXES = Set.of("_HELMET", "_CAP");
@@ -174,7 +174,7 @@ public class KitManager {
 
     private void startCleanupTask() {
         // Run every hour (72000 ticks)
-        cleanupTask = Bukkit.getScheduler().runTaskTimer(plugin, this::cleanupArchived, 72000L, 72000L);
+        cleanupTask = SchedulerUtil.runTaskTimer(plugin, this::cleanupArchived, 72000L, 72000L);
     }
 
     private void cleanupArchived() {

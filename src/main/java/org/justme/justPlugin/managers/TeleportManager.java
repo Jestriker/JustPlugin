@@ -7,9 +7,9 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +42,7 @@ public class TeleportManager {
     private final Map<UUID, UUID> incomingRequests = new ConcurrentHashMap<>();
 
     // Players currently in a teleport delay (waiting to tp after accept)
-    private final Map<UUID, BukkitTask> pendingTeleports = new ConcurrentHashMap<>();
+    private final Map<UUID, SchedulerUtil.CancellableTask> pendingTeleports = new ConcurrentHashMap<>();
     // Starting location for move-cancel detection
     private final Map<UUID, Location> teleportStartLocations = new ConcurrentHashMap<>();
 
@@ -59,7 +59,7 @@ public class TeleportManager {
 
     // --- Expiry ---
     private void startExpiryTask() {
-        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        SchedulerUtil.runTaskTimer(plugin, () -> {
             long now = System.currentTimeMillis();
             long timeout = requestTimeout * 1000L;
             Iterator<Map.Entry<UUID, TpaRequest>> it = outgoingRequests.entrySet().iterator();
@@ -268,7 +268,7 @@ public class TeleportManager {
     }
 
     public void cancelPendingTeleport(UUID uuid) {
-        BukkitTask task = pendingTeleports.remove(uuid);
+        SchedulerUtil.CancellableTask task = pendingTeleports.remove(uuid);
         if (task != null) task.cancel();
         teleportStartLocations.remove(uuid);
     }
@@ -290,7 +290,7 @@ public class TeleportManager {
 
         final int[] remaining = {seconds};
 
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        SchedulerUtil.CancellableTask task = SchedulerUtil.runForEntityTimer(plugin, player, () -> {
             if (!player.isOnline()) {
                 cancelPendingTeleport(uuid);
                 return;
@@ -313,13 +313,13 @@ public class TeleportManager {
         Location finalLoc = useSafeLocation ? getSafeLocation(destination) : destination;
         setBackLocation(player.getUniqueId(), player.getLocation());
         player.teleportAsync(finalLoc).thenAccept(success -> {
-            // Schedule back on the main thread since thenAccept may run asynchronously
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            // Schedule back on the entity's thread since thenAccept may run asynchronously
+            SchedulerUtil.runForEntity(plugin, player, () -> {
                 if (!success || !player.isOnline()) return;
                 player.sendMessage(CC.success("Teleported!"));
                 // Post-teleport safety check: verify destination is still safe 1 tick later
                 // This guards against race conditions where the environment changes during teleport
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                SchedulerUtil.runForEntityLater(plugin, player, () -> {
                     if (!player.isOnline()) return;
                     Location currentLoc = player.getLocation();
                     if (!isLocationSafe(currentLoc)) {
@@ -517,14 +517,14 @@ public class TeleportManager {
         player.sendMessage(CC.info("Teleporting in <yellow>" + delayStr + "</yellow> seconds. <gray>Don't move or take damage!"));
 
         final Location dest = pending.destination;
-        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            pendingTeleports.remove(player.getUniqueId());
-            teleportStartLocations.remove(player.getUniqueId());
+        // Use entity timer with delayTicks as initial delay; cancels itself on first execution
+        SchedulerUtil.CancellableTask task = SchedulerUtil.runForEntityTimer(plugin, player, () -> {
+            cancelPendingTeleport(player.getUniqueId());
             if (!player.isOnline()) return;
             setBackLocation(player.getUniqueId(), player.getLocation());
             player.teleportAsync(dest);
             player.sendMessage(CC.success("Teleported! <red>(unsafe destination)"));
-        }, delayTicks);
+        }, delayTicks, Long.MAX_VALUE);
         pendingTeleports.put(player.getUniqueId(), task);
     }
 

@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.CooldownManager;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -171,7 +172,7 @@ public class RtpGui implements Listener {
 
         Location loc = plugin.getTeleportManager().getRandomLocation(finalWorld);
         loc.getWorld().getChunkAtAsync(loc).thenAccept(chunk -> {
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            SchedulerUtil.runTask(plugin, () -> {
                 Location safeLoc = plugin.getTeleportManager().getSafeLocation(loc);
 
                 // Verify the safe location is actually safe

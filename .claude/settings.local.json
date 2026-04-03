@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(md|txt\\)$\")",
+      "Bash(ls:*)",
+      "Bash(find /c/Users/liami/OneDrive/Desktop/JustPlugin/src/main/java -name \"*.java\" -exec wc -l {} +)",
+      "Bash(./gradlew test:*)",
+      "Bash(./gradlew compileJava)",
+      "Bash(grep -v \"^$\")",
+      "Bash(./gradlew build:*)"
+    ]
+  }
+}

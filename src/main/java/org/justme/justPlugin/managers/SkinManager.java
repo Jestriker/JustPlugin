@@ -9,6 +9,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,7 +107,7 @@ public class SkinManager {
      * Runs async for Mojang API calls, applies on main thread.
      */
     public void setSkin(Player target, String skinName, Player initiator) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtil.runAsync(plugin, () -> {
             CachedSkin cached = getCachedSkin(skinName);
             if (cached == null) {
                 // Fetch from Mojang API
@@ -114,13 +115,13 @@ public class SkinManager {
             }
 
             if (cached == null) {
-                Bukkit.getScheduler().runTask(plugin, () ->
+                SchedulerUtil.runForEntity(plugin, initiator, () ->
                         initiator.sendMessage(CC.error("Could not find skin for <yellow>" + skinName + "</yellow>. Player may not exist.")));
                 return;
             }
 
             final CachedSkin skin = cached;
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            SchedulerUtil.runForEntity(plugin, target, () -> {
                 applySkin(target, skin);
                 playerSkins.put(target.getUniqueId(), skinName);
                 save();
@@ -139,10 +140,10 @@ public class SkinManager {
      * Clear/reset a player's skin back to their own username.
      */
     public void clearSkin(Player target, Player initiator) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtil.runAsync(plugin, () -> {
             CachedSkin skin = fetchSkinFromMojang(target.getName());
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            SchedulerUtil.runForEntity(plugin, target, () -> {
                 if (skin != null) {
                     applySkin(target, skin);
                 }
@@ -166,13 +167,13 @@ public class SkinManager {
         String skinName = playerSkins.get(player.getUniqueId());
         if (skinName == null) return;
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtil.runAsync(plugin, () -> {
             CachedSkin cached = getCachedSkin(skinName);
             if (cached == null) cached = fetchSkinFromMojang(skinName);
             if (cached == null) return;
 
             final CachedSkin skin = cached;
-            Bukkit.getScheduler().runTask(plugin, () -> applySkin(player, skin));
+            SchedulerUtil.runForEntity(plugin, player, () -> applySkin(player, skin));
         });
     }
 
@@ -186,7 +187,7 @@ public class SkinManager {
             for (Player other : Bukkit.getOnlinePlayers()) {
                 if (!other.equals(player) && other.canSee(player)) {
                     other.hidePlayer(plugin, player);
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> other.showPlayer(plugin, player), 2L);
+                    SchedulerUtil.runForEntityLater(plugin, other, () -> other.showPlayer(plugin, player), 2L);
                 }
             }
         } catch (Exception e) {

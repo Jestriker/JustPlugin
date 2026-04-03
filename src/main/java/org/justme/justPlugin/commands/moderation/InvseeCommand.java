@@ -15,10 +15,11 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitTask;
+import org.justme.justPlugin.util.SchedulerUtil.CancellableTask;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +32,7 @@ public class InvseeCommand implements TabExecutor, Listener {
     // viewer UUID -> target UUID
     private final Map<UUID, UUID> openSessions = new ConcurrentHashMap<>();
     // viewer UUID -> refresh task
-    private final Map<UUID, BukkitTask> refreshTasks = new ConcurrentHashMap<>();
+    private final Map<UUID, CancellableTask> refreshTasks = new ConcurrentHashMap<>();
     // viewer UUID -> GUI inventory
     private final Map<UUID, Inventory> sessionGuis = new ConcurrentHashMap<>();
     // viewer UUID -> whether the session is offline (read-only)
@@ -92,7 +93,7 @@ public class InvseeCommand implements TabExecutor, Listener {
         viewer.openInventory(gui);
 
         // Start periodic refresh task (every 20 ticks = 1 second)
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        CancellableTask task = SchedulerUtil.runTaskTimer(plugin, () -> {
             Player t = Bukkit.getPlayer(target.getUniqueId());
             if (t == null || !viewer.isOnline()) {
                 cancelSession(viewer.getUniqueId());
@@ -333,7 +334,7 @@ public class InvseeCommand implements TabExecutor, Listener {
         openSessions.remove(viewerUuid);
         sessionGuis.remove(viewerUuid);
         offlineSessions.remove(viewerUuid);
-        BukkitTask task = refreshTasks.remove(viewerUuid);
+        CancellableTask task = refreshTasks.remove(viewerUuid);
         if (task != null) task.cancel();
     }
 

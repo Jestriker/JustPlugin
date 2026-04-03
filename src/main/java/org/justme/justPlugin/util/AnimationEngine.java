@@ -1,8 +1,6 @@
 package org.justme.justPlugin.util;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
 
 import java.awt.Color;
@@ -29,7 +27,7 @@ public class AnimationEngine {
     private final JustPlugin plugin;
     private final Map<String, AnimationDef> animations = new HashMap<>();
     private int globalTick = 0;
-    private BukkitTask tickTask;
+    private SchedulerUtil.CancellableTask tickTask;
 
     public AnimationEngine(JustPlugin plugin) {
         this.plugin = plugin;
@@ -57,7 +55,7 @@ public class AnimationEngine {
     /** Start the global tick timer. Call once after all animations are registered. */
     public void start() {
         if (tickTask != null) tickTask.cancel();
-        tickTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> globalTick++, 1L, 1L);
+        tickTask = SchedulerUtil.runTaskTimer(plugin, () -> globalTick++, 1L, 1L);
     }
 
     /** Stop the tick timer. */

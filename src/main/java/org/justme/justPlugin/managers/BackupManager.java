@@ -1,8 +1,8 @@
 package org.justme.justPlugin.managers;
 
 import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.*;
 import java.nio.file.*;
@@ -24,7 +24,7 @@ public class BackupManager {
 
     private final JustPlugin plugin;
     private final File backupDir;
-    private BukkitTask autoBackupTask;
+    private SchedulerUtil.CancellableTask autoBackupTask;
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
 
@@ -53,7 +53,7 @@ public class BackupManager {
 
         // Run daily: 20 ticks/sec * 60 sec * 60 min * 24 hr = 1,728,000 ticks
         long dailyTicks = 20L * 60 * 60 * 24;
-        autoBackupTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+        autoBackupTask = SchedulerUtil.runAsyncTimer(plugin, () -> {
             plugin.getLogger().info("[Backup] Running scheduled auto-backup...");
             BackupResult result = createBackupSync();
             if (result.success()) {
@@ -81,10 +81,10 @@ public class BackupManager {
      * Creates a backup asynchronously and calls the callback on the main thread.
      */
     public void createBackupAsync(java.util.function.Consumer<BackupResult> callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtil.runAsync(plugin, () -> {
             BackupResult result = createBackupSync();
             enforceMaxBackups();
-            Bukkit.getScheduler().runTask(plugin, () -> callback.accept(result));
+            SchedulerUtil.runTask(plugin, () -> callback.accept(result));
         });
     }
 
@@ -149,9 +149,9 @@ public class BackupManager {
             return;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        SchedulerUtil.runAsync(plugin, () -> {
             BackupResult result = importBackupSync(zipFile);
-            Bukkit.getScheduler().runTask(plugin, () -> callback.accept(result));
+            SchedulerUtil.runTask(plugin, () -> callback.accept(result));
         });
     }
 

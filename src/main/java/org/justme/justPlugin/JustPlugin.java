@@ -221,7 +221,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("tab", tabCommand);
         int tabRefresh = tabCommand.getRefreshInterval();
         if (tabRefresh > 0) {
-            Bukkit.getScheduler().runTaskTimer(this, () -> tabCommand.applyTabToAll(), 20L * 5, 20L * tabRefresh);
+            org.justme.justPlugin.util.SchedulerUtil.runTaskTimer(this, () -> tabCommand.applyTabToAll(), 20L * 5, 20L * tabRefresh);
         }
 
         // Start scoreboard update task

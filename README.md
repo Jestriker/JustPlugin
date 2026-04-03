@@ -1,15 +1,21 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Jestriker/JustPlugin/main/.github/assets/justplugin-logo.svg" alt="Available for Paper" />
-  &nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/Jestriker/JustPlugin/main/.github/assets/builtwith-java25.svg" alt="Built with Java 25" />
+  <picture>
+    <source srcset="https://raw.githubusercontent.com/Jestriker/JustPlugin/main/.github/assets/justplugin-logo.svg" type="image/svg+xml" />
+    <img src="" alt="" width="0" height="0" />
+  </picture>
+  <picture>
+    <source srcset="https://raw.githubusercontent.com/Jestriker/JustPlugin/main/.github/assets/builtwith-java25.svg" type="image/svg+xml" />
+    <img src="" alt="" width="0" height="0" />
+  </picture>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Release%20Version-1.4-blue" alt="Release Version" />
   <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
-  <img src="https://img.shields.io/badge/Available%20on-Paper-purple" alt="Paper" />
-  <img src="https://img.shields.io/badge/Built%20with-Java%2025-orange" alt="Java 25" />
-  <img src="https://img.shields.io/badge/Available%20on-Folia-cyan" alt="Folia" />
+  <img src="https://img.shields.io/badge/Available%20on-Paper-blue?logo=paper" alt="Paper" />
+  <img src="https://img.shields.io/badge/Available%20on-Purpur-purple" alt="Purpur" />
+  <img src="https://img.shields.io/badge/Available%20on-Folia-green" alt="Folia" />
+  <img src="https://img.shields.io/badge/Built%20with-Java%2021-orange" alt="Java 21" />
   <img src="https://img.shields.io/bstats/servers/30446" alt="bStats Servers" />
   <img src="https://img.shields.io/discord/1482382694443913249" alt="Discord" />
   <img src="https://img.shields.io/github/stars/Jestriker/JustPlugin" alt="GitHub Stars" />
@@ -17,7 +23,7 @@
 
 <p align="center">
   <b>The only essentials plugin you'll ever need.</b><br>
-  A lightweight, fully configurable all-in-one server management plugin for Paper 1.21.11+
+  A lightweight, fully configurable all-in-one server management plugin for Paper, Purpur, and Folia 1.21.11+
 </p>
 
 ---

@@ -4,9 +4,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.*;
-import org.bukkit.scheduler.BukkitTask;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 /**
  * Manages automatic entity clearing (similar to ClearLag).
@@ -16,8 +16,8 @@ import org.justme.justPlugin.util.CC;
 public class EntityClearManager {
 
     private final JustPlugin plugin;
-    private BukkitTask clearTask;
-    private BukkitTask warningTask;
+    private SchedulerUtil.CancellableTask clearTask;
+    private SchedulerUtil.CancellableTask warningTask;
 
     public EntityClearManager(JustPlugin plugin) {
         this.plugin = plugin;
@@ -34,7 +34,7 @@ public class EntityClearManager {
 
         // Warning task
         if (warningSeconds > 0 && warningSeconds < intervalSeconds) {
-            warningTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            warningTask = SchedulerUtil.runTaskTimer(plugin, () -> {
                 boolean announcePublic = plugin.getConfig().getBoolean("entity-clear.announce-to-all", true);
                 if (announcePublic) {
                     String msg = plugin.getConfig().getString("entity-clear.warning-message",
@@ -46,7 +46,7 @@ public class EntityClearManager {
         }
 
         // Clear task
-        clearTask = Bukkit.getScheduler().runTaskTimer(plugin, this::clearNow, intervalTicks, intervalTicks);
+        clearTask = SchedulerUtil.runTaskTimer(plugin, this::clearNow, intervalTicks, intervalTicks);
     }
 
     public void stop() {
