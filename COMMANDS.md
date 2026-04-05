@@ -129,6 +129,7 @@
 | `/addcash` | `/addcash [player] <amount>` | Add cash to yourself or another player | `justplugin.addcash` | `givemoney`, `addmoney`, `addbal` |
 | `/baltop` | `/baltop` | Opens the Balance Leaderboard GUI with top 10 player heads | `justplugin.balance` | `balancetop`, `moneytop`, `topbal` |
 | `/baltophide` | `/baltophide [player]` | Hide yourself or another player from the balance leaderboard | `justplugin.baltophide` | `hidebaltop`, `balancetophide` |
+| `/transactions` | `/transactions [player]` | View transaction history in a paginated GUI | `justplugin.transactions` | `txhistory`, `transactionhistory` |
 
 ### Details
 
@@ -140,6 +141,7 @@
 - **PayNote** converts items in your main hand. Use `/paynote list` to see all convertible items and their values. Configurable item-to-coin mappings in `config.yml`.
 - **Baltop** shows the top 10 richest players with medal rankings (🥇🥈🥉). OPs can see hidden players marked `(hidden)`. Your own rank is shown at the bottom.
 - **BaltopHide** toggles your visibility on the leaderboard. `justplugin.baltophide.others` to hide other players. Players with `justplugin.baltophide.notify` receive notifications when players are hidden/unhidden. All baltop hide actions are logged.
+- **Transactions** opens a paginated GUI (28 per page) showing your transaction history. Click any entry for a detail view. Staff with `justplugin.transactions.others` can view other players' history. Tracks 6 types: PAY, PAYNOTE_CREATE, PAYNOTE_REDEEM, ADDCASH, TRADE, API. Configurable retention period (`economy.transaction-history.retention-days`, default 30) and max entries (`max-entries`, default 500).
 
 ---
 
@@ -251,6 +253,9 @@
 | `/getpos` | `/getpos [player]` | Display current coordinates, world, yaw, and pitch | - (public for self) | `whereami`, `position`, `getcoords`, `coords` |
 | `/getdeathpos` | `/getdeathpos [player]` | Display last death location | Configurable for self | `getdeathcoords`, `deathpos`, `deathcoords` |
 | `/afk` | `/afk` | Toggle AFK (Away From Keyboard) status | `justplugin.afk` | `away` |
+| `/near` | `/near [radius]` | Show nearby players with distance, direction, and coordinates | `justplugin.near` | `nearby` |
+| `/repair` | `/repair [player]` | Repair the held item to max durability | `justplugin.repair` | `fix` |
+| `/enchant` | `/enchant <enchantment> [level]` | Apply an enchantment to the held item (level 0 removes) | `justplugin.enchant` | - |
 
 ### Details
 
@@ -265,6 +270,9 @@
 - **Feed:** `justplugin.feed` for self, `justplugin.feed.others` for others. Restores food to 20 and saturation to 20.
 - **GetPos:** No permission needed for self (public). Requires `justplugin.getpos.others` to view another player's position. Shows clickable `[Click to Teleport]` text when viewing others (requires `justplugin.tppos`).
 - **GetDeathPos:** Self-use permission is configurable in `config.yml` (`commands.getdeathpos.require-permission-self`). Requires `justplugin.getdeathpos.others` for other players. Shows clickable `[Click to Teleport]` text (requires `justplugin.tppos`).
+- **Near:** Shows nearby players within a configurable radius (default: 1000, max: 5000) with distance, compass direction (N/S/E/W/NE/NW/SE/SW), and coordinates. Includes a clickable `[TP]` button for safe teleport. Vanished players are excluded unless the viewer has `vanish.see`. Staff-only command.
+- **Repair:** Repairs the item in your main hand to max durability. `justplugin.repair` for self, `justplugin.repair.others` for other players.
+- **Enchant:** Applies an enchantment to the held item. Level 0 removes the enchantment. By default, respects vanilla enchantment restrictions (item type, max level). Set `enchant.bypass-restrictions: true` in config or grant `justplugin.enchant.bypass` to allow any enchant on any item at any level.
 
 ---
 
@@ -369,11 +377,13 @@
 | `/loom` | `/loom` | Open a virtual loom | `justplugin.loom` | - |
 | `/smithingtable` | `/smithingtable` | Open a virtual smithing table | `justplugin.smithingtable` | `smithtable` |
 | `/enchantingtable` | `/enchantingtable` | Open a virtual enchanting table | `justplugin.enchantingtable` | `enchtable` |
+| `/pv` | `/pv [number]` | Open a player vault (54-slot virtual storage) | `justplugin.vault` | `playervault`, `vault` |
 
 ### Details
 
 - All virtual inventory commands are player-only.
 - These open functional GUIs - you can actually use them to craft, repair, enchant, etc.
+- **Player Vaults** are 54-slot virtual storage inventories, separate from the ender chest. Each player can have up to a configurable max (default 3). Staff with `justplugin.vault.others` can view other players' vaults via `/pv <player> <number>`. Grant `justplugin.vaults.<number>` to bypass the server max. Disabled by default - opt-in via `vaults.enabled` in `config.yml`. Data is saved on close, quit, and auto-save.
 
 ---
 

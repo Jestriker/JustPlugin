@@ -1,5 +1,58 @@
 # JustPlugin - Changelog
 
+## v1.6 - Player Vaults, Transaction History, Utilities & Events API
+**Released:** April 5, 2026
+
+### What's New
+
+#### Player Vaults System
++ `/pv [number]` - 54-slot virtual storage inventories, separate from ender chest
++ `/pv <player> <number>` - staff access to view other players' vaults
++ Configurable max vaults per player (default: 3) with permission-based override (`justplugin.vaults.<number>`)
++ Data saved on every close, quit, and auto-save to prevent data loss
++ Disabled by default - opt-in via `vaults.enabled` in config.yml
+
+#### Transaction History
++ `/transactions [player]` - paginated GUI showing all economy transactions
++ Tracks 6 transaction types: PAY, PAYNOTE_CREATE, PAYNOTE_REDEEM, ADDCASH, TRADE, API
++ Click any transaction to view full details (time, amount, parties involved)
++ Configurable retention period (default: 30 days) and max entries (default: 500)
++ Configurable PayNote creator visibility: show name, anonymous, or no notification
++ Configurable AddCash staff name visibility to players
+
+#### Near Command
++ `/near [radius]` - show nearby players with distance, compass direction, and coordinates
++ Clickable `[TP]` button with safe teleport for each player
++ Staff-only command with configurable default radius (1000) and max radius (5000)
++ Excludes vanished players unless viewer has `justplugin.vanish.see`
+
+#### Repair Command
++ `/repair` - repair held item to maximum durability
++ `/repair <player>` - repair another player's held item (staff)
++ Separate permissions for self and others
+
+#### Enchant Command
++ `/enchant <enchantment> [level]` - apply enchantments to held items
++ Level 0 removes the enchantment
++ Respects vanilla restrictions by default (item type, max level)
++ Configurable bypass via `enchant.bypass-restrictions` or `justplugin.enchant.bypass` permission
++ Supports both namespaced and simple enchantment names
+
+#### Custom Events API
++ 10 custom Bukkit events for add-on plugins to listen to
++ **Cancellable events:** PlayerBalanceChangeEvent, PlayerPunishEvent, PlayerTeleportRequestEvent, PlayerTradeEvent, PlayerJailEvent, KitClaimEvent
++ **Informational events:** PlayerUnjailEvent, PlayerAfkEvent, WarpCreateEvent, WarpDeleteEvent
++ All events use defensive copies for security - no database access exposed
++ Full JavaDoc documentation
+
+#### Documentation
++ Wiki: Added Placeholders reference, Formatting guide, Migration guide, Troubleshooting page, Comparison table
++ Wiki: Global search (Cmd+K), breadcrumbs, prev/next navigation, sticky table of contents
++ Wiki: Version selector, changelog page with color-coded +/~/- badges
++ Wiki: Light/dark mode toggle with animated sun/moon icon
+
+---
+
 ## v1.5 - Folia Support, Automated Messages & Platform Expansion
 **Released:** April 3, 2026
 

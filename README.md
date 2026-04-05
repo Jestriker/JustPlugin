@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Release%20Version-1.5-blue" alt="Release Version" />
+  <img src="https://img.shields.io/badge/Release%20Version-1.6-blue" alt="Release Version" />
   <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
   <img src="https://img.shields.io/badge/Available%20on-Paper-blue?logo=paper" alt="Paper" />
   <img src="https://img.shields.io/badge/Available%20on-Purpur-purple" alt="Purpur" />
@@ -43,6 +43,7 @@ Every command can be individually enabled or disabled. Every permission is granu
 - `/balance`, `/pay`, `/paytoggle`, `/baltop`, `/addcash`
 - **PayNotes** - enchanted paper items as redeemable balance vouchers
 - **Baltop GUI** - interactive leaderboard with player heads, medals, and hidden player support
+- **Transaction History** - `/transactions` GUI with pagination, detail view, 6 transaction types, configurable retention
 - Offline player support for all economy operations
 
 ### 🌍 Teleportation
@@ -180,6 +181,7 @@ Every command can be individually enabled or disabled. Every permission is granu
 - **EconomyAPI** - balance operations
 - **PunishmentAPI** - bans, mutes, warns
 - **VanishAPI** - vanish state checks
+- **10 Custom Events** - PlayerBalanceChangeEvent, PlayerPunishEvent, PlayerTeleportRequestEvent, PlayerTradeEvent, PlayerJailEvent, PlayerUnjailEvent, PlayerAfkEvent, KitClaimEvent, WarpCreateEvent, WarpDeleteEvent (6 cancellable)
 - Full docs in `ECOSYSTEM.md`
 
 ### 💾 Database Support
@@ -220,12 +222,24 @@ Every command can be individually enabled or disabled. Every permission is granu
 - `/automessage reload|list|toggle|send` for management
 - Fully configured in dedicated `automessages.yml`
 
+### 🗄️ Player Vaults
+- `/pv [number]` - 54-slot virtual storage per vault, separate from ender chest
+- `/pv <player> <number>` - staff can view other players' vaults
+- Configurable max vaults per player (default 3), per-player override via `justplugin.vaults.<number>`
+- **Disabled by default** - opt-in via `vaults.enabled` in `config.yml`
+- Data never lost - saves on close, quit, and auto-save
+
+### 🔧 Utility Commands
+- `/near [radius]` - show nearby players with distance, compass direction, coordinates, and clickable [TP] button
+- `/repair [player]` - repair held item to max durability
+- `/enchant <enchantment> [level]` - apply enchantments, level 0 removes, configurable restriction bypass
+
 ### 📦 More Features
 - **Modular Listener Architecture** - event handling split into 6 categorized sub-listeners (connection, chat, combat, player, server, inventory) for clean separation of concerns
 - **Web Config Editor** - browser-based config editing with security (CSRF protection)
 - **Discord Webhook Logging** - color-coded embeds for every staff action (with retry logic)
 - **Entity Clear System** - ClearLag replacement with warnings and notifications
-- **Virtual Inventories** - `/anvil`, `/craft`, `/grindstone`, `/enderchest`, and more
+- **Virtual Inventories** - `/anvil`, `/craft`, `/grindstone`, `/enderchest`, `/pv` (player vaults), and more
 - **PlaceholderAPI Support** - all JustPlugin placeholders available to other plugins (optimized caching)
 - **bStats Metrics** - anonymous usage statistics
 - **Stats GUI** - `/stats` opens an interactive stats inventory

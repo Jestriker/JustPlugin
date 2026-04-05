@@ -78,9 +78,12 @@ public final class JustPlugin extends JavaPlugin {
     private MessageManager messageManager;
     private JoinLeaveManager joinLeaveManager;
     private AutoMessageManager autoMessageManager;
+    private VaultManager vaultManager;
     private BackupManager backupManager;
     private SpawnProtectionManager spawnProtectionManager;
     private KitManager kitManager;
+    private TransactionManager transactionManager;
+    private org.justme.justPlugin.gui.TransactionHistoryGui transactionHistoryGui;
     private org.justme.justPlugin.gui.kits.KitSelectionGui kitSelectionGui;
     private org.justme.justPlugin.gui.kits.KitPreviewGui kitPreviewGui;
     private org.justme.justPlugin.gui.kits.KitEditGui kitEditGui;
@@ -144,6 +147,13 @@ public final class JustPlugin extends JavaPlugin {
         backupManager = new BackupManager(this);
         spawnProtectionManager = new SpawnProtectionManager(this);
         kitManager = new KitManager(this);
+        transactionManager = new TransactionManager(this);
+
+        // Initialize player vaults (only if enabled in config)
+        if (getConfig().getBoolean("vaults.enabled", false)) {
+            vaultManager = new VaultManager(this);
+            Bukkit.getPluginManager().registerEvents(vaultManager, this);
+        }
 
         // Try to hook into Vault if configured
         economyManager.setupVault();
@@ -193,6 +203,10 @@ public final class JustPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(homeGui, this);
         Bukkit.getPluginManager().registerEvents(baltopGui, this);
         Bukkit.getPluginManager().registerEvents(rtpGui, this);
+
+        // Initialize transaction history GUI
+        transactionHistoryGui = new org.justme.justPlugin.gui.TransactionHistoryGui(this);
+        Bukkit.getPluginManager().registerEvents(transactionHistoryGui, this);
 
         // Initialize stats GUI
         statsGui = new org.justme.justPlugin.gui.StatsGui(this);
@@ -249,6 +263,11 @@ public final class JustPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Save all open vaults before shutdown
+        if (vaultManager != null) {
+            vaultManager.saveAllVaults();
+        }
+
         // Stop auto-save and flush all cached data synchronously
         if (dataManager != null) {
             dataManager.stopAutoSave();
@@ -306,6 +325,11 @@ public final class JustPlugin extends JavaPlugin {
         // Shutdown kit manager (saves kits and cooldowns)
         if (kitManager != null) {
             kitManager.shutdown();
+        }
+
+        // Shutdown transaction manager
+        if (transactionManager != null) {
+            transactionManager.shutdown();
         }
 
         var console = Bukkit.getConsoleSender();
@@ -386,6 +410,11 @@ public final class JustPlugin extends JavaPlugin {
         } else {
             console.sendMessage(CC.translate("                        <dark_gray>○</dark_gray> <dark_gray> Auto messages <gray>disabled</gray> <dark_gray>(enable in automessages.yml)"));
         }
+        if (vaultManager != null) {
+            console.sendMessage(CC.translate("                        <green>✔</green> <gray> Player vaults <green>active</green> <dark_gray>(max: " + getConfig().getInt("vaults.max-vaults", 3) + ")"));
+        } else {
+            console.sendMessage(CC.translate("                        <dark_gray>○</dark_gray> <dark_gray> Player vaults <gray>disabled</gray> <dark_gray>(enable in config: vaults.enabled)"));
+        }
         console.sendMessage(net.kyori.adventure.text.Component.empty());
         console.sendMessage(CC.translate("  <gradient:#00aaff:#00ffaa>Successfully enabled.</gradient> <gray>(took " + loadTimeMs + "ms)"));
         console.sendMessage(net.kyori.adventure.text.Component.empty());
@@ -429,6 +458,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("addcash", new AddCashCommand(this));
         registerCmd("baltop", new BaltopCommand(this));
         registerCmd("baltophide", new BaltopHideCommand(this));
+        registerCmd("transactions", new TransactionCommand(this));
 
         // Moderation
         registerCmd("ban", new BanCommand(this));
@@ -483,6 +513,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("kill", new KillCommand(this));
         registerCmd("getpos", new GetPosCommand(this));
         registerCmd("getdeathpos", new GetDeathPosCommand(this));
+        registerCmd("near", new NearCommand(this));
         registerCmd("afk", new AfkCommand(this));
 
         // Chat
@@ -505,6 +536,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("loom", new LoomCommand());
         registerCmd("smithingtable", new SmithingTableCommand());
         registerCmd("enchantingtable", new EnchantingTableCommand());
+        registerCmd("pv", new VaultCommand(this));
 
         // Info
         registerCmd("jpinfo", new InfoCommand(this));
@@ -522,6 +554,8 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("itemname", new ItemNameCommand(this));
         registerCmd("shareitem", new ShareItemCommand());
         registerCmd("setspawner", new SetSpawnerCommand(this));
+        registerCmd("repair", new org.justme.justPlugin.commands.item.RepairCommand(this));
+        registerCmd("enchant", new org.justme.justPlugin.commands.item.EnchantCommand(this));
 
         // World
         registerCmd("weather", new WeatherCommand(this));
@@ -786,4 +820,7 @@ public final class JustPlugin extends JavaPlugin {
     public org.justme.justPlugin.gui.kits.KitPreviewGui getKitPreviewGui() { return kitPreviewGui; }
     public org.justme.justPlugin.gui.kits.KitEditGui getKitEditGui() { return kitEditGui; }
     public boolean isLuckPermsAvailable() { return luckPermsAvailable; }
+    public VaultManager getVaultManager() { return vaultManager; }
+    public TransactionManager getTransactionManager() { return transactionManager; }
+    public org.justme.justPlugin.gui.TransactionHistoryGui getTransactionHistoryGui() { return transactionHistoryGui; }
 }

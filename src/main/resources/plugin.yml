@@ -150,6 +150,11 @@ commands:
     usage: /baltophide
     permission: justplugin.baltophide
     aliases: [hidebaltop, balancetophide]
+  transactions:
+    description: View transaction history
+    usage: /transactions [player]
+    permission: justplugin.transactions
+    aliases: [txhistory, transactionhistory]
 
   # === Moderation ===
   ban:
@@ -379,6 +384,11 @@ commands:
     usage: /getdeathpos [player]
     permission: justplugin.getdeathpos
     aliases: [getdeathcoords, deathpos, deathcoords]
+  near:
+    description: Show nearby players with distance and direction
+    usage: /near [radius]
+    permission: justplugin.near
+    aliases: [nearby]
 
   # === AFK ===
   afk:
@@ -472,6 +482,11 @@ commands:
     usage: /enchantingtable
     permission: justplugin.enchantingtable
     aliases: [enchtable]
+  pv:
+    description: Open a player vault
+    usage: /pv [number]
+    permission: justplugin.vault
+    aliases: [playervault, vault]
 
   # === Info ===
   jpinfo:
@@ -538,6 +553,15 @@ commands:
     usage: /setspawner <type>
     permission: justplugin.setspawner
     aliases: [changespawner]
+  repair:
+    description: Repair the held item to full durability
+    usage: /repair [player]
+    permission: justplugin.repair
+    aliases: [fix]
+  enchant:
+    description: Apply an enchantment to the held item
+    usage: /enchant <enchantment> [level]
+    permission: justplugin.enchant
 
   # === World ===
   weather:
@@ -822,6 +846,7 @@ permissions:
       justplugin.getpos: true
       justplugin.getdeathpos: true
       justplugin.getdeathpos.others: true
+      justplugin.near: true
       justplugin.msg: true
       justplugin.ignore: true
       justplugin.announce: true
@@ -836,6 +861,8 @@ permissions:
       justplugin.loom: true
       justplugin.smithingtable: true
       justplugin.enchantingtable: true
+      justplugin.vault: true
+      justplugin.vault.others: true
       justplugin.playerinfo: true
       justplugin.playerinfo.ip: true
       justplugin.playerlist: true
@@ -857,6 +884,10 @@ permissions:
       justplugin.itemname: true
       justplugin.shareitem: true
       justplugin.setspawner: true
+      justplugin.repair: true
+      justplugin.repair.others: true
+      justplugin.enchant: true
+      justplugin.enchant.bypass: true
       justplugin.weather: true
       justplugin.time: true
       justplugin.team: true
@@ -871,6 +902,8 @@ permissions:
       justplugin.discord: true
       justplugin.addcash: true
       justplugin.addcash.others: true
+      justplugin.transactions: true
+      justplugin.transactions.others: true
       justplugin.discord.set: true
       justplugin.teleport.bypass: true
       justplugin.freezegame: true
@@ -1000,6 +1033,7 @@ permissions:
       justplugin.paytoggle: true
       justplugin.paynote: true
       justplugin.baltophide: true
+      justplugin.transactions: true
       justplugin.msg: true
       justplugin.ignore: true
       justplugin.sharecoords: true
@@ -1032,6 +1066,7 @@ permissions:
       justplugin.loom: true
       justplugin.smithingtable: true
       justplugin.enchantingtable: true
+      justplugin.vault: true
       justplugin.afk: true
       justplugin.kit: true
       justplugin.kit.preview: true
@@ -1050,6 +1085,9 @@ permissions:
     default: false
   justplugin.getpos:
     description: Get your own current position
+    default: false
+  justplugin.near:
+    description: Show nearby players with distance and direction
     default: false
   justplugin.discord:
     description: View the server Discord link
@@ -1225,6 +1263,11 @@ permissions:
     default: false
     children:
       justplugin.baltophide: true
+  justplugin.transactions.others:
+    description: View other players' transaction history
+    default: false
+    children:
+      justplugin.transactions: true
   justplugin.playerlist.hide.others:
     description: Hide other players from the player list
     default: false
@@ -1530,5 +1573,11 @@ permissions:
     default: false
   justplugin.automessage.send:
     description: Force-send an automated message immediately
+    default: false
+  justplugin.vault:
+    description: Open your own player vaults
+    default: false
+  justplugin.vault.others:
+    description: View and edit other players' vaults
     default: false
 

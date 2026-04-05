@@ -1,9 +1,9 @@
 # 🔌 JustPlugin - Ecosystem Developer Guide
 
-> **Version:** 1.5  
+> **Version:** 1.6  
 > **API Package:** `org.justme.justPlugin.api`  
 > **Minecraft:** 1.21.11 (Paper, Purpur, Folia)  
-> **Last Updated:** April 3, 2026
+> **Last Updated:** April 5, 2026
 
 ---
 
@@ -26,6 +26,7 @@ This guide is intended for developers (or AI agents) building plugins that integ
 - [Economy API](#-economy-api)
 - [Punishment API](#-punishment-api)
 - [Vanish API](#-vanish-api)
+- [Custom Events](#-custom-events)
 - [Full Example: Sign Shop Plugin](#-full-example-sign-shop-plugin)
 - [Important Notes & Best Practices](#-important-notes--best-practices)
 
@@ -457,6 +458,89 @@ public class ShopSignListener implements Listener {
 
 ---
 
+## 🎯 Custom Events
+
+JustPlugin fires 10 custom Bukkit events that add-on plugins can listen for. Cancellable events can be cancelled to prevent the action from taking effect. All events use defensive copies - no direct database access is exposed.
+
+| Event | Cancellable | Description |
+|-------|-------------|-------------|
+| `PlayerBalanceChangeEvent` | ✅ Yes | Fired when a player's balance changes |
+| `PlayerPunishEvent` | ✅ Yes | Fired when a player is punished (ban, mute, warn, etc.) |
+| `PlayerTeleportRequestEvent` | ✅ Yes | Fired when a TPA/TPAHere request is sent |
+| `PlayerTradeEvent` | ✅ Yes | Fired when a trade completes between players |
+| `PlayerJailEvent` | ✅ Yes | Fired when a player is jailed |
+| `PlayerUnjailEvent` | ❌ No | Fired when a player is released from jail |
+| `PlayerAfkEvent` | ❌ No | Fired when a player enters or leaves AFK |
+| `KitClaimEvent` | ✅ Yes | Fired when a player claims a kit |
+| `WarpCreateEvent` | ❌ No | Fired when a warp is created |
+| `WarpDeleteEvent` | ❌ No | Fired when a warp is deleted |
+
+### Example: Cancelling a balance change
+
+```java
+import org.justme.justPlugin.api.events.PlayerBalanceChangeEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class BalanceCapListener implements Listener {
+
+    private static final double MAX_ALLOWED = 500_000.0;
+
+    @EventHandler
+    public void onBalanceChange(PlayerBalanceChangeEvent event) {
+        if (event.getNewBalance() > MAX_ALLOWED) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage("Balance cap of $500,000 reached!");
+        }
+    }
+}
+```
+
+### Example: Logging punishments to an external system
+
+```java
+import org.justme.justPlugin.api.events.PlayerPunishEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class PunishLogListener implements Listener {
+
+    @EventHandler
+    public void onPunish(PlayerPunishEvent event) {
+        String log = String.format("[%s] %s punished %s: %s",
+            event.getType(),
+            event.getPunisher(),
+            event.getTarget().getName(),
+            event.getReason());
+        // Send to your external logging service
+        getLogger().info(log);
+    }
+}
+```
+
+### Example: Blocking kit claims during events
+
+```java
+import org.justme.justPlugin.api.events.KitClaimEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class EventKitBlocker implements Listener {
+
+    private boolean eventActive = false;
+
+    @EventHandler
+    public void onKitClaim(KitClaimEvent event) {
+        if (eventActive) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage("Kit claiming is disabled during the event!");
+        }
+    }
+}
+```
+
+---
+
 ## 📌 Important Notes & Best Practices
 
 ### 1. Always use `compileOnly`
@@ -508,6 +592,16 @@ JustPlugin uses a modular listener architecture. Event handling is split into 6 
 | `EconomyAPI` | `org.justme.justPlugin.api` | Balance management (get, set, add, remove, pay, format) |
 | `PunishmentAPI` | `org.justme.justPlugin.api` | Bans, mutes, warnings (check, apply, lift) |
 | `VanishAPI` | `org.justme.justPlugin.api` | Check vanish / super-vanish status |
+| `PlayerBalanceChangeEvent` | `org.justme.justPlugin.api.events` | Custom event: balance change (cancellable) |
+| `PlayerPunishEvent` | `org.justme.justPlugin.api.events` | Custom event: punishment (cancellable) |
+| `PlayerTeleportRequestEvent` | `org.justme.justPlugin.api.events` | Custom event: TPA request (cancellable) |
+| `PlayerTradeEvent` | `org.justme.justPlugin.api.events` | Custom event: trade completion (cancellable) |
+| `PlayerJailEvent` | `org.justme.justPlugin.api.events` | Custom event: player jailed (cancellable) |
+| `PlayerUnjailEvent` | `org.justme.justPlugin.api.events` | Custom event: player unjailed |
+| `PlayerAfkEvent` | `org.justme.justPlugin.api.events` | Custom event: AFK state change |
+| `KitClaimEvent` | `org.justme.justPlugin.api.events` | Custom event: kit claimed (cancellable) |
+| `WarpCreateEvent` | `org.justme.justPlugin.api.events` | Custom event: warp created |
+| `WarpDeleteEvent` | `org.justme.justPlugin.api.events` | Custom event: warp deleted |
 
 ---
 

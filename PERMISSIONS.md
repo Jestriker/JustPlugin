@@ -397,6 +397,8 @@ Includes all permissions listed in this document.
 | `justplugin.baltophide.others` | Hide other players from the balance leaderboard | `op` | `/baltophide <player>` |
 | `justplugin.baltophide.notify` | Receive notifications when players are hidden/unhidden from baltop | `op` | `/baltophide` |
 | `justplugin.baltop.viewhidden` | See hidden players in the Balance Leaderboard GUI | `op` | `/baltop` |
+| `justplugin.transactions` | View your own transaction history | `true` (player) | `/transactions` |
+| `justplugin.transactions.others` | View another player's transaction history | `op` | `/transactions <player>` |
 
 ---
 
@@ -471,6 +473,11 @@ Includes all permissions listed in this document.
 | `justplugin.getdeathpos.others` | View another player's death location | `op` | `/getdeathpos <player>` |
 | `justplugin.afk` | Toggle AFK status | `true` (player) | `/afk` |
 | `justplugin.afk.kickbypass` | Never kicked for being AFK | `op` | - |
+| `justplugin.near` | Show nearby players with distance and direction | `op` | `/near` |
+| `justplugin.repair` | Repair your own held item to max durability | `op` | `/repair` |
+| `justplugin.repair.others` | Repair another player's held item | `op` | `/repair <player>` |
+| `justplugin.enchant` | Enchant your held item | `op` | `/enchant` |
+| `justplugin.enchant.bypass` | Bypass enchantment restrictions (any enchant, any item, any level) | `op` | `/enchant` |
 
 > **Note:** `/getpos` (self) requires **no permission** - it is always public. Self-use permission for `/getdeathpos` is configurable via `commands.getdeathpos.require-permission-self` in `config.yml`.
 
@@ -542,6 +549,9 @@ Includes all permissions listed in this document.
 | `justplugin.loom` | Open a virtual loom | `op` | `/loom` |
 | `justplugin.smithingtable` | Open a virtual smithing table | `op` | `/smithingtable` |
 | `justplugin.enchantingtable` | Open a virtual enchanting table | `op` | `/enchantingtable` |
+| `justplugin.vault` | Open your own player vaults | `true` (player) | `/pv` |
+| `justplugin.vault.others` | Open another player's vaults (staff) | `op` | `/pv <player> <number>` |
+| `justplugin.vaults.<number>` | Bypass server max vault limit up to `<number>` | `false` | `/pv` |
 
 ---
 
@@ -652,6 +662,9 @@ These permissions control whether a command can target **other players**. The ba
 | `justplugin.playerlist.hide.others` | Hide other players from the player list | `op` | `/playerlisthide <player>` |
 | `justplugin.getpos.others` | View another player's position | `op` | `/getpos <player>` |
 | `justplugin.getdeathpos.others` | View another player's death location | `op` | `/getdeathpos <player>` |
+| `justplugin.repair.others` | Repair another player's held item | `op` | `/repair <player>` |
+| `justplugin.vault.others` | Open another player's vaults | `op` | `/pv <player> <number>` |
+| `justplugin.transactions.others` | View another player's transaction history | `op` | `/transactions <player>` |
 
 ### Other Special Permissions
 

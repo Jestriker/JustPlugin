@@ -64,6 +64,7 @@ public class CommandSettings {
         PERMISSIONS.put("addcash", "justplugin.addcash");
         PERMISSIONS.put("baltop", "justplugin.balance");
         PERMISSIONS.put("baltophide", "justplugin.baltophide");
+        PERMISSIONS.put("transactions", "justplugin.transactions");
 
         // Moderation
         PERMISSIONS.put("ban", "justplugin.ban");

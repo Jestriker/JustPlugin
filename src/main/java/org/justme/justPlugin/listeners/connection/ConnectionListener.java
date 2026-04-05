@@ -59,6 +59,7 @@ public class ConnectionListener implements Listener {
         plugin.getDataManager().loadPlayerDataToCache(player.getUniqueId());
 
         plugin.getEconomyManager().loadPlayer(player.getUniqueId());
+        plugin.getTransactionManager().loadPlayer(player.getUniqueId());
         plugin.getIgnoreManager().loadPlayer(player.getUniqueId());
         plugin.getVanishManager().handleJoin(player);
         plugin.getAfkManager().handleJoin(player.getUniqueId());
@@ -204,6 +205,7 @@ public class ConnectionListener implements Listener {
         plugin.getDataManager().savePlayerData(uuid, data);
 
         plugin.getEconomyManager().unloadPlayer(uuid);
+        plugin.getTransactionManager().unloadPlayer(uuid);
         plugin.getIgnoreManager().unloadPlayer(uuid);
         plugin.getChatManager().removePlayer(uuid);
         plugin.getScoreboardManager().handleQuit(uuid);

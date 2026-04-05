@@ -1,4 +1,4 @@
-![Release Version](https://img.shields.io/badge/Release%20Version-1.5-blue)
+![Release Version](https://img.shields.io/badge/Release%20Version-1.6-blue)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Paper](https://img.shields.io/badge/Available%20on-Paper-blue)
 ![Purpur](https://img.shields.io/badge/Available%20on-Purpur-purple)
@@ -14,7 +14,7 @@ A lightweight, fully configurable server management plugin for Paper, Purpur, an
 
 ## Core Features
 
-**Economy** - Full balance system with Vault support, PayNotes, Baltop GUI, offline player support.
+**Economy** - Full balance system with Vault support, PayNotes, Baltop GUI, transaction history GUI, offline player support.
 
 **Teleportation** - TPA, spawn, back, random TP with dimension selection GUI, safe teleport protection (3x3 hazard checks), warmup countdowns, and per-command cooldowns.
 
@@ -60,6 +60,10 @@ A lightweight, fully configurable server management plugin for Paper, Purpur, an
 
 **Offline Player Commands** - Teleport to, view position, view inventory, and view ender chest of offline players.
 
-**Developer API** - Economy, Punishment, and Vanish APIs for add-on plugins.
+**Player Vaults** - 54-slot virtual storage inventories with permission-based limits. Disabled by default.
 
-**More** - Web config editor (with CSRF protection), Discord webhook logging (with retry), entity clear system, virtual inventories (anvil, craft, etc.), PlaceholderAPI support (optimized caching), bStats metrics, stats GUI, config auto-migration, modular listener architecture, async I/O, thread safety, graceful shutdown, input sanitization, tab completion cache.
+**Utility Commands** - `/near` (staff: nearby players with distance/direction/TP), `/repair` (fix item durability), `/enchant` (apply enchantments with optional restriction bypass).
+
+**Developer API** - Economy, Punishment, and Vanish APIs plus 10 custom Bukkit events (6 cancellable) for add-on plugins.
+
+**More** - Transaction history GUI, web config editor (with CSRF protection), Discord webhook logging (with retry), entity clear system, virtual inventories (anvil, craft, player vaults, etc.), PlaceholderAPI support (optimized caching), bStats metrics, stats GUI, config auto-migration, modular listener architecture, async I/O, thread safety, graceful shutdown, input sanitization, tab completion cache.

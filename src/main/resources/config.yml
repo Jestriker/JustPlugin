@@ -105,6 +105,26 @@ economy:
   # Whether to show the currency symbol in the scoreboard's {balance_short} placeholder.
   # When false, scoreboard shows "25.70K" instead of "$25.70K".
   show-symbol-scoreboard: false
+  # --- Transaction History ---
+  # Tracks all economy transactions (pay, paynotes, addcash, trades, API).
+  # Players can view their history with /transactions.
+  transaction-history:
+    # Enable or disable transaction history tracking.
+    enabled: true
+    # How many days to keep transaction records. Set to 0 to keep forever.
+    retention-days: 30
+    # Maximum number of transactions stored per player (prevents data bloat).
+    max-entries: 500
+    addcash:
+      # If false, players cannot see which staff member gave them addcash.
+      show-to-player: true
+    paynote:
+      # true = show creator name on redeemed paynotes, false = show "Anonymous"
+      show-creator: true
+      # "name" = notify creator with redeemer's name
+      # "anonymous" = notify creator with "Someone redeemed your paynote"
+      # "none" = no notification to creator on redeem
+      notify-creator: "name"
 
 # ==========================================
 # Teleportation Settings
@@ -398,6 +418,14 @@ afk:
 #   pitch: 0.0
 
 # ==========================================
+# Enchant Command Settings
+# ==========================================
+enchant:
+  # When true, allows ANY enchantment on ANY item at ANY level.
+  # Players with justplugin.enchant.bypass permission can always bypass regardless.
+  bypass-restrictions: false
+
+# ==========================================
 # Command-Specific Behavior Settings
 # Additional per-command behavior configuration (not permissions).
 # Permissions are fixed in plugin.yml and cannot be changed here.
@@ -407,6 +435,11 @@ commands:
     # If true, players need justplugin.getdeathpos permission to view their OWN death location.
     # If false, any player can view their own death location without permission.
     require-permission-self: false
+  near:
+    # Default radius (in blocks) when no radius argument is given.
+    default-radius: 1000
+    # Maximum allowed radius (in blocks) players can specify.
+    max-radius: 5000
 
 # ==========================================
 # Feature Toggles
@@ -482,6 +515,8 @@ command-settings:
   baltop:
     enabled: true
   baltophide:
+    enabled: true
+  transactions:
     enabled: true
 
   # --- Moderation ---
@@ -565,6 +600,8 @@ command-settings:
     enabled: true
   getdeathpos:
     enabled: true
+  near:
+    enabled: true
 
   # --- Chat ---
   msg:
@@ -632,6 +669,10 @@ command-settings:
   shareitem:
     enabled: true
   setspawner:
+    enabled: true
+  repair:
+    enabled: true
+  enchant:
     enabled: true
 
   # --- World ---
@@ -850,4 +891,16 @@ backup:
   max-backups: 7
   # Include config.yml in backups.
   include-config: true
+
+# ==========================================
+# Player Vaults
+# ==========================================
+# Virtual storage inventories that persist across sessions.
+# Each vault is a double-chest-sized inventory (54 slots).
+vaults:
+  # Enable or disable the player vault system.
+  enabled: false
+  # Default maximum number of vaults per player.
+  # Can be overridden per-player with permission: justplugin.vaults.<number>
+  max-vaults: 3
 
