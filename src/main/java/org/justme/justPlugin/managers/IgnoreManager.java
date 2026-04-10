@@ -2,6 +2,8 @@ package org.justme.justPlugin.managers;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.storage.StorageProvider;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 
@@ -9,11 +11,25 @@ public class IgnoreManager {
 
     private final JustPlugin plugin;
     private final DataManager dataManager;
+    private final DatabaseManager databaseManager;
     private final Map<UUID, Set<UUID>> ignoreMap = new HashMap<>();
 
     public IgnoreManager(JustPlugin plugin) {
         this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
+        this.databaseManager = plugin.getDatabaseManager();
+    }
+
+    private boolean isUsingDatabase() {
+        if (databaseManager == null) return false;
+        StorageProvider provider = databaseManager.getProvider();
+        if (provider == null) return false;
+        String type = provider.getType();
+        return "sqlite".equals(type) || "mysql".equals(type);
+    }
+
+    private StorageProvider getStorageProvider() {
+        return databaseManager != null ? databaseManager.getProvider() : null;
     }
 
     public boolean isIgnoring(UUID player, UUID target) {
@@ -51,6 +67,24 @@ public class IgnoreManager {
     }
 
     public void loadPlayer(UUID uuid) {
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> data = provider.getPlayerData(uuid);
+                Set<UUID> ignored = new HashSet<>();
+                Object ignoredObj = data.get("ignored");
+                if (ignoredObj instanceof List<?> list) {
+                    for (Object s : list) {
+                        try {
+                            ignored.add(UUID.fromString(s.toString()));
+                        } catch (IllegalArgumentException ignored2) {}
+                    }
+                }
+                ignoreMap.put(uuid, ignored);
+                return;
+            }
+        }
+
         YamlConfiguration data = dataManager.getPlayerData(uuid);
         List<String> list = data.getStringList("ignored");
         Set<UUID> ignored = new HashSet<>();
@@ -68,12 +102,23 @@ public class IgnoreManager {
     }
 
     private void saveIgnoreList(UUID uuid) {
-        YamlConfiguration data = dataManager.getPlayerData(uuid);
         Set<UUID> ignored = ignoreMap.getOrDefault(uuid, Collections.emptySet());
         List<String> list = new ArrayList<>();
         for (UUID id : ignored) {
             list.add(id.toString());
         }
+
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> data = provider.getPlayerData(uuid);
+                data.put("ignored", list);
+                SchedulerUtil.runAsync(plugin, () -> provider.savePlayerData(uuid, data));
+                return;
+            }
+        }
+
+        YamlConfiguration data = dataManager.getPlayerData(uuid);
         data.set("ignored", list);
         dataManager.savePlayerData(uuid, data);
     }
@@ -82,4 +127,3 @@ public class IgnoreManager {
         return ignoreMap.getOrDefault(uuid, Collections.emptySet());
     }
 }
-

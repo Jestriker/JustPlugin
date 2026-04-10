@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Dark theme (default) */
 :root,
 [data-theme="dark"] {
@@ -11,7 +15,7 @@
   --border: #2a2d3e;
   --text-primary: #e4e5e7;
   --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  --text-muted: #7b8291;
   --accent: #f97316;
   --accent-hover: #fb923c;
   --accent-dim: #f9731610;
@@ -221,4 +225,50 @@ h2[id], h3[id] {
 /* Exclude transition on code/pre for perf */
 pre *, code * {
   transition: none;
+}
+
+/* Accessibility: focus indicators */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Animated orange text glow */
+@keyframes glow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 10px rgba(249, 115, 22, 0.5),
+      0 0 30px rgba(249, 115, 22, 0.3),
+      0 0 60px rgba(249, 115, 22, 0.15);
+    filter: brightness(1);
+  }
+  50% {
+    text-shadow:
+      0 0 20px rgba(249, 115, 22, 0.8),
+      0 0 50px rgba(249, 115, 22, 0.5),
+      0 0 100px rgba(249, 115, 22, 0.25);
+    filter: brightness(1.15);
+  }
+}
+
+[data-glow-text] {
+  animation: glow-pulse 3s ease-in-out infinite !important;
+}
+
+/* Animated orange box glow — subtle */
+@keyframes box-glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 6px rgba(249, 115, 22, 0.15),
+      0 0 14px rgba(249, 115, 22, 0.08);
+  }
+  50% {
+    box-shadow:
+      0 0 10px rgba(249, 115, 22, 0.3),
+      0 0 22px rgba(249, 115, 22, 0.12);
+  }
+}
+
+[data-glow-box] {
+  animation: box-glow-pulse 3s ease-in-out infinite !important;
 }

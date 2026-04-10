@@ -3,6 +3,8 @@ package org.justme.justPlugin.managers;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.storage.StorageProvider;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,11 +13,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages tags (prefix/suffix labels) that players can equip.
- * Tags are defined in tags.yml and equipped tags are stored in player data files.
+ * Tags are defined in tags.yml or via StorageProvider when a database is configured.
+ * Equipped tags are stored in player data files or database.
  */
 public class TagManager {
 
     private final JustPlugin plugin;
+    private final DatabaseManager databaseManager;
     private final File tagsFile;
     private YamlConfiguration tagsConfig;
 
@@ -27,8 +31,21 @@ public class TagManager {
 
     public TagManager(JustPlugin plugin) {
         this.plugin = plugin;
+        this.databaseManager = plugin.getDatabaseManager();
         this.tagsFile = new File(plugin.getDataFolder(), "tags.yml");
         loadTags();
+    }
+
+    private boolean isUsingDatabase() {
+        if (databaseManager == null) return false;
+        StorageProvider provider = databaseManager.getProvider();
+        if (provider == null) return false;
+        String type = provider.getType();
+        return "sqlite".equals(type) || "mysql".equals(type);
+    }
+
+    private StorageProvider getStorageProvider() {
+        return databaseManager != null ? databaseManager.getProvider() : null;
     }
 
     // ==================== Tag Data ====================
@@ -90,6 +107,13 @@ public class TagManager {
 
         // Unequip from all players who have this tag
         equippedTags.entrySet().removeIf(entry -> entry.getValue().equals(lower));
+
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                SchedulerUtil.runAsync(plugin, () -> provider.deleteTag(lower));
+            }
+        }
 
         saveTags();
     }
@@ -172,6 +196,17 @@ public class TagManager {
      * Load a player's equipped tag from their data file into the cache.
      */
     public void loadPlayer(UUID uuid) {
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> data = provider.getPlayerData(uuid);
+                Object tagId = data.get("equipped-tag");
+                if (tagId != null && !tagId.toString().isEmpty() && tags.containsKey(tagId.toString())) {
+                    equippedTags.put(uuid, tagId.toString());
+                }
+                return;
+            }
+        }
         YamlConfiguration data = plugin.getDataManager().getPlayerData(uuid);
         String tagId = data.getString("equipped-tag");
         if (tagId != null && !tagId.isEmpty() && tags.containsKey(tagId)) {
@@ -187,6 +222,19 @@ public class TagManager {
     }
 
     private void saveEquippedTag(UUID uuid, String tagId) {
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> data = provider.getPlayerData(uuid);
+                if (tagId != null) {
+                    data.put("equipped-tag", tagId);
+                } else {
+                    data.remove("equipped-tag");
+                }
+                SchedulerUtil.runAsync(plugin, () -> provider.savePlayerData(uuid, data));
+                return;
+            }
+        }
         YamlConfiguration data = plugin.getDataManager().getPlayerData(uuid);
         if (tagId != null) {
             data.set("equipped-tag", tagId);
@@ -197,25 +245,47 @@ public class TagManager {
     }
 
     /**
-     * Load tags from tags.yml.
+     * Load tags from tags.yml or database.
      */
     public void loadTags() {
         tags.clear();
+        if (isUsingDatabase()) {
+            loadTagsFromDatabase();
+        } else {
+            loadTagsFromYaml();
+        }
+    }
+
+    private void loadTagsFromDatabase() {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) { loadTagsFromYaml(); return; }
+
+        Map<String, Map<String, Object>> allTags = provider.getAllTags();
+        if (allTags.isEmpty()) {
+            // Create default tags in database
+            createDefaultTags();
+            return;
+        }
+
+        for (Map.Entry<String, Map<String, Object>> entry : allTags.entrySet()) {
+            String id = entry.getKey();
+            Map<String, Object> data = entry.getValue();
+            String display = data.getOrDefault("display", id).toString();
+            String type = data.getOrDefault("type", "prefix").toString();
+            String permission = data.getOrDefault("permission", "justplugin.tag." + id).toString();
+
+            tags.put(id.toLowerCase(), new TagData(id.toLowerCase(), display, type, permission));
+        }
+
+        plugin.getLogger().info("[Tags] Loaded " + tags.size() + " tag(s) from database.");
+    }
+
+    private void loadTagsFromYaml() {
         if (!tagsFile.exists()) {
             // Create default tags.yml with example tags
             tagsConfig = new YamlConfiguration();
-            tagsConfig.set("tags.vip.display", "<gold>[VIP]</gold>");
-            tagsConfig.set("tags.vip.type", "prefix");
-            tagsConfig.set("tags.vip.permission", "justplugin.tag.vip");
-
-            tagsConfig.set("tags.mvp.display", "<light_purple>[MVP]</light_purple>");
-            tagsConfig.set("tags.mvp.type", "prefix");
-            tagsConfig.set("tags.mvp.permission", "justplugin.tag.mvp");
-
-            tagsConfig.set("tags.og.display", "<green>[OG]</green>");
-            tagsConfig.set("tags.og.type", "suffix");
-            tagsConfig.set("tags.og.permission", "justplugin.tag.og");
-            saveTags();
+            createDefaultTags();
+            return;
         } else {
             tagsConfig = YamlConfiguration.loadConfiguration(tagsFile);
         }
@@ -237,10 +307,41 @@ public class TagManager {
         plugin.getLogger().info("[Tags] Loaded " + tags.size() + " tag(s) from tags.yml.");
     }
 
+    private void createDefaultTags() {
+        tags.put("vip", new TagData("vip", "<gold>[VIP]</gold>", "prefix", "justplugin.tag.vip"));
+        tags.put("mvp", new TagData("mvp", "<light_purple>[MVP]</light_purple>", "prefix", "justplugin.tag.mvp"));
+        tags.put("og", new TagData("og", "<green>[OG]</green>", "suffix", "justplugin.tag.og"));
+        saveTags();
+    }
+
     /**
-     * Save all tags to tags.yml.
+     * Save all tags to tags.yml or database.
      */
     public void saveTags() {
+        if (isUsingDatabase()) {
+            saveTagsToDatabase();
+        } else {
+            saveTagsToYaml();
+        }
+    }
+
+    private void saveTagsToDatabase() {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) { saveTagsToYaml(); return; }
+
+        for (TagData tag : tags.values()) {
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("display", tag.display);
+            data.put("type", tag.type);
+            data.put("permission", tag.permission);
+            provider.saveTag(tag.id, data);
+        }
+    }
+
+    private void saveTagsToYaml() {
+        if (tagsConfig == null) {
+            tagsConfig = new YamlConfiguration();
+        }
         // Clear existing tags section
         tagsConfig.set("tags", null);
 

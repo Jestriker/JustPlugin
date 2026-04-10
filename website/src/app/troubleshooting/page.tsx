@@ -376,7 +376,7 @@ export default function TroubleshootingPage() {
     <div>
       <PageHeader
         title="Troubleshooting"
-        description="Common issues and solutions for JustPlugin. Click any issue to expand the solution."
+        description={<>Common issues and solutions for <span className="text-[var(--accent)]">JustPlugin</span>. Click any issue to expand the solution.</>}
       />
 
       <div className="flex gap-2 mb-6">

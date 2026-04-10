@@ -1,6 +1,6 @@
 JustPlugin - All-in-One Server Essentials
 
-A lightweight, fully configurable server management plugin for Paper 1.21.11+ that replaces dozens of separate plugins with a single JAR. Every command can be individually enabled or disabled. Every permission is granular and hierarchical.
+A lightweight, fully configurable server management plugin for Paper, Purpur, and Folia 1.21.11+ that replaces dozens of separate plugins with a single JAR. Every command can be individually enabled or disabled. Every permission is granular and hierarchical.
 
 
 CORE FEATURES

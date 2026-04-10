@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import PageHeader from "@/components/PageHeader";
 import CodeBlock from "@/components/CodeBlock";
 import { PLUGIN_VERSION } from "@/data/constants";
+
+export const metadata: Metadata = {
+  title: "Configuration Guide",
+  description:
+    "Complete configuration reference for JustPlugin. Learn how to customize config.yml, database.yml, scoreboard, MOTD, and every module setting.",
+};
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -33,7 +40,7 @@ export default function ConfigurationPage() {
     <div>
       <PageHeader
         title="Plugin Configuration"
-        description="Complete reference for every configuration file in JustPlugin. All files are auto-generated with inline comments on first run."
+        description={<>Complete reference for every configuration file in <span className="text-[var(--accent)]">JustPlugin</span>. All files are auto-generated with inline comments on first run.</>}
         badge={`v${PLUGIN_VERSION}`}
       />
 

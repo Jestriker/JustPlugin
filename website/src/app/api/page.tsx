@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import PageHeader from "@/components/PageHeader";
 import CodeBlock from "@/components/CodeBlock";
+
+export const metadata: Metadata = {
+  title: "Developer API Reference",
+  description:
+    "JustPlugin developer API documentation. Integrate with EconomyAPI, PunishmentAPI, VanishAPI, and more in your Minecraft plugins.",
+};
 
 const economyMethods = [
   { signature: "double getBalance(UUID player)", description: "Returns the player's current balance." },
@@ -60,7 +67,7 @@ export default function APIReferencePage() {
     <div>
       <PageHeader
         title="API Reference"
-        description="Integrate your plugins with JustPlugin using the public developer API. Access economy, punishment, and vanish systems programmatically."
+        description={<>Integrate your plugins with <span className="text-[var(--accent)]">JustPlugin</span> using the public developer API. Access economy, punishment, and vanish systems programmatically.</>}
         badge="Developer"
       />
 
@@ -132,11 +139,11 @@ depend: [JustPlugin]`}
         <CodeBlock
           language="java"
           filename="MyAddonPlugin.java"
-          code={`import com.justplugin.api.JustPluginAPI;
-import com.justplugin.api.JustPluginProvider;
-import com.justplugin.api.economy.EconomyAPI;
-import com.justplugin.api.punishment.PunishmentAPI;
-import com.justplugin.api.vanish.VanishAPI;
+          code={`import org.justme.justPlugin.api.JustPluginAPI;
+import org.justme.justPlugin.api.JustPluginProvider;
+import org.justme.justPlugin.api.economy.EconomyAPI;
+import org.justme.justPlugin.api.punishment.PunishmentAPI;
+import org.justme.justPlugin.api.vanish.VanishAPI;
 
 public class MyAddonPlugin extends JavaPlugin {
 
@@ -354,7 +361,7 @@ for (Player visible : visiblePlayers) {
         </p>
         <CodeBlock
           language="java"
-          code={`import com.justplugin.api.events.PlayerBalanceChangeEvent;
+          code={`import org.justme.justPlugin.api.events.PlayerBalanceChangeEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -378,7 +385,7 @@ public class BalanceCapListener implements Listener {
         </p>
         <CodeBlock
           language="java"
-          code={`import com.justplugin.api.events.PlayerPunishEvent;
+          code={`import org.justme.justPlugin.api.events.PlayerPunishEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -408,8 +415,8 @@ public class PunishLogListener implements Listener {
         <CodeBlock
           language="java"
           filename="SignShopListener.java"
-          code={`import com.justplugin.api.JustPluginProvider;
-import com.justplugin.api.economy.EconomyAPI;
+          code={`import org.justme.justPlugin.api.JustPluginProvider;
+import org.justme.justPlugin.api.economy.EconomyAPI;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

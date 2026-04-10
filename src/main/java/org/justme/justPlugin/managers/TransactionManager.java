@@ -3,6 +3,7 @@ package org.justme.justPlugin.managers;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.storage.StorageProvider;
 import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
@@ -12,13 +13,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages transaction history for the economy system.
- * Stores transaction records in player data YAML files under the "transactions" section.
+ * Stores transaction records in player data YAML files or via StorageProvider when a database is configured.
  * Supports configurable retention periods and max entries per player.
  */
 public class TransactionManager {
 
     private final JustPlugin plugin;
     private final DataManager dataManager;
+    private final DatabaseManager databaseManager;
 
     // Cache of loaded transactions per player - avoids repeated YAML parsing
     private final Map<UUID, List<TransactionEntry>> cache = new ConcurrentHashMap<>();
@@ -28,11 +30,24 @@ public class TransactionManager {
     public TransactionManager(JustPlugin plugin) {
         this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
+        this.databaseManager = plugin.getDatabaseManager();
 
         // Schedule periodic purge every 30 minutes (36000 ticks)
         if (isEnabled()) {
             purgeTask = SchedulerUtil.runAsyncTimer(plugin, this::purgeExpired, 36000L, 36000L);
         }
+    }
+
+    private boolean isUsingDatabase() {
+        if (databaseManager == null) return false;
+        StorageProvider provider = databaseManager.getProvider();
+        if (provider == null) return false;
+        String type = provider.getType();
+        return "sqlite".equals(type) || "mysql".equals(type);
+    }
+
+    private StorageProvider getStorageProvider() {
+        return databaseManager != null ? databaseManager.getProvider() : null;
     }
 
     /**
@@ -230,6 +245,63 @@ public class TransactionManager {
     // --- Disk I/O ---
 
     private List<TransactionEntry> loadFromDisk(UUID player) {
+        if (isUsingDatabase()) {
+            return loadFromDatabase(player);
+        } else {
+            return loadFromYaml(player);
+        }
+    }
+
+    private List<TransactionEntry> loadFromDatabase(UUID player) {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) return loadFromYaml(player);
+
+        List<TransactionEntry> list = new ArrayList<>();
+        Map<String, Map<String, Object>> allTransactions = provider.getAllTransactions();
+        String prefix = player.toString() + ".";
+
+        long cutoff = 0;
+        int retentionDays = getRetentionDays();
+        if (retentionDays > 0) {
+            cutoff = System.currentTimeMillis() - (retentionDays * 24L * 60L * 60L * 1000L);
+        }
+
+        for (Map.Entry<String, Map<String, Object>> entry : allTransactions.entrySet()) {
+            if (!entry.getKey().startsWith(prefix)) continue;
+            Map<String, Object> data = entry.getValue();
+
+            long timestamp = data.containsKey("timestamp") ? ((Number) data.get("timestamp")).longValue() : 0L;
+            if (retentionDays > 0 && timestamp < cutoff) continue;
+
+            String id = data.getOrDefault("id", entry.getKey().substring(prefix.length())).toString();
+            String type = data.getOrDefault("type", "UNKNOWN").toString();
+            double amount = data.containsKey("amount") ? ((Number) data.get("amount")).doubleValue() : 0.0;
+
+            Map<String, String> details = new HashMap<>();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> detailsMap = data.containsKey("details") ? (Map<String, Object>) data.get("details") : null;
+            if (detailsMap != null) {
+                for (Map.Entry<String, Object> detailEntry : detailsMap.entrySet()) {
+                    details.put(detailEntry.getKey(), detailEntry.getValue().toString());
+                }
+            }
+
+            list.add(new TransactionEntry(id, type, player, amount, timestamp, details));
+        }
+
+        // Sort newest first
+        list.sort((a, b) -> Long.compare(b.timestamp, a.timestamp));
+
+        // Trim to max
+        int max = getMaxEntries();
+        while (list.size() > max) {
+            list.removeLast();
+        }
+
+        return list;
+    }
+
+    private List<TransactionEntry> loadFromYaml(UUID player) {
         List<TransactionEntry> list = new ArrayList<>();
         YamlConfiguration data = dataManager.getPlayerData(player);
         ConfigurationSection section = data.getConfigurationSection("transactions");
@@ -276,6 +348,45 @@ public class TransactionManager {
     }
 
     private void saveToDisk(UUID player, List<TransactionEntry> list) {
+        if (isUsingDatabase()) {
+            saveToDiskDatabase(player, list);
+        } else {
+            saveToDiskYaml(player, list);
+        }
+    }
+
+    private void saveToDiskDatabase(UUID player, List<TransactionEntry> list) {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) { saveToDiskYaml(player, list); return; }
+
+        // Delete existing transactions for this player first
+        Map<String, Map<String, Object>> allTransactions = provider.getAllTransactions();
+        String prefix = player.toString() + ".";
+        for (String key : allTransactions.keySet()) {
+            if (key.startsWith(prefix)) {
+                provider.deleteTransaction(key);
+            }
+        }
+
+        // Save new ones
+        if (list != null && !list.isEmpty()) {
+            int index = 0;
+            for (TransactionEntry entry : list) {
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("id", entry.id);
+                data.put("type", entry.type);
+                data.put("amount", entry.amount);
+                data.put("timestamp", entry.timestamp);
+                if (!entry.details.isEmpty()) {
+                    data.put("details", new LinkedHashMap<>(entry.details));
+                }
+                provider.saveTransaction(prefix + index, data);
+                index++;
+            }
+        }
+    }
+
+    private void saveToDiskYaml(UUID player, List<TransactionEntry> list) {
         YamlConfiguration data = dataManager.getPlayerData(player);
 
         // Clear existing transactions section

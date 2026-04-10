@@ -483,6 +483,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("deathitems", new DeathItemsCommand(this));
         registerCmd("oplist", new OpListCommand(this));
         registerCmd("banlist", new BanListCommand(this));
+        registerCmd("baniplist", new BanListCommand(this));
         registerCmd("jail", new JailCommand(this));
         registerCmd("unjail", new UnjailCommand(this));
         registerCmd("setjail", new SetJailCommand(this));

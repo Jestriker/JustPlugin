@@ -14,9 +14,9 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
   {
-    version: "1.6",
+    version: "1.3",
     title: "Player Vaults, Transaction History, Utilities & Events API",
-    date: "April 5, 2026",
+    date: "April 10, 2026",
     sections: [
       {
         title: "Player Vaults System",
@@ -79,7 +79,7 @@ const changelog: ChangelogEntry[] = [
     ],
   },
   {
-    version: "1.5",
+    version: "1.3-beta.3",
     title: "Folia Support, Automated Messages & Platform Expansion",
     date: "April 3, 2026",
     sections: [
@@ -123,7 +123,7 @@ const changelog: ChangelogEntry[] = [
     ],
   },
   {
-    version: "1.4",
+    version: "1.3-beta.2",
     title: "Database, Jail, Kits, AFK, Mail & 28+ New Features",
     date: "April 3, 2026",
     sections: [
@@ -245,7 +245,7 @@ const changelog: ChangelogEntry[] = [
     ],
   },
   {
-    version: "1.3",
+    version: "1.3-beta.1",
     title: "Architecture Refactor & Listener Modularization",
     date: "March 29, 2026",
     sections: [

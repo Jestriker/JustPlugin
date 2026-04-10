@@ -1,7 +1,7 @@
 # JustPlugin - Changelog
 
-## v1.6 - Player Vaults, Transaction History, Utilities & Events API
-**Released:** April 5, 2026
+## v1.3 - Player Vaults, Transaction History, Utilities & Events API
+**Released:** April 10, 2026
 
 ### What's New
 
@@ -53,7 +53,7 @@
 
 ---
 
-## v1.5 - Folia Support, Automated Messages & Platform Expansion
+## v1.3-beta.3 - Folia Support, Automated Messages & Platform Expansion
 **Released:** April 3, 2026
 
 ### What's New
@@ -82,11 +82,11 @@
 
 #### Platform Support
 - Official support for Paper, Purpur, and Folia
-- Version bumped to 1.5
+- Version bumped to 1.3-beta.3
 
 ---
 
-## v1.4 - Database, Jail, Kits, AFK, Mail & 28+ New Features
+## v1.3-beta.2 - Database, Jail, Kits, AFK, Mail & 28+ New Features
 **Released:** April 3, 2026
 
 ### What's New
@@ -194,7 +194,7 @@
 
 ---
 
-## v1.3 - Architecture Refactor & Listener Modularization
+## v1.3-beta.1 - Architecture Refactor & Listener Modularization
 **Released:** March 29, 2026
 
 ### What's New

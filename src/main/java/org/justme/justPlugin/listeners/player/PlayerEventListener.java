@@ -75,6 +75,12 @@ public class PlayerEventListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
+        // Early exit: only process if the player actually moved to a different block
+        if (event.getFrom().getBlockX() == event.getTo().getBlockX()
+                && event.getFrom().getBlockY() == event.getTo().getBlockY()
+                && event.getFrom().getBlockZ() == event.getTo().getBlockZ()) {
+            return;
+        }
         plugin.getTeleportManager().handleMoveDuringTeleport(event.getPlayer());
     }
 }

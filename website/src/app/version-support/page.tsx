@@ -19,7 +19,7 @@ export default function VersionSupportPage() {
     <div>
       <PageHeader
         title="Version Support"
-        description="Platform compatibility, version requirements, and build information for JustPlugin."
+        description={<>Platform compatibility, version requirements, and build information for <span className="text-[var(--accent)]">JustPlugin</span>.</>}
         badge={`v${PLUGIN_VERSION}`}
       />
 

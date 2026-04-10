@@ -160,7 +160,8 @@ public class WebEditorManager {
             cleanupTask = SchedulerUtil.runTaskTimer(plugin, this::periodicCleanup, 20L * 60, 20L * 60);
 
             plugin.getLogger().info("Web editor started on " + bindAddress + ":" + port);
-            plugin.getLogger().info("Web editor auth token: " + authToken);
+            plugin.getLogger().info("Web editor auth token: " + authToken.substring(0, 4) + "****");
+            plugin.getLogger().info("Use /webeditor or /we in-game to get the full URL and token.");
             plugin.getLogger().info("Open http://" + ("0.0.0.0".equals(bindAddress) ? "localhost" : bindAddress) + ":" + port + " in your browser to access the editor.");
             return true;
         } catch (IOException e) {
@@ -480,8 +481,8 @@ public class WebEditorManager {
                     || referer.startsWith("http://127.0.0.1:" + port + "/");
         }
 
-        // No Origin and no Referer - allow (direct API calls)
-        return true;
+        // No Origin and no Referer - reject (potential CSRF bypass)
+        return false;
     }
 
     private void handlePostConfig(HttpExchange exchange, String fileId) throws IOException {

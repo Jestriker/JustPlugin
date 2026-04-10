@@ -81,7 +81,7 @@ public class ConnectionListener implements Listener {
             YamlConfiguration data = plugin.getDataManager().getPlayerData(player.getUniqueId());
             data.set("last-ip", player.getAddress().getAddress().getHostAddress());
             data.set("last-name", player.getName());
-            plugin.getDataManager().savePlayerData(player.getUniqueId(), data);
+            plugin.getDataManager().savePlayerDataAsync(player.getUniqueId(), data);
         }
 
         // Restore persistent back location
@@ -202,7 +202,7 @@ public class ConnectionListener implements Listener {
         // Save XP
         data.set("xp-level", player.getLevel());
         data.set("xp-progress", player.getExp());
-        plugin.getDataManager().savePlayerData(uuid, data);
+        plugin.getDataManager().savePlayerDataAsync(uuid, data);
 
         plugin.getEconomyManager().unloadPlayer(uuid);
         plugin.getTransactionManager().unloadPlayer(uuid);

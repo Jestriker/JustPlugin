@@ -1,8 +1,8 @@
 # JustPlugin - Permissions Reference
 
-> **Version:** 1.5  
+> **Version:** 1.3  
 > **Author:** JustMe  
-> **Last Updated:** April 3, 2026
+> **Last Updated:** April 10, 2026
 
 > **IMPORTANT:** OPs do NOT have any permissions by default. All permissions must be granted  
 > through a permissions plugin (e.g., LuckPerms). Grant `justplugin.player` to your default  
@@ -567,8 +567,11 @@ Includes all permissions listed in this document.
 | `justplugin.playerlist.hide.notify` | Receive notifications when players are hidden/unhidden | `op` | `/playerlisthide` |
 | `justplugin.staff` | Marks a player as staff (shown with `[Staff]` tag in `/playerlist`) | `op` | `/playerlist` |
 | `justplugin.motd.set` | Set the server MOTD | `op` | `/motd <message>` |
-
-> **Note:** `/jpinfo`, `/jphelp`, `/plist`, `/motd` (view), `/clock`, `/date` have no permission requirement - all players can use them.
+| `justplugin.info` | View plugin info | `true` (player) | `/jpinfo`, `/about` |
+| `justplugin.help` | View plugin help | `true` (player) | `/jphelp`, `/help`, `/?` |
+| `justplugin.list` | List online players | `true` (player) | `/plist`, `/who`, `/online`, `/players` |
+| `justplugin.clock` | Show current real-world time | `true` (player) | `/clock`, `/realtime` |
+| `justplugin.date` | Show current real-world date and time | `true` (player) | `/date`, `/realdate` |
 
 ---
 
@@ -596,6 +599,10 @@ Includes all permissions listed in this document.
 | Permission | Description | Default | Commands |
 |------------|-------------|---------|----------|
 | `justplugin.team` | Full team management (create, disband, invite, join, leave, kick, info, list) | `true` (player) | `/team` |
+| `justplugin.team.list` | List all teams on the server | `op` | `/team list` |
+| `justplugin.teamhome.cooldownbypass` | Bypass team home pre-teleport countdown | `op` | `/team home` |
+| `justplugin.teamhome.delaybypass` | Bypass team home delay between uses | `op` | `/team home` |
+| `justplugin.teamhome.unsafetp` | Bypass team home safe teleport protection | `op` | `/team home` |
 
 ---
 
@@ -603,6 +610,8 @@ Includes all permissions listed in this document.
 
 | Permission | Description | Default | Commands |
 |------------|-------------|---------|----------|
+| `justplugin.admin` | Receive staff notifications on join (dependency warnings, update checks) | `op` | - |
+| `justplugin.announce.jail` | Receive jail punishment announcements | `op` | - |
 | `justplugin.trade` | Trade items with other players | `true` (player) | `/trade` |
 | `justplugin.discord.set` | Change the Discord link | `op` | `/discord set <link>` |
 | `justplugin.applyedits` | Apply config changes from the web editor (**highest-level**) | `op` | `/applyedits` |

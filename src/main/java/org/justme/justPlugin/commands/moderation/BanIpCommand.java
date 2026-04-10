@@ -74,7 +74,16 @@ public class BanIpCommand implements TabExecutor {
         } else {
             sender.sendMessage(CC.success("IP Banned <yellow>" + ip + "</yellow>. Reason: <gray>" + reason));
         }
-        Bukkit.broadcast(CC.warning("IP <yellow>" + ip + "</yellow> has been IP banned by <yellow>" + bannedBy + "</yellow>. Reason: <gray>" + reason));
+        net.kyori.adventure.text.Component announcement = CC.warning("IP <yellow>" + ip + "</yellow> has been IP banned by <yellow>" + bannedBy + "</yellow>. Reason: <gray>" + reason);
+        if (plugin.getConfig().getBoolean("punishment-announcements.banip", false)) {
+            Bukkit.broadcast(announcement);
+        } else {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.hasPermission("justplugin.announce.banip")) {
+                    p.sendMessage(announcement);
+                }
+            }
+        }
         plugin.getLogManager().log("moderation", "<yellow>" + bannedBy + "</yellow> IP-banned <yellow>" + ip + "</yellow>" + (resolvedFrom != null ? " (from <yellow>" + resolvedFrom + "</yellow>)" : "") + ". Reason: <gray>" + reason);
         return true;
     }

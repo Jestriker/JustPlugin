@@ -48,25 +48,50 @@ export default function Breadcrumbs() {
     return { href, label, isLast };
   });
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://justplugin.dev",
+      },
+      ...crumbs.map((crumb, i) => ({
+        "@type": "ListItem",
+        position: i + 2,
+        name: crumb.label,
+        item: `https://justplugin.dev${crumb.href}`,
+      })),
+    ],
+  };
+
   return (
-    <nav className="flex items-center gap-1.5 text-sm text-[var(--text-muted)] mb-6">
-      <Link href="/" className="hover:text-[var(--accent)] transition-colors">
-        Home
-      </Link>
-      {crumbs.map((crumb) => (
-        <span key={crumb.href} className="flex items-center gap-1.5">
-          <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-          {crumb.isLast ? (
-            <span className="text-[var(--text-secondary)] font-medium">{crumb.label}</span>
-          ) : (
-            <Link href={crumb.href} className="hover:text-[var(--accent)] transition-colors">
-              {crumb.label}
-            </Link>
-          )}
-        </span>
-      ))}
-    </nav>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-[var(--text-muted)] mb-6">
+        <Link href="/" className="hover:text-[var(--accent)] transition-colors">
+          Home
+        </Link>
+        {crumbs.map((crumb) => (
+          <span key={crumb.href} className="flex items-center gap-1.5">
+            <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+            {crumb.isLast ? (
+              <span className="text-[var(--text-secondary)] font-medium">{crumb.label}</span>
+            ) : (
+              <Link href={crumb.href} className="hover:text-[var(--accent)] transition-colors">
+                {crumb.label}
+              </Link>
+            )}
+          </span>
+        ))}
+      </nav>
+    </>
   );
 }

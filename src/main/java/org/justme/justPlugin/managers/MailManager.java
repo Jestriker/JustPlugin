@@ -3,26 +3,42 @@ package org.justme.justPlugin.managers;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.storage.StorageProvider;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 /**
- * Manages offline mail stored in mail.yml.
+ * Manages offline mail stored in mail.yml or via StorageProvider when a database is configured.
  * Each player's mail is stored under players.{uuid} as a list of entries
  * containing sender, sender-name, message, timestamp, and read status.
  */
 public class MailManager {
 
     private final JustPlugin plugin;
+    private final DatabaseManager databaseManager;
     private final File mailFile;
     private YamlConfiguration mailConfig;
 
     public MailManager(JustPlugin plugin) {
         this.plugin = plugin;
+        this.databaseManager = plugin.getDatabaseManager();
         this.mailFile = new File(plugin.getDataFolder(), "mail.yml");
         load();
+    }
+
+    private boolean isUsingDatabase() {
+        if (databaseManager == null) return false;
+        StorageProvider provider = databaseManager.getProvider();
+        if (provider == null) return false;
+        String type = provider.getType();
+        return "sqlite".equals(type) || "mysql".equals(type);
+    }
+
+    private StorageProvider getStorageProvider() {
+        return databaseManager != null ? databaseManager.getProvider() : null;
     }
 
     private void load() {
@@ -71,7 +87,17 @@ public class MailManager {
 
         mail.add(entry);
         setMail(targetUUID, mail);
-        save();
+
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> mailData = new LinkedHashMap<>();
+                mailData.put("entries", mail);
+                SchedulerUtil.runAsync(plugin, () -> provider.saveMail(targetUUID.toString(), mailData));
+            }
+        } else {
+            save();
+        }
         return true;
     }
 
@@ -80,6 +106,27 @@ public class MailManager {
      */
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> getMail(UUID uuid) {
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Map<String, Object>> allMail = provider.getAllMail();
+                Map<String, Object> playerMail = allMail.get(uuid.toString());
+                if (playerMail != null && playerMail.containsKey("entries")) {
+                    Object entries = playerMail.get("entries");
+                    if (entries instanceof List<?> list) {
+                        List<Map<String, Object>> result = new ArrayList<>();
+                        for (Object obj : list) {
+                            if (obj instanceof Map) {
+                                result.add((Map<String, Object>) obj);
+                            }
+                        }
+                        return result;
+                    }
+                }
+                return new ArrayList<>();
+            }
+        }
+
         String path = "players." + uuid.toString();
         List<?> raw = mailConfig.getList(path);
         if (raw == null) return new ArrayList<>();
@@ -117,7 +164,17 @@ public class MailManager {
             entry.put("read", true);
         }
         setMail(uuid, mail);
-        save();
+
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> mailData = new LinkedHashMap<>();
+                mailData.put("entries", mail);
+                SchedulerUtil.runAsync(plugin, () -> provider.saveMail(uuid.toString(), mailData));
+            }
+        } else {
+            save();
+        }
     }
 
     /**
@@ -131,7 +188,17 @@ public class MailManager {
         mail.removeIf(entry -> Boolean.TRUE.equals(entry.get("read")));
         int removed = before - mail.size();
         setMail(uuid, mail);
-        save();
+
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> mailData = new LinkedHashMap<>();
+                mailData.put("entries", mail);
+                SchedulerUtil.runAsync(plugin, () -> provider.saveMail(uuid.toString(), mailData));
+            }
+        } else {
+            save();
+        }
         return removed;
     }
 
@@ -143,12 +210,23 @@ public class MailManager {
     public int clearAll(UUID uuid) {
         List<Map<String, Object>> mail = getMail(uuid);
         int count = mail.size();
-        mailConfig.set("players." + uuid.toString(), null);
-        save();
+
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                SchedulerUtil.runAsync(plugin, () -> provider.deleteMail(uuid.toString()));
+            }
+        } else {
+            mailConfig.set("players." + uuid.toString(), null);
+            save();
+        }
         return count;
     }
 
     private void setMail(UUID uuid, List<Map<String, Object>> mail) {
-        mailConfig.set("players." + uuid.toString(), mail);
+        if (!isUsingDatabase()) {
+            mailConfig.set("players." + uuid.toString(), mail);
+        }
+        // Database saves are handled at the call site
     }
 }

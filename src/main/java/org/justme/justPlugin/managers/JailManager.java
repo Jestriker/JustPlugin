@@ -7,6 +7,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.storage.StorageProvider;
 import org.justme.justPlugin.util.CC;
 import org.justme.justPlugin.util.SchedulerUtil;
 import org.justme.justPlugin.util.TimeUtil;
@@ -18,11 +19,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages jail locations and jailed players.
- * Data is persisted in jails.yml with two sections: "locations" and "prisoners".
+ * Data is persisted in jails.yml or via StorageProvider when a database is configured.
  */
 public class JailManager {
 
     private final JustPlugin plugin;
+    private final DatabaseManager databaseManager;
     private final File jailsFile;
     private YamlConfiguration jailsConfig;
 
@@ -68,6 +70,7 @@ public class JailManager {
 
     public JailManager(JustPlugin plugin) {
         this.plugin = plugin;
+        this.databaseManager = plugin.getDatabaseManager();
         this.jailsFile = new File(plugin.getDataFolder(), "jails.yml");
         this.jailsConfig = YamlConfiguration.loadConfiguration(jailsFile);
         loadLocations();
@@ -75,10 +78,56 @@ public class JailManager {
         startExpiryTask();
     }
 
+    private boolean isUsingDatabase() {
+        if (databaseManager == null) return false;
+        StorageProvider provider = databaseManager.getProvider();
+        if (provider == null) return false;
+        String type = provider.getType();
+        return "sqlite".equals(type) || "mysql".equals(type);
+    }
+
+    private StorageProvider getStorageProvider() {
+        return databaseManager != null ? databaseManager.getProvider() : null;
+    }
+
     // ==================== Loading ====================
 
     private void loadLocations() {
         jailLocations.clear();
+        if (isUsingDatabase()) {
+            loadLocationsFromDatabase();
+        } else {
+            loadLocationsFromYaml();
+        }
+    }
+
+    private void loadLocationsFromDatabase() {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) return;
+
+        Map<String, Map<String, Object>> allJails = provider.getAllJails();
+        for (Map.Entry<String, Map<String, Object>> entry : allJails.entrySet()) {
+            String name = entry.getKey();
+            // Skip prisoner entries (they have a "jail" key indicating they are prisoner data)
+            Map<String, Object> data = entry.getValue();
+            if (data.containsKey("jail")) continue; // This is a prisoner entry, not a location
+
+            String world = data.getOrDefault("world", "").toString();
+            if (world.isEmpty() || Bukkit.getWorld(world) == null) continue;
+
+            double x = data.containsKey("x") ? ((Number) data.get("x")).doubleValue() : 0;
+            double y = data.containsKey("y") ? ((Number) data.get("y")).doubleValue() : 0;
+            double z = data.containsKey("z") ? ((Number) data.get("z")).doubleValue() : 0;
+            float yaw = data.containsKey("yaw") ? ((Number) data.get("yaw")).floatValue() : 0;
+            float pitch = data.containsKey("pitch") ? ((Number) data.get("pitch")).floatValue() : 0;
+
+            jailLocations.put(name.toLowerCase(), new Location(
+                    Bukkit.getWorld(world), x, y, z, yaw, pitch
+            ));
+        }
+    }
+
+    private void loadLocationsFromYaml() {
         ConfigurationSection section = jailsConfig.getConfigurationSection("locations");
         if (section == null) return;
         for (String name : section.getKeys(false)) {
@@ -96,6 +145,50 @@ public class JailManager {
 
     private void loadPrisoners() {
         jailedPlayers.clear();
+        if (isUsingDatabase()) {
+            loadPrisonersFromDatabase();
+        } else {
+            loadPrisonersFromYaml();
+        }
+    }
+
+    private void loadPrisonersFromDatabase() {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) return;
+
+        Map<String, Map<String, Object>> allJails = provider.getAllJails();
+        for (Map.Entry<String, Map<String, Object>> entry : allJails.entrySet()) {
+            String key = entry.getKey();
+            Map<String, Object> data = entry.getValue();
+            // Prisoner entries have a "jail" key
+            if (!data.containsKey("jail")) continue;
+
+            // Key format for prisoners: "prisoner.<uuid>"
+            if (!key.startsWith("prisoner.")) continue;
+
+            try {
+                UUID uuid = UUID.fromString(key.substring("prisoner.".length()));
+                JailEntry jailEntry = new JailEntry(
+                        uuid,
+                        data.getOrDefault("name", "Unknown").toString(),
+                        data.getOrDefault("jail", "default").toString(),
+                        data.getOrDefault("reason", "No reason").toString(),
+                        data.getOrDefault("jailedBy", "Unknown").toString(),
+                        data.containsKey("startTime") ? ((Number) data.get("startTime")).longValue() : System.currentTimeMillis(),
+                        data.containsKey("expiryTime") ? ((Number) data.get("expiryTime")).longValue() : -1L,
+                        data.getOrDefault("previousGameMode", "SURVIVAL").toString()
+                );
+
+                if (!jailEntry.isExpired()) {
+                    jailedPlayers.put(uuid, jailEntry);
+                } else {
+                    provider.deleteJail(key);
+                }
+            } catch (IllegalArgumentException ignored) {}
+        }
+    }
+
+    private void loadPrisonersFromYaml() {
         ConfigurationSection section = jailsConfig.getConfigurationSection("prisoners");
         if (section == null) return;
         for (String key : section.getKeys(false)) {
@@ -198,9 +291,16 @@ public class JailManager {
         JailEntry entry = jailedPlayers.remove(uuid);
         if (entry == null) return;
 
-        // Remove from config
-        jailsConfig.set("prisoners." + uuid.toString(), null);
-        save();
+        // Remove from storage
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                SchedulerUtil.runAsync(plugin, () -> provider.deleteJail("prisoner." + uuid.toString()));
+            }
+        } else {
+            jailsConfig.set("prisoners." + uuid.toString(), null);
+            save();
+        }
 
         Player player = Bukkit.getPlayer(uuid);
         if (player != null && player.isOnline()) {
@@ -327,8 +427,15 @@ public class JailManager {
     public boolean deleteJailLocation(String name) {
         if (!jailLocations.containsKey(name.toLowerCase())) return false;
         jailLocations.remove(name.toLowerCase());
-        jailsConfig.set("locations." + name.toLowerCase(), null);
-        save();
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                SchedulerUtil.runAsync(plugin, () -> provider.deleteJail(name.toLowerCase()));
+            }
+        } else {
+            jailsConfig.set("locations." + name.toLowerCase(), null);
+            save();
+        }
         return true;
     }
 
@@ -353,26 +460,55 @@ public class JailManager {
     // ==================== Persistence ====================
 
     private void saveLocation(String name, Location loc) {
-        String path = "locations." + name;
-        jailsConfig.set(path + ".world", loc.getWorld().getName());
-        jailsConfig.set(path + ".x", loc.getX());
-        jailsConfig.set(path + ".y", loc.getY());
-        jailsConfig.set(path + ".z", loc.getZ());
-        jailsConfig.set(path + ".yaw", loc.getYaw());
-        jailsConfig.set(path + ".pitch", loc.getPitch());
-        save();
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("world", loc.getWorld().getName());
+                data.put("x", loc.getX());
+                data.put("y", loc.getY());
+                data.put("z", loc.getZ());
+                data.put("yaw", (double) loc.getYaw());
+                data.put("pitch", (double) loc.getPitch());
+                SchedulerUtil.runAsync(plugin, () -> provider.saveJail(name, data));
+            }
+        } else {
+            String path = "locations." + name;
+            jailsConfig.set(path + ".world", loc.getWorld().getName());
+            jailsConfig.set(path + ".x", loc.getX());
+            jailsConfig.set(path + ".y", loc.getY());
+            jailsConfig.set(path + ".z", loc.getZ());
+            jailsConfig.set(path + ".yaw", loc.getYaw());
+            jailsConfig.set(path + ".pitch", loc.getPitch());
+            save();
+        }
     }
 
     private void savePrisoner(JailEntry entry) {
-        String path = "prisoners." + entry.uuid.toString();
-        jailsConfig.set(path + ".name", entry.playerName);
-        jailsConfig.set(path + ".jail", entry.jailName);
-        jailsConfig.set(path + ".reason", entry.reason);
-        jailsConfig.set(path + ".jailedBy", entry.jailedBy);
-        jailsConfig.set(path + ".startTime", entry.startTime);
-        jailsConfig.set(path + ".expiryTime", entry.expiryTime);
-        jailsConfig.set(path + ".previousGameMode", entry.previousGameMode);
-        save();
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("name", entry.playerName);
+                data.put("jail", entry.jailName);
+                data.put("reason", entry.reason);
+                data.put("jailedBy", entry.jailedBy);
+                data.put("startTime", entry.startTime);
+                data.put("expiryTime", entry.expiryTime);
+                data.put("previousGameMode", entry.previousGameMode);
+                SchedulerUtil.runAsync(plugin, () -> provider.saveJail("prisoner." + entry.uuid.toString(), data));
+            }
+        } else {
+            String path = "prisoners." + entry.uuid.toString();
+            jailsConfig.set(path + ".name", entry.playerName);
+            jailsConfig.set(path + ".jail", entry.jailName);
+            jailsConfig.set(path + ".reason", entry.reason);
+            jailsConfig.set(path + ".jailedBy", entry.jailedBy);
+            jailsConfig.set(path + ".startTime", entry.startTime);
+            jailsConfig.set(path + ".expiryTime", entry.expiryTime);
+            jailsConfig.set(path + ".previousGameMode", entry.previousGameMode);
+            save();
+        }
     }
 
     private void save() {

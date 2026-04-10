@@ -1,0 +1,38 @@
+name: Documentation Check
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check version consistency
+        run: node scripts/check-versions.js
+
+      - name: Check documentation sync
+        run: node scripts/sync-docs.js
+
+      - name: Check generated docs are up to date
+        run: node scripts/generate-docs.js --check
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install website dependencies
+        working-directory: website
+        run: pnpm install --frozen-lockfile
+
+      - name: Build website
+        working-directory: website
+        run: npx next build

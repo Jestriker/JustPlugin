@@ -163,7 +163,6 @@ public class ChatListener implements Listener {
         try {
             net.luckperms.api.LuckPerms lp = net.luckperms.api.LuckPermsProvider.get();
             net.luckperms.api.model.user.User user = lp.getUserManager().getUser(player.getUniqueId());
-            if (user == null) user = lp.getUserManager().loadUser(player.getUniqueId()).join();
             if (user != null) return user.getCachedData().getMetaData().getPrefix();
         } catch (Throwable ignored) {}
         return null;
@@ -174,7 +173,6 @@ public class ChatListener implements Listener {
         try {
             net.luckperms.api.LuckPerms lp = net.luckperms.api.LuckPermsProvider.get();
             net.luckperms.api.model.user.User user = lp.getUserManager().getUser(player.getUniqueId());
-            if (user == null) user = lp.getUserManager().loadUser(player.getUniqueId()).join();
             if (user != null) return user.getCachedData().getMetaData().getSuffix();
         } catch (Throwable ignored) {}
         return null;

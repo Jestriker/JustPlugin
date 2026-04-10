@@ -33,7 +33,7 @@ export default function FormattingPage() {
     <div>
       <PageHeader
         title="Formatting Guide"
-        description="JustPlugin uses MiniMessage for all text formatting. This guide covers colors, gradients, decorations, click/hover events, and more."
+        description={<><span className="text-[var(--accent)]">JustPlugin</span> uses MiniMessage for all text formatting. This guide covers colors, gradients, decorations, click/hover events, and more.</>}
       />
 
       {/* Overview */}

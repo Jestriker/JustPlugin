@@ -1580,4 +1580,25 @@ permissions:
   justplugin.vault.others:
     description: View and edit other players' vaults
     default: false
+  justplugin.admin:
+    description: Receive staff notifications on join (dependency warnings, update checks)
+    default: op
+  justplugin.backup.export:
+    description: Export a full plugin data backup
+    default: op
+  justplugin.backup.import:
+    description: Import/restore a plugin data backup
+    default: op
+  justplugin.backup.list:
+    description: List available backups
+    default: op
+  justplugin.backup.delete:
+    description: Delete a backup
+    default: op
+  justplugin.mail.send:
+    description: Send mail to other players
+    default: false
+  justplugin.announce.jail:
+    description: Receive jail punishment announcements
+    default: op
 

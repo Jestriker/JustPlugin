@@ -123,3 +123,22 @@ runs/
 /gradlew.bat
 .claude/worktrees/
 .claude/
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+*.env
+website/.env
+website/.env.local
+website/.env.*
+
+# Next.js
+website/.next/
+website/node_modules/
+website/out/

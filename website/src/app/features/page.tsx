@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import { icons } from "@/components/Icons";
+
+export const metadata: Metadata = {
+  title: "Features Overview",
+  description:
+    "Explore all 22 feature modules in JustPlugin: economy, teleportation, moderation, kits, teams, scoreboard, and more for your Minecraft server.",
+};
 
 interface FeatureCard {
   title: string;

@@ -41,6 +41,27 @@ function AccordionItem({
   );
 }
 
+/* Plain-text answers for FAQPage JSON-LD structured data (search engines cannot
+   parse React nodes, so we maintain a parallel plain-text list). */
+const faqPlainText: { question: string; answer: string }[] = [
+  { question: "What Minecraft versions are supported?", answer: "JustPlugin requires Minecraft 1.21.11 or newer. It is built exclusively for the Paper, Purpur, and Folia server platforms. Older Minecraft versions are not supported." },
+  { question: "Does JustPlugin work with Spigot?", answer: "No. JustPlugin relies on Paper-exclusive APIs including the Adventure component library for MiniMessage formatting, async event handling, and enhanced scheduler APIs. We recommend using Paper as a drop-in replacement for Spigot." },
+  { question: "Do OPs automatically get all JustPlugin permissions?", answer: "No. Unlike many plugins, OPs do not automatically receive JustPlugin permissions. You must explicitly grant permissions using a permissions manager like LuckPerms. Use the justplugin.* wildcard to grant all permissions." },
+  { question: "How do I set up the economy system?", answer: "JustPlugin includes a full built-in economy system that works out of the box. You can also integrate with an external economy plugin via Vault. Configure the provider in config.yml under the economy section." },
+  { question: "Can I disable specific commands?", answer: "Yes. Every command can be individually enabled or disabled in config.yml under the command-settings section. Disabled commands are fully unregistered from the server." },
+  { question: "How do warnings and punishment escalation work?", answer: "Warnings use a progressive escalation system. Each warning level triggers a configurable action, from chat messages to permanent bans. Available actions are ChatMessage, Kick, TempBan, and Ban." },
+  { question: "How do I set up Discord logging?", answer: "Discord logging sends moderation actions and events to a Discord channel via webhooks. Create a webhook in your Discord channel, then run /setlogswebhook <url> in-game." },
+  { question: "What databases are supported?", answer: "JustPlugin supports YAML (default flat-file), SQLite (single-file database), and MySQL (remote database with HikariCP connection pooling). Configure in database.yml." },
+  { question: "Is LuckPerms required?", answer: "No. LuckPerms is optional. JustPlugin works with any permissions plugin. However, LuckPerms enables the /rank GUI, chat prefix/suffix display, staff group detection, and maintenance mode bypass." },
+  { question: "How do I configure the scoreboard?", answer: "The scoreboard is configured in scoreboard.yml. It supports 50+ built-in placeholders, MiniMessage formatting, animated titles with wave effects, and PlaceholderAPI integration." },
+  { question: "Can players have multiple homes?", answer: "Yes. The default maximum is 3 homes per player, configurable in config.yml. Grant more via the justplugin.homes.max.<number> permission node." },
+  { question: "How does safe teleport work?", answer: "Safe teleport checks a 3x3 area around the destination for lava, fire, void, suffocation, and unsafe surfaces. Players with justplugin.teleport.unsafe can bypass safety checks." },
+  { question: "How do I use the web config editor?", answer: "Enable the web editor in config.yml under web-editor with enabled: true. Access it at http://localhost:8585. Only enable on trusted networks." },
+  { question: "What's the difference between vanish and super vanish?", answer: "Regular vanish makes the player invisible but allows world interaction. Super vanish puts the player in spectator-like ghost mode where they can fly through blocks and cannot interact with the world." },
+  { question: "How do auto messages work?", answer: "Auto messages support four scheduling modes: Interval (fixed time between messages), Schedule (specific times of day), On-the-Hour (every XX:00), and On-the-Half-Hour (every XX:30). Configured in automessages.yml." },
+  { question: "How do I backup my data?", answer: "Use the /jpbackup command. /jpbackup export creates a full backup, /jpbackup import restores data, /jpbackup list shows backups, and /jpbackup delete removes a backup. Backups are stored in plugins/JustPlugin/backups/." },
+];
+
 const faqItems: {
   question: string;
   answer: React.ReactNode;
@@ -427,11 +448,28 @@ export default function FAQPage() {
     setOpenItems(new Set());
   };
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqPlainText.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <PageHeader
         title="Frequently Asked Questions"
-        description="Common questions and answers about installing, configuring, and using JustPlugin."
+        description={<>Common questions and answers about installing, configuring, and using <span className="text-[var(--accent)]">JustPlugin</span>.</>}
       />
 
       <div className="flex gap-2 mb-6">

@@ -76,7 +76,7 @@ public class PlayerListener {
         data.set("lastBack.z", loc.getZ());
         data.set("lastBack.yaw", loc.getYaw());
         data.set("lastBack.pitch", loc.getPitch());
-        plugin.getDataManager().savePlayerData(uuid, data);
+        plugin.getDataManager().savePlayerDataAsync(uuid, data);
     }
 
     public void loadBackLocation(UUID uuid) {
@@ -103,7 +103,7 @@ public class PlayerListener {
         data.set("lastDeath.z", loc.getZ());
         data.set("lastDeath.yaw", loc.getYaw());
         data.set("lastDeath.pitch", loc.getPitch());
-        plugin.getDataManager().savePlayerData(uuid, data);
+        plugin.getDataManager().savePlayerDataAsync(uuid, data);
     }
 
     public void loadDeathLocation(UUID uuid) {
@@ -146,6 +146,6 @@ public class PlayerListener {
             data.set("enderchest.slot_" + i, (i < enderContents.length && enderContents[i] != null) ? enderContents[i] : null);
         }
 
-        plugin.getDataManager().savePlayerData(uuid, data);
+        plugin.getDataManager().savePlayerDataAsync(uuid, data);
     }
 }

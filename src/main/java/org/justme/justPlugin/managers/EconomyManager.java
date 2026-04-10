@@ -2,6 +2,8 @@ package org.justme.justPlugin.managers;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.storage.StorageProvider;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
 import java.util.*;
@@ -11,6 +13,7 @@ public class EconomyManager {
 
     private final JustPlugin plugin;
     private final DataManager dataManager;
+    private final DatabaseManager databaseManager;
     private final double startingBalance;
     private final double maxBalance;
 
@@ -20,14 +23,74 @@ public class EconomyManager {
 
     // Cache (used only when provider is "justplugin") - thread-safe for async access
     private final Map<UUID, Double> balances = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Object> playerLocks = new ConcurrentHashMap<>();
     private final Set<UUID> payToggleOff = ConcurrentHashMap.newKeySet();
     private final Set<UUID> baltopHidden = ConcurrentHashMap.newKeySet();
 
     public EconomyManager(JustPlugin plugin) {
         this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
+        this.databaseManager = plugin.getDatabaseManager();
         this.startingBalance = plugin.getConfig().getDouble("economy.starting-balance", 100.0);
         this.maxBalance = plugin.getConfig().getDouble("economy.max-balance", 1_000_000_000_000.0);
+    }
+
+    /**
+     * Returns true if a database StorageProvider (sqlite/mysql) is active,
+     * meaning we should route data through StorageProvider instead of DataManager.
+     */
+    private boolean isUsingDatabase() {
+        if (databaseManager == null) return false;
+        StorageProvider provider = databaseManager.getProvider();
+        if (provider == null) return false;
+        String type = provider.getType();
+        return "sqlite".equals(type) || "mysql".equals(type);
+    }
+
+    /**
+     * Gets the active StorageProvider, or null if using YAML.
+     */
+    private StorageProvider getStorageProvider() {
+        return databaseManager != null ? databaseManager.getProvider() : null;
+    }
+
+    /**
+     * Helper: read a double value from the StorageProvider's player data map.
+     */
+    private double getDbDouble(UUID uuid, String key, double defaultValue) {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) return defaultValue;
+        Map<String, Object> data = provider.getPlayerData(uuid);
+        Object val = data.get(key);
+        if (val instanceof Number n) return n.doubleValue();
+        if (val instanceof String s) {
+            try { return Double.parseDouble(s); } catch (NumberFormatException ignored) {}
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Helper: read a boolean value from the StorageProvider's player data map.
+     */
+    private boolean getDbBoolean(UUID uuid, String key, boolean defaultValue) {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) return defaultValue;
+        Map<String, Object> data = provider.getPlayerData(uuid);
+        Object val = data.get(key);
+        if (val instanceof Boolean b) return b;
+        if (val instanceof String s) return Boolean.parseBoolean(s);
+        return defaultValue;
+    }
+
+    /**
+     * Helper: save a single key-value pair via the StorageProvider, merging with existing data.
+     */
+    private void saveDbValue(UUID uuid, String key, Object value) {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) return;
+        Map<String, Object> data = provider.getPlayerData(uuid);
+        data.put(key, value);
+        provider.savePlayerData(uuid, data);
     }
 
     /**
@@ -74,11 +137,17 @@ public class EconomyManager {
         if (usingVault && vaultBridge != null) {
             return vaultBridge.getBalance(uuid);
         }
-        if (balances.containsKey(uuid)) return balances.get(uuid);
-        YamlConfiguration data = dataManager.getPlayerData(uuid);
-        double bal = data.getDouble("balance", startingBalance);
-        balances.put(uuid, bal);
-        return bal;
+        return balances.computeIfAbsent(uuid, id -> {
+            if (isUsingDatabase()) {
+                return getDbDouble(id, "balance", startingBalance);
+            }
+            YamlConfiguration data = dataManager.getPlayerData(id);
+            return data.getDouble("balance", startingBalance);
+        });
+    }
+
+    private Object getLock(UUID uuid) {
+        return playerLocks.computeIfAbsent(uuid, k -> new Object());
     }
 
     public void setBalance(UUID uuid, double amount) {
@@ -92,7 +161,7 @@ public class EconomyManager {
         }
         amount = Math.max(0, Math.min(amount, maxBalance));
         balances.put(uuid, amount);
-        saveBalance(uuid);
+        saveBalanceAsync(uuid);
     }
 
     public void addBalance(UUID uuid, double amount) {
@@ -135,16 +204,31 @@ public class EconomyManager {
         if (usingVault && vaultBridge != null) {
             return vaultBridge.pay(from, to, amount);
         }
-        if (getBalance(from) < amount) return false;
-        removeBalance(from, amount);
-        addBalance(to, amount);
+        // Lock both players in consistent order to prevent deadlock
+        UUID first = from.compareTo(to) < 0 ? from : to;
+        UUID second = from.compareTo(to) < 0 ? to : from;
+        synchronized (getLock(first)) {
+            synchronized (getLock(second)) {
+                double fromBalance = getBalance(from);
+                if (fromBalance < amount) return false;
+                balances.put(from, fromBalance - amount);
+                double toBalance = getBalance(to);
+                double newToBalance = Math.min(toBalance + amount, maxBalance);
+                balances.put(to, newToBalance);
+            }
+        }
+        saveBalanceAsync(from);
+        saveBalanceAsync(to);
         return true;
     }
 
     public boolean isPayToggleOff(UUID uuid) {
         if (payToggleOff.contains(uuid)) return true;
-        // For offline players not in cache, check disk
+        // For offline players not in cache, check storage
         if (!balances.containsKey(uuid)) {
+            if (isUsingDatabase()) {
+                return getDbBoolean(uuid, "paytoggle", false);
+            }
             YamlConfiguration data = dataManager.getPlayerData(uuid);
             return data.getBoolean("paytoggle", false);
         }
@@ -157,22 +241,40 @@ public class EconomyManager {
         } else {
             payToggleOff.add(uuid);
         }
-        YamlConfiguration data = dataManager.getPlayerData(uuid);
-        data.set("paytoggle", payToggleOff.contains(uuid));
-        dataManager.savePlayerData(uuid, data);
+        boolean toggled = payToggleOff.contains(uuid);
+        if (isUsingDatabase()) {
+            SchedulerUtil.runAsync(plugin, () -> saveDbValue(uuid, "paytoggle", toggled));
+        } else {
+            YamlConfiguration data = dataManager.getPlayerData(uuid);
+            data.set("paytoggle", toggled);
+            dataManager.savePlayerData(uuid, data);
+        }
     }
 
     public void loadPlayer(UUID uuid) {
-        YamlConfiguration data = dataManager.getPlayerData(uuid);
-        // Only cache balance locally when using built-in economy (Vault handles its own storage)
-        if (!usingVault) {
-            balances.put(uuid, data.getDouble("balance", startingBalance));
-        }
-        if (data.getBoolean("paytoggle", false)) {
-            payToggleOff.add(uuid);
-        }
-        if (data.getBoolean("baltopHidden", false)) {
-            baltopHidden.add(uuid);
+        if (isUsingDatabase()) {
+            // Load from database StorageProvider
+            if (!usingVault) {
+                balances.put(uuid, getDbDouble(uuid, "balance", startingBalance));
+            }
+            if (getDbBoolean(uuid, "paytoggle", false)) {
+                payToggleOff.add(uuid);
+            }
+            if (getDbBoolean(uuid, "baltopHidden", false)) {
+                baltopHidden.add(uuid);
+            }
+        } else {
+            // Load from YAML DataManager
+            YamlConfiguration data = dataManager.getPlayerData(uuid);
+            if (!usingVault) {
+                balances.put(uuid, data.getDouble("balance", startingBalance));
+            }
+            if (data.getBoolean("paytoggle", false)) {
+                payToggleOff.add(uuid);
+            }
+            if (data.getBoolean("baltopHidden", false)) {
+                baltopHidden.add(uuid);
+            }
         }
     }
 
@@ -184,12 +286,31 @@ public class EconomyManager {
         balances.remove(uuid);
         payToggleOff.remove(uuid);
         baltopHidden.remove(uuid);
+        playerLocks.remove(uuid);
     }
 
     private void saveBalance(UUID uuid) {
-        YamlConfiguration data = dataManager.getPlayerData(uuid);
-        data.set("balance", balances.getOrDefault(uuid, startingBalance));
-        dataManager.savePlayerData(uuid, data);
+        double balance = balances.getOrDefault(uuid, startingBalance);
+        if (isUsingDatabase()) {
+            saveDbValue(uuid, "balance", balance);
+        } else {
+            YamlConfiguration data = dataManager.getPlayerData(uuid);
+            data.set("balance", balance);
+            dataManager.savePlayerData(uuid, data);
+        }
+    }
+
+    private void saveBalanceAsync(UUID uuid) {
+        double balance = balances.getOrDefault(uuid, startingBalance);
+        SchedulerUtil.runAsync(plugin, () -> {
+            if (isUsingDatabase()) {
+                saveDbValue(uuid, "balance", balance);
+            } else {
+                YamlConfiguration data = dataManager.getPlayerData(uuid);
+                data.set("balance", balance);
+                dataManager.savePlayerData(uuid, data);
+            }
+        });
     }
 
     public String format(double amount) {
@@ -204,6 +325,9 @@ public class EconomyManager {
     public boolean isBaltopHidden(UUID uuid) {
         if (baltopHidden.contains(uuid)) return true;
         if (!balances.containsKey(uuid)) {
+            if (isUsingDatabase()) {
+                return getDbBoolean(uuid, "baltopHidden", false);
+            }
             YamlConfiguration data = dataManager.getPlayerData(uuid);
             return data.getBoolean("baltopHidden", false);
         }
@@ -216,37 +340,67 @@ public class EconomyManager {
         } else {
             baltopHidden.add(uuid);
         }
-        YamlConfiguration data = dataManager.getPlayerData(uuid);
-        data.set("baltopHidden", baltopHidden.contains(uuid));
-        dataManager.savePlayerData(uuid, data);
+        boolean hidden = baltopHidden.contains(uuid);
+        if (isUsingDatabase()) {
+            SchedulerUtil.runAsync(plugin, () -> saveDbValue(uuid, "baltopHidden", hidden));
+        } else {
+            YamlConfiguration data = dataManager.getPlayerData(uuid);
+            data.set("baltopHidden", hidden);
+            dataManager.savePlayerData(uuid, data);
+        }
     }
 
     /**
-     * Scans all player data files and returns a sorted list of (UUID, balance) entries.
+     * Scans all player data and returns a sorted list of (UUID, balance) entries.
      * When using Vault, queries Vault for each known player's balance.
+     * When using a database StorageProvider, queries the database for offline players.
+     * When using YAML, scans player data files on disk.
      */
     public List<Map.Entry<UUID, Double>> getAllBalancesSorted() {
         if (usingVault && vaultBridge != null) {
             return vaultBridge.getAllBalancesSorted(dataManager);
         }
         Map<UUID, Double> all = new HashMap<>(balances);
-        // Also scan disk for offline players
-        File folder = dataManager.getPlayerDataFolder();
-        if (folder.exists()) {
-            File[] files = folder.listFiles((dir, name) -> name.endsWith(".yml"));
-            if (files != null) {
-                for (File file : files) {
-                    String fileName = file.getName().replace(".yml", "");
-                    try {
-                        UUID uuid = UUID.fromString(fileName);
-                        if (!all.containsKey(uuid)) {
-                            YamlConfiguration data = YamlConfiguration.loadConfiguration(file);
-                            all.put(uuid, data.getDouble("balance", startingBalance));
+
+        if (isUsingDatabase()) {
+            // Query database for all player UUIDs and load balances for offline players
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Set<UUID> allUuids = provider.getAllPlayerUUIDs();
+                for (UUID uuid : allUuids) {
+                    if (!all.containsKey(uuid)) {
+                        Map<String, Object> data = provider.getPlayerData(uuid);
+                        Object val = data.get("balance");
+                        double balance = startingBalance;
+                        if (val instanceof Number n) {
+                            balance = n.doubleValue();
+                        } else if (val instanceof String s) {
+                            try { balance = Double.parseDouble(s); } catch (NumberFormatException ignored) {}
                         }
-                    } catch (IllegalArgumentException ignored) {}
+                        all.put(uuid, balance);
+                    }
+                }
+            }
+        } else {
+            // Scan YAML files on disk for offline players
+            File folder = dataManager.getPlayerDataFolder();
+            if (folder.exists()) {
+                File[] files = folder.listFiles((dir, name) -> name.endsWith(".yml"));
+                if (files != null) {
+                    for (File file : files) {
+                        String fileName = file.getName().replace(".yml", "");
+                        try {
+                            UUID uuid = UUID.fromString(fileName);
+                            if (!all.containsKey(uuid)) {
+                                YamlConfiguration data = YamlConfiguration.loadConfiguration(file);
+                                all.put(uuid, data.getDouble("balance", startingBalance));
+                            }
+                        } catch (IllegalArgumentException ignored) {}
+                    }
                 }
             }
         }
+
         List<Map.Entry<UUID, Double>> sorted = new ArrayList<>(all.entrySet());
         sorted.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
         return sorted;

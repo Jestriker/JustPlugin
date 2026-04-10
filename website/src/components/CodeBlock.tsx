@@ -252,7 +252,7 @@ export default function CodeBlock({
         </span>
         <button
           onClick={copy}
-          className="p-1 rounded text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--accent)] transition-all"
+          className="p-1 rounded text-[var(--text-muted)] opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-[var(--accent)] transition-all"
           aria-label="Copy code"
           title={copied ? "Copied!" : "Copy"}
         >

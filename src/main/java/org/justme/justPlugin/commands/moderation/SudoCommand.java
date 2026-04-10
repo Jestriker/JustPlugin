@@ -33,7 +33,26 @@ public class SudoCommand implements TabExecutor {
             sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
             return true;
         }
+        // Prevent self-sudo
+        if (sender instanceof Player p && p.getUniqueId().equals(target.getUniqueId())) {
+            sender.sendMessage(CC.error("You cannot sudo yourself."));
+            return true;
+        }
+        // Prevent sudo against operators when sender is not console
+        if (sender instanceof Player && target.isOp()) {
+            sender.sendMessage(CC.error("You cannot sudo an operator."));
+            return true;
+        }
         String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+        // Block dangerous commands
+        if (message.startsWith("/")) {
+            String cmdLower = message.substring(1).toLowerCase();
+            if (cmdLower.startsWith("op ") || cmdLower.startsWith("deop ") || cmdLower.startsWith("stop")
+                    || cmdLower.startsWith("reload") || cmdLower.startsWith("sudo ")) {
+                sender.sendMessage(CC.error("That command is blocked from sudo."));
+                return true;
+            }
+        }
         String senderName = sender instanceof Player ? sender.getName() : "Console";
         if (message.startsWith("/")) {
             target.performCommand(message.substring(1));
@@ -50,7 +69,9 @@ public class SudoCommand implements TabExecutor {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
+            String senderName = sender instanceof Player ? sender.getName() : "";
             return Bukkit.getOnlinePlayers().stream().map(Player::getName)
+                    .filter(n -> !n.equalsIgnoreCase(senderName))
                     .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
         }
         return List.of();

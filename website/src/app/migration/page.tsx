@@ -1,12 +1,19 @@
+import type { Metadata } from "next";
 import PageHeader from "@/components/PageHeader";
 import CodeBlock from "@/components/CodeBlock";
+
+export const metadata: Metadata = {
+  title: "Migration Guide",
+  description:
+    "Step-by-step guide to migrate from EssentialsX, CMI, or other plugins to JustPlugin. Transfer economy data, homes, warps, and more.",
+};
 
 export default function MigrationPage() {
   return (
     <div>
       <PageHeader
         title="Migration Guide"
-        description="Guide for migrating from EssentialsX, CMI, or SunLight to JustPlugin."
+        description={<>Guide for migrating from EssentialsX, CMI, or SunLight to <span className="text-[var(--accent)]">JustPlugin</span>.</>}
       />
 
       {/* Credits */}
@@ -57,7 +64,7 @@ export default function MigrationPage() {
             <thead>
               <tr>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--text-muted)] border-b border-[var(--border)]">EssentialsX</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--text-muted)] border-b border-[var(--border)]">JustPlugin</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)]">JustPlugin</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--text-muted)] border-b border-[var(--border)]">Notes</th>
               </tr>
             </thead>
@@ -124,7 +131,7 @@ export default function MigrationPage() {
             <thead>
               <tr>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--text-muted)] border-b border-[var(--border)]">EssentialsX</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--text-muted)] border-b border-[var(--border)]">JustPlugin</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)]">JustPlugin</th>
               </tr>
             </thead>
             <tbody>
@@ -210,7 +217,7 @@ export default function MigrationPage() {
 
       {/* What JustPlugin Adds */}
       <div className="mb-10">
-        <h2 className="text-2xl font-bold mb-4 pb-2 border-b border-[var(--border)]">What JustPlugin Adds</h2>
+        <h2 className="text-2xl font-bold mb-4 pb-2 border-b border-[var(--border)]">What <span data-glow-text="" className="text-[var(--accent)]">JustPlugin</span> Adds</h2>
         <p className="text-[var(--text-secondary)] mb-4">
           Features available in JustPlugin that are not part of EssentialsX.
         </p>

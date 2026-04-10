@@ -1,6 +1,6 @@
 # 🔌 JustPlugin - Ecosystem Developer Guide
 
-> **Version:** 1.6  
+> **Version:** 1.3  
 > **API Package:** `org.justme.justPlugin.api`  
 > **Minecraft:** 1.21.11 (Paper, Purpur, Folia)  
 > **Last Updated:** April 5, 2026
@@ -36,7 +36,7 @@ This guide is intended for developers (or AI agents) building plugins that integ
 
 ### 1. Place the JustPlugin JAR in your project
 
-Since JustPlugin is not published to a Maven repository, place `JustPlugin-1.0-SNAPSHOT.jar` in a `libs/` folder in your add-on plugin project.
+Since JustPlugin is not published to a Maven repository, place `JustPlugin.jar` in a `libs/` folder in your add-on plugin project.
 
 ### 2. `build.gradle`
 

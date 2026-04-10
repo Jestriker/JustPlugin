@@ -6,8 +6,11 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.storage.StorageProvider;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,10 +21,24 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NickManager {
 
     private final JustPlugin plugin;
+    private final DatabaseManager databaseManager;
     private final ConcurrentHashMap<UUID, String> nicknames = new ConcurrentHashMap<>();
 
     public NickManager(JustPlugin plugin) {
         this.plugin = plugin;
+        this.databaseManager = plugin.getDatabaseManager();
+    }
+
+    private boolean isUsingDatabase() {
+        if (databaseManager == null) return false;
+        StorageProvider provider = databaseManager.getProvider();
+        if (provider == null) return false;
+        String type = provider.getType();
+        return "sqlite".equals(type) || "mysql".equals(type);
+    }
+
+    private StorageProvider getStorageProvider() {
+        return databaseManager != null ? databaseManager.getProvider() : null;
     }
 
     // ==================== Configuration ====================
@@ -49,7 +66,7 @@ public class NickManager {
 
     /**
      * Set a player's nickname (raw MiniMessage string).
-     * Persists to player data file.
+     * Persists to player data file or database.
      */
     public void setNickname(UUID uuid, String nickname) {
         nicknames.put(uuid, nickname);
@@ -194,6 +211,17 @@ public class NickManager {
      * Load a player's nickname from their data file into the cache.
      */
     public void loadPlayer(UUID uuid) {
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> data = provider.getPlayerData(uuid);
+                Object nick = data.get("nickname");
+                if (nick != null && !nick.toString().isEmpty()) {
+                    nicknames.put(uuid, nick.toString());
+                }
+                return;
+            }
+        }
         YamlConfiguration data = plugin.getDataManager().getPlayerData(uuid);
         String nick = data.getString("nickname");
         if (nick != null && !nick.isEmpty()) {
@@ -210,6 +238,19 @@ public class NickManager {
     }
 
     private void saveToPlayerData(UUID uuid, String nickname) {
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> data = provider.getPlayerData(uuid);
+                if (nickname != null) {
+                    data.put("nickname", nickname);
+                } else {
+                    data.remove("nickname");
+                }
+                SchedulerUtil.runAsync(plugin, () -> provider.savePlayerData(uuid, data));
+                return;
+            }
+        }
         YamlConfiguration data = plugin.getDataManager().getPlayerData(uuid);
         if (nickname != null) {
             data.set("nickname", nickname);

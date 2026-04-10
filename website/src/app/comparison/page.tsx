@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import PageHeader from "@/components/PageHeader";
+
+export const metadata: Metadata = {
+  title: "Feature Comparison",
+  description:
+    "Side-by-side feature comparison of JustPlugin vs EssentialsX vs CMI. See which Minecraft server plugin offers the features you need.",
+};
 
 type Support = "full" | "partial" | "none";
 
@@ -44,7 +51,7 @@ const comparisonData: ComparisonRow[] = [
   { feature: "Database Support", justplugin: "full", essentialsx: "partial", cmi: "full", jpNote: "YAML, SQLite, MySQL", essNote: "YAML only (flat file)" },
   { feature: "Developer API", justplugin: "full", essentialsx: "full", cmi: "full" },
   { feature: "Auction House", justplugin: "none", essentialsx: "none", cmi: "full", jpNote: "Not yet available", essNote: "Not available", cmiNote: "Built-in" },
-  { feature: "Player Vaults", justplugin: "none", essentialsx: "none", cmi: "full", jpNote: "Not yet available", essNote: "Requires separate plugin", cmiNote: "Built-in" },
+  { feature: "Player Vaults", justplugin: "full", essentialsx: "none", cmi: "full", jpNote: "Added in v1.3", essNote: "Requires separate plugin", cmiNote: "Built-in" },
   { feature: "Holograms", justplugin: "none", essentialsx: "none", cmi: "full", jpNote: "Not yet available", essNote: "Not available", cmiNote: "Built-in" },
   { feature: "Custom Commands", justplugin: "none", essentialsx: "none", cmi: "full", jpNote: "Not yet available", essNote: "Not available", cmiNote: "Built-in" },
 ];
@@ -95,14 +102,14 @@ export default function ComparisonPage() {
     <div>
       <PageHeader
         title="Feature Comparison"
-        description="Side-by-side comparison of JustPlugin, EssentialsX, and CMI. We aim to be fair and transparent about what each plugin offers."
+        description={<>Side-by-side comparison of <span className="text-[var(--accent)]">JustPlugin</span>, EssentialsX, and CMI. We aim to be fair and transparent about what each plugin offers.</>}
       />
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] p-5 text-center">
-          <div className="text-2xl font-bold text-[var(--accent-hover)]">{jpFull}</div>
-          <div className="text-sm font-semibold mt-1">JustPlugin</div>
+          <div className="text-2xl font-bold text-[var(--accent)]">{jpFull}</div>
+          <div className="text-sm font-semibold mt-1 text-[var(--accent)]">JustPlugin</div>
           <div className="text-xs text-[var(--text-muted)] mt-0.5">Full features</div>
         </div>
         <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] p-5 text-center">
@@ -133,7 +140,7 @@ export default function ComparisonPage() {
             <tr>
               <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--text-muted)] border-b-2 border-[var(--border)] min-w-[180px]">Feature</th>
               <th className="text-left py-3 px-4 text-sm font-semibold border-b-2 border-[var(--border)] min-w-[140px]">
-                <span className="text-[var(--accent-hover)]">JustPlugin</span>
+                <span data-glow-text="" className="text-[var(--accent)]">JustPlugin</span>
               </th>
               <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--text-muted)] border-b-2 border-[var(--border)] min-w-[140px]">EssentialsX</th>
               <th className="text-left py-3 px-4 text-sm font-semibold text-[var(--text-muted)] border-b-2 border-[var(--border)] min-w-[140px]">CMI</th>
@@ -180,7 +187,7 @@ export default function ComparisonPage() {
 
         <div className="space-y-4">
           <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border)] p-5">
-            <h3 className="font-semibold text-[var(--accent-hover)] mb-2">JustPlugin</h3>
+            <h3 data-glow-text="" className="font-semibold text-[var(--accent)] mb-2">JustPlugin</h3>
             <p className="text-sm text-[var(--text-secondary)]">
               Best for servers wanting a modern, single-JAR solution with native Folia support, built-in
               web editor, and MiniMessage formatting. Ideal for new servers or those seeking a lighter

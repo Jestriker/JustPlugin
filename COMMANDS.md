@@ -1,8 +1,8 @@
 # 📋 JustPlugin - Command Reference
 
-> **Version:** 1.5  
+> **Version:** 1.3  
 > **Author:** JustMe  
-> **Last Updated:** April 3, 2026
+> **Last Updated:** April 10, 2026
 
 ---
 
@@ -61,6 +61,8 @@
 
 | Command | Usage | Description | Permission | Aliases |
 |---------|-------|-------------|------------|---------|
+| `/tpsafecheck` | `/tpsafecheck <player>` | Internal: safety-checked teleport (used by clickable TP buttons) | `justplugin.tppos` | - |
+| `/tpunsafeconfirm` | `/tpunsafeconfirm` | Internal: confirm teleport to an unsafe destination (used by TP Anyway button) | `justplugin.tppos` | - |
 | `/tpoff` | `/tpoff <player>` | Teleport to an offline player's last known location | `justplugin.tpoff` | - |
 | `/getposoff` | `/getposoff <player>` | View an offline player's last known position | `justplugin.getposoff` | - |
 | `/getdeathposoff` | `/getdeathposoff <player>` | View an offline player's last death location | `justplugin.getdeathposoff` | - |

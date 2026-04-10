@@ -19,10 +19,32 @@ public class YamlStorageProvider implements StorageProvider {
     private final File warpsFile;
     private final File bansFile;
     private final File teamsFile;
+    private final File jailsFile;
+    private final File kitsFile;
+    private final File mutesFile;
+    private final File warnsFile;
+    private final File mailFile;
+    private final File homesFile;
+    private final File nicknamesFile;
+    private final File tagsFile;
+    private final File transactionsFile;
+    private final File vaultsFile;
+    private final File ignoresFile;
 
     private YamlConfiguration warpsConfig;
     private YamlConfiguration bansConfig;
     private YamlConfiguration teamsConfig;
+    private YamlConfiguration jailsConfig;
+    private YamlConfiguration kitsConfig;
+    private YamlConfiguration mutesConfig;
+    private YamlConfiguration warnsConfig;
+    private YamlConfiguration mailConfig;
+    private YamlConfiguration homesConfig;
+    private YamlConfiguration nicknamesConfig;
+    private YamlConfiguration tagsConfig;
+    private YamlConfiguration transactionsConfig;
+    private YamlConfiguration vaultsConfig;
+    private YamlConfiguration ignoresConfig;
 
     public YamlStorageProvider(JustPlugin plugin) {
         this.plugin = plugin;
@@ -30,6 +52,17 @@ public class YamlStorageProvider implements StorageProvider {
         this.warpsFile = new File(plugin.getDataFolder(), "warps.yml");
         this.bansFile = new File(plugin.getDataFolder(), "bans.yml");
         this.teamsFile = new File(plugin.getDataFolder(), "teams.yml");
+        this.jailsFile = new File(plugin.getDataFolder(), "jails.yml");
+        this.kitsFile = new File(plugin.getDataFolder(), "kits.yml");
+        this.mutesFile = new File(plugin.getDataFolder(), "mutes.yml");
+        this.warnsFile = new File(plugin.getDataFolder(), "warns.yml");
+        this.mailFile = new File(plugin.getDataFolder(), "mail.yml");
+        this.homesFile = new File(plugin.getDataFolder(), "homes.yml");
+        this.nicknamesFile = new File(plugin.getDataFolder(), "nicknames.yml");
+        this.tagsFile = new File(plugin.getDataFolder(), "tags.yml");
+        this.transactionsFile = new File(plugin.getDataFolder(), "transactions.yml");
+        this.vaultsFile = new File(plugin.getDataFolder(), "vaults.yml");
+        this.ignoresFile = new File(plugin.getDataFolder(), "ignores.yml");
     }
 
     @Override
@@ -39,6 +72,17 @@ public class YamlStorageProvider implements StorageProvider {
         warpsConfig = YamlConfiguration.loadConfiguration(warpsFile);
         bansConfig = YamlConfiguration.loadConfiguration(bansFile);
         teamsConfig = YamlConfiguration.loadConfiguration(teamsFile);
+        jailsConfig = YamlConfiguration.loadConfiguration(jailsFile);
+        kitsConfig = YamlConfiguration.loadConfiguration(kitsFile);
+        mutesConfig = YamlConfiguration.loadConfiguration(mutesFile);
+        warnsConfig = YamlConfiguration.loadConfiguration(warnsFile);
+        mailConfig = YamlConfiguration.loadConfiguration(mailFile);
+        homesConfig = YamlConfiguration.loadConfiguration(homesFile);
+        nicknamesConfig = YamlConfiguration.loadConfiguration(nicknamesFile);
+        tagsConfig = YamlConfiguration.loadConfiguration(tagsFile);
+        transactionsConfig = YamlConfiguration.loadConfiguration(transactionsFile);
+        vaultsConfig = YamlConfiguration.loadConfiguration(vaultsFile);
+        ignoresConfig = YamlConfiguration.loadConfiguration(ignoresFile);
         plugin.getLogger().info("[Database] YAML storage provider initialized.");
     }
 
@@ -174,6 +218,219 @@ public class YamlStorageProvider implements StorageProvider {
     public void deleteTeam(String name) {
         teamsConfig.set(name, null);
         saveConfig(teamsConfig, teamsFile, "teams");
+    }
+
+    // --- Jails ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllJails() {
+        return getAllFromYaml(jailsConfig, jailsFile);
+    }
+
+    @Override
+    public void saveJail(String name, Map<String, Object> data) {
+        saveToYaml(jailsConfig, jailsFile, name, data, "jails");
+    }
+
+    @Override
+    public void deleteJail(String name) {
+        deleteFromYaml(jailsConfig, jailsFile, name, "jails");
+    }
+
+    // --- Kits ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllKits() {
+        return getAllFromYaml(kitsConfig, kitsFile);
+    }
+
+    @Override
+    public void saveKit(String name, Map<String, Object> data) {
+        saveToYaml(kitsConfig, kitsFile, name, data, "kits");
+    }
+
+    @Override
+    public void deleteKit(String name) {
+        deleteFromYaml(kitsConfig, kitsFile, name, "kits");
+    }
+
+    // --- Mutes ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllMutes() {
+        return getAllFromYaml(mutesConfig, mutesFile);
+    }
+
+    @Override
+    public void saveMute(String key, Map<String, Object> data) {
+        saveToYaml(mutesConfig, mutesFile, key, data, "mutes");
+    }
+
+    @Override
+    public void deleteMute(String key) {
+        deleteFromYaml(mutesConfig, mutesFile, key, "mutes");
+    }
+
+    // --- Warns ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllWarns() {
+        return getAllFromYaml(warnsConfig, warnsFile);
+    }
+
+    @Override
+    public void saveWarn(String key, Map<String, Object> data) {
+        saveToYaml(warnsConfig, warnsFile, key, data, "warns");
+    }
+
+    @Override
+    public void deleteWarn(String key) {
+        deleteFromYaml(warnsConfig, warnsFile, key, "warns");
+    }
+
+    // --- Mail ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllMail() {
+        return getAllFromYaml(mailConfig, mailFile);
+    }
+
+    @Override
+    public void saveMail(String key, Map<String, Object> data) {
+        saveToYaml(mailConfig, mailFile, key, data, "mail");
+    }
+
+    @Override
+    public void deleteMail(String key) {
+        deleteFromYaml(mailConfig, mailFile, key, "mail");
+    }
+
+    // --- Homes ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllHomes() {
+        return getAllFromYaml(homesConfig, homesFile);
+    }
+
+    @Override
+    public void saveHome(String key, Map<String, Object> data) {
+        saveToYaml(homesConfig, homesFile, key, data, "homes");
+    }
+
+    @Override
+    public void deleteHome(String key) {
+        deleteFromYaml(homesConfig, homesFile, key, "homes");
+    }
+
+    // --- Nicknames ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllNicknames() {
+        return getAllFromYaml(nicknamesConfig, nicknamesFile);
+    }
+
+    @Override
+    public void saveNickname(String key, Map<String, Object> data) {
+        saveToYaml(nicknamesConfig, nicknamesFile, key, data, "nicknames");
+    }
+
+    @Override
+    public void deleteNickname(String key) {
+        deleteFromYaml(nicknamesConfig, nicknamesFile, key, "nicknames");
+    }
+
+    // --- Tags ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllTags() {
+        return getAllFromYaml(tagsConfig, tagsFile);
+    }
+
+    @Override
+    public void saveTag(String key, Map<String, Object> data) {
+        saveToYaml(tagsConfig, tagsFile, key, data, "tags");
+    }
+
+    @Override
+    public void deleteTag(String key) {
+        deleteFromYaml(tagsConfig, tagsFile, key, "tags");
+    }
+
+    // --- Transactions ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllTransactions() {
+        return getAllFromYaml(transactionsConfig, transactionsFile);
+    }
+
+    @Override
+    public void saveTransaction(String key, Map<String, Object> data) {
+        saveToYaml(transactionsConfig, transactionsFile, key, data, "transactions");
+    }
+
+    @Override
+    public void deleteTransaction(String key) {
+        deleteFromYaml(transactionsConfig, transactionsFile, key, "transactions");
+    }
+
+    // --- Vaults ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllVaults() {
+        return getAllFromYaml(vaultsConfig, vaultsFile);
+    }
+
+    @Override
+    public void saveVault(String key, Map<String, Object> data) {
+        saveToYaml(vaultsConfig, vaultsFile, key, data, "vaults");
+    }
+
+    @Override
+    public void deleteVault(String key) {
+        deleteFromYaml(vaultsConfig, vaultsFile, key, "vaults");
+    }
+
+    // --- Ignores ---
+
+    @Override
+    public Map<String, Map<String, Object>> getAllIgnores() {
+        return getAllFromYaml(ignoresConfig, ignoresFile);
+    }
+
+    @Override
+    public void saveIgnore(String key, Map<String, Object> data) {
+        saveToYaml(ignoresConfig, ignoresFile, key, data, "ignores");
+    }
+
+    @Override
+    public void deleteIgnore(String key) {
+        deleteFromYaml(ignoresConfig, ignoresFile, key, "ignores");
+    }
+
+    // --- Generic YAML helpers ---
+
+    private Map<String, Map<String, Object>> getAllFromYaml(YamlConfiguration config, File file) {
+        YamlConfiguration reloaded = YamlConfiguration.loadConfiguration(file);
+        Map<String, Map<String, Object>> result = new LinkedHashMap<>();
+        for (String key : reloaded.getKeys(false)) {
+            ConfigurationSection section = reloaded.getConfigurationSection(key);
+            if (section != null) {
+                result.put(key, flattenSection(section));
+            }
+        }
+        return result;
+    }
+
+    private void saveToYaml(YamlConfiguration config, File file, String key, Map<String, Object> data, String label) {
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            config.set(key + "." + entry.getKey(), entry.getValue());
+        }
+        saveConfig(config, file, label);
+    }
+
+    private void deleteFromYaml(YamlConfiguration config, File file, String key, String label) {
+        config.set(key, null);
+        saveConfig(config, file, label);
     }
 
     @Override

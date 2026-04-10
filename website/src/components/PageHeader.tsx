@@ -4,7 +4,7 @@ export default function PageHeader({
   badge,
 }: {
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   badge?: string;
 }) {
   return (

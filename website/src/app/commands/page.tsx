@@ -47,6 +47,8 @@ const categories: Category[] = [
     id: "offline-player",
     title: "Offline Player Commands",
     commands: [
+      { command: "/tpsafecheck", usage: "/tpsafecheck <player>", description: "Internal: safety-checked teleport (used by clickable TP buttons)", permission: "justplugin.tppos", aliases: "—" },
+      { command: "/tpunsafeconfirm", usage: "/tpunsafeconfirm", description: "Internal: confirm teleport to unsafe destination (TP Anyway button)", permission: "justplugin.tppos", aliases: "—" },
       { command: "/tpoff", usage: "/tpoff <player>", description: "Teleport to an offline player's last known location", permission: "justplugin.tpoff", aliases: "—" },
       { command: "/getposoff", usage: "/getposoff <player>", description: "Get the last known position of an offline player", permission: "justplugin.getposoff", aliases: "—" },
       { command: "/getdeathposoff", usage: "/getdeathposoff <player>", description: "Get the last death position of an offline player", permission: "justplugin.getdeathposoff", aliases: "—" },
@@ -324,7 +326,7 @@ export default function CommandsPage() {
     <div>
       <PageHeader
         title="Commands"
-        description={`Complete reference for all ${totalCommands} commands available in JustPlugin.`}
+        description={<>Complete reference for all {totalCommands} commands available in <span className="text-[var(--accent)]">JustPlugin</span>.</>}
         badge={`v${PLUGIN_VERSION}`}
       />
 

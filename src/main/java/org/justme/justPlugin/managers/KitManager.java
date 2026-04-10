@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.storage.StorageProvider;
 import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.io.File;
@@ -18,12 +19,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages kit definitions, cooldowns, and claiming logic.
- * Kits are stored in kits.yml. Each kit has a display name, permission,
- * cooldown, enabled flag, status (published/pending/archived), and items.
+ * Kits are stored in kits.yml or via StorageProvider when a database is configured.
+ * Each kit has a display name, permission, cooldown, enabled flag, status (published/pending/archived), and items.
  */
 public class KitManager {
 
     private final JustPlugin plugin;
+    private final DatabaseManager databaseManager;
     private final File kitsFile;
     private YamlConfiguration kitsConfig;
 
@@ -43,10 +45,23 @@ public class KitManager {
 
     public KitManager(JustPlugin plugin) {
         this.plugin = plugin;
+        this.databaseManager = plugin.getDatabaseManager();
         this.kitsFile = new File(plugin.getDataFolder(), "kits.yml");
         load();
         loadCooldowns();
         startCleanupTask();
+    }
+
+    private boolean isUsingDatabase() {
+        if (databaseManager == null) return false;
+        StorageProvider provider = databaseManager.getProvider();
+        if (provider == null) return false;
+        String type = provider.getType();
+        return "sqlite".equals(type) || "mysql".equals(type);
+    }
+
+    private StorageProvider getStorageProvider() {
+        return databaseManager != null ? databaseManager.getProvider() : null;
     }
 
     // ==================== Data Classes ====================
@@ -77,6 +92,53 @@ public class KitManager {
 
     private void load() {
         kits.clear();
+        if (isUsingDatabase()) {
+            loadFromDatabase();
+        } else {
+            loadFromYaml();
+        }
+    }
+
+    private void loadFromDatabase() {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) { loadFromYaml(); return; }
+
+        Map<String, Map<String, Object>> allKits = provider.getAllKits();
+        for (Map.Entry<String, Map<String, Object>> entry : allKits.entrySet()) {
+            String key = entry.getKey();
+            // Skip cooldown entries
+            if (key.startsWith("cooldown.")) continue;
+
+            Map<String, Object> data = entry.getValue();
+            KitData kit = new KitData(key);
+            kit.displayName = data.getOrDefault("display-name", key).toString();
+            kit.permission = data.getOrDefault("permission", "justplugin.kits." + key).toString();
+            kit.cooldownSeconds = data.containsKey("cooldown") ? ((Number) data.get("cooldown")).intValue() : 3600;
+            kit.enabled = !data.containsKey("enabled") || Boolean.TRUE.equals(data.get("enabled"));
+            kit.status = data.getOrDefault("status", "pending").toString();
+            kit.archiveDate = data.containsKey("archive-date") ? ((Number) data.get("archive-date")).longValue() : 0;
+
+            // Items are stored serialized in the database
+            // They need to be ItemStack objects - database stores them as a serialized list
+            @SuppressWarnings("unchecked")
+            Map<String, Object> itemsMap = data.containsKey("items") ? (Map<String, Object>) data.get("items") : null;
+            if (itemsMap != null) {
+                for (Map.Entry<String, Object> itemEntry : itemsMap.entrySet()) {
+                    try {
+                        int slot = Integer.parseInt(itemEntry.getKey());
+                        if (itemEntry.getValue() instanceof ItemStack item) {
+                            kit.items.put(slot, item);
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+
+            kits.put(key.toLowerCase(), kit);
+        }
+        plugin.getLogger().info("[Kits] Loaded " + kits.size() + " kit(s) from database.");
+    }
+
+    private void loadFromYaml() {
         if (!kitsFile.exists()) {
             kitsConfig = new YamlConfiguration();
             save();
@@ -120,6 +182,48 @@ public class KitManager {
     }
 
     public void save() {
+        if (isUsingDatabase()) {
+            saveToDatabase();
+        } else {
+            saveToYaml();
+        }
+    }
+
+    private void saveToDatabase() {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) { saveToYaml(); return; }
+
+        for (Map.Entry<String, KitData> entry : kits.entrySet()) {
+            KitData kit = entry.getValue();
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("display-name", kit.displayName);
+            data.put("permission", kit.permission);
+            data.put("cooldown", kit.cooldownSeconds);
+            data.put("enabled", kit.enabled);
+            data.put("status", kit.status);
+            data.put("archive-date", kit.archiveDate);
+
+            Map<String, Object> itemsMap = new LinkedHashMap<>();
+            for (Map.Entry<Integer, ItemStack> itemEntry : kit.items.entrySet()) {
+                itemsMap.put(String.valueOf(itemEntry.getKey()), itemEntry.getValue());
+            }
+            data.put("items", itemsMap);
+
+            provider.saveKit(kit.name, data);
+        }
+
+        // Save cooldowns
+        for (Map.Entry<UUID, Map<String, Long>> entry : cooldowns.entrySet()) {
+            String uuid = entry.getKey().toString();
+            Map<String, Object> cdData = new LinkedHashMap<>();
+            for (Map.Entry<String, Long> cd : entry.getValue().entrySet()) {
+                cdData.put(cd.getKey(), cd.getValue());
+            }
+            provider.saveKit("cooldown." + uuid, cdData);
+        }
+    }
+
+    private void saveToYaml() {
         kitsConfig = new YamlConfiguration();
         for (Map.Entry<String, KitData> entry : kits.entrySet()) {
             KitData kit = entry.getValue();
@@ -153,6 +257,36 @@ public class KitManager {
 
     private void loadCooldowns() {
         cooldowns.clear();
+        if (isUsingDatabase()) {
+            loadCooldownsFromDatabase();
+        } else {
+            loadCooldownsFromYaml();
+        }
+    }
+
+    private void loadCooldownsFromDatabase() {
+        StorageProvider provider = getStorageProvider();
+        if (provider == null) return;
+
+        Map<String, Map<String, Object>> allKits = provider.getAllKits();
+        for (Map.Entry<String, Map<String, Object>> entry : allKits.entrySet()) {
+            String key = entry.getKey();
+            if (!key.startsWith("cooldown.")) continue;
+
+            try {
+                UUID uuid = UUID.fromString(key.substring("cooldown.".length()));
+                Map<String, Long> playerMap = new ConcurrentHashMap<>();
+                for (Map.Entry<String, Object> cdEntry : entry.getValue().entrySet()) {
+                    if (cdEntry.getValue() instanceof Number n) {
+                        playerMap.put(cdEntry.getKey(), n.longValue());
+                    }
+                }
+                cooldowns.put(uuid, playerMap);
+            } catch (IllegalArgumentException ignored) {}
+        }
+    }
+
+    private void loadCooldownsFromYaml() {
         ConfigurationSection cdSection = kitsConfig.getConfigurationSection("cooldowns");
         if (cdSection == null) return;
         for (String uuidStr : cdSection.getKeys(false)) {
@@ -195,6 +329,12 @@ public class KitManager {
 
         for (String name : toRemove) {
             kits.remove(name);
+            if (isUsingDatabase()) {
+                StorageProvider provider = getStorageProvider();
+                if (provider != null) {
+                    provider.deleteKit(name);
+                }
+            }
             plugin.getLogger().info("[Kits] Auto-deleted archived kit '" + name + "' (exceeded " + retentionDays + " day retention).");
         }
 
@@ -236,6 +376,12 @@ public class KitManager {
     public boolean deleteKit(String name) {
         String key = name.toLowerCase();
         if (kits.remove(key) != null) {
+            if (isUsingDatabase()) {
+                StorageProvider provider = getStorageProvider();
+                if (provider != null) {
+                    provider.deleteKit(key);
+                }
+            }
             save();
             return true;
         }
@@ -291,6 +437,12 @@ public class KitManager {
         if (!kits.containsKey(oldKey) || kits.containsKey(newKey)) return false;
 
         KitData kit = kits.remove(oldKey);
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                provider.deleteKit(oldKey);
+            }
+        }
         kit.name = newKey;
         kit.permission = "justplugin.kits." + newKey;
         kits.put(newKey, kit);

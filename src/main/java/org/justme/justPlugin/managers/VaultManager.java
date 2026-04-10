@@ -10,7 +10,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.justme.justPlugin.JustPlugin;
+import org.justme.justPlugin.managers.storage.StorageProvider;
 import org.justme.justPlugin.util.CC;
+import org.justme.justPlugin.util.SchedulerUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +21,7 @@ public class VaultManager implements Listener {
 
     private final JustPlugin plugin;
     private final DataManager dataManager;
+    private final DatabaseManager databaseManager;
     private final int maxVaults;
 
     // Track open vaults: player UUID -> vault number
@@ -29,7 +32,20 @@ public class VaultManager implements Listener {
     public VaultManager(JustPlugin plugin) {
         this.plugin = plugin;
         this.dataManager = plugin.getDataManager();
+        this.databaseManager = plugin.getDatabaseManager();
         this.maxVaults = plugin.getConfig().getInt("vaults.max-vaults", 3);
+    }
+
+    private boolean isUsingDatabase() {
+        if (databaseManager == null) return false;
+        StorageProvider provider = databaseManager.getProvider();
+        if (provider == null) return false;
+        String type = provider.getType();
+        return "sqlite".equals(type) || "mysql".equals(type);
+    }
+
+    private StorageProvider getStorageProvider() {
+        return databaseManager != null ? databaseManager.getProvider() : null;
     }
 
     /**
@@ -52,16 +68,34 @@ public class VaultManager implements Listener {
 
         Inventory vault = Bukkit.createInventory(null, 54, CC.translate(title));
 
-        // Load contents from player data
-        YamlConfiguration data = dataManager.getPlayerData(ownerUuid);
-        String path = "vaults." + vaultNumber + ".contents";
+        // Load contents from storage
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Map<String, Object>> allVaults = provider.getAllVaults();
+                String key = ownerUuid.toString() + "." + vaultNumber;
+                Map<String, Object> vaultData = allVaults.get(key);
+                if (vaultData != null && vaultData.containsKey("contents")) {
+                    @SuppressWarnings("unchecked")
+                    List<ItemStack> items = (List<ItemStack>) vaultData.get("contents");
+                    if (items != null) {
+                        for (int i = 0; i < items.size() && i < 54; i++) {
+                            vault.setItem(i, items.get(i));
+                        }
+                    }
+                }
+            }
+        } else {
+            YamlConfiguration data = dataManager.getPlayerData(ownerUuid);
+            String path = "vaults." + vaultNumber + ".contents";
 
-        if (data.contains(path)) {
-            @SuppressWarnings("unchecked")
-            List<ItemStack> items = (List<ItemStack>) data.getList(path);
-            if (items != null) {
-                for (int i = 0; i < items.size() && i < 54; i++) {
-                    vault.setItem(i, items.get(i));
+            if (data.contains(path)) {
+                @SuppressWarnings("unchecked")
+                List<ItemStack> items = (List<ItemStack>) data.getList(path);
+                if (items != null) {
+                    for (int i = 0; i < items.size() && i < 54; i++) {
+                        vault.setItem(i, items.get(i));
+                    }
                 }
             }
         }
@@ -91,6 +125,13 @@ public class VaultManager implements Listener {
      * Returns whether the given vault number exists (has been used) for a player.
      */
     public boolean hasVault(Player player, int number) {
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Map<String, Object>> allVaults = provider.getAllVaults();
+                return allVaults.containsKey(player.getUniqueId().toString() + "." + number);
+            }
+        }
         YamlConfiguration data = dataManager.getPlayerData(player.getUniqueId());
         return data.contains("vaults." + number + ".contents");
     }
@@ -99,12 +140,22 @@ public class VaultManager implements Listener {
      * Saves vault contents to player data.
      */
     public void saveVault(UUID ownerUuid, int number, Inventory inventory) {
+        List<ItemStack> contents = new ArrayList<>(Arrays.asList(inventory.getContents()));
+
+        if (isUsingDatabase()) {
+            StorageProvider provider = getStorageProvider();
+            if (provider != null) {
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("contents", contents);
+                String key = ownerUuid.toString() + "." + number;
+                SchedulerUtil.runAsync(plugin, () -> provider.saveVault(key, data));
+                return;
+            }
+        }
+
         YamlConfiguration data = dataManager.getPlayerData(ownerUuid);
         String path = "vaults." + number + ".contents";
-
-        List<ItemStack> contents = new ArrayList<>(Arrays.asList(inventory.getContents()));
         data.set(path, contents);
-
         dataManager.savePlayerDataAsync(ownerUuid, data);
     }
 

@@ -20,7 +20,6 @@ interface NavItem {
 const ic = "w-4 h-4 flex-shrink-0";
 
 const navigation: NavItem[] = [
-  { label: "Home", href: "/", icon: <svg className={ic} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg> },
   { label: "Features", href: "/features", icon: <svg className={ic} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>, children: [
     { label: "Economy", href: "/features/economy" },
     { label: "Teleportation", href: "/features/teleportation" },
@@ -113,6 +112,8 @@ function NavSection({ item }: { item: NavItem }) {
         </Link>
         <button
           onClick={() => setOpen(!open)}
+          aria-label="Toggle section"
+          aria-expanded={open}
           className="p-1.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
         >
           <ChevronIcon open={open} />
@@ -151,13 +152,16 @@ export default function Sidebar({ mobileOpen, onClose, onSearchOpen }: { mobileO
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-72 bg-[var(--bg-secondary)] border-r border-[var(--border)] overflow-y-auto transition-transform duration-300 lg:translate-x-0 lg:z-30 ${
+        role={mobileOpen ? "dialog" : undefined}
+        aria-modal={mobileOpen ? "true" : undefined}
+        aria-label={mobileOpen ? "Navigation menu" : undefined}
+        className={`fixed top-0 left-0 z-50 w-72 bg-[var(--bg-secondary)] border-r border-[var(--border)] overflow-y-auto transition-transform duration-300 lg:translate-x-0 lg:z-30 lg:top-16 h-full lg:h-[calc(100vh-4rem)] ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo */}
         <div className="sticky top-0 bg-[var(--bg-secondary)] border-b border-[var(--border)] px-5 py-4 flex items-center gap-3">
-          <img src="/justplugin-icon.png" alt="JustPlugin" width={32} height={32} className="rounded-lg" />
+          <img src="/plugins-image.png" alt="JustPlugin" width={32} height={32} className="rounded-lg" />
           <div>
             <div className="font-semibold text-sm">JustPlugin</div>
             <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
@@ -168,6 +172,7 @@ export default function Sidebar({ mobileOpen, onClose, onSearchOpen }: { mobileO
             <ThemeToggle />
             <button
               onClick={onClose}
+              aria-label="Close menu"
               className="lg:hidden p-1 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -177,16 +182,23 @@ export default function Sidebar({ mobileOpen, onClose, onSearchOpen }: { mobileO
           </div>
         </div>
 
+        {/* Search button */}
+        <div className="px-3 pt-3">
+          <SearchTrigger onClick={() => onSearchOpen?.()} />
+        </div>
+
         {/* Nav */}
-        <nav className="p-3 space-y-1">
+        <nav aria-label="Documentation navigation" className="p-3 space-y-1">
           {navigation.map((item) => (
             <NavSection key={item.label} item={item} />
           ))}
         </nav>
 
-        {/* Search button */}
-        <div className="px-3 mt-2">
-          <SearchTrigger onClick={() => onSearchOpen?.()} />
+        {/* Modrinth badge */}
+        <div className="px-5 mt-2 flex justify-center">
+          <a href="https://modrinth.com/plugin/justplugin" target="_blank" rel="noopener noreferrer" className="hover:opacity-90 transition-opacity">
+            <img src="/modrinth-badge.svg" alt="Available on Modrinth" width={140} height={48} className="h-10 rounded" />
+          </a>
         </div>
 
         {/* Footer links */}

@@ -240,6 +240,11 @@ const sections: PermSection[] = [
       { perm: "justplugin.playerlist.hide.notify", desc: "Get notified when someone hides from the player list", def: "Admin", commands: "" },
       { perm: "justplugin.staff", desc: "View the online staff list", def: "Player", commands: "/staff" },
       { perm: "justplugin.motd.set", desc: "Set the server MOTD", def: "Admin", commands: "/motd set" },
+      { perm: "justplugin.info", desc: "View plugin info", def: "Player", commands: "/jpinfo, /about" },
+      { perm: "justplugin.help", desc: "View plugin help", def: "Player", commands: "/jphelp, /help, /?" },
+      { perm: "justplugin.list", desc: "List online players", def: "Player", commands: "/plist, /who, /online" },
+      { perm: "justplugin.clock", desc: "Show current real-world time", def: "Player", commands: "/clock, /realtime" },
+      { perm: "justplugin.date", desc: "Show current real-world date and time", def: "Player", commands: "/date, /realdate" },
     ],
   },
   {
@@ -264,12 +269,18 @@ const sections: PermSection[] = [
     id: "teams",
     perms: [
       { perm: "justplugin.team", desc: "Access team commands (create, invite, chat, etc.)", def: "Player", commands: "/team" },
+      { perm: "justplugin.team.list", desc: "List all teams on the server", def: "Admin", commands: "/team list" },
+      { perm: "justplugin.teamhome.cooldownbypass", desc: "Bypass team home pre-teleport countdown", def: "Admin", commands: "/team home" },
+      { perm: "justplugin.teamhome.delaybypass", desc: "Bypass team home delay between uses", def: "Admin", commands: "/team home" },
+      { perm: "justplugin.teamhome.unsafetp", desc: "Bypass team home safe teleport protection", def: "Admin", commands: "/team home" },
     ],
   },
   {
     title: "Misc",
     id: "misc",
     perms: [
+      { perm: "justplugin.admin", desc: "Receive staff notifications on join (dependency warnings, update checks)", def: "Admin", commands: "" },
+      { perm: "justplugin.announce.jail", desc: "Receive jail punishment announcements", def: "Admin", commands: "" },
       { perm: "justplugin.trade", desc: "Send a trade request to a player", def: "Player", commands: "/trade" },
       { perm: "justplugin.discord.set", desc: "Set the Discord invite link", def: "Admin", commands: "/discord set" },
       { perm: "justplugin.applyedits", desc: "Apply web editor configuration edits", def: "Admin", commands: "/applyedits" },

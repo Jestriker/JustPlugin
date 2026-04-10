@@ -147,7 +147,7 @@ export default function Search({ open, onClose }: { open: boolean; onClose: () =
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg mx-4 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden">
+      <div role="dialog" aria-modal="true" aria-label="Search documentation" className="relative w-full max-w-lg mx-4 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden">
         {/* Search input */}
         <div className="flex items-center gap-3 px-4 border-b border-[var(--border)]">
           <svg className="w-5 h-5 text-[var(--text-muted)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -160,6 +160,7 @@ export default function Search({ open, onClose }: { open: boolean; onClose: () =
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search commands, features, pages..."
+            aria-label="Search documentation"
             className="flex-1 bg-transparent py-3.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none"
           />
           <kbd
@@ -171,7 +172,7 @@ export default function Search({ open, onClose }: { open: boolean; onClose: () =
         </div>
 
         {/* Results */}
-        <div ref={listRef} className="max-h-80 overflow-y-auto p-2">
+        <div ref={listRef} aria-live="polite" className="max-h-80 overflow-y-auto p-2">
           {query && flatResults.length === 0 && (
             <div className="px-3 py-8 text-center text-sm text-[var(--text-muted)]">
               No results for &ldquo;{query}&rdquo;
