@@ -144,7 +144,8 @@ website/
 # Claude instruction files
 CLAUDE.md
 
-# GitHub assets
+# Assets
+assets/
 .github/assets/
 
 # Next.js
