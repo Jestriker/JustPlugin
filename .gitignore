@@ -138,6 +138,15 @@ website/.env
 website/.env.local
 website/.env.*
 
+# Website (hosted separately)
+website/
+
+# Claude instruction files
+CLAUDE.md
+
+# GitHub assets
+.github/assets/
+
 # Next.js
 website/.next/
 website/node_modules/

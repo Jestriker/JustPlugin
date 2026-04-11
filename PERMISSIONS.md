@@ -1,8 +1,8 @@
 # JustPlugin - Permissions Reference
 
-> **Version:** 1.3  
+> **Version:** 1.0  
 > **Author:** JustMe  
-> **Last Updated:** April 10, 2026
+> **Last Updated:** April 12, 2026
 
 > **IMPORTANT:** OPs do NOT have any permissions by default. All permissions must be granted  
 > through a permissions plugin (e.g., LuckPerms). Grant `justplugin.player` to your default  
@@ -834,7 +834,7 @@ Delay = minimum time between successive uses of the same command (e.g. 3 minutes
 
 ---
 
-## New v1.0.1 Permissions
+## Additional Beta Permissions
 
 ### 🪓 Death Items Permissions
 

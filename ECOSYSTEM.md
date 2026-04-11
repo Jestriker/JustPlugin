@@ -1,9 +1,9 @@
 # 🔌 JustPlugin - Ecosystem Developer Guide
 
-> **Version:** 1.3  
+> **Version:** 1.0  
 > **API Package:** `org.justme.justPlugin.api`  
 > **Minecraft:** 1.21.11 (Paper, Purpur, Folia)  
-> **Last Updated:** April 5, 2026
+> **Last Updated:** April 12, 2026
 
 ---
 
@@ -608,7 +608,7 @@ JustPlugin uses a modular listener architecture. Event handling is split into 6 
 ## 🧪 Testing Your Integration
 
 1. Build your add-on plugin JAR.
-2. Place **both** `JustPlugin-1.0-SNAPSHOT.jar` and your add-on JAR in the server's `plugins/` folder.
+2. Place **both** `JustPlugin-1.0.jar` and your add-on JAR in the server's `plugins/` folder.
 3. Start the server - your plugin should load **after** JustPlugin.
 4. If JustPlugin is missing, your plugin should log an error and disable itself (if using `depend`).
 

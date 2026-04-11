@@ -1,4 +1,4 @@
-![Release Version](https://img.shields.io/badge/Release%20Version-1.3-blue)
+![Release Version](https://img.shields.io/badge/Release%20Version-1.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Paper](https://img.shields.io/badge/Available%20on-Paper-blue)
 ![Purpur](https://img.shields.io/badge/Available%20on-Purpur-purple)

@@ -1,8 +1,8 @@
 # 📋 JustPlugin - Command Reference
 
-> **Version:** 1.3  
+> **Version:** 1.0  
 > **Author:** JustMe  
-> **Last Updated:** April 10, 2026
+> **Last Updated:** April 12, 2026
 
 ---
 
