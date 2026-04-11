@@ -148,6 +148,13 @@ CLAUDE.md
 assets/
 .github/assets/
 
+# Internal docs & scripts
+DESCRIPTION.md
+DESCRIPTION_PLAIN.txt
+PRERELEASE_CHECKLIST.md
+scripts/
+.github/workflows/docs-check.yml
+
 # Next.js
 website/.next/
 website/node_modules/
