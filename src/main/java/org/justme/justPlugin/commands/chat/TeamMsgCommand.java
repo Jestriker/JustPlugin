@@ -26,7 +26,7 @@ public class TeamMsgCommand implements TabExecutor {
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /teammsg <message>"));
+            player.sendMessage(plugin.getMessageManager().error("team.chat.usage"));
             return true;
         }
         String teamName = plugin.getTeamManager().getPlayerTeam(player.getUniqueId());

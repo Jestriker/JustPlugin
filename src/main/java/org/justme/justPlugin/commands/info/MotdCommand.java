@@ -27,8 +27,8 @@ public class MotdCommand implements TabExecutor {
         if (args.length >= 2 && args[0].equalsIgnoreCase("server") && sender.hasPermission("justplugin.motd.set")) {
             String text = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
             plugin.getMotdManager().setServerMotd(text);
-            sender.sendMessage(CC.success("Server list MOTD updated!"));
-            sender.sendMessage(CC.line("Preview:"));
+            sender.sendMessage(plugin.getMessageManager().success("info.motd.server-updated"));
+            sender.sendMessage(plugin.getMessageManager().info("info.motd.preview"));
             String preview = text
                     .replace("{online}", String.valueOf(Bukkit.getOnlinePlayers().size()))
                     .replace("{max}", String.valueOf(Bukkit.getMaxPlayers()));
@@ -41,8 +41,8 @@ public class MotdCommand implements TabExecutor {
         if (args.length >= 2 && args[0].equalsIgnoreCase("join") && sender.hasPermission("justplugin.motd.set")) {
             String text = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
             plugin.getMotdManager().setJoinMotd(text);
-            sender.sendMessage(CC.success("Join MOTD updated!"));
-            sender.sendMessage(CC.line("Preview:"));
+            sender.sendMessage(plugin.getMessageManager().success("info.motd.join-updated"));
+            sender.sendMessage(plugin.getMessageManager().info("info.motd.preview"));
             String preview = text
                     .replace("{player}", sender.getName())
                     .replace("{online}", String.valueOf(Bukkit.getOnlinePlayers().size()))
@@ -54,14 +54,14 @@ public class MotdCommand implements TabExecutor {
 
         // /motd - view both MOTDs
         sender.sendMessage(CC.translate("<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-        sender.sendMessage(CC.translate("  <gold><bold>MOTD Configuration</bold></gold>"));
+        sender.sendMessage(plugin.getMessageManager().info("info.motd.config-header"));
         sender.sendMessage(CC.translate("<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
 
         // Server MOTD
         String serverMotd = plugin.getMotdManager().getServerMotd();
-        sender.sendMessage(CC.translate(" <white><bold>Server List MOTD:</bold></white>"));
+        sender.sendMessage(plugin.getMessageManager().info("info.motd.server-label"));
         if (serverMotd == null || serverMotd.isEmpty()) {
-            sender.sendMessage(CC.line("<dark_gray>(using vanilla default)"));
+            sender.sendMessage(plugin.getMessageManager().info("info.motd.server-default"));
         } else {
             String resolvedServer = serverMotd
                     .replace("{online}", String.valueOf(Bukkit.getOnlinePlayers().size()))
@@ -73,9 +73,9 @@ public class MotdCommand implements TabExecutor {
 
         // Join MOTD
         String joinMotd = plugin.getMotdManager().getJoinMotd();
-        sender.sendMessage(CC.translate(" <white><bold>Join MOTD:</bold></white>"));
+        sender.sendMessage(plugin.getMessageManager().info("info.motd.join-label"));
         if (joinMotd == null || joinMotd.isEmpty()) {
-            sender.sendMessage(CC.line("<dark_gray>(disabled)"));
+            sender.sendMessage(plugin.getMessageManager().info("info.motd.join-default"));
         } else {
             String resolvedJoin = joinMotd
                     .replace("{player}", sender.getName())
@@ -87,8 +87,8 @@ public class MotdCommand implements TabExecutor {
         sender.sendMessage(CC.translate("<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
 
         if (sender.hasPermission("justplugin.motd.set")) {
-            sender.sendMessage(CC.line("<dark_gray>Set: <yellow>/motd server <text></yellow> | <yellow>/motd join <text>"));
-            sender.sendMessage(CC.line("<dark_gray>Reset: <yellow>/resetmotd [server | join]"));
+            sender.sendMessage(plugin.getMessageManager().info("info.motd.set-hint"));
+            sender.sendMessage(plugin.getMessageManager().info("info.motd.reset-hint"));
         }
 
         return true;

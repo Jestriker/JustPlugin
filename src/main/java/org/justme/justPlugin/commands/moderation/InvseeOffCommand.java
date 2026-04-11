@@ -41,7 +41,7 @@ public class InvseeOffCommand implements TabExecutor, Listener {
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /invseeoff <player>"));
+            player.sendMessage(plugin.getMessageManager().error("moderation.invsee.usage"));
             return true;
         }
 
@@ -96,7 +96,8 @@ public class InvseeOffCommand implements TabExecutor, Listener {
 
         openSessions.add(player.getUniqueId());
         player.openInventory(gui);
-        player.sendMessage(CC.info("Viewing <yellow>" + name + "</yellow>'s saved inventory <gray>(offline, read-only)."));
+        player.sendMessage(plugin.getMessageManager().info("moderation.offline.viewing-inventory",
+                "{player}", name));
         plugin.getLogManager().log("moderation",
                 "<yellow>" + player.getName() + "</yellow> opened <yellow>" + name + "</yellow>'s inventory <gray>(offline)");
         return true;

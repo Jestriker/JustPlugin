@@ -8,7 +8,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +26,7 @@ public class BaltopHideCommand implements TabExecutor {
         // Hiding another player
         if (args.length >= 1) {
             if (sender instanceof Player p && !p.hasPermission("justplugin.baltophide.others")) {
-                sender.sendMessage(CC.error("You don't have permission to hide other players from the balance leaderboard."));
+                sender.sendMessage(plugin.getMessageManager().error("economy.baltophide.no-permission-others"));
                 return true;
             }
 
@@ -41,7 +40,7 @@ public class BaltopHideCommand implements TabExecutor {
                 @SuppressWarnings("deprecation")
                 OfflinePlayer offP = Bukkit.getOfflinePlayer(args[0]);
                 if (!offP.hasPlayedBefore()) {
-                    sender.sendMessage(CC.error("Player <yellow>" + args[0] + "</yellow> has never joined the server."));
+                    sender.sendMessage(plugin.getMessageManager().error("general.never-joined", "{player}", args[0]));
                     return true;
                 }
                 targetUuid = offP.getUniqueId();
@@ -52,10 +51,10 @@ public class BaltopHideCommand implements TabExecutor {
             boolean hidden = plugin.getEconomyManager().isBaltopHidden(targetUuid);
 
             String senderName = sender instanceof Player ? sender.getName() : "Console";
-            sender.sendMessage(CC.success("<yellow>" + targetName + "</yellow> is now " + (hidden ? "<red>hidden" : "<green>visible") + " on the balance leaderboard."));
+            sender.sendMessage(plugin.getMessageManager().success(hidden ? "economy.baltophide.hidden-other" : "economy.baltophide.visible-other", "{player}", targetName));
 
             if (target != null && !target.equals(sender)) {
-                target.sendMessage(CC.info("You have been " + (hidden ? "<red>hidden from" : "<green>made visible on") + " the balance leaderboard by <yellow>" + senderName + "</yellow>."));
+                target.sendMessage(plugin.getMessageManager().info(hidden ? "economy.baltophide.notify-target-hidden" : "economy.baltophide.notify-target-visible", "{player}", senderName));
             }
 
             // Log
@@ -64,7 +63,7 @@ public class BaltopHideCommand implements TabExecutor {
             // Notify players with notification permission
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.hasPermission("justplugin.baltophide.notify") && !p.equals(sender)) {
-                    p.sendMessage(CC.info("<yellow>" + senderName + "</yellow> " + (hidden ? "hid" : "unhid") + " <yellow>" + targetName + "</yellow> from the balance leaderboard."));
+                    p.sendMessage(plugin.getMessageManager().info(hidden ? "economy.baltophide.notify-staff-hidden" : "economy.baltophide.notify-staff-visible", "{player}", senderName, "{target}", targetName));
                 }
             }
             return true;
@@ -72,18 +71,14 @@ public class BaltopHideCommand implements TabExecutor {
 
         // Self-hide
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Console must specify a player: /baltophide <player>"));
+            sender.sendMessage(plugin.getMessageManager().error("economy.baltophide.console-usage"));
             return true;
         }
 
         plugin.getEconomyManager().toggleBaltopHidden(player.getUniqueId());
         boolean hidden = plugin.getEconomyManager().isBaltopHidden(player.getUniqueId());
 
-        if (hidden) {
-            player.sendMessage(CC.success("You are now <yellow>hidden</yellow> from the balance leaderboard."));
-        } else {
-            player.sendMessage(CC.success("You are now <yellow>visible</yellow> on the balance leaderboard."));
-        }
+        player.sendMessage(plugin.getMessageManager().success(hidden ? "economy.baltophide.hidden-self" : "economy.baltophide.visible-self"));
 
         // Log
         plugin.getLogManager().log("economy", "<yellow>" + player.getName() + "</yellow> " + (hidden ? "hid" : "unhid") + " themselves from the balance leaderboard");

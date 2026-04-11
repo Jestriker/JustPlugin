@@ -24,19 +24,20 @@ public class HatCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         ItemStack hand = player.getInventory().getItemInMainHand();
         if (hand.getType() == Material.AIR) {
-            player.sendMessage(CC.error("You must hold an item!"));
+            player.sendMessage(plugin.getMessageManager().error("player.hat.empty-hand"));
             return true;
         }
         ItemStack helmet = player.getInventory().getHelmet();
         player.getInventory().setHelmet(hand.clone());
         player.getInventory().setItemInMainHand(helmet != null ? helmet : new ItemStack(Material.AIR));
-        player.sendMessage(CC.success("You are now wearing <yellow>" + hand.getType().name().toLowerCase().replace("_", " ") + "</yellow> as a hat!"));
-        plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> equipped <yellow>" + hand.getType().name().toLowerCase().replace("_", " ") + "</yellow> as a hat");
+        String itemName = hand.getType().name().toLowerCase().replace("_", " ");
+        player.sendMessage(plugin.getMessageManager().success("player.hat.success", "{item}", itemName));
+        plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> equipped <yellow>" + itemName + "</yellow> as a hat");
         return true;
     }
 

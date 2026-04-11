@@ -28,7 +28,7 @@ public class IgnoreCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
@@ -49,30 +49,30 @@ public class IgnoreCommand implements TabExecutor {
 
     private void handleAdd(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(CC.error("Usage: /ignore add <player>"));
+            player.sendMessage(plugin.getMessageManager().error("chat.ignore.add-usage"));
             return;
         }
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+            player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
             return;
         }
         if (target.equals(player)) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("chat.ignore.cannot-self")));
+            player.sendMessage(plugin.getMessageManager().error("chat.ignore.cannot-self"));
             return;
         }
         if (plugin.getIgnoreManager().isIgnoring(player.getUniqueId(), target.getUniqueId())) {
-            player.sendMessage(CC.error("You are already ignoring <yellow>" + target.getName() + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().error("chat.ignore.already-ignored", "{player}", target.getName()));
             return;
         }
         plugin.getIgnoreManager().addIgnore(player.getUniqueId(), target.getUniqueId());
-        player.sendMessage(CC.success("You are now ignoring <yellow>" + target.getName() + "</yellow>."));
-        target.sendMessage(CC.warning("You have been ignored by <yellow>" + player.getName() + "</yellow>."));
+        player.sendMessage(plugin.getMessageManager().success("chat.ignore.added", "{player}", target.getName()));
+        target.sendMessage(plugin.getMessageManager().warning("chat.ignore.ignored-by", "{player}", player.getName()));
     }
 
     private void handleRemove(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(CC.error("Usage: /ignore remove <player>"));
+            player.sendMessage(plugin.getMessageManager().error("chat.ignore.remove-usage"));
             return;
         }
         // Try online player first, then search ignored list by name
@@ -94,28 +94,28 @@ public class IgnoreCommand implements TabExecutor {
         }
 
         if (targetUuid == null) {
-            player.sendMessage(CC.error("Player not found in your ignore list!"));
+            player.sendMessage(plugin.getMessageManager().error("chat.ignore.not-in-list"));
             return;
         }
         if (!plugin.getIgnoreManager().removeIgnore(player.getUniqueId(), targetUuid)) {
-            player.sendMessage(CC.error("You are not ignoring <yellow>" + targetName + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().error("chat.ignore.not-ignored", "{player}", targetName));
             return;
         }
-        player.sendMessage(CC.success("You are no longer ignoring <yellow>" + targetName + "</yellow>."));
+        player.sendMessage(plugin.getMessageManager().success("chat.ignore.removed", "{player}", targetName));
         if (target != null) {
-            target.sendMessage(CC.info("<yellow>" + player.getName() + "</yellow> is no longer ignoring you."));
+            target.sendMessage(plugin.getMessageManager().info("chat.ignore.unignored-by", "{player}", player.getName()));
         }
     }
 
     private void handleList(Player player) {
         Set<UUID> ignored = plugin.getIgnoreManager().getIgnoredPlayers(player.getUniqueId());
         if (ignored.isEmpty()) {
-            player.sendMessage(CC.info("Your ignore list is empty."));
+            player.sendMessage(plugin.getMessageManager().info("chat.ignore.list-empty"));
             return;
         }
         boolean clickable = plugin.getConfig().getBoolean("clickable-commands.ignore", true);
         player.sendMessage(CC.translate(""));
-        player.sendMessage(CC.info("<gold><bold>Ignored Players</bold></gold> <dark_gray>(<green>" + ignored.size() + "<dark_gray>)"));
+        player.sendMessage(plugin.getMessageManager().info("chat.ignore.list-display-header", "{count}", String.valueOf(ignored.size())));
         int index = 1;
         for (UUID uuid : ignored) {
             OfflinePlayer off = Bukkit.getOfflinePlayer(uuid);
@@ -132,12 +132,12 @@ public class IgnoreCommand implements TabExecutor {
     private void handleClearList(Player player) {
         Set<UUID> ignored = plugin.getIgnoreManager().getIgnoredPlayers(player.getUniqueId());
         if (ignored.isEmpty()) {
-            player.sendMessage(CC.info("Your ignore list is already empty."));
+            player.sendMessage(plugin.getMessageManager().info("chat.ignore.list-already-empty"));
             return;
         }
         int count = ignored.size();
         plugin.getIgnoreManager().clearIgnoreList(player.getUniqueId());
-        player.sendMessage(CC.success("Cleared your ignore list. <gray>(" + count + " player" + (count == 1 ? "" : "s") + " removed)</gray>"));
+        player.sendMessage(plugin.getMessageManager().success("chat.ignore.list-cleared-count", "{count}", count + " player" + (count == 1 ? "" : "s")));
     }
 
     private void sendUsage(Player player) {

@@ -39,7 +39,7 @@ public class EchestSeeOffCommand implements TabExecutor, Listener {
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /echestseeoff <player>"));
+            player.sendMessage(plugin.getMessageManager().error("moderation.echestsee.usage"));
             return true;
         }
 
@@ -71,7 +71,8 @@ public class EchestSeeOffCommand implements TabExecutor, Listener {
 
         openSessions.add(player.getUniqueId());
         player.openInventory(gui);
-        player.sendMessage(CC.info("Viewing <yellow>" + name + "</yellow>'s saved ender chest <gray>(offline, read-only)."));
+        player.sendMessage(plugin.getMessageManager().info("moderation.offline.viewing-echest",
+                "{player}", name));
         plugin.getLogManager().log("moderation",
                 "<yellow>" + player.getName() + "</yellow> opened <yellow>" + name + "</yellow>'s ender chest <gray>(offline)");
         return true;

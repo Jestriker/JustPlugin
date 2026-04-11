@@ -26,14 +26,14 @@ public class TempBanIpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(CC.error("Usage: /tempbanip <ip | player> <duration> [reason]"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.tempbanip.usage"));
             return true;
         }
 
         String bannedBy = sender instanceof Player ? sender.getName() : "Console";
         long duration = TimeUtil.parseDuration(args[1]);
         if (duration <= 0) {
-            sender.sendMessage(CC.error("Invalid duration!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.tempbanip.invalid-duration"));
             return true;
         }
 
@@ -54,7 +54,7 @@ public class TempBanIpCommand implements TabExecutor {
                     ip = lastIp;
                     resolvedFrom = offP.getName() != null ? offP.getName() : args[0];
                 } else {
-                    sender.sendMessage(CC.error("Could not find an IP for <yellow>" + args[0] + "</yellow>. They may have never joined."));
+                    sender.sendMessage(plugin.getMessageManager().error("moderation.tempbanip.no-ip-found", "{player}", args[0]));
                     return true;
                 }
             }
@@ -62,19 +62,19 @@ public class TempBanIpCommand implements TabExecutor {
 
         // Check if already IP banned
         if (plugin.getBanManager().isIpBanned(ip)) {
-            sender.sendMessage(CC.error("IP <yellow>" + ip + "</yellow> is already IP banned!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.tempbanip.already-banned", "{ip}", ip));
             return true;
         }
 
         plugin.getBanManager().tempBanIp(ip, reason, bannedBy, duration);
         if (resolvedFrom != null) {
-            sender.sendMessage(CC.success("Temporarily IP banned <yellow>" + ip + "</yellow> (resolved from <yellow>" + resolvedFrom + "</yellow>) for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>."));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.tempbanip.success-resolved", "{ip}", ip, "{player}", resolvedFrom, "{duration}", TimeUtil.formatDuration(duration)));
         } else {
-            sender.sendMessage(CC.success("Temporarily IP banned <yellow>" + ip + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>."));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.tempbanip.success", "{ip}", ip, "{duration}", TimeUtil.formatDuration(duration)));
         }
 
         // Configurable announcement
-        net.kyori.adventure.text.Component announcement = CC.warning("IP <yellow>" + ip + "</yellow> has been temporarily IP banned by <yellow>" + bannedBy + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>.");
+        net.kyori.adventure.text.Component announcement = plugin.getMessageManager().warning("moderation.tempbanip.announce", "{ip}", ip, "{staff}", bannedBy, "{duration}", TimeUtil.formatDuration(duration));
         if (plugin.getConfig().getBoolean("punishment-announcements.tempbanip", false)) {
             Bukkit.broadcast(announcement);
         } else {

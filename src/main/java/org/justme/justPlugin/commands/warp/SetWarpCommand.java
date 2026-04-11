@@ -6,7 +6,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
+
 import org.justme.justPlugin.util.InputValidator;
 
 import java.util.List;
@@ -23,20 +23,20 @@ public class SetWarpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("warp.setwarp.usage")));
+            player.sendMessage(plugin.getMessageManager().error("warp.setwarp.usage"));
             return true;
         }
         String name = args[0];
         if (!InputValidator.isValidName(name)) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-name")));
+            player.sendMessage(plugin.getMessageManager().error("general.invalid-name"));
             return true;
         }
         plugin.getWarpManager().setWarp(name, player.getLocation());
-        player.sendMessage(CC.success("Warp <yellow>" + name + "</yellow> has been set."));
+        player.sendMessage(plugin.getMessageManager().success("warp.setwarp.success", "{warp}", name));
         plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set warp <yellow>" + name + "</yellow>");
         return true;
     }

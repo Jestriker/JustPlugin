@@ -63,7 +63,7 @@ public class TradeCommand implements TabExecutor {
         // Normal: target must be online
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null || (plugin.getVanishManager().isVanished(target.getUniqueId()) && !player.hasPermission("justplugin.vanish.see"))) {
-            player.sendMessage(CC.error("Player not found or not online!"));
+            player.sendMessage(plugin.getMessageManager().error("trade.request.player-not-found"));
             return true;
         }
         if (target.equals(player)) {

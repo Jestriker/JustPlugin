@@ -30,7 +30,7 @@
 
 ## 🚀 Overview
 
-JustPlugin replaces dozens of separate plugins with a single JAR. Economy, teleportation, moderation, jail, kits, AFK, mail, nicknames, tags, teams, trading, vanish, warnings, mutes, skins, scoreboard, maintenance mode, and **200+ commands** - all built from scratch with performance and simplicity in mind.
+JustPlugin replaces dozens of separate plugins with a single JAR. Economy, teleportation, moderation, jail, kits, AFK, mail, nicknames, tags, teams, trading, vanish, warnings, mutes, skins, scoreboard, maintenance mode, and **159+ commands** - all built from scratch with performance and simplicity in mind.
 
 Every command can be individually enabled or disabled. Every permission is granular and hierarchical. Every feature just works out of the box.
 

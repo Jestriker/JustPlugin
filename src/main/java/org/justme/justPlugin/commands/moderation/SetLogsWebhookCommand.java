@@ -27,7 +27,7 @@ public class SetLogsWebhookCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /setlogswebhook <url | disable | confirm | cancel | tryagain>"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.setlogswebhook.usage"));
             return true;
         }
 
@@ -36,7 +36,7 @@ public class SetLogsWebhookCommand implements TabExecutor {
         switch (sub) {
             case "disable" -> {
                 plugin.getWebhookManager().disable();
-                sender.sendMessage(CC.success("Discord webhook logging has been <red>disabled</red>."));
+                sender.sendMessage(plugin.getMessageManager().success("moderation.setlogswebhook.disabled"));
                 plugin.getLogManager().log("admin", sender.getName() + " disabled Discord webhook logging.");
             }
             case "confirm" -> handleConfirm(sender);
@@ -50,21 +50,21 @@ public class SetLogsWebhookCommand implements TabExecutor {
     private void handleSetUrl(CommandSender sender, String url) {
         // Basic URL validation
         if (!url.startsWith("https://discord.com/api/webhooks/") && !url.startsWith("https://discordapp.com/api/webhooks/")) {
-            sender.sendMessage(CC.error("Invalid webhook URL! Must be a Discord webhook URL starting with <yellow>https://discord.com/api/webhooks/</yellow>"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.setlogswebhook.invalid-url"));
             return;
         }
 
         UUID senderUuid = sender instanceof Player p ? p.getUniqueId() : UUID.nameUUIDFromBytes("CONSOLE".getBytes());
         pendingUrls.put(senderUuid, url);
 
-        sender.sendMessage(CC.info("Sending test webhook to the provided URL..."));
-        sender.sendMessage(CC.line("<gray>This may take a few seconds."));
+        sender.sendMessage(plugin.getMessageManager().info("moderation.setlogswebhook.testing"));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.setlogswebhook.testing-hint"));
 
         plugin.getWebhookManager().sendTest(url).thenAccept(status -> {
             SchedulerUtil.runTask(plugin, () -> {
                 if (status >= 200 && status < 300) {
-                    sender.sendMessage(CC.success("Test webhook sent successfully! <gray>(HTTP " + status + ")"));
-                    sender.sendMessage(CC.line("Check your Discord channel for the test message."));
+                    sender.sendMessage(plugin.getMessageManager().success("moderation.setlogswebhook.test-success", "{status}", String.valueOf(status)));
+                    sender.sendMessage(plugin.getMessageManager().line("moderation.setlogswebhook.test-success-hint"));
 
                     boolean clickable = true;
                     String confirmBtn = CC.clickCmd("<green>[✔ Confirm]</green>", "/setlogswebhook confirm", clickable);
@@ -72,8 +72,8 @@ public class SetLogsWebhookCommand implements TabExecutor {
                     String tryAgainBtn = CC.clickCmd("<dark_purple>[↻ Try Again]</dark_purple>", "/setlogswebhook tryagain", clickable);
                     sender.sendMessage(CC.translate(" " + confirmBtn + "  " + cancelBtn + "  " + tryAgainBtn));
                 } else {
-                    sender.sendMessage(CC.error("Failed to send test webhook! <gray>(HTTP " + status + ")"));
-                    sender.sendMessage(CC.line("Please check the URL and try again."));
+                    sender.sendMessage(plugin.getMessageManager().error("moderation.setlogswebhook.test-failed", "{status}", String.valueOf(status)));
+                    sender.sendMessage(plugin.getMessageManager().line("moderation.setlogswebhook.test-failed-hint"));
 
                     boolean clickable = true;
                     String cancelBtn = CC.clickCmd("<red>[✕ Cancel]</red>", "/setlogswebhook cancel", clickable);
@@ -88,20 +88,20 @@ public class SetLogsWebhookCommand implements TabExecutor {
         UUID senderUuid = sender instanceof Player p ? p.getUniqueId() : UUID.nameUUIDFromBytes("CONSOLE".getBytes());
         String url = pendingUrls.remove(senderUuid);
         if (url == null) {
-            sender.sendMessage(CC.error("No pending webhook URL to confirm."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.setlogswebhook.no-pending"));
             return;
         }
 
         plugin.getWebhookManager().setWebhookUrl(url);
-        sender.sendMessage(CC.success("Discord webhook logging has been <green>enabled</green> and configured!"));
-        sender.sendMessage(CC.line("All logs will now be sent to the configured Discord channel."));
+        sender.sendMessage(plugin.getMessageManager().success("moderation.setlogswebhook.confirm-success"));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.setlogswebhook.confirm-success-hint"));
         plugin.getLogManager().log("admin", sender.getName() + " configured and enabled Discord webhook logging.");
     }
 
     private void handleCancel(CommandSender sender) {
         UUID senderUuid = sender instanceof Player p ? p.getUniqueId() : UUID.nameUUIDFromBytes("CONSOLE".getBytes());
         pendingUrls.remove(senderUuid);
-        sender.sendMessage(CC.info("Webhook setup cancelled."));
+        sender.sendMessage(plugin.getMessageManager().info("moderation.setlogswebhook.cancel"));
     }
 
     private void handleTryAgain(CommandSender sender) {
@@ -111,23 +111,23 @@ public class SetLogsWebhookCommand implements TabExecutor {
         Long lastTime = lastTestTime.get(senderUuid);
         if (lastTime != null && System.currentTimeMillis() - lastTime < 10000) {
             long remaining = (10000 - (System.currentTimeMillis() - lastTime)) / 1000;
-            sender.sendMessage(CC.error("Please wait <yellow>" + remaining + "s</yellow> before trying again."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.setlogswebhook.retry-cooldown", "{time}", String.valueOf(remaining)));
             return;
         }
 
         String url = pendingUrls.get(senderUuid);
         if (url == null) {
-            sender.sendMessage(CC.error("No pending webhook URL. Use /setlogswebhook <url> first."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.setlogswebhook.no-pending-url"));
             return;
         }
 
         lastTestTime.put(senderUuid, System.currentTimeMillis());
-        sender.sendMessage(CC.info("Retrying test webhook... This may take a few seconds."));
+        sender.sendMessage(plugin.getMessageManager().info("moderation.setlogswebhook.retrying"));
 
         plugin.getWebhookManager().sendTest(url).thenAccept(status -> {
             SchedulerUtil.runTask(plugin, () -> {
                 if (status >= 200 && status < 300) {
-                    sender.sendMessage(CC.success("Test webhook sent successfully! <gray>(HTTP " + status + ")"));
+                    sender.sendMessage(plugin.getMessageManager().success("moderation.setlogswebhook.test-success", "{status}", String.valueOf(status)));
 
                     boolean clickable = true;
                     String confirmBtn = CC.clickCmd("<green>[✔ Confirm]</green>", "/setlogswebhook confirm", clickable);
@@ -135,7 +135,7 @@ public class SetLogsWebhookCommand implements TabExecutor {
                     String tryAgainBtn = CC.clickCmd("<dark_purple>[↻ Try Again]</dark_purple>", "/setlogswebhook tryagain", clickable);
                     sender.sendMessage(CC.translate(" " + confirmBtn + "  " + cancelBtn + "  " + tryAgainBtn));
                 } else {
-                    sender.sendMessage(CC.error("Failed again! <gray>(HTTP " + status + ")"));
+                    sender.sendMessage(plugin.getMessageManager().error("moderation.setlogswebhook.retry-failed", "{status}", String.valueOf(status)));
 
                     boolean clickable = true;
                     String cancelBtn = CC.clickCmd("<red>[✕ Cancel]</red>", "/setlogswebhook cancel", clickable);

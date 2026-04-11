@@ -22,11 +22,11 @@ public class AnnounceCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /announce <message>"));
+            sender.sendMessage(plugin.getMessageManager().error("chat.announce.usage"));
             return true;
         }
         String message = String.join(" ", args);
-        Bukkit.broadcast(CC.translate("<red><bold>[Announcement]</bold></red> <yellow>" + message));
+        Bukkit.broadcast(CC.translate(plugin.getMessageManager().raw("chat.announce.format").replace("{message}", message)));
         String senderName = sender instanceof org.bukkit.entity.Player ? sender.getName() : "Console";
         plugin.getLogManager().log("admin", "<yellow>" + senderName + "</yellow> announced: <gray>" + message);
         return true;

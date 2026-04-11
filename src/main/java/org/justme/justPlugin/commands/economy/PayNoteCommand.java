@@ -42,8 +42,8 @@ public class PayNoteCommand implements TabExecutor {
         }
 
         if (args.length < 1) {
-            player.sendMessage(CC.info("Usage: <yellow>/paynote <amount></yellow>"));
-            player.sendMessage(CC.info("Hold exactly <yellow>1 paper</yellow> to create a balance note."));
+            player.sendMessage(plugin.getMessageManager().info("economy.paynote.usage"));
+            player.sendMessage(plugin.getMessageManager().info("economy.paynote.usage-hint"));
             return true;
         }
 
@@ -51,33 +51,32 @@ public class PayNoteCommand implements TabExecutor {
         try {
             amount = Double.parseDouble(args[0]);
         } catch (NumberFormatException e) {
-            player.sendMessage(CC.error("Invalid amount! Use a number."));
+            player.sendMessage(plugin.getMessageManager().error("economy.paynote.invalid-amount"));
             return true;
         }
 
         if (amount <= 0) {
-            player.sendMessage(CC.error("Amount must be greater than zero."));
+            player.sendMessage(plugin.getMessageManager().error("economy.paynote.amount-positive"));
             return true;
         }
 
         // Check player is holding exactly 1 paper
         ItemStack hand = player.getInventory().getItemInMainHand();
         if (hand.getType() != Material.PAPER || hand.getAmount() != 1) {
-            player.sendMessage(CC.error("You must be holding exactly <yellow>1 paper</yellow> (no more, no less)."));
+            player.sendMessage(plugin.getMessageManager().error("economy.paynote.hold-paper"));
             return true;
         }
 
         // Check if it's already a pay note
         ItemMeta meta = hand.getItemMeta();
         if (meta != null && meta.getPersistentDataContainer().has(noteKey, PersistentDataType.DOUBLE)) {
-            player.sendMessage(CC.error("This paper is already a balance note!"));
+            player.sendMessage(plugin.getMessageManager().error("economy.paynote.already-note"));
             return true;
         }
 
         // Check player has enough balance
         if (!plugin.getEconomyManager().removeBalance(player.getUniqueId(), amount)) {
-            player.sendMessage(CC.error("You don't have enough balance! Your balance: <yellow>"
-                    + plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(player.getUniqueId()))));
+            player.sendMessage(plugin.getMessageManager().error("economy.paynote.insufficient-funds", "{balance}", plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(player.getUniqueId()))));
             return true;
         }
 
@@ -101,7 +100,7 @@ public class PayNoteCommand implements TabExecutor {
 
         hand.setItemMeta(meta);
 
-        player.sendMessage(CC.success("Created a balance note worth <yellow>" + formatted + "</yellow>. Right-click to redeem!"));
+        player.sendMessage(plugin.getMessageManager().success("economy.paynote.created", "{amount}", formatted));
         plugin.getLogManager().log("economy", "<yellow>" + player.getName() + "</yellow> created a balance note worth <green>" + formatted + "</green>");
         return true;
     }

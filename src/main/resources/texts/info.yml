@@ -32,11 +32,12 @@ jpinfo:
   author: "Author: <yellow>JustMe"
   server: "Server: <yellow>{server}"
   commands: "Commands: <yellow>{enabled} enabled</yellow>, <gray>{disabled} disabled"
+  description: "An EssentialsX-like plugin for your server."
 
 # === Help ===
 jphelp:
-  header: "<gold><bold>JustPlugin Help</bold></gold> <gray>(Page {page}/{max_page})"
-  footer: "<gray>Use <yellow>/help {next_page}</yellow> for the next page."
+  header: "<gold><bold>JustPlugin Help (Page {page}/{max_page})</bold></gold>"
+  footer: "Type {next_button} for the next page."
   no-more-pages: "There are no more pages."
 
 # === Player Info ===
@@ -44,6 +45,9 @@ playerinfo:
   header-online: "<gold><bold>Player Info: {player}</bold></gold> <green>(Online)</green>"
   header-offline: "<gold><bold>Player Info: {player}</bold></gold> <red>(Offline)</red>"
   uuid: "UUID: <yellow>{uuid}"
+  display-name: "Display Name: <yellow>{display}"
+  health: "Health: <yellow>{health}/{max_health}"
+  food: "Food: <yellow>{food}/20.0"
   world: "World: <yellow>{world}"
   location: "Location: <yellow>{x}, {y}, {z}"
   ip: "IP: <yellow>{ip}"
@@ -53,6 +57,8 @@ playerinfo:
   gamemode: "Game Mode: <yellow>{gamemode}"
   last-seen: "Last Seen: <yellow>{last_seen}"
   first-played: "First Played: <yellow>{first_played}"
+  banned: "Banned: <yellow>{banned}"
+  usage: "Usage: /whois <player>"
 
 # === Player List (Simple) ===
 plist:
@@ -61,14 +67,22 @@ plist:
 
 # === Player List (Advanced) ===
 playerlist:
-  header: "<gold><bold>Player List</bold></gold> <gray>(Page {page}/{max_page}) - {online}/{max} online"
+  header: "<gold><bold>Player List</bold></gold> <dark_gray>(<green>{online}<dark_gray>/<green>{max}<dark_gray>) <gray>Page <yellow>{page}<gray>/<yellow>{max_page}"
+  no-players: "<gray>No players online."
+  invalid-page: "Invalid page number!"
 
 # === Player List Hide ===
 playerlisthide:
-  hidden-self: "You are now <red>hidden</red> from the player list."
-  visible-self: "You are now <green>visible</green> on the player list."
+  hidden-self: "You are now <red>hidden from</red> the player list."
+  visible-self: "You are now <green>visible on</green> the player list."
   hidden-other: "<yellow>{player}</yellow> is now <red>hidden</red> from the player list."
   visible-other: "<yellow>{player}</yellow> is now <green>visible</green> on the player list."
+  no-permission-others: "You don't have permission to hide other players from the player list."
+  never-joined: "Player <yellow>{player}</yellow> has never joined the server."
+  target-notified-hidden: "You have been <red>hidden from</red> the player list by <yellow>{staff}</yellow>."
+  target-notified-visible: "You have been <green>made visible on</green> the player list by <yellow>{staff}</yellow>."
+  notify-hidden: "<yellow>{staff}</yellow> hid <yellow>{player}</yellow> from the player list."
+  notify-visible: "<yellow>{staff}</yellow> unhid <yellow>{player}</yellow> from the player list."
   usage: "Usage: /playerlisthide [player]"
 
 # === MOTD ===
@@ -86,14 +100,55 @@ resetmotd:
 clock:
   # {time} = formatted time, {timezone} = timezone name
   format: "Current time: <yellow>{time}</yellow> <gray>({timezone})"
+  header: "<gold>Clock:"
+  irl-time: "IRL Time: <yellow>{time} ({timezone})"
+  game-time: "Game Time: <yellow>{time} <gray>(tick {ticks})"
 
 # === Date ===
 date:
   # {date} = formatted date and time, {timezone} = timezone name
   format: "Current date: <yellow>{date}</yellow> <gray>({timezone})"
+  header: "<gold>Date & Time:"
+  irl-date: "IRL Date: <yellow>{date}"
+  irl-time: "IRL Time: <yellow>{time} ({timezone})"
+  game-day: "Game Day: <yellow>{day}"
+  game-time: "Game Time: <yellow>{time}"
 
 # === Stats ===
 stats:
   usage: "Usage: /stats [player]"
   no-data: "No statistics found for <yellow>{player}</yellow>."
+  no-permission-others: "You don't have permission to view other players' stats."
+  player-not-found: "Player <yellow>{player}</yellow> not found or not online."
+
+# === List ===
+list:
+  header: "<gold><bold>Online Players</bold></gold> <dark_gray>(<green>{online}<dark_gray>/<green>{max}<dark_gray>)"
+  no-players: "No players online."
+
+# === MOTD ===
+motd:
+  current: "Current server MOTD:"
+  set-success: "Server MOTD updated!"
+  usage: "Usage: /motd [server|join] [message]"
+  server-updated: "Server list MOTD updated!"
+  join-updated: "Join MOTD updated!"
+  preview: "Preview:"
+  config-header: "<gold><bold>MOTD Configuration</bold></gold>"
+  server-label: "<white><bold>Server List MOTD:</bold></white>"
+  server-default: "<dark_gray>(using vanilla default)"
+  join-label: "<white><bold>Join MOTD:</bold></white>"
+  join-default: "<dark_gray>(disabled)"
+  set-hint: "<dark_gray>Set: <yellow>/motd server <text></yellow> | <yellow>/motd join <text>"
+  reset-hint: "<dark_gray>Reset: <yellow>/resetmotd [server | join]"
+
+# === Reset MOTD ===
+resetmotd:
+  success: "MOTD has been reset to default."
+  usage: "Usage: /resetmotd [server|join]"
+  server-reset: "Server list MOTD has been reset to default."
+  join-reset: "Join MOTD has been reset to default."
+  both-reset: "Both MOTDs have been reset to default."
+  server-label: "<white><bold>Server List MOTD:</bold>"
+  join-label: "<white><bold>Join MOTD:</bold>"
 

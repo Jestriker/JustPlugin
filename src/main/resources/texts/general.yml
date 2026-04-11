@@ -42,6 +42,10 @@ cannot-target-self: "You can't target yourself!"
 # Names must be 1-32 characters using only letters, numbers, underscores, and hyphens.
 invalid-name: "Invalid name! Use only letters, numbers, underscores, and hyphens (max 32 chars)."
 
+# Shown when a target player has never joined the server.
+# Placeholders: {player} - the player name entered
+never-joined: "Player <yellow>{player}</yellow> has never joined the server."
+
 # Generic error for unexpected failures.
 generic-error: "An error occurred. Please try again."
 

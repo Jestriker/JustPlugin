@@ -35,12 +35,12 @@ public class SudoCommand implements TabExecutor {
         }
         // Prevent self-sudo
         if (sender instanceof Player p && p.getUniqueId().equals(target.getUniqueId())) {
-            sender.sendMessage(CC.error("You cannot sudo yourself."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.sudo.cannot-self"));
             return true;
         }
         // Prevent sudo against operators when sender is not console
         if (sender instanceof Player && target.isOp()) {
-            sender.sendMessage(CC.error("You cannot sudo an operator."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.sudo.cannot-op"));
             return true;
         }
         String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
@@ -49,18 +49,20 @@ public class SudoCommand implements TabExecutor {
             String cmdLower = message.substring(1).toLowerCase();
             if (cmdLower.startsWith("op ") || cmdLower.startsWith("deop ") || cmdLower.startsWith("stop")
                     || cmdLower.startsWith("reload") || cmdLower.startsWith("sudo ")) {
-                sender.sendMessage(CC.error("That command is blocked from sudo."));
+                sender.sendMessage(plugin.getMessageManager().error("moderation.sudo.blocked"));
                 return true;
             }
         }
         String senderName = sender instanceof Player ? sender.getName() : "Console";
         if (message.startsWith("/")) {
             target.performCommand(message.substring(1));
-            sender.sendMessage(CC.success("Forced <yellow>" + target.getName() + "</yellow> to run: <gray>" + message));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.sudo.success-command",
+                    "{player}", target.getName(), "{command}", message));
             plugin.getLogManager().log("admin", "<yellow>" + senderName + "</yellow> forced <yellow>" + target.getName() + "</yellow> to run: <gray>" + message);
         } else {
             target.chat(message);
-            sender.sendMessage(CC.success("Forced <yellow>" + target.getName() + "</yellow> to say: <gray>" + message));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.sudo.success-chat",
+                    "{player}", target.getName(), "{message}", message));
             plugin.getLogManager().log("admin", "<yellow>" + senderName + "</yellow> forced <yellow>" + target.getName() + "</yellow> to say: <gray>" + message);
         }
         return true;

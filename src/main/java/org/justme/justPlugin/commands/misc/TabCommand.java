@@ -30,7 +30,7 @@ public class TabCommand implements TabExecutor {
         }
 
         applyTabToPlayer(player);
-        player.sendMessage(CC.success("Tab list updated!"));
+        player.sendMessage(plugin.getMessageManager().success("misc.tab.updated"));
         return true;
     }
 

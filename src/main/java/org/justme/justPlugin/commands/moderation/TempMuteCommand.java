@@ -26,13 +26,13 @@ public class TempMuteCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(CC.error("Usage: /tempmute <player> <duration> [reason]"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.tempmute.usage"));
             return true;
         }
 
         long durationMs = TimeUtil.parseDuration(args[1]);
         if (durationMs <= 0) {
-            sender.sendMessage(CC.error("Invalid duration! Examples: 5m, 1h, 1d, 1w"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.tempmute.invalid-duration"));
             return true;
         }
 
@@ -46,16 +46,16 @@ public class TempMuteCommand implements TabExecutor {
         String name = offP.getName() != null ? offP.getName() : args[0];
 
         if (plugin.getMuteManager().isMuted(uuid)) {
-            sender.sendMessage(CC.error("<yellow>" + name + "</yellow> is already muted!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.tempmute.already-muted", "{player}", name));
             return true;
         }
 
         plugin.getMuteManager().tempMute(uuid, name, reason, mutedBy, durationMs);
-        sender.sendMessage(CC.success("Temporarily muted <yellow>" + name + "</yellow> for <yellow>" + TimeUtil.formatDuration(durationMs) + "</yellow>."));
-        sender.sendMessage(CC.line("Reason: <white>" + reason));
+        sender.sendMessage(plugin.getMessageManager().success("moderation.tempmute.success", "{player}", name, "{duration}", TimeUtil.formatDuration(durationMs)));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.tempmute.success-reason", "{reason}", reason));
 
         // Configurable announcement
-        net.kyori.adventure.text.Component announcement = CC.warning("<yellow>" + name + "</yellow> has been temporarily muted by <yellow>" + mutedBy + "</yellow> for <yellow>" + TimeUtil.formatDuration(durationMs) + "</yellow>. Reason: <gray>" + reason);
+        net.kyori.adventure.text.Component announcement = plugin.getMessageManager().warning("moderation.tempmute.announce", "{player}", name, "{staff}", mutedBy, "{duration}", TimeUtil.formatDuration(durationMs), "{reason}", reason);
         if (plugin.getConfig().getBoolean("punishment-announcements.tempmute", false)) {
             Bukkit.broadcast(announcement);
         } else {

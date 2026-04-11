@@ -24,8 +24,8 @@ public class ResetMotdCommand implements TabExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length >= 1 && args[0].equalsIgnoreCase("server")) {
             plugin.getMotdManager().resetServerMotd();
-            sender.sendMessage(CC.success("Server list MOTD has been reset to default."));
-            sender.sendMessage(CC.line("Preview:"));
+            sender.sendMessage(plugin.getMessageManager().success("info.resetmotd.server-reset"));
+            sender.sendMessage(plugin.getMessageManager().info("info.motd.preview"));
             sender.sendMessage(CC.translate(MotdManager.DEFAULT_SERVER_MOTD));
             plugin.getLogManager().log("admin", "<yellow>" + sender.getName() + "</yellow> reset the <white>server list MOTD</white> to default");
             return true;
@@ -33,8 +33,8 @@ public class ResetMotdCommand implements TabExecutor {
 
         if (args.length >= 1 && args[0].equalsIgnoreCase("join")) {
             plugin.getMotdManager().resetJoinMotd();
-            sender.sendMessage(CC.success("Join MOTD has been reset to default."));
-            sender.sendMessage(CC.line("Preview:"));
+            sender.sendMessage(plugin.getMessageManager().success("info.resetmotd.join-reset"));
+            sender.sendMessage(plugin.getMessageManager().info("info.motd.preview"));
             sender.sendMessage(CC.translate(MotdManager.DEFAULT_JOIN_MOTD.replace("{player}", sender.getName())));
             plugin.getLogManager().log("admin", "<yellow>" + sender.getName() + "</yellow> reset the <white>join MOTD</white> to default");
             return true;
@@ -43,12 +43,12 @@ public class ResetMotdCommand implements TabExecutor {
         // No args or anything else = reset both
         plugin.getMotdManager().resetServerMotd();
         plugin.getMotdManager().resetJoinMotd();
-        sender.sendMessage(CC.success("Both MOTDs have been reset to default."));
+        sender.sendMessage(plugin.getMessageManager().success("info.resetmotd.both-reset"));
         sender.sendMessage(CC.translate(""));
-        sender.sendMessage(CC.line("<white><bold>Server List MOTD:</bold>"));
+        sender.sendMessage(plugin.getMessageManager().info("info.resetmotd.server-label"));
         sender.sendMessage(CC.translate(" " + MotdManager.DEFAULT_SERVER_MOTD));
         sender.sendMessage(CC.translate(""));
-        sender.sendMessage(CC.line("<white><bold>Join MOTD:</bold>"));
+        sender.sendMessage(plugin.getMessageManager().info("info.resetmotd.join-label"));
         sender.sendMessage(CC.translate(" " + MotdManager.DEFAULT_JOIN_MOTD.replace("{player}", sender.getName())));
         plugin.getLogManager().log("admin", "<yellow>" + sender.getName() + "</yellow> reset <white>both MOTDs</white> to default");
         return true;

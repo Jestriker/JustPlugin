@@ -22,8 +22,9 @@ public class UnfreezeGameCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tick unfreeze");
-        sender.sendMessage(CC.success("Game has been <yellow>unfrozen</yellow>! Tick processing resumed."));
-        Bukkit.broadcast(CC.warning("The game has been <green>unfrozen</green> by <yellow>" + sender.getName() + "</yellow>."));
+        sender.sendMessage(plugin.getMessageManager().success("world.unfreezegame.unfrozen"));
+        Bukkit.broadcast(plugin.getMessageManager().warning("world.unfreezegame.broadcast",
+                "{player}", sender.getName()));
         plugin.getLogManager().log("admin", "<yellow>" + sender.getName() + "</yellow> unfroze the game");
         return true;
     }

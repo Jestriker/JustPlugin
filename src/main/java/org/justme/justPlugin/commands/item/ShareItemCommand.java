@@ -11,6 +11,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.util.CC;
 
 import java.util.List;
@@ -18,15 +19,21 @@ import java.util.List;
 @SuppressWarnings("NullableProblems")
 public class ShareItemCommand implements TabExecutor {
 
+    private final JustPlugin plugin;
+
+    public ShareItemCommand(JustPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Only players can use this command."));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType() == Material.AIR) {
-            player.sendMessage(CC.error("You must hold an item!"));
+            player.sendMessage(plugin.getMessageManager().error("misc.shareitem.empty-hand"));
             return true;
         }
 
@@ -54,4 +61,3 @@ public class ShareItemCommand implements TabExecutor {
         return List.of();
     }
 }
-

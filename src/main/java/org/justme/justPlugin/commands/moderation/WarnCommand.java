@@ -28,7 +28,7 @@ public class WarnCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /warn <add | remove | list> <player> [reason | index]"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.usage"));
             return true;
         }
 
@@ -41,14 +41,14 @@ public class WarnCommand implements TabExecutor {
             case "list" -> handleList(sender, args);
             case "confirm" -> handleConfirm(sender, executedBy);
             case "cancel" -> handleCancel(sender);
-            default -> sender.sendMessage(CC.error("Usage: /warn <add | remove | list> <player> [reason | index]"));
+            default -> sender.sendMessage(plugin.getMessageManager().error("moderation.warn.usage"));
         }
         return true;
     }
 
     private void handleAdd(CommandSender sender, String[] args, String executedBy) {
         if (args.length < 2) {
-            sender.sendMessage(CC.error("Usage: /warn add <player> [reason]"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.usage-add"));
             return;
         }
 
@@ -62,16 +62,16 @@ public class WarnCommand implements TabExecutor {
         WarnManager.WarnEntry entry = plugin.getWarnManager().addWarn(uuid, name, reason, executedBy);
         int activeCount = plugin.getWarnManager().getActiveWarnCount(uuid);
 
-        sender.sendMessage(CC.success("Warned <yellow>" + name + "</yellow>. <gray>(Warning #" + activeCount + ")"));
-        sender.sendMessage(CC.line("Reason: <white>" + entry.reason));
-        sender.sendMessage(CC.line("Punishment: <yellow>" + entry.punishment + (entry.punishmentDetail.isEmpty() ? "" : " " + entry.punishmentDetail)));
+        sender.sendMessage(plugin.getMessageManager().success("moderation.warn.added", "{player}", name, "{reason}", entry.reason, "{count}", String.valueOf(activeCount)));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.warn.added-reason", "{reason}", entry.reason));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.warn.added-punishment", "{punishment}", entry.punishment + (entry.punishmentDetail.isEmpty() ? "" : " " + entry.punishmentDetail)));
 
         plugin.getLogManager().log("warn", "<yellow>" + executedBy + "</yellow> warned <yellow>" + name + "</yellow> (#" + activeCount + "). Reason: <gray>" + entry.reason + " | Punishment: " + entry.punishment);
     }
 
     private void handleRemove(CommandSender sender, String[] args, String executedBy) {
         if (args.length < 3) {
-            sender.sendMessage(CC.error("Usage: /warn remove <player> <index> [reason]"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.usage-remove"));
             return;
         }
 
@@ -84,27 +84,27 @@ public class WarnCommand implements TabExecutor {
         try {
             index = Integer.parseInt(args[2]);
         } catch (NumberFormatException e) {
-            sender.sendMessage(CC.error("Invalid warning index! Use /warn list <player> to see indices."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.invalid-index"));
             return;
         }
 
         WarnManager.WarnEntry entry = plugin.getWarnManager().getWarn(uuid, index);
         if (entry == null) {
-            sender.sendMessage(CC.error("Warning #" + index + " not found for <yellow>" + name + "</yellow>."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.not-found", "{index}", String.valueOf(index), "{player}", name));
             return;
         }
 
         if (entry.lifted) {
-            sender.sendMessage(CC.error("Warning #" + index + " has already been lifted."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.already-lifted", "{index}", String.valueOf(index)));
             return;
         }
 
         // Show details and ask for confirmation
-        sender.sendMessage(CC.warning("Are you sure you want to lift warning #<yellow>" + index + "</yellow> for <yellow>" + name + "</yellow>?"));
-        sender.sendMessage(CC.line("Reason: <white>" + entry.reason));
-        sender.sendMessage(CC.line("Punishment: <yellow>" + entry.punishment + (entry.punishmentDetail.isEmpty() ? "" : " " + entry.punishmentDetail)));
-        sender.sendMessage(CC.line("Warned by: <white>" + entry.warnedBy));
-        sender.sendMessage(CC.line("Date: <white>" + plugin.getWarnManager().formatDate(entry.timestamp)));
+        sender.sendMessage(plugin.getMessageManager().warning("moderation.warn.lift-confirm", "{index}", String.valueOf(index), "{player}", name));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.warn.lift-reason", "{reason}", entry.reason));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.warn.lift-punishment", "{punishment}", entry.punishment + (entry.punishmentDetail.isEmpty() ? "" : " " + entry.punishmentDetail)));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.warn.lift-by", "{staff}", entry.warnedBy));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.warn.lift-date", "{date}", plugin.getWarnManager().formatDate(entry.timestamp)));
 
         String liftReason = args.length >= 4 ? String.join(" ", Arrays.copyOfRange(args, 3, args.length)) : null;
 
@@ -129,19 +129,19 @@ public class WarnCommand implements TabExecutor {
             // Console - just do it
             String finalReason = liftReason != null ? liftReason : "Lifted by console";
             plugin.getWarnManager().liftWarn(uuid, index, executedBy, finalReason);
-            sender.sendMessage(CC.success("Warning #" + index + " for <yellow>" + name + "</yellow> has been lifted."));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.warn.lifted", "{index}", String.valueOf(index), "{player}", name));
             plugin.getLogManager().log("warn", "<yellow>" + executedBy + "</yellow> lifted warning #" + index + " for <yellow>" + name + "</yellow>. Reason: " + finalReason);
         }
     }
 
     private void handleConfirm(CommandSender sender, String executedBy) {
         if (!(sender instanceof Player p)) {
-            sender.sendMessage(CC.error("Only players can confirm."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.only-players-confirm"));
             return;
         }
         long[] data = pendingRemovals.remove(p.getUniqueId());
         if (data == null || System.currentTimeMillis() > data[3]) {
-            sender.sendMessage(CC.error("No pending warning removal to confirm."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.no-pending-removal"));
             return;
         }
 
@@ -161,10 +161,10 @@ public class WarnCommand implements TabExecutor {
         }
 
         if (plugin.getWarnManager().liftWarn(targetUuid, index, executedBy, liftReason)) {
-            sender.sendMessage(CC.success("Warning #" + index + " for <yellow>" + name + "</yellow> has been lifted."));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.warn.lifted", "{index}", String.valueOf(index), "{player}", name));
             plugin.getLogManager().log("warn", "<yellow>" + executedBy + "</yellow> lifted warning #" + index + " for <yellow>" + name + "</yellow>. Reason: " + liftReason);
         } else {
-            sender.sendMessage(CC.error("Failed to lift warning. It may have already been lifted."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.lift-failed"));
         }
     }
 
@@ -173,12 +173,12 @@ public class WarnCommand implements TabExecutor {
             pendingRemovals.remove(p.getUniqueId());
             p.removeMetadata("warnLiftReason", plugin);
         }
-        sender.sendMessage(CC.info("Warning removal cancelled."));
+        sender.sendMessage(plugin.getMessageManager().info("moderation.warn.removal-cancelled"));
     }
 
     private void handleList(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(CC.error("Usage: /warn list <player>"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.warn.usage-list"));
             return;
         }
 
@@ -189,12 +189,12 @@ public class WarnCommand implements TabExecutor {
 
         List<WarnManager.WarnEntry> warns = plugin.getWarnManager().getWarns(uuid);
         if (warns.isEmpty()) {
-            sender.sendMessage(CC.info("<yellow>" + name + "</yellow> has no warnings."));
+            sender.sendMessage(plugin.getMessageManager().info("moderation.warn.no-warnings", "{player}", name));
             return;
         }
 
         int active = plugin.getWarnManager().getActiveWarnCount(uuid);
-        sender.sendMessage(CC.prefixed("<yellow>" + name + "</yellow>'s Warnings <gray>(" + active + " active, " + warns.size() + " total)"));
+        sender.sendMessage(plugin.getMessageManager().prefixed("moderation.warn.list-title", "{player}", name, "{active}", String.valueOf(active), "{total}", String.valueOf(warns.size())));
 
         for (WarnManager.WarnEntry entry : warns) {
             String status = entry.lifted ? "<red>[LIFTED]</red>" : "<green>[ACTIVE]</green>";

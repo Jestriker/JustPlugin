@@ -26,15 +26,15 @@ public class TempBanCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(CC.error("Usage: /tempban <player> <duration> [reason]"));
-            sender.sendMessage(CC.info("Duration format: 1d2h30m (days, hours, minutes, seconds)"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.tempban.usage"));
+            sender.sendMessage(plugin.getMessageManager().info("moderation.tempban.duration-hint"));
             return true;
         }
 
         String bannedBy = sender instanceof Player ? sender.getName() : "Console";
         long duration = TimeUtil.parseDuration(args[1]);
         if (duration <= 0) {
-            sender.sendMessage(CC.error("Invalid duration! Example: 1d2h30m"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.tempban.invalid-duration"));
             return true;
         }
 
@@ -54,15 +54,15 @@ public class TempBanCommand implements TabExecutor {
         }
 
         if (plugin.getBanManager().isBanned(uuid)) {
-            sender.sendMessage(CC.error("<yellow>" + name + "</yellow> is already banned!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.tempban.already-banned", "{player}", name));
             return true;
         }
 
         plugin.getBanManager().tempBan(uuid, name, reason, bannedBy, duration);
-        sender.sendMessage(CC.success("Temporarily banned <yellow>" + name + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>. Reason: <gray>" + reason));
+        sender.sendMessage(plugin.getMessageManager().success("moderation.tempban.success", "{player}", name, "{duration}", TimeUtil.formatDuration(duration), "{reason}", reason));
 
         // Configurable announcement
-        net.kyori.adventure.text.Component announcement = CC.warning("<yellow>" + name + "</yellow> has been temporarily banned by <yellow>" + bannedBy + "</yellow> for <yellow>" + TimeUtil.formatDuration(duration) + "</yellow>. Reason: <gray>" + reason);
+        net.kyori.adventure.text.Component announcement = plugin.getMessageManager().warning("moderation.tempban.announce", "{player}", name, "{staff}", bannedBy, "{duration}", TimeUtil.formatDuration(duration), "{reason}", reason);
         if (plugin.getConfig().getBoolean("punishment-announcements.tempban", false)) {
             Bukkit.broadcast(announcement);
         } else {

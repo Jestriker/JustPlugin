@@ -24,7 +24,7 @@ public class UnbanIpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /unbanip <ip | player | uuid>"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.unbanip.usage"));
             return true;
         }
 
@@ -41,9 +41,9 @@ public class UnbanIpCommand implements TabExecutor {
 
         if (info == null) {
             if (isIp) {
-                sender.sendMessage(CC.error("IP <yellow>" + input + "</yellow> is not banned!"));
+                sender.sendMessage(plugin.getMessageManager().error("moderation.unbanip.ip-not-banned", "{ip}", input));
             } else {
-                sender.sendMessage(CC.error("No IP ban found for <yellow>" + input + "</yellow>!"));
+                sender.sendMessage(plugin.getMessageManager().error("moderation.unbanip.player-not-banned", "{player}", input));
             }
             return true;
         }
@@ -59,7 +59,7 @@ public class UnbanIpCommand implements TabExecutor {
         // Perform the unban
         boolean success = plugin.getBanManager().unbanIp(ip);
         if (!success) {
-            sender.sendMessage(CC.error("Failed to unban IP <yellow>" + ip + "</yellow>!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.unbanip.failed", "{ip}", ip));
             return true;
         }
 
@@ -67,13 +67,13 @@ public class UnbanIpCommand implements TabExecutor {
         String unbannedBy = sender instanceof org.bukkit.entity.Player ? sender.getName() : "Console";
         plugin.getLogManager().log("moderation", "<yellow>" + unbannedBy + "</yellow> unbanned IP <yellow>" + ip + "</yellow>");
         sender.sendMessage(CC.translate(""));
-        sender.sendMessage(CC.success("<bold>IP Ban Removed</bold>"));
-        sender.sendMessage(CC.line("IP: <yellow>" + ip));
-        sender.sendMessage(CC.line("Reason: <yellow>" + reason));
-        sender.sendMessage(CC.line("Banned by: <yellow>" + bannedBy));
+        sender.sendMessage(plugin.getMessageManager().success("moderation.unbanip.success"));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.unbanip.detail-ip", "{ip}", ip));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.unbanip.detail-reason", "{reason}", reason));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.unbanip.detail-banned-by", "{staff}", bannedBy));
 
         if (!names.isEmpty()) {
-            sender.sendMessage(CC.line("Associated names: <yellow>" + String.join("<dark_gray>, <yellow>", names)));
+            sender.sendMessage(plugin.getMessageManager().line("moderation.unbanip.detail-names", "{names}", String.join("<dark_gray>, <yellow>", names)));
         }
         if (!uuids.isEmpty()) {
             StringBuilder uuidDisplay = new StringBuilder();
@@ -92,11 +92,11 @@ public class UnbanIpCommand implements TabExecutor {
                     uuidDisplay.append(uuidStr);
                 }
             }
-            sender.sendMessage(CC.line("Associated UUIDs: <yellow>" + uuidDisplay));
+            sender.sendMessage(plugin.getMessageManager().line("moderation.unbanip.detail-uuids", "{uuids}", uuidDisplay.toString()));
         }
 
         int totalUnbanned = 1 + uuids.size(); // IP + associated accounts
-        sender.sendMessage(CC.line("Unbanned: <green>" + totalUnbanned + "</green> record" + (totalUnbanned == 1 ? "" : "s") + " <gray>(IP + associated accounts)"));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.unbanip.detail-unbanned", "{count}", String.valueOf(totalUnbanned), "{s}", totalUnbanned == 1 ? "" : "s"));
         sender.sendMessage(CC.translate(""));
         return true;
     }

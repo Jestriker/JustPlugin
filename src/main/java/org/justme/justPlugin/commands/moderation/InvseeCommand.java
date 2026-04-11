@@ -57,7 +57,7 @@ public class InvseeCommand implements TabExecutor, Listener {
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /invsee <player>"));
+            player.sendMessage(plugin.getMessageManager().error("moderation.invsee.usage"));
             return true;
         }
 
@@ -112,7 +112,8 @@ public class InvseeCommand implements TabExecutor, Listener {
         YamlConfiguration data = plugin.getDataManager().getPlayerData(offline.getUniqueId());
 
         if (!data.contains("inventory")) {
-            viewer.sendMessage(CC.error("No saved inventory data found for <yellow>" + name + "</yellow>."));
+            viewer.sendMessage(plugin.getMessageManager().error("moderation.offline.no-snapshot",
+                    "{player}", name));
             return;
         }
 
@@ -157,7 +158,8 @@ public class InvseeCommand implements TabExecutor, Listener {
         offlineSessions.add(viewer.getUniqueId());
 
         viewer.openInventory(gui);
-        viewer.sendMessage(CC.info("Viewing <yellow>" + name + "</yellow>'s saved inventory <gray>(offline, read-only)."));
+        viewer.sendMessage(plugin.getMessageManager().info("moderation.offline.viewing-inventory",
+                "{player}", name));
     }
 
     private void refreshGui(Inventory gui, Player target) {
@@ -256,7 +258,7 @@ public class InvseeCommand implements TabExecutor, Listener {
             };
 
             if (!valid) {
-                viewer.sendMessage(CC.error("That item doesn't go in this armor slot!"));
+                viewer.sendMessage(plugin.getMessageManager().error("moderation.invsee.invalid-armor-slot"));
                 return;
             }
 

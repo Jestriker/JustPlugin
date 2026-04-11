@@ -98,3 +98,10 @@ all-archives-deleted: "Deleted <yellow>{count}</yellow> archived kit(s)."
 
 # Shown when a kit edit/creation is cancelled.
 edit-cancelled: "Kit editing cancelled."
+
+# Shown as header for archived kits listing.
+archived-header: "<yellow>Archived Kits:"
+
+# Shown as header for all kits listing with count.
+# Placeholders: {count} - total kit count
+all-kits-header: "<yellow>All Kits <dark_gray>({count}):"

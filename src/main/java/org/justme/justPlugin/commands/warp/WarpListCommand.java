@@ -24,7 +24,7 @@ public class WarpListCommand implements TabExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         Set<String> names = plugin.getWarpManager().getWarpNames();
         if (names.isEmpty()) {
-            sender.sendMessage(CC.info("No warps available."));
+            sender.sendMessage(plugin.getMessageManager().info("warp.warps.none"));
         } else {
             boolean clickable = plugin.getConfig().getBoolean("clickable-commands.warp-list", true);
             String warpList = names.stream()

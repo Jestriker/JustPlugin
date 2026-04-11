@@ -6,7 +6,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
@@ -27,20 +26,20 @@ public class RankCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
         // Check if ranks system is enabled
         if (!plugin.getCommandSettings().isEnabled("rank")) {
-            player.sendMessage(CC.error("The ranks system is currently disabled."));
+            player.sendMessage(plugin.getMessageManager().error("misc.rank.disabled-msg"));
             return true;
         }
 
         // Check if LuckPerms is available
         if (!plugin.isLuckPermsAvailable()) {
-            player.sendMessage(CC.error("The ranks system requires <yellow>LuckPerms</yellow> to be installed on this server."));
-            player.sendMessage(CC.info("Please ask a server administrator to install LuckPerms."));
+            player.sendMessage(plugin.getMessageManager().error("misc.rank.requires-luckperms"));
+            player.sendMessage(plugin.getMessageManager().info("misc.rank.install-hint"));
             return true;
         }
 

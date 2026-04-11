@@ -41,4 +41,20 @@ smithingtable:
 # === Enchanting Table ===
 enchantingtable:
   opened: ""
+  not-supported: "Enchanting table is not supported via command on this server version."
+
+# === Vault (Player Vaults) ===
+vault:
+  disabled: "Player vaults are disabled on this server."
+  no-permission-others: "You don't have permission to view other players' vaults."
+  player-not-online: "Player <yellow>{player}</yellow> is not online."
+  invalid-number: "Invalid vault number."
+  # Placeholders: {max} - max vault number for the target
+  target-max: "That player only has access to vaults <yellow>1-{max}</yellow>."
+  # Placeholders: {player}, {number} - vault number
+  opening-other: "Opening <yellow>{player}</yellow>'s Vault <yellow>#{number}</yellow>."
+  # Placeholders: {max} - max vault number
+  self-max: "You only have access to vaults <yellow>1-{max}</yellow>."
+  # Placeholders: {number} - vault number
+  opening: "Opening Vault <yellow>#{number}</yellow>."
 

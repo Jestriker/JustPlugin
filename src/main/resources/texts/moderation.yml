@@ -31,42 +31,61 @@ ban:
 
 # === Temp Ban ===
 tempban:
-  success: "Temporarily banned <yellow>{player}</yellow> for <yellow>{duration}</yellow>. <gray>Reason: {reason}"
+  success: "Temporarily banned <yellow>{player}</yellow> for <yellow>{duration}</yellow>. Reason: <gray>{reason}"
   already-banned: "<yellow>{player}</yellow> is already banned!"
   kick-message: "\n<red><bold>You have been temporarily banned!</bold></red>\n\n<gray>Reason: <white>{reason}\n<gray>Duration: <yellow>{duration}\n<gray>Appeal at: <yellow>{appeal}"
   usage: "Usage: /tempban <player> <duration> [reason]"
-  invalid-duration: "Invalid duration! Examples: 5m, 1h, 1d, 7d, 30d"
-  announce: "<red>[TempBan]</red> <yellow>{player}</yellow> was temp-banned for <yellow>{duration}</yellow> by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+  duration-hint: "Duration format: 1d2h30m (days, hours, minutes, seconds)"
+  invalid-duration: "Invalid duration! Example: 1d2h30m"
+  announce: "<red>[TempBan]</red> <yellow>{player}</yellow> has been temporarily banned by <yellow>{staff}</yellow> for <yellow>{duration}</yellow>. Reason: <gray>{reason}"
 
 # === Ban IP ===
 banip:
-  success: "IP banned <yellow>{ip}</yellow>. <gray>Reason: {reason}"
-  already-banned: "IP <yellow>{ip}</yellow> is already banned!"
+  success: "IP Banned <yellow>{ip}</yellow>. Reason: <gray>{reason}"
+  success-resolved: "IP Banned <yellow>{ip}</yellow> (resolved from <yellow>{player}</yellow>). Reason: <gray>{reason}"
+  already-banned: "IP <yellow>{ip}</yellow> is already IP banned!"
+  no-ip-found: "Could not find an IP for <yellow>{player}</yellow>. They may have never joined."
   usage: "Usage: /banip <ip | player> [reason]"
-  announce: "<red>[IP Ban]</red> <yellow>{ip}</yellow> was banned by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+  announce: "<red>[IP Ban]</red> IP <yellow>{ip}</yellow> has been IP banned by <yellow>{staff}</yellow>. Reason: <gray>{reason}"
 
 # === Temp Ban IP ===
 tempbanip:
-  success: "Temporarily IP banned <yellow>{ip}</yellow> for <yellow>{duration}</yellow>. <gray>Reason: {reason}"
-  already-banned: "IP <yellow>{ip}</yellow> is already banned!"
+  success: "Temporarily IP banned <yellow>{ip}</yellow> for <yellow>{duration}</yellow>."
+  success-resolved: "Temporarily IP banned <yellow>{ip}</yellow> (resolved from <yellow>{player}</yellow>) for <yellow>{duration}</yellow>."
+  already-banned: "IP <yellow>{ip}</yellow> is already IP banned!"
+  no-ip-found: "Could not find an IP for <yellow>{player}</yellow>. They may have never joined."
+  invalid-duration: "Invalid duration!"
   usage: "Usage: /tempbanip <ip | player> <duration> [reason]"
-  announce: "<red>[Temp IP Ban]</red> <yellow>{ip}</yellow> was temp-banned for <yellow>{duration}</yellow> by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+  announce: "<red>[Temp IP Ban]</red> IP <yellow>{ip}</yellow> has been temporarily IP banned by <yellow>{staff}</yellow> for <yellow>{duration}</yellow>."
 
 # === Unban ===
 unban:
   success: "Unbanned <yellow>{player}</yellow>."
   not-banned: "<yellow>{player}</yellow> is not banned!"
+  ip-ban-warning: "This player also has an <red>IP ban</red> on <yellow>{ip}</yellow>."
+  ip-ban-accounts: "Associated accounts: <yellow>{names}</yellow>"
+  ip-ban-hint: "Use <yellow>/unbanip {ip}</yellow> to fully remove the IP ban."
   usage: "Usage: /unban <player | uuid>"
 
 # === Unban IP ===
 unbanip:
-  success: "Unbanned IP <yellow>{ip}</yellow>."
-  not-banned: "IP <yellow>{ip}</yellow> is not banned!"
+  success: "<bold>IP Ban Removed</bold>"
+  ip-not-banned: "IP <yellow>{ip}</yellow> is not banned!"
+  player-not-banned: "No IP ban found for <yellow>{player}</yellow>!"
+  failed: "Failed to unban IP <yellow>{ip}</yellow>!"
+  detail-ip: "IP: <yellow>{ip}"
+  detail-reason: "Reason: <yellow>{reason}"
+  detail-banned-by: "Banned by: <yellow>{staff}"
+  detail-names: "Associated names: <yellow>{names}"
+  detail-uuids: "Associated UUIDs: <yellow>{uuids}"
+  detail-unbanned: "Unbanned: <green>{count}</green> record{s} <gray>(IP + associated accounts)"
   usage: "Usage: /unbanip <ip | player | uuid>"
 
 # === Mute ===
 mute:
   success: "Muted <yellow>{player}</yellow>. <gray>Reason: {reason}"
+  success-permanent: "Permanently muted <yellow>{player}</yellow>."
+  reason-line: "Reason: <white>{reason}"
   already-muted: "<yellow>{player}</yellow> is already muted!"
   usage: "Usage: /mute <player> [reason]"
   # Message shown to the muted player when they try to chat
@@ -75,11 +94,13 @@ mute:
 
 # === Temp Mute ===
 tempmute:
-  success: "Temporarily muted <yellow>{player}</yellow> for <yellow>{duration}</yellow>. <gray>Reason: {reason}"
+  success: "Temporarily muted <yellow>{player}</yellow> for <yellow>{duration}</yellow>."
+  success-reason: "Reason: <white>{reason}"
   already-muted: "<yellow>{player}</yellow> is already muted!"
+  invalid-duration: "Invalid duration! Examples: 5m, 1h, 1d, 1w"
   usage: "Usage: /tempmute <player> <duration> [reason]"
   blocked: "You are muted! <gray>Expires in {duration}. Reason: {reason}"
-  announce: "<red>[TempMute]</red> <yellow>{player}</yellow> was temp-muted for <yellow>{duration}</yellow> by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
+  announce: "<red>[TempMute]</red> <yellow>{player}</yellow> has been temporarily muted by <yellow>{staff}</yellow> for <yellow>{duration}</yellow>. Reason: <gray>{reason}"
 
 # === Unmute ===
 unmute:
@@ -90,11 +111,30 @@ unmute:
 # === Warn ===
 warn:
   added: "Warned <yellow>{player}</yellow>. <gray>Reason: {reason} <dark_gray>(Warning #{count})"
+  added-reason: "Reason: <white>{reason}"
+  added-punishment: "Punishment: <yellow>{punishment}"
   removed: "Removed warning #{index} from <yellow>{player}</yellow>."
   list-header: "<gold><bold>Warnings for {player}</bold></gold> <gray>({count} total):"
   list-entry: " <yellow>#{index}</yellow> <gray>- {reason} <dark_gray>(by {staff})"
   no-warnings: "<yellow>{player}</yellow> has no warnings."
   usage: "Usage: /warn <add | remove | list> <player> [reason | index]"
+  usage-add: "Usage: /warn add <player> [reason]"
+  usage-remove: "Usage: /warn remove <player> <index> [reason]"
+  usage-list: "Usage: /warn list <player>"
+  invalid-index: "Invalid warning index! Use /warn list <player> to see indices."
+  not-found: "Warning #{index} not found for <yellow>{player}</yellow>."
+  already-lifted: "Warning #{index} has already been lifted."
+  lift-confirm: "Are you sure you want to lift warning #<yellow>{index}</yellow> for <yellow>{player}</yellow>?"
+  lift-reason: "Reason: <white>{reason}"
+  lift-punishment: "Punishment: <yellow>{punishment}"
+  lift-by: "Warned by: <white>{staff}"
+  lift-date: "Date: <white>{date}"
+  lifted: "Warning #{index} for <yellow>{player}</yellow> has been lifted."
+  lift-failed: "Failed to lift warning. It may have already been lifted."
+  only-players-confirm: "Only players can confirm."
+  no-pending-removal: "No pending warning removal to confirm."
+  removal-cancelled: "Warning removal cancelled."
+  list-title: "<yellow>{player}</yellow>'s Warnings <gray>({active} active, {total} total)"
   # Confirmation prompt for warn punishments
   confirm-prompt: "Warning #{count} will result in: <yellow>{punishment}</yellow>. Type <yellow>/warn confirm</yellow> to proceed or <yellow>/warn cancel</yellow> to abort."
   confirmed: "Warning confirmed and applied."
@@ -105,6 +145,7 @@ warn:
 # === Kick ===
 kick:
   success: "Kicked <yellow>{player}</yellow>. <gray>Reason: {reason}"
+  player-not-found: "Player <yellow>{player}</yellow> not found or not online!"
   kick-message: "\n<red><bold>You have been kicked!</bold></red>\n\n<gray>Reason: <white>{reason}"
   usage: "Usage: /kick <player> [reason]"
   announce: "<red>[Kick]</red> <yellow>{player}</yellow> was kicked by <yellow>{staff}</yellow>. <gray>Reason: {reason}"
@@ -115,6 +156,8 @@ vanish:
   disabled-self: "You are now <red>visible</red>."
   enabled-other: "<yellow>{player}</yellow> is now <green>vanished</green>."
   disabled-other: "<yellow>{player}</yellow> is now <red>visible</red>."
+  no-permission-others: "You don't have permission to vanish other players."
+  toggled-other: "<yellow>{player}</yellow> has been {status}."
   usage: "Usage: /vanish [player]"
 
 # === Super Vanish ===
@@ -123,52 +166,79 @@ supervanish:
   disabled-self: "You have exited <red>super vanish</red>."
   enabled-other: "<yellow>{player}</yellow> is now in <green>super vanish</green>."
   disabled-other: "<yellow>{player}</yellow> has exited <red>super vanish</red>."
+  no-permission-others: "You don't have permission to super-vanish other players."
+  toggled-other: "<yellow>{player}</yellow> has been {status}."
   usage: "Usage: /supervanish [player]"
 
 # === Sudo ===
 sudo:
-  success: "Forced <yellow>{player}</yellow> to run: <gray>{command}"
+  success-command: "Forced <yellow>{player}</yellow> to run: <gray>{command}"
+  success-chat: "Forced <yellow>{player}</yellow> to say: <gray>{message}"
+  cannot-self: "You cannot sudo yourself."
+  cannot-op: "You cannot sudo an operator."
+  blocked: "That command is blocked from sudo."
   usage: "Usage: /sudo <player> <command | message>"
 
 # === Invsee ===
 invsee:
   opened: "Viewing <yellow>{player}</yellow>'s inventory."
   usage: "Usage: /invsee <player>"
+  invalid-armor-slot: "That item doesn't go in this armor slot!"
 
 # === Ender Chest See ===
 echestsee:
   opened: "Viewing <yellow>{player}</yellow>'s ender chest."
   usage: "Usage: /echestsee <player>"
+  closed-offline: "Ender chest view closed - player logged off."
 
 # === Death Items ===
 deathitems:
   opened: "Viewing <yellow>{player}</yellow>'s death items."
   no-items: "<yellow>{player}</yellow> has no saved death items."
+  no-items-self: "You have no recorded death inventory. You either haven't died, or your items were kept on death."
+  no-items-other: "No recorded death inventory for <yellow>{player}</yellow>."
+  no-data: "No death inventory data available."
+  no-permission-others: "You don't have permission to view other players' death items."
   restored: "Restored <yellow>{player}</yellow>'s death items."
   usage: "Usage: /deathitems [player]"
 
 # === OP List ===
 oplist:
-  header: "<gold><bold>Server Operators</bold></gold>"
+  header: "<yellow>Server Operators <gray>({count})"
   entry: " <gray>- <yellow>{player}"
-  empty: "No operators found."
+  empty: "There are no operators on this server."
 
 # === Ban List ===
 banlist:
-  header: "<gold><bold>Ban List</bold></gold> <gray>(Page {page}/{max_page}):"
+  header: "<yellow>Ban List <gray>(Page {page} / {max_page}, {count} total)"
+  ip-header: "<yellow>IP Ban List <gray>(Page {page} / {max_page}, {count} total)"
   entry: " <yellow>{player}</yellow> <gray>- {reason} <dark_gray>(by {staff})"
-  empty: "No bans found."
+  empty: "There are no banned players."
+  ip-empty: "There are no IP-banned players."
+  invalid-page: "Invalid page number."
   usage: "Usage: /banlist [page]"
 
 # === Set Logs Webhook ===
 setlogswebhook:
   success: "Discord webhook URL has been set!"
-  disabled: "Discord webhook logging has been disabled."
-  usage: "Usage: /setlogswebhook <url | disable>"
-  invalid-url: "Invalid webhook URL! Must be a Discord webhook URL."
+  disabled: "Discord webhook logging has been <red>disabled</red>."
+  usage: "Usage: /setlogswebhook <url | disable | confirm | cancel | tryagain>"
+  invalid-url: "Invalid webhook URL! Must be a Discord webhook URL starting with <yellow>https://discord.com/api/webhooks/</yellow>"
+  testing: "Sending test webhook to the provided URL..."
+  testing-hint: "This may take a few seconds."
+  test-success: "Test webhook sent successfully! <gray>(HTTP {status})"
+  test-success-hint: "Check your Discord channel for the test message."
+  test-failed: "Failed to send test webhook! <gray>(HTTP {status})"
+  test-failed-hint: "Please check the URL and try again."
   confirm-prompt: "Are you sure? Type <yellow>/setlogswebhook confirm</yellow> to apply."
-  confirm-success: "Webhook confirmed and saved."
+  confirm-success: "Discord webhook logging has been <green>enabled</green> and configured!"
+  confirm-success-hint: "All logs will now be sent to the configured Discord channel."
+  no-pending: "No pending webhook URL to confirm."
   cancel: "Webhook setup cancelled."
+  retry-cooldown: "Please wait <yellow>{time}s</yellow> before trying again."
+  no-pending-url: "No pending webhook URL. Use /setlogswebhook <url> first."
+  retrying: "Retrying test webhook... This may take a few seconds."
+  retry-failed: "Failed again! <gray>(HTTP {status})"
 
 # === Jail ===
 jail:
@@ -218,13 +288,34 @@ jailinfo:
   not-jailed: "<yellow>{player}</yellow> is not jailed."
   usage: "Usage: /jailinfo <player>"
 
+# === Skin Ban ===
+skinban:
+  success: "Banned skin name <yellow>{name}</yellow>. Players can no longer use this skin."
+  already-banned: "Skin name <yellow>{name}</yellow> is already banned."
+  list-header: "Banned skins <dark_gray>({count}):"
+  list-entry: "<white>{name}"
+  list-empty: "No skin names are currently banned."
+  list-usage: "Usage: <yellow>/skinban <name></yellow> to ban a skin."
+
+# === Skin Unban ===
+skinunban:
+  success: "Unbanned skin name <yellow>{name}</yellow>. Players can now use this skin."
+  not-banned: "Skin name <yellow>{name}</yellow> is not banned."
+  usage: "Usage: <yellow>/skinunban <name>"
+
 # === Offline Player Commands ===
 offline:
   tpoff-success: "Teleporting to <yellow>{player}</yellow>'s last location."
   tpoff-no-data: "No saved location for <yellow>{player}</yellow>."
+  tpoff-usage: "Usage: /tpoff <player>"
+  tpoff-world-not-loaded: "World '<yellow>{world}</yellow>' is not loaded."
   getposoff-location: "<gold>{player}'s last location:</gold> <gray>{world} {x} {y} {z}"
+  getposoff-usage: "Usage: /getposoff <player>"
+  getdeathposoff-usage: "Usage: /getdeathposoff <player>"
   no-data: "No data found for <yellow>{player}</yellow>."
   invseeoff-title: "OFFLINE - {player}'s Inventory"
   echestseeoff-title: "OFFLINE - {player}'s Ender Chest"
   no-snapshot: "No inventory data for <yellow>{player}</yellow>."
+  viewing-inventory: "Viewing <yellow>{player}</yellow>'s saved inventory <gray>(offline, read-only)."
+  viewing-echest: "Viewing <yellow>{player}</yellow>'s saved ender chest <gray>(offline, read-only)."
 

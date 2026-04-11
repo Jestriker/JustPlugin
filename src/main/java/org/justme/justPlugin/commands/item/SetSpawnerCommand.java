@@ -32,7 +32,7 @@ public class SetSpawnerCommand implements TabExecutor {
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /setspawner <entity_type>"));
+            player.sendMessage(plugin.getMessageManager().error("misc.setspawner.usage"));
             return true;
         }
 
@@ -46,14 +46,15 @@ public class SetSpawnerCommand implements TabExecutor {
         try {
             type = EntityType.valueOf(args[0].toUpperCase());
         } catch (IllegalArgumentException e) {
-            player.sendMessage(CC.error("Invalid entity type! Example: ZOMBIE, SKELETON, CREEPER"));
+            player.sendMessage(plugin.getMessageManager().error("misc.setspawner.invalid-type"));
             return true;
         }
 
         CreatureSpawner spawner = (CreatureSpawner) target.getState();
         spawner.setSpawnedType(type);
         spawner.update();
-        player.sendMessage(CC.success("Spawner set to <yellow>" + type.name().toLowerCase() + "</yellow>."));
+        player.sendMessage(plugin.getMessageManager().success("misc.setspawner.success",
+                "{type}", type.name().toLowerCase()));
         plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> set a spawner to <yellow>" + type.name().toLowerCase() + "</yellow> at <yellow>" + target.getX() + ", " + target.getY() + ", " + target.getZ() + "</yellow>");
         return true;
     }

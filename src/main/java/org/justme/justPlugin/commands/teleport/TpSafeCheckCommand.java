@@ -30,18 +30,18 @@ public class TpSafeCheckCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
         if (args.length < 1) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.safe-teleport.usage")));
+            player.sendMessage(plugin.getMessageManager().error("teleport.safe-teleport.usage"));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.safe-teleport.player-not-found")));
+            player.sendMessage(plugin.getMessageManager().error("teleport.safe-teleport.player-not-found"));
             return true;
         }
 
@@ -51,16 +51,16 @@ public class TpSafeCheckCommand implements TabExecutor {
 
         if (!safe || destFlying) {
             // Destination is unsafe - warn, offer options based on permissions
-            player.sendMessage(CC.warning("⚠ <yellow>" + target.getName() + "</yellow>'s current location is unsafe!"));
+            player.sendMessage(plugin.getMessageManager().warning("teleport.safe-teleport.unsafe-warning", "{player}", target.getName()));
             if (destFlying) {
-                player.sendMessage(CC.line("<gray>The player is currently flying."));
+                player.sendMessage(plugin.getMessageManager().info("teleport.safe-teleport.flying-warning"));
             }
 
             boolean hasGm = player.hasPermission("justplugin.gamemode");
             boolean hasGod = player.hasPermission("justplugin.god");
 
             if (hasGm || hasGod) {
-                player.sendMessage(CC.info("Consider enabling protection before teleporting:"));
+                player.sendMessage(plugin.getMessageManager().info("teleport.safe-teleport.protection-hint"));
             }
 
             Component buttons = CC.translate("  ");
@@ -76,7 +76,7 @@ public class TpSafeCheckCommand implements TabExecutor {
             // Safe - teleport directly
             plugin.getTeleportManager().setBackLocation(player.getUniqueId(), player.getLocation());
             player.teleportAsync(destLoc);
-            player.sendMessage(CC.success("Teleported to <yellow>" + target.getName() + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().success("teleport.safe-teleport.teleported-to-player", "{player}", target.getName()));
         }
         return true;
     }

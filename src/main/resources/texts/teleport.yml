@@ -99,6 +99,7 @@ safe-teleport:
   teleported-to-player: "Teleported to <yellow>{player}</yellow>."
   player-not-found: "Player not found or is no longer online!"
   usage: "Usage: /tpsafecheck <player>"
+  flying-warning: "The player is currently flying."
 
 # === Teleport Countdown ===
 countdown:

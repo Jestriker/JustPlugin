@@ -41,7 +41,7 @@ public class EchestSeeCommand implements TabExecutor, Listener {
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /echestsee <player>"));
+            player.sendMessage(plugin.getMessageManager().error("moderation.echestsee.usage"));
             return true;
         }
         Player target = Bukkit.getPlayer(args[0]);
@@ -54,7 +54,8 @@ public class EchestSeeCommand implements TabExecutor, Listener {
         Inventory echest = target.getEnderChest();
         openSessions.put(player.getUniqueId(), target.getUniqueId());
         player.openInventory(echest);
-        player.sendMessage(CC.success("Viewing <yellow>" + target.getName() + "</yellow>'s ender chest."));
+        player.sendMessage(plugin.getMessageManager().success("moderation.echestsee.opened",
+                "{player}", target.getName()));
         plugin.getLogManager().log("moderation", "<yellow>" + player.getName() + "</yellow> opened <yellow>" + target.getName() + "</yellow>'s ender chest");
 
         // Start periodic refresh task (every 20 ticks = 1 second)
@@ -66,7 +67,7 @@ public class EchestSeeCommand implements TabExecutor, Listener {
                 cancelSession(player.getUniqueId());
                 if (player.isOnline()) {
                     player.closeInventory();
-                    player.sendMessage(CC.warning("Ender chest view closed - player logged off."));
+                    player.sendMessage(plugin.getMessageManager().warning("moderation.echestsee.closed-offline"));
                 }
             }
         }, 20L, 20L);

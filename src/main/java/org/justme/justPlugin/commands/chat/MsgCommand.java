@@ -25,30 +25,30 @@ public class MsgCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 2) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("chat.msg.usage")));
+            player.sendMessage(plugin.getMessageManager().error("chat.msg.usage"));
             return true;
         }
 
         // Mute check
         if (plugin.getMuteManager().isMuted(player.getUniqueId())) {
-            player.sendMessage(CC.error("You are muted and cannot send private messages."));
+            player.sendMessage(plugin.getMessageManager().error("chat.msg.muted"));
             return true;
         }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null || (plugin.getVanishManager().isVanished(target.getUniqueId()) && !player.hasPermission("justplugin.vanish.see"))) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+            player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
             return true;
         }
         if (target.equals(player)) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("chat.msg.self-message")));
+            player.sendMessage(plugin.getMessageManager().error("chat.msg.self-message"));
             return true;
         }
         if (plugin.getIgnoreManager().isIgnoring(target.getUniqueId(), player.getUniqueId())) {
-            player.sendMessage(CC.error("This player is ignoring you."));
+            player.sendMessage(plugin.getMessageManager().error("chat.msg.ignored"));
             return true;
         }
         String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));

@@ -27,7 +27,7 @@ public class SkullCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         String targetName = args.length >= 1 ? args[0] : player.getName();
@@ -37,7 +37,7 @@ public class SkullCommand implements TabExecutor {
         meta.setOwningPlayer(Bukkit.getOfflinePlayer(targetName));
         skull.setItemMeta(meta);
         player.getInventory().addItem(skull);
-        player.sendMessage(CC.success("Given you <yellow>" + targetName + "</yellow>'s skull."));
+        player.sendMessage(plugin.getMessageManager().success("player.skull.success", "{player}", targetName));
         return true;
     }
 

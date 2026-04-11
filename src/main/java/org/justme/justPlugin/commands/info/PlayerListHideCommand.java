@@ -32,7 +32,7 @@ public class PlayerListHideCommand implements TabExecutor {
         // Targeting another player
         if (args.length >= 1) {
             if (!player.hasPermission("justplugin.playerlist.hide.others")) {
-                player.sendMessage(CC.error("You don't have permission to hide other players from the player list."));
+                player.sendMessage(plugin.getMessageManager().error("info.playerlisthide.no-permission-others"));
                 return true;
             }
 
@@ -46,7 +46,8 @@ public class PlayerListHideCommand implements TabExecutor {
                 @SuppressWarnings("deprecation")
                 OfflinePlayer offP = Bukkit.getOfflinePlayer(args[0]);
                 if (!offP.hasPlayedBefore()) {
-                    player.sendMessage(CC.error("Player <yellow>" + args[0] + "</yellow> has never joined the server."));
+                    player.sendMessage(plugin.getMessageManager().error("info.playerlisthide.never-joined",
+                            "{player}", args[0]));
                     return true;
                 }
                 targetUuid = offP.getUniqueId();
@@ -56,9 +57,21 @@ public class PlayerListHideCommand implements TabExecutor {
             plugin.getVanishManager().togglePlayerListHidden(targetUuid);
             boolean hidden = plugin.getVanishManager().isPlayerListHidden(targetUuid);
 
-            player.sendMessage(CC.success("<yellow>" + targetName + "</yellow> is now " + (hidden ? "<red>hidden" : "<green>visible") + " on the player list."));
+            if (hidden) {
+                player.sendMessage(plugin.getMessageManager().success("info.playerlisthide.hidden-other",
+                        "{player}", targetName));
+            } else {
+                player.sendMessage(plugin.getMessageManager().success("info.playerlisthide.visible-other",
+                        "{player}", targetName));
+            }
             if (target != null && !target.equals(player)) {
-                target.sendMessage(CC.info("You have been " + (hidden ? "<red>hidden from" : "<green>made visible on") + " the player list by <yellow>" + player.getName() + "</yellow>."));
+                if (hidden) {
+                    target.sendMessage(plugin.getMessageManager().info("info.playerlisthide.target-notified-hidden",
+                            "{staff}", player.getName()));
+                } else {
+                    target.sendMessage(plugin.getMessageManager().info("info.playerlisthide.target-notified-visible",
+                            "{staff}", player.getName()));
+                }
             }
 
             // Log and notify
@@ -67,7 +80,13 @@ public class PlayerListHideCommand implements TabExecutor {
             // Notify players with notification permission
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.hasPermission("justplugin.playerlist.hide.notify") && !p.equals(player)) {
-                    p.sendMessage(CC.info("<yellow>" + player.getName() + "</yellow> " + (hidden ? "hid" : "unhid") + " <yellow>" + targetName + "</yellow> from the player list."));
+                    if (hidden) {
+                        p.sendMessage(plugin.getMessageManager().info("info.playerlisthide.notify-hidden",
+                                "{staff}", player.getName(), "{player}", targetName));
+                    } else {
+                        p.sendMessage(plugin.getMessageManager().info("info.playerlisthide.notify-visible",
+                                "{staff}", player.getName(), "{player}", targetName));
+                    }
                 }
             }
             return true;
@@ -77,7 +96,11 @@ public class PlayerListHideCommand implements TabExecutor {
         plugin.getVanishManager().togglePlayerListHidden(player.getUniqueId());
         boolean hidden = plugin.getVanishManager().isPlayerListHidden(player.getUniqueId());
 
-        player.sendMessage(CC.success("You are now " + (hidden ? "<red>hidden from" : "<green>visible on") + " the player list."));
+        if (hidden) {
+            player.sendMessage(plugin.getMessageManager().success("info.playerlisthide.hidden-self"));
+        } else {
+            player.sendMessage(plugin.getMessageManager().success("info.playerlisthide.visible-self"));
+        }
         plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> " + (hidden ? "hid" : "unhid") + " themselves from the player list");
         return true;
     }

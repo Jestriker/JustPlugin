@@ -24,10 +24,12 @@ create:
 
 # === Disband ===
 disband:
-  success: "Team <yellow>{team}</yellow> has been disbanded."
+  success: "Team disbanded."
   not-owner: "Only the team owner can disband the team!"
   not-in-team: "You are not in a team!"
   confirm-prompt: "Are you sure? Type <yellow>/team disband confirm</yellow> to disband."
+  not-leader: "Only team leaders can disband!"
+  team-disbanded: "Your team has been disbanded!"
 
 # === Invite ===
 invite:
@@ -38,79 +40,122 @@ invite:
   already-invited: "<yellow>{player}</yellow> has already been invited!"
   not-in-team: "You are not in a team!"
   usage: "Usage: /team invite <player>"
+  not-leader: "Only team leaders can invite!"
+  target-already-in-team: "That player is already in a team!"
 
 # === Join ===
 join:
   success: "You joined team <yellow>{team}</yellow>!"
   team-notify: "<yellow>{player}</yellow> joined the team!"
-  no-invite: "You have no pending invite from that team."
+  no-invite: "You don't have an invite to that team!"
   already-in-team: "You are already in a team! Leave first."
   usage: "Usage: /team join <name>"
+  failed: "Could not join that team!"
 
 # === Leave ===
 leave:
-  success: "You left team <yellow>{team}</yellow>."
+  success: "You left the team."
   team-notify: "<yellow>{player}</yellow> left the team."
   not-in-team: "You are not in a team!"
   owner-cannot-leave: "You are the team owner! Use <yellow>/team disband</yellow> or promote someone first."
+  failed: "Could not leave the team!"
+  disbanded: "You left the team. The team was disbanded because no leaders remain."
 
 # === Kick ===
 kick:
   success: "Kicked <yellow>{player}</yellow> from the team."
-  kicked-notify: "You have been kicked from team <yellow>{team}</yellow>."
-  team-notify: "<yellow>{player}</yellow> was kicked from the team by <yellow>{sender}</yellow>."
+  kicked-notify: "You have been kicked from the team!"
+  team-notify: "<yellow>{player}</yellow> was kicked from the team."
   not-in-team: "You are not in a team!"
   not-owner: "Only the team owner can kick members!"
-  player-not-member: "<yellow>{player}</yellow> is not in your team!"
+  player-not-member: "That player is not in your team!"
   cannot-kick-self: "You can't kick yourself! Use <yellow>/team leave</yellow>."
   usage: "Usage: /team kick <player>"
+  not-leader: "Only team leaders can kick!"
+  cannot-kick-leader: "You cannot kick a team leader. Demote them first."
+  failed: "Could not kick that player!"
 
 # === Promote ===
 promote:
-  success: "Promoted <yellow>{player}</yellow> to team owner."
-  promoted-notify: "You have been promoted to team owner of <yellow>{team}</yellow>!"
+  success: "Promoted <yellow>{player}</yellow> to team leader!"
+  promoted-notify: "You have been promoted to <gold>team leader</gold>!"
+  team-notify: "<yellow>{player}</yellow> was promoted to team leader!"
   not-owner: "Only the team owner can promote members!"
+  not-leader: "Only team leaders can promote members!"
+  not-in-team: "That player is not in your team!"
+  already-leader: "<yellow>{player}</yellow> is already a team leader!"
+  team-not-found: "Team not found!"
   usage: "Usage: /team promote <player>"
 
 # === Demote ===
 demote:
-  success: "Demoted <yellow>{player}</yellow>."
+  success: "Demoted <yellow>{player}</yellow> to member."
+  demoted-notify: "You have been demoted to regular member."
+  team-notify: "<yellow>{player}</yellow> was demoted to member."
   not-owner: "Only the team owner can demote members!"
+  not-leader: "Only team leaders can demote!"
+  cannot-demote-self: "You cannot demote yourself! Use <yellow>/team leave</yellow> instead."
+  not-in-team: "That player is not in your team!"
+  already-member: "<yellow>{player}</yellow> is already a regular member and cannot be demoted further."
+  disbanded: "The team was disbanded because there are no remaining leaders."
+  team-not-found: "Team not found!"
   usage: "Usage: /team demote <player>"
 
 # === Set Home ===
 sethome:
-  success: "Team home set!"
+  success: "Team home has been set at your current location!"
   not-in-team: "You are not in a team!"
+  not-leader: "Only team leaders can set the team home!"
+  team-notify: "<yellow>{player}</yellow> set the team home."
 
 # === Delete Home ===
 delhome:
-  success: "Team home deleted."
-  not-set: "Your team doesn't have a home set."
+  success: "Team home has been deleted."
+  not-set: "Your team does not have a home set!"
   not-in-team: "You are not in a team!"
+  not-leader: "Only team leaders can delete the team home!"
+  team-notify: "<yellow>{player}</yellow> deleted the team home."
 
 # === Home ===
 home:
   teleporting: "Teleporting to team <yellow>{team}</yellow>'s home."
-  not-set: "Your team doesn't have a home set."
+  not-set: "Your team does not have a home set!"
   not-in-team: "You are not in a team!"
+  sethome-hint: "Use <yellow>/team sethome</yellow> to set one."
 
 # === Info ===
 info:
   header: "<gold><bold>Team: {team}</bold></gold>"
+  leaders: "  Leaders: <yellow>{players}"
+  members-header: "  Members ({count}):"
+  member-entry: "    <gray>- <yellow>{player} {status}{role}"
+  member-online: "<green>Online"
+  member-offline: "<red>Offline"
+  member-role-leader: " <gold>[Leader]"
+  home-location: "  Home: <yellow>{x}, {y}, {z} <gray>({world})"
   owner: "Owner: <yellow>{player}</yellow>"
   members: "Members ({count}): <yellow>{members}"
   has-home: "Home: <green>Set"
   no-home: "Home: <red>Not set"
+  not-in-team: "You are not in a team! Specify a team name."
+  team-not-found: "Team not found!"
 
 # === List ===
 list:
-  header: "<gold><bold>Teams</bold></gold> <gray>({count}):"
+  header: "<gold>Teams:</gold> {teams}"
   entry: " <yellow>{team}</yellow> <gray>- {count} members"
   empty: "No teams exist."
+  no-permission: "You don't have permission to list all teams."
+
+# === Chat ===
+chat:
+  usage: "Usage: /teammsg <message>"
+
+# === Help ===
+help:
+  header: "<gold><bold>Team Commands:</bold></gold>"
 
 # === General ===
 general:
   not-in-team: "You are not in a team!"
   usage: "Usage: /team <create|disband|invite|join|leave|kick|promote|demote|sethome|delhome|home|info|list>"
-

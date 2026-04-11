@@ -30,12 +30,13 @@ public class TimeCommand implements TabExecutor {
         }
         if (args.length < 1) {
             long ticks = player.getWorld().getTime();
-            player.sendMessage(CC.info("Current game time: <yellow>" + TimeUtil.getGameTime(ticks) + " <gray>(tick " + ticks + ")"));
+            player.sendMessage(plugin.getMessageManager().info("world.time.query",
+                    "{time}", TimeUtil.getGameTime(ticks), "{ticks}", String.valueOf(ticks)));
             return true;
         }
         if (args.length < 2 && !args[0].equalsIgnoreCase("query")) {
-            player.sendMessage(CC.error("Usage: /time <set | add> <value>"));
-            player.sendMessage(CC.info("Values: day, night, noon, midnight, sunrise, sunset, or tick number"));
+            player.sendMessage(plugin.getMessageManager().error("world.time.usage"));
+            player.sendMessage(plugin.getMessageManager().info("world.time.values-hint"));
             return true;
         }
 
@@ -43,28 +44,31 @@ public class TimeCommand implements TabExecutor {
             case "set" -> {
                 long ticks = parseTime(args[1]);
                 if (ticks < 0) {
-                    player.sendMessage(CC.error("Invalid time value!"));
+                    player.sendMessage(plugin.getMessageManager().error("world.time.invalid"));
                     return true;
                 }
                 player.getWorld().setTime(ticks);
-                player.sendMessage(CC.success("Time set to <yellow>" + args[1] + "</yellow> (" + ticks + " ticks)."));
+                player.sendMessage(plugin.getMessageManager().success("world.time.set",
+                        "{time}", args[1], "{ticks}", String.valueOf(ticks)));
                 plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set time to <yellow>" + args[1] + "</yellow> (" + ticks + " ticks)");
             }
             case "add" -> {
                 try {
                     long ticks = Long.parseLong(args[1]);
                     player.getWorld().setTime(player.getWorld().getTime() + ticks);
-                    player.sendMessage(CC.success("Added <yellow>" + ticks + "</yellow> ticks to the time."));
+                    player.sendMessage(plugin.getMessageManager().success("world.time.added",
+                            "{time}", String.valueOf(ticks)));
                     plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> added <yellow>" + ticks + "</yellow> ticks to the time");
                 } catch (NumberFormatException e) {
-                    player.sendMessage(CC.error("Invalid tick amount!"));
+                    player.sendMessage(plugin.getMessageManager().error("world.time.invalid-ticks"));
                 }
             }
             case "query" -> {
                 long ticks = player.getWorld().getTime();
-                player.sendMessage(CC.info("Current game time: <yellow>" + TimeUtil.getGameTime(ticks) + " <gray>(tick " + ticks + ")"));
+                player.sendMessage(plugin.getMessageManager().info("world.time.query",
+                        "{time}", TimeUtil.getGameTime(ticks), "{ticks}", String.valueOf(ticks)));
             }
-            default -> player.sendMessage(CC.error("Usage: /time <set | add | query> <value>"));
+            default -> player.sendMessage(plugin.getMessageManager().error("world.time.usage-full"));
         }
         return true;
     }

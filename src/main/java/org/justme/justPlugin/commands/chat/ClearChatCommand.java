@@ -48,7 +48,7 @@ public class ClearChatCommand implements TabExecutor {
         }
 
         // Notify sender
-        sender.sendMessage(CC.success("Chat has been cleared."));
+        sender.sendMessage(plugin.getMessageManager().success("chat.clearchat.success"));
 
         // Log - after clearing so it appears after the blank lines
         String logMsg = "<yellow>" + executedBy + "</yellow> cleared the chat.";

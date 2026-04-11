@@ -22,8 +22,9 @@ public class FreezeGameCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tick freeze");
-        sender.sendMessage(CC.success("Game has been <yellow>frozen</yellow>! All tick processing is paused."));
-        Bukkit.broadcast(CC.warning("The game has been <red>frozen</red> by <yellow>" + sender.getName() + "</yellow>."));
+        sender.sendMessage(plugin.getMessageManager().success("world.freezegame.frozen"));
+        Bukkit.broadcast(plugin.getMessageManager().warning("world.freezegame.broadcast",
+                "{player}", sender.getName()));
         plugin.getLogManager().log("admin", "<yellow>" + sender.getName() + "</yellow> froze the game");
         return true;
     }

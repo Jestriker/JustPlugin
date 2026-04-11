@@ -48,13 +48,13 @@ public class BanCommand implements TabExecutor {
         }
 
         if (plugin.getBanManager().isBanned(uuid)) {
-            sender.sendMessage(CC.error("<yellow>" + name + "</yellow> is already banned!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.ban.already-banned", "{player}", name));
             return true;
         }
 
         plugin.getBanManager().ban(uuid, name, reason, bannedBy);
-        sender.sendMessage(CC.success("Banned <yellow>" + name + "</yellow>. Reason: <gray>" + reason));
-        Bukkit.broadcast(CC.warning("<yellow>" + name + "</yellow> has been banned by <yellow>" + bannedBy + "</yellow>. Reason: <gray>" + reason));
+        sender.sendMessage(plugin.getMessageManager().success("moderation.ban.success", "{player}", name, "{reason}", reason));
+        Bukkit.broadcast(plugin.getMessageManager().warning("moderation.ban.announce", "{player}", name, "{staff}", bannedBy, "{reason}", reason));
         plugin.getLogManager().log("moderation", "<yellow>" + bannedBy + "</yellow> banned <yellow>" + name + "</yellow>. Reason: <gray>" + reason);
         return true;
     }

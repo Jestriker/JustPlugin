@@ -42,12 +42,12 @@ public class GameModeCommand implements TabExecutor {
         } else {
             // Standard /gm <mode> usage
             if (args.length < 1) {
-                sender.sendMessage(CC.error("Usage: /gm <0 | 1 | 2 | 3 | survival | creative | adventure | spectator> [player]"));
+                sender.sendMessage(plugin.getMessageManager().error("player.gamemode.usage"));
                 return true;
             }
             mode = parseGameMode(args[0]);
             if (mode == null) {
-                sender.sendMessage(CC.error("Invalid game mode! Use: 0 | 1 | 2 | 3 | survival | creative | adventure | spectator"));
+                sender.sendMessage(plugin.getMessageManager().error("player.gamemode.invalid-mode"));
                 return true;
             }
             targetArgIndex = 1;
@@ -59,25 +59,25 @@ public class GameModeCommand implements TabExecutor {
         if (args.length > targetArgIndex) {
             // Trying to change another player's game mode
             if (!sender.hasPermission("justplugin.gamemode.others")) {
-                sender.sendMessage(CC.error("You don't have permission to change other players' game mode."));
+                sender.sendMessage(plugin.getMessageManager().error("general.no-permission"));
                 return true;
             }
             target = Bukkit.getPlayer(args[targetArgIndex]);
             if (target == null) {
-                sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+                sender.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                 return true;
             }
         }
 
         if (target == null) {
-            sender.sendMessage(CC.error("You must specify a player when running from console."));
+            sender.sendMessage(plugin.getMessageManager().error("player.gamemode.console-specify"));
             return true;
         }
 
         target.setGameMode(mode);
-        target.sendMessage(CC.success("Game mode set to <yellow>" + mode.name().toLowerCase() + "</yellow>."));
+        target.sendMessage(plugin.getMessageManager().success("player.gamemode.changed-self", "{mode}", mode.name().toLowerCase()));
         if (!target.equals(sender)) {
-            sender.sendMessage(CC.success("Set <yellow>" + target.getName() + "</yellow>'s game mode to <yellow>" + mode.name().toLowerCase() + "</yellow>."));
+            sender.sendMessage(plugin.getMessageManager().success("player.gamemode.changed-other", "{player}", target.getName(), "{mode}", mode.name().toLowerCase()));
             String senderName = sender instanceof Player ? sender.getName() : "Console";
             plugin.getLogManager().log("gamemode", "<yellow>" + senderName + "</yellow> set <yellow>" + target.getName() + "</yellow>'s game mode to <yellow>" + mode.name().toLowerCase() + "</yellow>");
         } else {

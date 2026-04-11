@@ -35,7 +35,7 @@ public class KillCommand implements TabExecutor {
             // Check for special arguments
             if (SPECIAL_ARGS.contains(arg)) {
                 if (!sender.hasPermission("justplugin.kill.others")) {
-                    sender.sendMessage(CC.error("You don't have permission to use mass kill commands."));
+                    sender.sendMessage(plugin.getMessageManager().error("player.kill.no-permission-mass"));
                     return true;
                 }
 
@@ -52,7 +52,7 @@ public class KillCommand implements TabExecutor {
                                 }
                             }
                         }
-                        sender.sendMessage(CC.success("Killed <yellow>" + count + "</yellow> mobs (hostile + friendly)."));
+                        sender.sendMessage(plugin.getMessageManager().success("player.kill.killed-mobs", "{amount}", String.valueOf(count)));
                     }
                     case "hostile" -> {
                         int count = 0;
@@ -64,7 +64,7 @@ public class KillCommand implements TabExecutor {
                                 }
                             }
                         }
-                        sender.sendMessage(CC.success("Killed <yellow>" + count + "</yellow> hostile mobs."));
+                        sender.sendMessage(plugin.getMessageManager().success("player.kill.killed-hostile", "{amount}", String.valueOf(count)));
                     }
                     case "entities" -> {
                         int count = 0;
@@ -76,7 +76,7 @@ public class KillCommand implements TabExecutor {
                                 }
                             }
                         }
-                        sender.sendMessage(CC.success("Killed <yellow>" + count + "</yellow> entities (mobs + items)."));
+                        sender.sendMessage(plugin.getMessageManager().success("player.kill.killed-entities", "{amount}", String.valueOf(count)));
                     }
                     case "friendly" -> {
                         int count = 0;
@@ -88,7 +88,7 @@ public class KillCommand implements TabExecutor {
                                 }
                             }
                         }
-                        sender.sendMessage(CC.success("Killed <yellow>" + count + "</yellow> friendly mobs."));
+                        sender.sendMessage(plugin.getMessageManager().success("player.kill.killed-friendly", "{amount}", String.valueOf(count)));
                     }
                     case "items" -> {
                         int count = 0;
@@ -100,28 +100,28 @@ public class KillCommand implements TabExecutor {
                                 }
                             }
                         }
-                        sender.sendMessage(CC.success("Cleared <yellow>" + count + "</yellow> dropped items."));
+                        sender.sendMessage(plugin.getMessageManager().success("player.kill.cleared-items", "{amount}", String.valueOf(count)));
                     }
                     case "players" -> {
                         int count = 0;
                         for (Player p : Bukkit.getOnlinePlayers()) {
                             if (p.equals(senderPlayer)) continue;
                             p.setHealth(0);
-                            p.sendMessage(CC.error("You have been killed by <yellow>" + sender.getName() + "</yellow>."));
+                            p.sendMessage(plugin.getMessageManager().error("player.kill.killed-by", "{player}", sender.getName()));
                             count++;
                         }
-                        sender.sendMessage(CC.success("Killed <yellow>" + count + "</yellow> players (excluding yourself)."));
+                        sender.sendMessage(plugin.getMessageManager().success("player.kill.killed-players", "{amount}", String.valueOf(count)));
                     }
                     case "allplayers" -> {
                         int count = 0;
                         for (Player p : Bukkit.getOnlinePlayers()) {
                             p.setHealth(0);
                             if (!p.equals(senderPlayer)) {
-                                p.sendMessage(CC.error("You have been killed by <yellow>" + sender.getName() + "</yellow>."));
+                                p.sendMessage(plugin.getMessageManager().error("player.kill.killed-by", "{player}", sender.getName()));
                             }
                             count++;
                         }
-                        sender.sendMessage(CC.success("Killed <yellow>" + count + "</yellow> players (including yourself)."));
+                        sender.sendMessage(plugin.getMessageManager().success("player.kill.killed-allplayers", "{amount}", String.valueOf(count)));
                     }
                     case "everything" -> {
                         int entityCount = 0;
@@ -137,11 +137,11 @@ public class KillCommand implements TabExecutor {
                         for (Player p : Bukkit.getOnlinePlayers()) {
                             p.setHealth(0);
                             if (!p.equals(senderPlayer)) {
-                                p.sendMessage(CC.error("You have been killed by <yellow>" + sender.getName() + "</yellow>."));
+                                p.sendMessage(plugin.getMessageManager().error("player.kill.killed-by", "{player}", sender.getName()));
                             }
                             playerCount++;
                         }
-                        sender.sendMessage(CC.success("Killed <yellow>" + entityCount + "</yellow> entities and <yellow>" + playerCount + "</yellow> players."));
+                        sender.sendMessage(plugin.getMessageManager().success("player.kill.killed-everything", "{entities}", String.valueOf(entityCount), "{players}", String.valueOf(playerCount)));
                     }
                 }
                 return true;
@@ -149,17 +149,17 @@ public class KillCommand implements TabExecutor {
 
             // Normal player kill
             if (!sender.hasPermission("justplugin.kill.others")) {
-                sender.sendMessage(CC.error("You don't have permission to kill other players."));
+                sender.sendMessage(plugin.getMessageManager().error("player.kill.no-permission-others"));
                 return true;
             }
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+                sender.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                 return true;
             }
             target.setHealth(0);
-            sender.sendMessage(CC.success("Killed <yellow>" + target.getName() + "</yellow>."));
-            target.sendMessage(CC.error("You have been killed by <yellow>" + sender.getName() + "</yellow>."));
+            sender.sendMessage(plugin.getMessageManager().success("player.kill.killed-other", "{player}", target.getName()));
+            target.sendMessage(plugin.getMessageManager().error("player.kill.killed-by", "{player}", sender.getName()));
             String killedBy = sender instanceof Player ? sender.getName() : "Console";
             plugin.getLogManager().log("admin", "<yellow>" + killedBy + "</yellow> killed <yellow>" + target.getName() + "</yellow>");
             return true;
@@ -167,11 +167,11 @@ public class KillCommand implements TabExecutor {
 
         // Self
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Usage: /kill <player | mobs | hostile | friendly | items | entities | players | allplayers | everything>"));
+            sender.sendMessage(plugin.getMessageManager().error("player.kill.usage-console"));
             return true;
         }
         player.setHealth(0);
-        player.sendMessage(CC.info("You killed yourself."));
+        player.sendMessage(plugin.getMessageManager().info("player.kill.killed-self"));
         return true;
     }
 

@@ -40,16 +40,20 @@ public class MuteCommand implements TabExecutor {
         String name = offP.getName() != null ? offP.getName() : args[0];
 
         if (plugin.getMuteManager().isMuted(uuid)) {
-            sender.sendMessage(CC.error("<yellow>" + name + "</yellow> is already muted!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.mute.already-muted",
+                    "{player}", name));
             return true;
         }
 
         plugin.getMuteManager().mute(uuid, name, reason, mutedBy);
-        sender.sendMessage(CC.success("Permanently muted <yellow>" + name + "</yellow>."));
-        sender.sendMessage(CC.line("Reason: <white>" + reason));
+        sender.sendMessage(plugin.getMessageManager().success("moderation.mute.success-permanent",
+                "{player}", name));
+        sender.sendMessage(plugin.getMessageManager().line("moderation.mute.reason-line",
+                "{reason}", reason));
 
         // Configurable announcement
-        net.kyori.adventure.text.Component announcement = CC.warning("<yellow>" + name + "</yellow> has been muted by <yellow>" + mutedBy + "</yellow>. Reason: <gray>" + reason);
+        net.kyori.adventure.text.Component announcement = plugin.getMessageManager().warning("moderation.mute.announce",
+                "{player}", name, "{staff}", mutedBy, "{reason}", reason);
         if (plugin.getConfig().getBoolean("punishment-announcements.mute", false)) {
             Bukkit.broadcast(announcement);
         } else {

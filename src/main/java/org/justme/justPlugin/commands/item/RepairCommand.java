@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,19 +26,19 @@ public class RepairCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
         Player target;
         if (args.length >= 1) {
             if (!player.hasPermission("justplugin.repair.others")) {
-                player.sendMessage(CC.error("You don't have permission to repair other players' items."));
+                player.sendMessage(plugin.getMessageManager().error("misc.repair.no-permission-others"));
                 return true;
             }
             target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                player.sendMessage(CC.error("Player not found."));
+                player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                 return true;
             }
         } else {
@@ -49,20 +48,20 @@ public class RepairCommand implements TabExecutor {
         ItemStack item = target.getInventory().getItemInMainHand();
         if (item.getType() == Material.AIR) {
             if (target.equals(player)) {
-                player.sendMessage(CC.error("You must be holding an item to repair."));
+                player.sendMessage(plugin.getMessageManager().error("misc.repair.empty-hand"));
             } else {
-                player.sendMessage(CC.error(target.getName() + " is not holding an item."));
+                player.sendMessage(plugin.getMessageManager().error("misc.repair.target-empty-hand", "{player}", target.getName()));
             }
             return true;
         }
 
         if (!(item.getItemMeta() instanceof Damageable damageable)) {
-            player.sendMessage(CC.error("This item cannot be repaired."));
+            player.sendMessage(plugin.getMessageManager().error("misc.repair.not-repairable"));
             return true;
         }
 
         if (damageable.getDamage() == 0) {
-            player.sendMessage(CC.error("This item is already fully repaired."));
+            player.sendMessage(plugin.getMessageManager().error("misc.repair.already-repaired"));
             return true;
         }
 
@@ -71,11 +70,11 @@ public class RepairCommand implements TabExecutor {
 
         String itemName = item.getType().name().toLowerCase().replace("_", " ");
         if (target.equals(player)) {
-            player.sendMessage(CC.success("Repaired <yellow>" + itemName + "</yellow>!"));
+            player.sendMessage(plugin.getMessageManager().success("misc.repair.success", "{item}", itemName));
             plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> repaired <yellow>" + itemName + "</yellow>");
         } else {
-            player.sendMessage(CC.success("Repaired <yellow>" + target.getName() + "</yellow>'s <yellow>" + itemName + "</yellow>!"));
-            target.sendMessage(CC.success("Your <yellow>" + itemName + "</yellow> was repaired by <yellow>" + player.getName() + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().success("misc.repair.success-other", "{player}", target.getName(), "{item}", itemName));
+            target.sendMessage(plugin.getMessageManager().success("misc.repair.repaired-by", "{item}", itemName, "{player}", player.getName()));
             plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> repaired <yellow>" + target.getName() + "</yellow>'s <yellow>" + itemName + "</yellow>");
         }
         return true;

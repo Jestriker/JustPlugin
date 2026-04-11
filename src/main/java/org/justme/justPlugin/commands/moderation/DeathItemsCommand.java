@@ -33,7 +33,7 @@ public class DeathItemsCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("This command can only be used by players."));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
@@ -43,7 +43,7 @@ public class DeathItemsCommand implements TabExecutor {
         if (args.length >= 1) {
             // Others mode
             if (!player.hasPermission("justplugin.deathitems.others")) {
-                player.sendMessage(CC.error("You don't have permission to view other players' death items."));
+                player.sendMessage(plugin.getMessageManager().error("moderation.deathitems.no-permission-others"));
                 return true;
             }
 
@@ -62,16 +62,16 @@ public class DeathItemsCommand implements TabExecutor {
 
         if (!plugin.getDeathInventoryManager().hasDeathInventory(targetUuid)) {
             if (args.length >= 1) {
-                player.sendMessage(CC.error("No recorded death inventory for <yellow>" + targetName + "</yellow>."));
+                player.sendMessage(plugin.getMessageManager().error("moderation.deathitems.no-items-other", "{player}", targetName));
             } else {
-                player.sendMessage(CC.error("You have no recorded death inventory. You either haven't died, or your items were kept on death."));
+                player.sendMessage(plugin.getMessageManager().error("moderation.deathitems.no-items-self"));
             }
             return true;
         }
 
         ItemStack[] deathItems = plugin.getDeathInventoryManager().getDeathInventory(targetUuid);
         if (deathItems == null) {
-            player.sendMessage(CC.error("No death inventory data available."));
+            player.sendMessage(plugin.getMessageManager().error("moderation.deathitems.no-data"));
             return true;
         }
 

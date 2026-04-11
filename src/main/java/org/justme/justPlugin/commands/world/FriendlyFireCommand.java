@@ -28,7 +28,7 @@ public class FriendlyFireCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /friendlyfire <enable | disable>"));
+            sender.sendMessage(plugin.getMessageManager().error("world.friendlyfire.usage"));
             return true;
         }
 
@@ -41,14 +41,16 @@ public class FriendlyFireCommand implements TabExecutor {
         } else if (action.equals("disable") || action.equals("off") || action.equals("false")) {
             enable = false;
         } else {
-            sender.sendMessage(CC.error("Usage: /friendlyfire <enable | disable>"));
+            sender.sendMessage(plugin.getMessageManager().error("world.friendlyfire.usage"));
             return true;
         }
 
         // Check current state
         boolean currentState = Bukkit.getWorlds().get(0).getPVP();
         if (enable == currentState) {
-            sender.sendMessage(CC.error("Friendly fire is already " + (enable ? "<green>enabled" : "<red>disabled") + "<red>!"));
+            String status = enable ? "<green>enabled" : "<red>disabled";
+            sender.sendMessage(plugin.getMessageManager().error("world.friendlyfire.already-state",
+                    "{status}", status));
             return true;
         }
 
@@ -64,7 +66,11 @@ public class FriendlyFireCommand implements TabExecutor {
         plugin.getConfig().set("friendly-fire.current-state", enable);
         plugin.saveConfig();
 
-        sender.sendMessage(CC.success("Friendly fire has been " + (enable ? "<green>enabled" : "<red>disabled") + "</green>."));
+        if (enable) {
+            sender.sendMessage(plugin.getMessageManager().success("world.friendlyfire.enabled"));
+        } else {
+            sender.sendMessage(plugin.getMessageManager().success("world.friendlyfire.disabled"));
+        }
 
         // Announce to players if configured
         boolean announce = plugin.getConfig().getBoolean("friendly-fire.announce", false);

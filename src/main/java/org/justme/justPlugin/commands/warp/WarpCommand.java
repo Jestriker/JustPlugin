@@ -25,14 +25,14 @@ public class WarpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
             // Show warp list
             var names = plugin.getWarpManager().getWarpNames();
             if (names.isEmpty()) {
-                player.sendMessage(CC.info("No warps available."));
+                player.sendMessage(plugin.getMessageManager().info("warp.warps.none"));
             } else {
                 boolean clickable = plugin.getConfig().getBoolean("clickable-commands.warp-list", true);
                 String warpList = names.stream()
@@ -47,20 +47,20 @@ public class WarpCommand implements TabExecutor {
         if (!player.hasPermission("justplugin.warp.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "warp")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "warp");
-            player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
+            player.sendMessage(plugin.getMessageManager().error("general.cooldown-wait", "{time}", CooldownManager.formatTime(remaining)));
             return true;
         }
 
         Location loc = plugin.getWarpManager().getWarp(args[0]);
         if (loc == null) {
-            player.sendMessage(CC.error("Warp <yellow>" + args[0] + "</yellow> not found!"));
+            player.sendMessage(plugin.getMessageManager().error("warp.warp.not-found", "{warp}", args[0]));
             return true;
         }
         boolean initiated = plugin.getTeleportManager().teleportWithSafety(
                 player, loc, "justplugin.warp.cooldownbypass", "warp", "justplugin.warp.unsafetp");
         if (initiated) {
             plugin.getCooldownManager().setDelayStart(player.getUniqueId(), "warp");
-            player.sendMessage(CC.success("Warping to <yellow>" + args[0] + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().success("warp.warp.teleporting", "{warp}", args[0]));
         }
         return true;
     }

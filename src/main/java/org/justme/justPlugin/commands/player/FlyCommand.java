@@ -24,27 +24,28 @@ public class FlyCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         Player target = player;
         if (args.length >= 1 && player.hasPermission("justplugin.fly.others")) {
             target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+                player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                 return true;
             }
         }
         target.setAllowFlight(!target.getAllowFlight());
         target.setFlying(target.getAllowFlight());
         plugin.getPlayerStateManager().saveState(target);
-        String status = target.getAllowFlight() ? "<green>enabled" : "<red>disabled";
-        target.sendMessage(CC.success("Flight " + status + "."));
-        if (!target.equals(player)) {
-            player.sendMessage(CC.success("Flight " + status + " for <yellow>" + target.getName() + "</yellow>."));
-            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (target.getAllowFlight() ? "enabled" : "disabled") + " flight for <yellow>" + target.getName() + "</yellow>");
+        boolean enabled = target.getAllowFlight();
+        if (target.equals(player)) {
+            player.sendMessage(plugin.getMessageManager().success(enabled ? "player.fly.enabled-self" : "player.fly.disabled-self"));
+            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (enabled ? "enabled" : "disabled") + " flight");
         } else {
-            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (target.getAllowFlight() ? "enabled" : "disabled") + " flight");
+            target.sendMessage(plugin.getMessageManager().success(enabled ? "player.fly.enabled-self" : "player.fly.disabled-self"));
+            player.sendMessage(plugin.getMessageManager().success(enabled ? "player.fly.enabled-other" : "player.fly.disabled-other", "{player}", target.getName()));
+            plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (enabled ? "enabled" : "disabled") + " flight for <yellow>" + target.getName() + "</yellow>");
         }
         return true;
     }

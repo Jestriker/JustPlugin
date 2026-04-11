@@ -41,7 +41,7 @@ public class JailCommand implements TabExecutor {
         // Resolve target player (must be online)
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(CC.error("Player not found or not online."));
+            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
             return true;
         }
 

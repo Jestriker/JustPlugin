@@ -37,7 +37,7 @@ public class TpaHereCommand implements TabExecutor {
         if (!player.hasPermission("justplugin.tpahere.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "tpahere")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "tpahere");
-            player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
+            player.sendMessage(plugin.getMessageManager().error("general.cooldown-wait", "{time}", CooldownManager.formatTime(remaining)));
             return true;
         }
 
@@ -61,12 +61,12 @@ public class TpaHereCommand implements TabExecutor {
         String result = plugin.getTeleportManager().sendTpaHereRequest(player.getUniqueId(), target.getUniqueId());
         if (result != null) {
             if (result.equals("already_same")) {
-                player.sendMessage(CC.error("You already have a pending request for <yellow>" + target.getName() + "</yellow>."));
+                player.sendMessage(plugin.getMessageManager().error("teleport.tpahere.already-pending-same", "{player}", target.getName()));
             } else if (result.startsWith("already_other:")) {
                 String otherName = result.substring("already_other:".length());
-                player.sendMessage(CC.error("You already have a pending request to <yellow>" + otherName + "</yellow>."));
+                player.sendMessage(plugin.getMessageManager().error("teleport.tpahere.already-pending-other", "{player}", otherName));
                 String cancelCmd = CC.clickCmd("<yellow>/tpacancel</yellow>", "/tpacancel", clickable);
-                player.sendMessage(CC.info("Use " + cancelCmd + " to cancel it and try again."));
+                player.sendMessage(CC.info(plugin.getMessageManager().raw("teleport.tpahere.already-pending-cancel-hint", "{cancel}", cancelCmd)));
             }
             return true;
         }
@@ -78,10 +78,10 @@ public class TpaHereCommand implements TabExecutor {
         String acceptCmd = CC.clickCmd("<green>/tpaccept</green>", "/tpaccept", clickable);
         String rejectCmd = CC.clickCmd("<red>/tpreject</red>", "/tpreject", clickable);
 
-        player.sendMessage(CC.success("TPA Here request sent to <yellow>" + target.getName() + "</yellow>. <gray>Expires in " + timeout + "s."));
-        player.sendMessage(CC.info("Type " + cancelCmd + " to cancel."));
-        target.sendMessage(CC.info("<yellow>" + player.getName() + "</yellow> has requested you to teleport to them."));
-        target.sendMessage(CC.info("Type " + acceptCmd + " to accept or " + rejectCmd + " to deny. <gray>Expires in " + timeout + "s."));
+        player.sendMessage(plugin.getMessageManager().success("teleport.tpahere.sent", "{player}", target.getName(), "{timeout}", String.valueOf(timeout)));
+        player.sendMessage(CC.info(plugin.getMessageManager().raw("teleport.tpahere.sent-cancel-hint", "{cancel}", cancelCmd)));
+        target.sendMessage(CC.info(plugin.getMessageManager().raw("teleport.tpahere.received", "{sender}", player.getName())));
+        target.sendMessage(CC.info(plugin.getMessageManager().raw("teleport.tpahere.received-hint", "{accept}", acceptCmd, "{reject}", rejectCmd, "{timeout}", String.valueOf(timeout))));
         return true;
     }
 

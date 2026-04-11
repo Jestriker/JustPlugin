@@ -21,6 +21,7 @@ request:
   received: "<yellow>{sender}</yellow> wants to trade with you!"
   received-hint: "Type {accept} to accept or {deny} to deny. <gray>Expires in {timeout}s."
   cannot-self: "You can't trade with yourself!"
+  player-not-found: "Player not found or not online!"
   already-pending: "You already have a pending trade request."
   busy: "<yellow>{player}</yellow> is currently in a trade."
   usage: "Usage: /trade <player|accept|deny>"

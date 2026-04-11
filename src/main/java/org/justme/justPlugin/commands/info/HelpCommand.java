@@ -77,7 +77,7 @@ public class HelpCommand implements TabExecutor {
 
         page = Math.max(1, Math.min(page, helpPages.length));
 
-        sender.sendMessage(CC.translate("<gold><bold>JustPlugin Help (Page " + page + "/" + helpPages.length + ")</bold></gold>"));
+        sender.sendMessage(plugin.getMessageManager().info("info.jphelp.header", "{page}", String.valueOf(page), "{max_page}", String.valueOf(helpPages.length)));
         for (String[] entry : helpPages[page - 1]) {
             String cmdLabel = CC.suggestCmd("<yellow>" + entry[0] + "</yellow>", entry[1], c);
             sender.sendMessage(CC.translate(cmdLabel + " <gray>- " + entry[2]));
@@ -86,7 +86,8 @@ public class HelpCommand implements TabExecutor {
         if (page < helpPages.length) {
             int next = page + 1;
             String nextBtn = CC.clickCmd("<yellow>/help " + next + "</yellow>", "/help " + next, c);
-            sender.sendMessage(CC.info("Type " + nextBtn + " for the next page."));
+            sender.sendMessage(plugin.getMessageManager().info("info.jphelp.footer",
+                    "{next_button}", nextBtn));
         }
         return true;
     }

@@ -6,7 +6,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,26 +21,26 @@ public class StatsCommand implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("This command can only be used by players."));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
         if (args.length == 0) {
             // Self stats
             if (!player.hasPermission("justplugin.stats")) {
-                player.sendMessage(CC.error("You don't have permission to view stats."));
+                player.sendMessage(plugin.getMessageManager().error("general.no-permission"));
                 return true;
             }
             plugin.getStatsGui().open(player, player);
         } else {
             // Others stats
             if (!player.hasPermission("justplugin.stats.others")) {
-                player.sendMessage(CC.error("You don't have permission to view other players' stats."));
+                player.sendMessage(plugin.getMessageManager().error("info.stats.no-permission-others"));
                 return true;
             }
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                player.sendMessage(CC.error("Player <yellow>" + args[0] + "</yellow> not found or not online."));
+                player.sendMessage(plugin.getMessageManager().error("info.stats.player-not-found", "{player}", args[0]));
                 return true;
             }
             plugin.getStatsGui().open(player, target);

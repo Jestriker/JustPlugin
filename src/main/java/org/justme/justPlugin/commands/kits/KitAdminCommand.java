@@ -182,7 +182,7 @@ public class KitAdminCommand implements TabExecutor {
                 sender.sendMessage(plugin.getMessageManager().info("kits.no-archived-kits"));
                 return true;
             }
-            sender.sendMessage(CC.prefixed("<yellow>Archived Kits:"));
+            sender.sendMessage(plugin.getMessageManager().info("kits.archived-header"));
             for (KitManager.KitData kit : archived) {
                 long daysAgo = kit.archiveDate > 0
                         ? (System.currentTimeMillis() - kit.archiveDate) / 86400000L
@@ -258,7 +258,7 @@ public class KitAdminCommand implements TabExecutor {
             return true;
         }
 
-        sender.sendMessage(CC.prefixed("<yellow>All Kits <dark_gray>(" + allKits.size() + "):"));
+        sender.sendMessage(plugin.getMessageManager().info("kits.all-kits-header", "{count}", String.valueOf(allKits.size())));
         for (KitManager.KitData kit : allKits) {
             String statusColor = switch (kit.status) {
                 case "published" -> kit.enabled ? "<green>" : "<yellow>";

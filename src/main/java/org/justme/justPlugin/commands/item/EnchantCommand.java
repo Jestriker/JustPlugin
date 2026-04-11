@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,25 +28,25 @@ public class EnchantCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /enchant <enchantment> [level]"));
+            player.sendMessage(plugin.getMessageManager().error("misc.enchant.usage"));
             return true;
         }
 
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType() == Material.AIR) {
-            player.sendMessage(CC.error("You must be holding an item."));
+            player.sendMessage(plugin.getMessageManager().error("misc.enchant.empty-hand"));
             return true;
         }
 
         // Look up enchantment
         Enchantment enchantment = lookupEnchantment(args[0]);
         if (enchantment == null) {
-            player.sendMessage(CC.error("Unknown enchantment: <yellow>" + args[0] + "</yellow>"));
+            player.sendMessage(plugin.getMessageManager().error("misc.enchant.unknown", "{enchantment}", args[0]));
             return true;
         }
 
@@ -57,7 +56,7 @@ public class EnchantCommand implements TabExecutor {
             try {
                 level = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                player.sendMessage(CC.error("Level must be a number."));
+                player.sendMessage(plugin.getMessageManager().error("misc.enchant.invalid-level"));
                 return true;
             }
         }
@@ -69,7 +68,7 @@ public class EnchantCommand implements TabExecutor {
         // Level 0 = remove enchantment
         if (level == 0) {
             item.removeEnchantment(enchantment);
-            player.sendMessage(CC.success("Removed <yellow>" + enchantName + "</yellow> from <yellow>" + itemName + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().success("misc.enchant.removed", "{enchantment}", enchantName, "{item}", itemName));
             plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> removed <yellow>" + enchantName + "</yellow> from <yellow>" + itemName + "</yellow>");
             return true;
         }
@@ -77,18 +76,18 @@ public class EnchantCommand implements TabExecutor {
         // Check restrictions (unless bypass)
         if (!canBypass) {
             if (!enchantment.canEnchantItem(item)) {
-                player.sendMessage(CC.error("This enchantment cannot be applied to this item."));
+                player.sendMessage(plugin.getMessageManager().error("misc.enchant.cannot-apply"));
                 return true;
             }
             if (level > enchantment.getMaxLevel()) {
-                player.sendMessage(CC.error("Maximum level for <yellow>" + enchantName + "</yellow> is <yellow>" + enchantment.getMaxLevel() + "</yellow>."));
+                player.sendMessage(plugin.getMessageManager().error("misc.enchant.max-level", "{enchantment}", enchantName, "{max}", String.valueOf(enchantment.getMaxLevel())));
                 return true;
             }
         }
 
         // Apply enchantment (unsafe to allow bypass levels)
         item.addUnsafeEnchantment(enchantment, level);
-        player.sendMessage(CC.success("Applied <yellow>" + enchantName + " " + level + "</yellow> to <yellow>" + itemName + "</yellow>."));
+        player.sendMessage(plugin.getMessageManager().success("misc.enchant.applied", "{enchantment}", enchantName, "{level}", String.valueOf(level), "{item}", itemName));
         plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> enchanted <yellow>" + itemName + "</yellow> with <yellow>" + enchantName + " " + level + "</yellow>");
         return true;
     }

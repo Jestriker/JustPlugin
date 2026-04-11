@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.ChatManager;
-import org.justme.justPlugin.util.CC;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,13 +25,13 @@ public class ChatCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
             ChatManager.ChatMode current = plugin.getChatManager().getChatMode(player.getUniqueId());
-            player.sendMessage(CC.info("Current chat mode: <yellow>" + current.name()));
-            player.sendMessage(CC.info("Usage: /chat <all | team>"));
+            player.sendMessage(plugin.getMessageManager().info("chat.chat.current-mode", "{mode}", current.name()));
+            player.sendMessage(plugin.getMessageManager().info("chat.chat.usage"));
             return true;
         }
         ChatManager.ChatMode mode = switch (args[0].toLowerCase()) {
@@ -40,16 +40,16 @@ public class ChatCommand implements TabExecutor {
             default -> null;
         };
         if (mode == null) {
-            player.sendMessage(CC.error("Invalid chat mode! Use: all, team"));
+            player.sendMessage(plugin.getMessageManager().error("chat.chat.invalid-mode"));
             return true;
         }
         if (mode == ChatManager.ChatMode.TEAM
                 && plugin.getTeamManager().getPlayerTeam(player.getUniqueId()) == null) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
+            player.sendMessage(plugin.getMessageManager().error("team.general.not-in-team"));
             return true;
         }
         plugin.getChatManager().setChatMode(player.getUniqueId(), mode);
-        player.sendMessage(CC.success("Chat mode set to <yellow>" + mode.name() + "</yellow>."));
+        player.sendMessage(plugin.getMessageManager().success("chat.chat.mode-set", "{mode}", mode.name()));
         return true;
     }
 

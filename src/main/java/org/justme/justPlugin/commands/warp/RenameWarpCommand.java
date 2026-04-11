@@ -6,7 +6,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,18 +22,18 @@ public class RenameWarpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 2) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("warp.renamewarp.usage")));
+            player.sendMessage(plugin.getMessageManager().error("warp.renamewarp.usage"));
             return true;
         }
         if (plugin.getWarpManager().renameWarp(args[0], args[1])) {
-            player.sendMessage(CC.success("Warp <yellow>" + args[0] + "</yellow> renamed to <yellow>" + args[1] + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().success("warp.renamewarp.success", "{warp}", args[0], "{new_name}", args[1]));
             plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> renamed warp <yellow>" + args[0] + "</yellow> to <yellow>" + args[1] + "</yellow>");
         } else {
-            player.sendMessage(CC.error("Warp <yellow>" + args[0] + "</yellow> not found!"));
+            player.sendMessage(plugin.getMessageManager().error("warp.renamewarp.not-found", "{warp}", args[0]));
         }
         return true;
     }

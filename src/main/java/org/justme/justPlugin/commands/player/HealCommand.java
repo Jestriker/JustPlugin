@@ -25,19 +25,19 @@ public class HealCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
         Player target = player;
         if (args.length >= 1) {
             if (!player.hasPermission("justplugin.heal.others")) {
-                player.sendMessage(CC.error("You don't have permission to heal other players."));
+                player.sendMessage(plugin.getMessageManager().error("general.no-permission"));
                 return true;
             }
             target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+                player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                 return true;
             }
         }
@@ -47,11 +47,11 @@ public class HealCommand implements TabExecutor {
         target.setFireTicks(0);
 
         if (target.equals(player)) {
-            player.sendMessage(CC.success("You have been healed."));
+            player.sendMessage(plugin.getMessageManager().success("player.heal.healed-self"));
             plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> healed themselves");
         } else {
-            player.sendMessage(CC.success("Healed <yellow>" + target.getName() + "</yellow>."));
-            target.sendMessage(CC.success("You have been healed by <yellow>" + player.getName() + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().success("player.heal.healed-other", "{player}", target.getName()));
+            target.sendMessage(plugin.getMessageManager().success("player.heal.healed-notify", "{player}", player.getName()));
             plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> healed <yellow>" + target.getName() + "</yellow>");
         }
         return true;

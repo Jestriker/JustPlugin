@@ -29,10 +29,13 @@ public class ClearEntitiesCommand implements TabExecutor {
 
         var result = plugin.getEntityClearManager().clearNow();
 
-        sender.sendMessage(CC.success("Entity clear complete!"));
-        sender.sendMessage(CC.line("Items removed: <yellow>" + result.itemsRemoved()));
-        sender.sendMessage(CC.line("Mobs removed: <yellow>" + result.mobsRemoved()));
-        sender.sendMessage(CC.line("Total: <yellow>" + result.total()));
+        sender.sendMessage(plugin.getMessageManager().success("world.clearentities.success"));
+        sender.sendMessage(plugin.getMessageManager().line("world.clearentities.items-removed",
+                "{items}", String.valueOf(result.itemsRemoved())));
+        sender.sendMessage(plugin.getMessageManager().line("world.clearentities.mobs-removed",
+                "{mobs}", String.valueOf(result.mobsRemoved())));
+        sender.sendMessage(plugin.getMessageManager().line("world.clearentities.total-removed",
+                "{total}", String.valueOf(result.total())));
 
         plugin.getLogManager().log("admin", "<yellow>" + executedBy + "</yellow> manually triggered entity clear. Removed <yellow>" + result.total() + "</yellow> entities.");
         return true;

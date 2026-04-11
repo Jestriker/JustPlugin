@@ -38,18 +38,18 @@ public class GodCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         Player target = player;
         if (args.length >= 1) {
             if (!player.hasPermission("justplugin.god.others")) {
-                player.sendMessage(CC.error("You don't have permission to toggle god mode for others."));
+                player.sendMessage(plugin.getMessageManager().error("general.no-permission"));
                 return true;
             }
             target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+                player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                 return true;
             }
         }
@@ -73,16 +73,16 @@ public class GodCommand implements TabExecutor {
         } else {
             // Disabling god mode - check if player has any effects, suggest clearing
             if (!target.getActivePotionEffects().isEmpty()) {
-                target.sendMessage(CC.info("You have active effects. Use <yellow>/effect clear</yellow> to remove them."));
+                target.sendMessage(plugin.getMessageManager().info("player.god.effects-hint"));
             }
         }
 
         if (target.equals(player)) {
-            player.sendMessage(CC.success("God mode " + (god ? "<green>enabled" : "<red>disabled") + "."));
+            player.sendMessage(plugin.getMessageManager().success(god ? "player.god.enabled-self" : "player.god.disabled-self"));
             plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (god ? "enabled" : "disabled") + " god mode");
         } else {
-            player.sendMessage(CC.success("God mode " + (god ? "<green>enabled" : "<red>disabled") + " for <yellow>" + target.getName() + "</yellow>."));
-            target.sendMessage(CC.info("God mode has been " + (god ? "<green>enabled" : "<red>disabled") + " by <yellow>" + player.getName() + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().success(god ? "player.god.enabled-other" : "player.god.disabled-other", "{player}", target.getName()));
+            target.sendMessage(plugin.getMessageManager().info("player.god.toggled-by", "{status}", (god ? "<green>enabled" : "<red>disabled"), "{player}", player.getName()));
             plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> " + (god ? "enabled" : "disabled") + " god mode for <yellow>" + target.getName() + "</yellow>");
         }
          plugin.getPlayerStateManager().saveState(target);

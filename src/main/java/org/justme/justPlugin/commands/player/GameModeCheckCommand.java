@@ -27,7 +27,7 @@ public class GameModeCheckCommand implements TabExecutor {
         // /gmcheck [player] - if no player specified, check your own (must be a player)
         if (args.length < 1) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(CC.error("Usage: /gmcheck <player>"));
+                sender.sendMessage(plugin.getMessageManager().error("player.gmcheck.usage-console"));
                 return true;
             }
             showGameModeInfo(sender, player);
@@ -37,7 +37,7 @@ public class GameModeCheckCommand implements TabExecutor {
         // Check a specific player
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(CC.error("Player <yellow>" + args[0] + "</yellow> is not online!"));
+            sender.sendMessage(plugin.getMessageManager().error("player.gmcheck.not-online", "{player}", args[0]));
             return true;
         }
 
@@ -54,11 +54,11 @@ public class GameModeCheckCommand implements TabExecutor {
             case SPECTATOR -> "<gray>";
         };
 
-        sender.sendMessage(CC.info("<gold><bold>Game Mode Info</bold></gold>"));
-        sender.sendMessage(CC.line("Player: <yellow>" + target.getName()));
-        sender.sendMessage(CC.line("Game Mode: " + gmColor + gm.name().toLowerCase()));
-        sender.sendMessage(CC.line("Flying: " + (target.isFlying() ? "<green>yes" : "<red>no")));
-        sender.sendMessage(CC.line("Allow Flight: " + (target.getAllowFlight() ? "<green>yes" : "<red>no")));
+        sender.sendMessage(plugin.getMessageManager().info("player.gmcheck.header"));
+        sender.sendMessage(plugin.getMessageManager().line("player.gmcheck.player-line", "{player}", target.getName()));
+        sender.sendMessage(plugin.getMessageManager().line("player.gmcheck.mode-line", "{color}", gmColor, "{mode}", gm.name().toLowerCase()));
+        sender.sendMessage(plugin.getMessageManager().line("player.gmcheck.flying-line", "{status}", (target.isFlying() ? "<green>yes" : "<red>no")));
+        sender.sendMessage(plugin.getMessageManager().line("player.gmcheck.allow-flight-line", "{status}", (target.getAllowFlight() ? "<green>yes" : "<red>no")));
     }
 
     @Override

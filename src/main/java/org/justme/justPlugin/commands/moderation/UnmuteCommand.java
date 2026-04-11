@@ -46,7 +46,8 @@ public class UnmuteCommand implements TabExecutor {
         if (!plugin.getMuteManager().isMuted(uuid)) {
             // Try by name
             if (!plugin.getMuteManager().isMutedByName(name)) {
-                sender.sendMessage(CC.error("<yellow>" + name + "</yellow> is not muted!"));
+                sender.sendMessage(plugin.getMessageManager().error("moderation.unmute.not-muted",
+                        "{player}", name));
                 return true;
             }
             plugin.getMuteManager().unmuteByName(name);
@@ -54,7 +55,8 @@ public class UnmuteCommand implements TabExecutor {
             plugin.getMuteManager().unmute(uuid);
         }
 
-        sender.sendMessage(CC.success("Unmuted <yellow>" + name + "</yellow>."));
+        sender.sendMessage(plugin.getMessageManager().success("moderation.unmute.success",
+                "{player}", name));
         plugin.getLogManager().log("mute", "<yellow>" + executedBy + "</yellow> unmuted <yellow>" + name + "</yellow>");
         return true;
     }

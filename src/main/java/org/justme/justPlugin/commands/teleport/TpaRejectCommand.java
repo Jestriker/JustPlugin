@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.TeleportManager;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
@@ -24,20 +23,20 @@ public class TpaRejectCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         TeleportManager tm = plugin.getTeleportManager();
         TeleportManager.TpaRequest req = tm.getIncomingRequest(player.getUniqueId());
         if (req == null) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tpaccept.no-pending")));
+            player.sendMessage(plugin.getMessageManager().error("teleport.tpreject.no-pending"));
             return true;
         }
         tm.removeRequest(req.sender);
-        player.sendMessage(CC.success(plugin.getMessageManager().raw("teleport.tpreject.rejected")));
+        player.sendMessage(plugin.getMessageManager().success("teleport.tpreject.rejected"));
         Player requester = Bukkit.getPlayer(req.sender);
         if (requester != null) {
-            requester.sendMessage(CC.error("<yellow>" + player.getName() + "</yellow> rejected your teleport request."));
+            requester.sendMessage(plugin.getMessageManager().error("teleport.tpreject.notify-requester", "{player}", player.getName()));
         }
         return true;
     }

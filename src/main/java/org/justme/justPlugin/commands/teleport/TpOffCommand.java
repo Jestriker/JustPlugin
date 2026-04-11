@@ -11,7 +11,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,18 +27,18 @@ public class TpOffCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /tpoff <player>"));
+            player.sendMessage(plugin.getMessageManager().error("moderation.offline.tpoff-usage"));
             return true;
         }
 
         @SuppressWarnings("deprecation")
         OfflinePlayer offline = Bukkit.getOfflinePlayer(args[0]);
         if (!offline.hasPlayedBefore() && !offline.isOnline()) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+            player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
             return true;
         }
 
@@ -54,7 +53,7 @@ public class TpOffCommand implements TabExecutor {
         String worldName = data.getString("last-location.world", "");
         World world = Bukkit.getWorld(worldName);
         if (world == null) {
-            player.sendMessage(CC.error("World '" + worldName + "' is not loaded."));
+            player.sendMessage(plugin.getMessageManager().error("moderation.offline.tpoff-world-not-loaded", "{world}", worldName));
             return true;
         }
 

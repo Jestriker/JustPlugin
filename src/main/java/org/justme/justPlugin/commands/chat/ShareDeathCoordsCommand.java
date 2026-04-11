@@ -28,11 +28,11 @@ public class ShareDeathCoordsCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (!plugin.getPlayerListener().hasDeathLocation(player.getUniqueId())) {
-            player.sendMessage(CC.error("No recorded death location. You haven't died yet!"));
+            player.sendMessage(plugin.getMessageManager().error("chat.sharedeathcoords.no-death-location"));
             return true;
         }
         Location loc = plugin.getPlayerListener().getDeathLocation(player.getUniqueId());
@@ -46,7 +46,7 @@ public class ShareDeathCoordsCommand implements TabExecutor {
             case "team" -> {
                 String teamName = plugin.getTeamManager().getPlayerTeam(player.getUniqueId());
                 if (teamName == null) {
-                    player.sendMessage(CC.error(plugin.getMessageManager().raw("team.general.not-in-team")));
+                    player.sendMessage(plugin.getMessageManager().error("team.general.not-in-team"));
                     return true;
                 }
                 TeamManager.TeamData team = plugin.getTeamManager().getTeam(teamName);

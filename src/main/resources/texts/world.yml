@@ -22,32 +22,39 @@ weather:
 
 # === Time ===
 time:
-  set: "Time set to <yellow>{time}</yellow>."
-  added: "Added <yellow>{time}</yellow> ticks."
-  query: "Current time: <yellow>{time}</yellow> ticks."
-  usage: "Usage: /time <set|add|query> <value>"
+  set: "Time set to <yellow>{time}</yellow> ({ticks} ticks)."
+  added: "Added <yellow>{time}</yellow> ticks to the time."
+  query: "Current game time: <yellow>{time}</yellow> <gray>(tick {ticks})"
+  usage: "Usage: /time <set | add> <value>"
+  usage-full: "Usage: /time <set | add | query> <value>"
+  values-hint: "Values: day, night, noon, midnight, sunrise, sunset, or tick number"
   invalid: "Invalid time value!"
+  invalid-ticks: "Invalid tick amount!"
 
 # === Freeze Game ===
 freezegame:
-  frozen: "Game has been <red>frozen</red>! <gray>(Tick processing paused)"
-  already-frozen: "The game is already frozen!"
+  frozen: "Game has been <yellow>frozen</yellow>! All tick processing is paused."
+  broadcast: "The game has been <red>frozen</red> by <yellow>{player}</yellow>."
 
 # === Unfreeze Game ===
 unfreezegame:
-  unfrozen: "Game has been <green>unfrozen</green>! <gray>(Tick processing resumed)"
-  not-frozen: "The game is not frozen!"
+  unfrozen: "Game has been <yellow>unfrozen</yellow>! Tick processing resumed."
+  broadcast: "The game has been <green>unfrozen</green> by <yellow>{player}</yellow>."
 
 # === Clear Entities ===
 clearentities:
-  cleared: "Cleared <yellow>{items}</yellow> items and <yellow>{mobs}</yellow> mobs."
+  success: "Entity clear complete!"
+  items-removed: "Items removed: <yellow>{items}"
+  mobs-removed: "Mobs removed: <yellow>{mobs}"
+  total-removed: "Total: <yellow>{total}"
   # Warning message uses {seconds} placeholder (configured in config.yml entity-clear section)
 
 # === Friendly Fire (PvP Toggle) ===
 friendlyfire:
-  enabled: "PvP has been <green>enabled</green> server-wide."
-  disabled: "PvP has been <red>disabled</red> server-wide."
-  usage: "Usage: /friendlyfire <enable|disable>"
+  enabled: "Friendly fire has been <green>enabled</green>."
+  disabled: "Friendly fire has been <red>disabled</red>."
+  already-state: "Friendly fire is already {status}<red>!"
+  usage: "Usage: /friendlyfire <enable | disable>"
 
 # === Spawn Protection ===
 spawn-protection:

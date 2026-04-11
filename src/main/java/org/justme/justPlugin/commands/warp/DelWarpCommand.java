@@ -6,7 +6,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,18 +22,18 @@ public class DelWarpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("warp.delwarp.usage")));
+            player.sendMessage(plugin.getMessageManager().error("warp.delwarp.usage"));
             return true;
         }
         if (plugin.getWarpManager().deleteWarp(args[0])) {
-            player.sendMessage(CC.success("Warp <yellow>" + args[0] + "</yellow> has been deleted."));
+            player.sendMessage(plugin.getMessageManager().success("warp.delwarp.success", "{warp}", args[0]));
             plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> deleted warp <yellow>" + args[0] + "</yellow>");
         } else {
-            player.sendMessage(CC.error("Warp <yellow>" + args[0] + "</yellow> not found!"));
+            player.sendMessage(plugin.getMessageManager().error("warp.delwarp.not-found", "{warp}", args[0]));
         }
         return true;
     }

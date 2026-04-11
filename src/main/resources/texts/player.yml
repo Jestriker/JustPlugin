@@ -26,13 +26,21 @@ gamemode:
   changed-self: "Game mode set to <yellow>{mode}</yellow>."
   changed-other: "Set <yellow>{player}</yellow>'s game mode to <yellow>{mode}</yellow>."
   usage: "Usage: /gm <0|1|2|3|survival|creative|adventure|spectator> [player]"
-  invalid-mode: "Invalid game mode! Use survival, creative, adventure, or spectator."
+  invalid-mode: "Invalid game mode! Use: 0 | 1 | 2 | 3 | survival | creative | adventure | spectator"
+  console-specify: "You must specify a player when running from console."
 
 # === GM Check ===
 gmcheck:
   self: "Your game mode: <yellow>{mode}"
   other: "<yellow>{player}</yellow>'s game mode: <yellow>{mode}"
   usage: "Usage: /gmcheck [player]"
+  usage-console: "Usage: /gmcheck <player>"
+  not-online: "Player <yellow>{player}</yellow> is not online!"
+  header: "<gold><bold>Game Mode Info</bold></gold>"
+  player-line: "Player: <yellow>{player}"
+  mode-line: "Game Mode: {color}{mode}"
+  flying-line: "Flying: {status}"
+  allow-flight-line: "Allow Flight: {status}"
 
 # === God ===
 god:
@@ -41,6 +49,8 @@ god:
   enabled-other: "God mode <green>enabled</green> for <yellow>{player}</yellow>."
   disabled-other: "God mode <red>disabled</red> for <yellow>{player}</yellow>."
   usage: "Usage: /god [player]"
+  toggled-by: "God mode has been {status} by <yellow>{player}</yellow>."
+  effects-hint: "You have active effects. Use <yellow>/effect clear</yellow> to remove them."
 
 # === Speed ===
 speed:
@@ -48,27 +58,31 @@ speed:
   set-walk-self: "Walk speed set to <yellow>{speed}</yellow>."
   set-fly-other: "Set <yellow>{player}</yellow>'s fly speed to <yellow>{speed}</yellow>."
   set-walk-other: "Set <yellow>{player}</yellow>'s walk speed to <yellow>{speed}</yellow>."
+  set-other: "Speed set for <yellow>{player}</yellow>."
   usage: "Usage: /speed <0-10> [player]"
   invalid-speed: "Speed must be between 0 and 10!"
+  invalid-value: "Invalid speed value!"
 
 # === Hat ===
 hat:
-  success: "You are now wearing the item as a hat!"
-  empty-hand: "You must be holding an item!"
+  success: "You are now wearing <yellow>{item}</yellow> as a hat!"
+  empty-hand: "You must hold an item!"
   usage: "Usage: /hat"
 
 # === Exp ===
 exp:
-  set-levels: "Set <yellow>{player}</yellow>'s experience to <yellow>{amount}</yellow> levels."
-  set-orbs: "Set <yellow>{player}</yellow>'s experience to <yellow>{amount}</yellow> points."
-  give-levels: "Gave <yellow>{amount}</yellow> levels to <yellow>{player}</yellow>."
-  give-orbs: "Gave <yellow>{amount}</yellow> experience points to <yellow>{player}</yellow>."
+  show-self: "Your XP: <yellow>Level {level}</yellow> (<gray>{total} total XP</gray>)"
+  set-levels: "Set <yellow>{player}</yellow>'s level to <yellow>{amount}</yellow>."
+  set-orbs: "Set <yellow>{player}</yellow>'s XP to <yellow>{amount}</yellow> orbs."
+  give-levels: "Gave <yellow>{amount}</yellow> levels to <yellow>{player}</yellow>. (Now level {current})"
+  give-orbs: "Gave <yellow>{amount}</yellow> XP orbs to <yellow>{player}</yellow>."
   usage: "Usage: /exp <set|give> <levels|orbs> <amount> [player]"
   invalid-amount: "Invalid amount! Must be a non-negative number."
+  invalid-type: "Type must be <yellow>levels</yellow> or <yellow>orbs</yellow>."
 
 # === Skull ===
 skull:
-  success: "You received <yellow>{player}</yellow>'s skull."
+  success: "Given you <yellow>{player}</yellow>'s skull."
   usage: "Usage: /skull [player]"
 
 # === Suicide ===
@@ -77,39 +91,58 @@ suicide:
 
 # === Heal ===
 heal:
-  healed-self: "You have been healed!"
+  healed-self: "You have been healed."
   healed-other: "Healed <yellow>{player}</yellow>."
   healed-notify: "You have been healed by <yellow>{player}</yellow>."
   usage: "Usage: /heal [player]"
 
 # === Feed ===
 feed:
-  fed-self: "You have been fed!"
+  fed-self: "Your hunger has been restored."
   fed-other: "Fed <yellow>{player}</yellow>."
-  fed-notify: "You have been fed by <yellow>{player}</yellow>."
+  fed-notify: "Your hunger has been restored by <yellow>{player}</yellow>."
   usage: "Usage: /feed [player]"
 
 # === Kill ===
 kill:
   killed-self: "You killed yourself."
   killed-other: "Killed <yellow>{player}</yellow>."
-  killed-entities: "Killed <yellow>{amount}</yellow> entities."
+  killed-by: "You have been killed by <yellow>{player}</yellow>."
+  killed-mobs: "Killed <yellow>{amount}</yellow> mobs (hostile + friendly)."
+  killed-hostile: "Killed <yellow>{amount}</yellow> hostile mobs."
+  killed-entities: "Killed <yellow>{amount}</yellow> entities (mobs + items)."
+  killed-friendly: "Killed <yellow>{amount}</yellow> friendly mobs."
+  cleared-items: "Cleared <yellow>{amount}</yellow> dropped items."
+  killed-players: "Killed <yellow>{amount}</yellow> players (excluding yourself)."
+  killed-allplayers: "Killed <yellow>{amount}</yellow> players (including yourself)."
+  killed-everything: "Killed <yellow>{entities}</yellow> entities and <yellow>{players}</yellow> players."
   usage: "Usage: /kill [player | mobs | hostile | friendly | items | entities | players | allplayers | everything]"
-  no-permission-mass: "You don't have permission for mass kill operations."
+  usage-console: "Usage: /kill <player | mobs | hostile | friendly | items | entities | players | allplayers | everything>"
+  no-permission-mass: "You don't have permission to use mass kill commands."
+  no-permission-others: "You don't have permission to kill other players."
 
 # === Get Position ===
 getpos:
   self: "Your position: <yellow>{x}, {y}, {z}</yellow> in <yellow>{world}</yellow>"
   other: "<yellow>{player}</yellow>'s position: <yellow>{x}, {y}, {z}</yellow> in <yellow>{world}</yellow>"
   usage: "Usage: /getpos [player]"
+  header-self: "<gold>Your Position:"
+  header-other: "<gold>{player}'s Position:"
+  world-line: "World: <yellow>{world}"
+  coords-line: "X: <yellow>{x} <dark_gray>| <gray>Y: <yellow>{y} <dark_gray>| <gray>Z: <yellow>{z}"
+  rotation-line: "Yaw: <yellow>{yaw} <dark_gray>| <gray>Pitch: <yellow>{pitch}"
 
 # === Get Death Position ===
 getdeathpos:
   self: "Your last death location: <yellow>{x}, {y}, {z}</yellow> in <yellow>{world}</yellow>"
   other: "<yellow>{player}</yellow>'s last death location: <yellow>{x}, {y}, {z}</yellow> in <yellow>{world}</yellow>"
-  no-death: "No death location found."
-  no-death-other: "No death location found for <yellow>{player}</yellow>."
+  no-death: "No recorded death location. You haven't died yet!"
+  no-death-other: "<yellow>{player}</yellow> has no recorded death location."
   usage: "Usage: /getdeathpos [player]"
+  header-self: "<gold>Last Death Location:"
+  header-other: "<gold>{player}'s Last Death Location:"
+  world-line: "World: <yellow>{world}"
+  coords-line: "X: <yellow>{x} <dark_gray>| <gray>Y: <yellow>{y} <dark_gray>| <gray>Z: <yellow>{z}"
 
 # === Skin ===
 skin:
@@ -118,9 +151,28 @@ skin:
   cleared-self: "Your skin has been reset to default."
   cleared-other: "Reset <yellow>{player}</yellow>'s skin to default."
   applying: "Applying skin <yellow>{skin}</yellow>..."
+  fetching: "Fetching skin for <yellow>{skin}</yellow>..."
+  resetting: "Resetting your skin..."
+  resetting-other: "Resetting <yellow>{player}</yellow>'s skin..."
   failed: "Failed to apply skin. Player may not exist."
   banned: "The skin <yellow>{skin}</yellow> is banned and cannot be used."
   usage: "Usage: /skin <set|clear> [name] [player]"
+  usage-set: "Usage: <yellow>/skin set <name> [player]"
+  help-header: "<gray>Skin Commands:"
+  help-set: "<yellow>/skin set <name> <gray>- Set your skin"
+  help-clear: "<yellow>/skin clear <gray>- Reset to default"
+  help-set-other: "<yellow>/skin set <name> <player> <gray>- Set another player's skin"
+  help-clear-other: "<yellow>/skin clear <player> <gray>- Reset another player's skin"
+  not-online: "Player <yellow>{player}</yellow> is not online."
+  unknown-subcommand: "Unknown subcommand. Use <yellow>set</yellow> or <yellow>clear</yellow>."
+
+# === Near ===
+near:
+  invalid-radius: "Invalid radius. Please enter a number."
+  min-radius: "Radius must be at least 1."
+  max-radius: "Maximum radius is <yellow>{max}</yellow> blocks."
+  no-players: "No players found within <yellow>{radius}</yellow> blocks."
+  header: "<gold>Players within {radius} blocks: <yellow>({count})"
 
 # === AFK ===
 afk:

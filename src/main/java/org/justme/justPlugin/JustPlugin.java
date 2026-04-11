@@ -529,14 +529,14 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("mail", new MailCommand(this));
 
         // Virtual Inventories
-        registerCmd("anvil", new AnvilCommand());
-        registerCmd("grindstone", new GrindstoneCommand());
-        registerCmd("enderchest", new EnderChestCommand());
-        registerCmd("craft", new CraftCommand());
-        registerCmd("stonecutter", new StonecutterCommand());
-        registerCmd("loom", new LoomCommand());
-        registerCmd("smithingtable", new SmithingTableCommand());
-        registerCmd("enchantingtable", new EnchantingTableCommand());
+        registerCmd("anvil", new AnvilCommand(this));
+        registerCmd("grindstone", new GrindstoneCommand(this));
+        registerCmd("enderchest", new EnderChestCommand(this));
+        registerCmd("craft", new CraftCommand(this));
+        registerCmd("stonecutter", new StonecutterCommand(this));
+        registerCmd("loom", new LoomCommand(this));
+        registerCmd("smithingtable", new SmithingTableCommand(this));
+        registerCmd("enchantingtable", new EnchantingTableCommand(this));
         registerCmd("pv", new VaultCommand(this));
 
         // Info
@@ -553,7 +553,7 @@ public final class JustPlugin extends JavaPlugin {
 
         // Items
         registerCmd("itemname", new ItemNameCommand(this));
-        registerCmd("shareitem", new ShareItemCommand());
+        registerCmd("shareitem", new ShareItemCommand(this));
         registerCmd("setspawner", new SetSpawnerCommand(this));
         registerCmd("repair", new org.justme.justPlugin.commands.item.RepairCommand(this));
         registerCmd("enchant", new org.justme.justPlugin.commands.item.EnchantCommand(this));

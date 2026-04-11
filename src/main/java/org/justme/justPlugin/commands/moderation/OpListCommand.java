@@ -29,11 +29,11 @@ public class OpListCommand implements TabExecutor {
         Set<OfflinePlayer> ops = Bukkit.getOperators();
 
         if (ops.isEmpty()) {
-            sender.sendMessage(CC.info("There are no operators on this server."));
+            sender.sendMessage(plugin.getMessageManager().info("moderation.oplist.empty"));
             return true;
         }
 
-        sender.sendMessage(CC.prefixed("<yellow>Server Operators <gray>(" + ops.size() + ")"));
+        sender.sendMessage(plugin.getMessageManager().prefixed("moderation.oplist.header", "{count}", String.valueOf(ops.size())));
 
         StringBuilder list = new StringBuilder();
         int count = 0;

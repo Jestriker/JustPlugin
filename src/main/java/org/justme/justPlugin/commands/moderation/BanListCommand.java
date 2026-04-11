@@ -38,7 +38,7 @@ public class BanListCommand implements TabExecutor {
                 page = Integer.parseInt(args[0]);
                 if (page < 1) page = 1;
             } catch (NumberFormatException e) {
-                sender.sendMessage(CC.error("Invalid page number."));
+                sender.sendMessage(plugin.getMessageManager().error("moderation.banlist.invalid-page"));
                 return true;
             }
         }
@@ -56,7 +56,7 @@ public class BanListCommand implements TabExecutor {
         ConfigurationSection bans = config.getConfigurationSection("bans");
 
         if (bans == null || bans.getKeys(false).isEmpty()) {
-            sender.sendMessage(CC.info("There are no banned players."));
+            sender.sendMessage(plugin.getMessageManager().info("moderation.banlist.empty"));
             return;
         }
 
@@ -67,7 +67,7 @@ public class BanListCommand implements TabExecutor {
         int start = (page - 1) * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, keys.size());
 
-        sender.sendMessage(CC.prefixed("<yellow>Ban List <gray>(Page " + page + " / " + totalPages + ", " + keys.size() + " total)"));
+        sender.sendMessage(plugin.getMessageManager().prefixed("moderation.banlist.header", "{page}", String.valueOf(page), "{max_page}", String.valueOf(totalPages), "{count}", String.valueOf(keys.size())));
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         for (int i = start; i < end; i++) {
@@ -111,7 +111,7 @@ public class BanListCommand implements TabExecutor {
         ConfigurationSection ipbans = config.getConfigurationSection("ipbans");
 
         if (ipbans == null || ipbans.getKeys(false).isEmpty()) {
-            sender.sendMessage(CC.info("There are no IP-banned players."));
+            sender.sendMessage(plugin.getMessageManager().info("moderation.banlist.ip-empty"));
             return;
         }
 
@@ -122,7 +122,7 @@ public class BanListCommand implements TabExecutor {
         int start = (page - 1) * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, keys.size());
 
-        sender.sendMessage(CC.prefixed("<yellow>IP Ban List <gray>(Page " + page + " / " + totalPages + ", " + keys.size() + " total)"));
+        sender.sendMessage(plugin.getMessageManager().prefixed("moderation.banlist.ip-header", "{page}", String.valueOf(page), "{max_page}", String.valueOf(totalPages), "{count}", String.valueOf(keys.size())));
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         for (int i = start; i < end; i++) {

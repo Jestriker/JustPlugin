@@ -21,6 +21,7 @@ discord:
   not-set: "Discord link has not been configured."
   set-success: "Discord link set to: <yellow>{link}"
   set-usage: "Usage: /discord set <link>"
+  header: "<gold><bold>Join our Discord!</bold></gold>"
 
 # === Apply Edits (Web Editor) ===
 applyedits:
@@ -28,19 +29,34 @@ applyedits:
   invalid-code: "Invalid or expired code. Generate a new one from the web editor."
   no-pending: "No pending changes to apply."
   usage: "Usage: /applyedits <code>"
+  not-running: "The web editor is not running. Enable it in config.yml under <yellow>web-editor.enabled</yellow>."
+  open-hint: "Open the web editor at <aqua>http://localhost:{port}</aqua>"
+  make-changes-hint: "Make your changes and use the generated code here."
+  invalid-session: "Invalid or expired session code: <yellow>{code}</yellow>"
+  session-expire-hint: "Session codes expire after <yellow>10 minutes</yellow>. Generate a new one from the web editor."
+  # Placeholders: {count}, {file}, {code}
+  applied: "Applied <yellow>{count}</yellow> change(s) to <aqua>{file}</aqua> from session <yellow>{code}</yellow>."
+  more-changes: "... and {count} more changes."
+  saved: "Config saved. Some changes may require a server restart to take full effect."
 
 # === Tab ===
 tab:
   refreshed: "Tab list refreshed."
+  updated: "Tab list updated!"
 
 # === Reload Scoreboard ===
 reloadscoreboard:
   success: "Scoreboard configuration reloaded for all players."
+  no-permission: "You don't have permission to reload the scoreboard."
+  reloaded: "Scoreboard configuration reloaded and applied to all players."
 
 # === Rank ===
 rank:
   no-luckperms: "LuckPerms is not installed! The rank system requires LuckPerms."
   disabled: "The rank system is disabled. Enable it in config.yml (command-settings.rank.enabled)."
+  disabled-msg: "The ranks system is currently disabled."
+  requires-luckperms: "The ranks system requires <yellow>LuckPerms</yellow> to be installed on this server."
+  install-hint: "Please ask a server administrator to install LuckPerms."
 
 # === Plugins ===
 plugins:
@@ -58,12 +74,42 @@ shareitem:
   # The format when broadcasting. {player} = sender, {item} = hover-able item display
   format: "<yellow>{player}</yellow> is showing: {item}"
 
+# === Repair ===
+repair:
+  no-permission-others: "You don't have permission to repair other players' items."
+  empty-hand: "You must be holding an item to repair."
+  target-empty-hand: "{player} is not holding an item."
+  not-repairable: "This item cannot be repaired."
+  already-repaired: "This item is already fully repaired."
+  # Placeholders: {item} - item name
+  success: "Repaired <yellow>{item}</yellow>!"
+  # Placeholders: {player}, {item} - target player name and item name
+  success-other: "Repaired <yellow>{player}</yellow>'s <yellow>{item}</yellow>!"
+  # Sent to the target player when someone else repairs their item
+  repaired-by: "Your <yellow>{item}</yellow> was repaired by <yellow>{player}</yellow>."
+  usage: "Usage: /repair [player]"
+
+# === Enchant ===
+enchant:
+  usage: "Usage: /enchant <enchantment> [level]"
+  empty-hand: "You must be holding an item."
+  # Placeholders: {enchantment} - the unknown enchantment name
+  unknown: "Unknown enchantment: <yellow>{enchantment}</yellow>"
+  invalid-level: "Level must be a number."
+  # Placeholders: {enchantment}, {item}
+  removed: "Removed <yellow>{enchantment}</yellow> from <yellow>{item}</yellow>."
+  cannot-apply: "This enchantment cannot be applied to this item."
+  # Placeholders: {enchantment}, {max}
+  max-level: "Maximum level for <yellow>{enchantment}</yellow> is <yellow>{max}</yellow>."
+  # Placeholders: {enchantment}, {level}, {item}
+  applied: "Applied <yellow>{enchantment} {level}</yellow> to <yellow>{item}</yellow>."
+
 # === Set Spawner ===
 setspawner:
-  success: "Spawner type set to <yellow>{type}</yellow>."
+  success: "Spawner set to <yellow>{type}</yellow>."
   not-looking: "You must be looking at a spawner!"
-  invalid-type: "Invalid entity type: <yellow>{type}"
-  usage: "Usage: /setspawner <type>"
+  invalid-type: "Invalid entity type! Example: ZOMBIE, SKELETON, CREEPER"
+  usage: "Usage: /setspawner <entity_type>"
 
 # === Skin Ban ===
 skinban:

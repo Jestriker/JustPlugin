@@ -49,38 +49,38 @@ public class MaintenanceCommand implements TabExecutor {
         switch (sub) {
             case "mode" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(CC.prefixed("Usage: <yellow>/maintenance mode <on | off>"));
+                    sender.sendMessage(plugin.getMessageManager().prefixed("maintenance.mode.usage"));
                     return true;
                 }
                 String mode = args[1].toLowerCase();
                 if ("on".equals(mode)) {
                     if (mm.isActive()) {
-                        sender.sendMessage(CC.warning("Maintenance mode is already <red>active</red><yellow>."));
+                        sender.sendMessage(plugin.getMessageManager().warning("maintenance.mode.already-on"));
                         return true;
                     }
                     mm.setActive(true);
-                    sender.sendMessage(CC.success("Maintenance mode is now <red>active</red><green>. Non-whitelisted players have been kicked."));
+                    sender.sendMessage(plugin.getMessageManager().success("maintenance.mode.enabled"));
                     plugin.getLogManager().log("admin",
                             "<yellow>" + sender.getName() + "</yellow> <gray>enabled <red>maintenance mode</red><gray>.");
                     if (plugin.getTabCommand() != null) plugin.getTabCommand().applyTabToAll();
                 } else if ("off".equals(mode)) {
                     if (!mm.isActive()) {
-                        sender.sendMessage(CC.warning("Maintenance mode is already <green>inactive</green><yellow>."));
+                        sender.sendMessage(plugin.getMessageManager().warning("maintenance.mode.already-off"));
                         return true;
                     }
                     mm.setActive(false);
-                    sender.sendMessage(CC.success("Maintenance mode is now <green>inactive</green><green>. Server is open to all players."));
+                    sender.sendMessage(plugin.getMessageManager().success("maintenance.mode.disabled"));
                     plugin.getLogManager().log("admin",
                             "<yellow>" + sender.getName() + "</yellow> <gray>disabled <green>maintenance mode</green><gray>.");
                     if (plugin.getTabCommand() != null) plugin.getTabCommand().applyTabToAll();
                 } else {
-                    sender.sendMessage(CC.error("Invalid mode. Use <yellow>on</yellow> or <yellow>off</yellow>."));
+                    sender.sendMessage(plugin.getMessageManager().error("maintenance.mode.invalid"));
                 }
             }
 
             case "allowed-users", "allowedusers", "whitelist", "users" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(CC.prefixed("Usage: <yellow>/maintenance allowed-users <list | add | remove> [player]"));
+                    sender.sendMessage(plugin.getMessageManager().prefixed("maintenance.allowed-users.usage"));
                     return true;
                 }
                 String action = args[1].toLowerCase();
@@ -88,17 +88,17 @@ public class MaintenanceCommand implements TabExecutor {
                     case "list" -> {
                         Map<UUID, String> allowed = mm.getAllowedUsers();
                         if (allowed.isEmpty()) {
-                            sender.sendMessage(CC.info("No players on the maintenance whitelist."));
+                            sender.sendMessage(plugin.getMessageManager().info("maintenance.allowed-users.list-empty"));
                         } else {
-                            sender.sendMessage(CC.prefixed("<gray>Maintenance whitelist <dark_gray>(" + allowed.size() + " players):"));
+                            sender.sendMessage(plugin.getMessageManager().prefixed("maintenance.allowed-users.list-header", "{count}", String.valueOf(allowed.size())));
                             for (var entry : allowed.entrySet()) {
-                                sender.sendMessage(CC.line("<white>" + entry.getValue() + " <dark_gray>(" + entry.getKey() + ")"));
+                                sender.sendMessage(plugin.getMessageManager().line("maintenance.allowed-users.list-entry", "{player}", entry.getValue(), "{uuid}", entry.getKey().toString()));
                             }
                         }
                     }
                     case "add" -> {
                         if (args.length < 3) {
-                            sender.sendMessage(CC.error("Usage: <yellow>/maintenance allowed-users add <player>"));
+                            sender.sendMessage(plugin.getMessageManager().error("maintenance.allowed-users.usage-add"));
                             return true;
                         }
                         String targetName = args[2];
@@ -109,17 +109,16 @@ public class MaintenanceCommand implements TabExecutor {
                             target = Bukkit.getOfflinePlayer(targetName);
                         }
                         if (mm.addAllowed(target.getUniqueId(), target.getName() != null ? target.getName() : targetName)) {
-                            sender.sendMessage(CC.success("Added <yellow>" + (target.getName() != null ? target.getName() : targetName) +
-                                    "</yellow> to the maintenance whitelist."));
+                            sender.sendMessage(plugin.getMessageManager().success("maintenance.allowed-users.added", "{player}", target.getName() != null ? target.getName() : targetName));
                             plugin.getLogManager().log("admin",
                                     "<yellow>" + sender.getName() + "</yellow> <gray>added <white>" + targetName + "</white> to maintenance whitelist.");
                         } else {
-                            sender.sendMessage(CC.warning("That player is already on the maintenance whitelist."));
+                            sender.sendMessage(plugin.getMessageManager().warning("maintenance.allowed-users.already-added"));
                         }
                     }
                     case "remove" -> {
                         if (args.length < 3) {
-                            sender.sendMessage(CC.error("Usage: <yellow>/maintenance allowed-users remove <player>"));
+                            sender.sendMessage(plugin.getMessageManager().error("maintenance.allowed-users.usage-remove"));
                             return true;
                         }
                         String targetName = args[2];
@@ -140,20 +139,20 @@ public class MaintenanceCommand implements TabExecutor {
                             }
                         }
                         if (found != null && mm.removeAllowed(found)) {
-                            sender.sendMessage(CC.success("Removed <yellow>" + targetName + "</yellow> from the maintenance whitelist."));
+                            sender.sendMessage(plugin.getMessageManager().success("maintenance.allowed-users.removed", "{player}", targetName));
                             plugin.getLogManager().log("admin",
                                     "<yellow>" + sender.getName() + "</yellow> <gray>removed <white>" + targetName + "</white> from maintenance whitelist.");
                         } else {
-                            sender.sendMessage(CC.error("That player is not on the maintenance whitelist."));
+                            sender.sendMessage(plugin.getMessageManager().error("maintenance.allowed-users.not-on-list"));
                         }
                     }
-                    default -> sender.sendMessage(CC.error("Unknown action. Use <yellow>list</yellow>, <yellow>add</yellow>, or <yellow>remove</yellow>."));
+                    default -> sender.sendMessage(plugin.getMessageManager().error("maintenance.allowed-users.unknown-action"));
                 }
             }
 
             case "allowed-groups", "allowedgroups", "groups" -> {
                 if (args.length < 2) {
-                    sender.sendMessage(CC.prefixed("Usage: <yellow>/maintenance allowed-groups <list | add | remove> [group]"));
+                    sender.sendMessage(plugin.getMessageManager().prefixed("maintenance.allowed-groups.usage"));
                     return true;
                 }
                 String action = args[1].toLowerCase();
@@ -161,20 +160,20 @@ public class MaintenanceCommand implements TabExecutor {
                     case "list" -> {
                         List<String> groups = mm.getAllowedGroups();
                         if (groups.isEmpty()) {
-                            sender.sendMessage(CC.info("No LuckPerms groups configured for maintenance bypass."));
+                            sender.sendMessage(plugin.getMessageManager().info("maintenance.allowed-groups.list-empty"));
                         } else {
-                            sender.sendMessage(CC.prefixed("<gray>Maintenance bypass groups <dark_gray>(" + groups.size() + "):"));
+                            sender.sendMessage(plugin.getMessageManager().prefixed("maintenance.allowed-groups.list-header", "{count}", String.valueOf(groups.size())));
                             for (String group : groups) {
-                                sender.sendMessage(CC.line("<white>" + group));
+                                sender.sendMessage(plugin.getMessageManager().line("maintenance.allowed-groups.list-entry", "{group}", group));
                             }
                         }
                         if (!plugin.isLuckPermsAvailable()) {
-                            sender.sendMessage(CC.warning("LuckPerms is not installed - group bypass is inactive."));
+                            sender.sendMessage(plugin.getMessageManager().warning("maintenance.allowed-groups.no-luckperms"));
                         }
                     }
                     case "add" -> {
                         if (args.length < 3) {
-                            sender.sendMessage(CC.error("Usage: <yellow>/maintenance allowed-groups add <group>"));
+                            sender.sendMessage(plugin.getMessageManager().error("maintenance.allowed-groups.usage-add"));
                             return true;
                         }
                         String groupName = args[2].toLowerCase();
@@ -184,36 +183,33 @@ public class MaintenanceCommand implements TabExecutor {
                                 net.luckperms.api.LuckPerms lp = net.luckperms.api.LuckPermsProvider.get();
                                 net.luckperms.api.model.group.Group group = lp.getGroupManager().getGroup(groupName);
                                 if (group == null) {
-                                    sender.sendMessage(CC.warning("LuckPerms group <yellow>" + groupName +
-                                            "</yellow> was not found. Adding anyway - it will work if the group is created later."));
+                                    sender.sendMessage(plugin.getMessageManager().warning("maintenance.allowed-groups.group-not-found", "{group}", groupName));
                                 }
                             } catch (Exception ignored) {}
                         }
                         if (mm.addAllowedGroup(groupName)) {
-                            sender.sendMessage(CC.success("Added group <yellow>" + groupName +
-                                    "</yellow> to the maintenance bypass list."));
+                            sender.sendMessage(plugin.getMessageManager().success("maintenance.allowed-groups.added", "{group}", groupName));
                             plugin.getLogManager().log("admin",
                                     "<yellow>" + sender.getName() + "</yellow> <gray>added group <white>" + groupName + "</white> to maintenance bypass.");
                         } else {
-                            sender.sendMessage(CC.warning("Group <yellow>" + groupName + "</yellow> is already in the bypass list."));
+                            sender.sendMessage(plugin.getMessageManager().warning("maintenance.allowed-groups.already-added", "{group}", groupName));
                         }
                     }
                     case "remove" -> {
                         if (args.length < 3) {
-                            sender.sendMessage(CC.error("Usage: <yellow>/maintenance allowed-groups remove <group>"));
+                            sender.sendMessage(plugin.getMessageManager().error("maintenance.allowed-groups.usage-remove"));
                             return true;
                         }
                         String groupName = args[2].toLowerCase();
                         if (mm.removeAllowedGroup(groupName)) {
-                            sender.sendMessage(CC.success("Removed group <yellow>" + groupName +
-                                    "</yellow> from the maintenance bypass list."));
+                            sender.sendMessage(plugin.getMessageManager().success("maintenance.allowed-groups.removed", "{group}", groupName));
                             plugin.getLogManager().log("admin",
                                     "<yellow>" + sender.getName() + "</yellow> <gray>removed group <white>" + groupName + "</white> from maintenance bypass.");
                         } else {
-                            sender.sendMessage(CC.error("Group <yellow>" + groupName + "</yellow> is not in the bypass list."));
+                            sender.sendMessage(plugin.getMessageManager().error("maintenance.allowed-groups.not-on-list", "{group}", groupName));
                         }
                     }
-                    default -> sender.sendMessage(CC.error("Unknown action. Use <yellow>list</yellow>, <yellow>add</yellow>, or <yellow>remove</yellow>."));
+                    default -> sender.sendMessage(plugin.getMessageManager().error("maintenance.allowed-groups.unknown-action"));
                 }
             }
 
@@ -221,32 +217,31 @@ public class MaintenanceCommand implements TabExecutor {
                 if (args.length < 2) {
                     String cd = mm.getCooldownText();
                     if (cd != null) {
-                        sender.sendMessage(CC.info("Maintenance estimated to end in: <yellow>" + cd));
+                        sender.sendMessage(plugin.getMessageManager().info("maintenance.cooldown.current", "{cooldown}", cd));
                     } else {
-                        sender.sendMessage(CC.info("No maintenance cooldown is set."));
+                        sender.sendMessage(plugin.getMessageManager().info("maintenance.cooldown.no-cooldown"));
                     }
-                    sender.sendMessage(CC.line("Usage: <yellow>/maintenance cooldown <duration | clear>"));
-                    sender.sendMessage(CC.line("Duration examples: <white>30m<gray>, <white>1h<gray>, <white>2d<gray>, <white>1d12h"));
+                    sender.sendMessage(plugin.getMessageManager().line("maintenance.cooldown.usage"));
+                    sender.sendMessage(plugin.getMessageManager().line("maintenance.cooldown.usage-hint"));
                     return true;
                 }
                 String val = args[1].toLowerCase();
                 if ("clear".equals(val) || "none".equals(val) || "off".equals(val)) {
                     mm.setCooldownEnd(-1);
-                    sender.sendMessage(CC.success("Maintenance cooldown cleared. MOTD and kick screen will say \"try again later\"."));
+                    sender.sendMessage(plugin.getMessageManager().success("maintenance.cooldown.cleared"));
                 } else {
                     long duration = MaintenanceManager.parseDuration(val);
                     if (duration <= 0) {
-                        sender.sendMessage(CC.error("Invalid duration. Examples: <yellow>30m<gray>, <yellow>1h<gray>, <yellow>2d<gray>, <yellow>1d12h"));
+                        sender.sendMessage(plugin.getMessageManager().error("maintenance.cooldown.invalid-duration"));
                         return true;
                     }
                     mm.setCooldownEnd(System.currentTimeMillis() + duration);
-                    sender.sendMessage(CC.success("Maintenance cooldown set to <yellow>" + mm.getCooldownText() +
-                            "</yellow>. This will be shown in the MOTD and kick screen."));
+                    sender.sendMessage(plugin.getMessageManager().success("maintenance.cooldown.set", "{duration}", mm.getCooldownText()));
                 }
             }
 
             default -> {
-                sender.sendMessage(CC.prefixed("<gray>Unknown subcommand. Usage:"));
+                sender.sendMessage(plugin.getMessageManager().prefixed("maintenance.general.unknown-subcommand"));
                 sendUsage(sender);
             }
         }
@@ -255,24 +250,29 @@ public class MaintenanceCommand implements TabExecutor {
     }
 
     private void sendStatus(CommandSender sender, MaintenanceManager mm) {
-        sender.sendMessage(CC.prefixed("<gray>Maintenance System:"));
-        sender.sendMessage(CC.line("Status: " + (mm.isActive() ? "<red>Active (maintenance on)" : "<green>Inactive (server open)")));
+        sender.sendMessage(plugin.getMessageManager().prefixed("maintenance.general.status-header"));
+        String statusValue = mm.isActive() ? plugin.getMessageManager().raw("maintenance.general.status-on") : plugin.getMessageManager().raw("maintenance.general.status-off");
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.status-line", "{status}", statusValue));
         String cd = mm.getCooldownText();
-        sender.sendMessage(CC.line("Cooldown: " + (cd != null ? "<yellow>" + cd : "<dark_gray>Not set")));
-        sender.sendMessage(CC.line("Whitelisted: <white>" + mm.getAllowedUsers().size() + " players<gray>, <white>" + mm.getAllowedGroups().size() + " groups<gray>."));
+        String cooldownValue = cd != null ? "<yellow>" + cd : plugin.getMessageManager().raw("maintenance.general.status-cooldown-none");
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.status-cooldown", "{cooldown}", cooldownValue));
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.status-whitelisted", "{players}", String.valueOf(mm.getAllowedUsers().size()), "{groups}", String.valueOf(mm.getAllowedGroups().size())));
         List<String> groups = mm.getAllowedGroups();
-        sender.sendMessage(CC.line("Bypass groups: " + (groups.isEmpty() ? "<dark_gray>None" : "<white>" + String.join(", ", groups))));
-        sender.sendMessage(CC.line("OP bypass: " + (mm.isOpsBypass() ? "<green>Enabled" : "<red>Disabled")));
-        sender.sendMessage(CC.line("Custom icon: " + (mm.getCachedIcon() != null ? "<green>Loaded" : "<dark_gray>Not set")));
+        String groupsValue = groups.isEmpty() ? plugin.getMessageManager().raw("maintenance.general.status-bypass-none") : "<white>" + String.join(", ", groups);
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.status-bypass-groups", "{groups}", groupsValue));
+        String opValue = mm.isOpsBypass() ? plugin.getMessageManager().raw("maintenance.general.status-op-enabled") : plugin.getMessageManager().raw("maintenance.general.status-op-disabled");
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.status-op-bypass", "{status}", opValue));
+        String iconValue = mm.getCachedIcon() != null ? plugin.getMessageManager().raw("maintenance.general.status-icon-loaded") : plugin.getMessageManager().raw("maintenance.general.status-icon-none");
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.status-icon", "{status}", iconValue));
         sender.sendMessage(net.kyori.adventure.text.Component.empty());
         sendUsage(sender);
     }
 
     private void sendUsage(CommandSender sender) {
-        sender.sendMessage(CC.line("<yellow>/maintenance mode <on | off>"));
-        sender.sendMessage(CC.line("<yellow>/maintenance allowed-users <list | add | remove> [player]"));
-        sender.sendMessage(CC.line("<yellow>/maintenance allowed-groups <list | add | remove> [group]"));
-        sender.sendMessage(CC.line("<yellow>/maintenance cooldown <duration | clear>"));
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.usage-mode"));
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.usage-users"));
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.usage-groups"));
+        sender.sendMessage(plugin.getMessageManager().line("maintenance.general.usage-cooldown"));
     }
 
     @Override

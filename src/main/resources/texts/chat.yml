@@ -24,12 +24,18 @@ msg:
   self-message: "You can't message yourself!"
   # When target is ignoring sender
   ignored: "This player is not accepting messages from you."
+  # When the sender is muted
+  muted: "You are muted and cannot send private messages."
 
 # === Reply ===
 reply:
   no-target: "You have no one to reply to!"
   target-offline: "That player is no longer online."
   usage: "Usage: /r <message>"
+  # When the sender is muted
+  muted: "You are muted and cannot send private messages."
+  # When target is ignoring sender
+  ignored: "This player is ignoring you."
 
 # === Ignore ===
 ignore:
@@ -42,6 +48,20 @@ ignore:
   list-cleared: "Your ignore list has been cleared."
   cannot-self: "You can't ignore yourself!"
   usage: "Usage: /ignore <add|remove|list|clearlist> [player]"
+  add-usage: "Usage: /ignore add <player>"
+  remove-usage: "Usage: /ignore remove <player>"
+  # Sent to the ignored player when they are added
+  ignored-by: "You have been ignored by <yellow>{player}</yellow>."
+  # Sent when the target is not in the ignore list (for remove with offline player)
+  not-in-list: "Player not found in your ignore list!"
+  # Sent to the ignored player when they are removed
+  unignored-by: "<yellow>{player}</yellow> is no longer ignoring you."
+  # List display header with count
+  list-display-header: "<gold><bold>Ignored Players</bold></gold> <dark_gray>(<green>{count}<dark_gray>)"
+  # Shown when clearing an already-empty ignore list
+  list-already-empty: "Your ignore list is already empty."
+  # Shown after clearing the ignore list with count
+  list-cleared-count: "Cleared your ignore list. <gray>({count} player(s) removed)</gray>"
 
 # === Announce ===
 announce:
@@ -59,6 +79,7 @@ sharecoords:
 sharedeathcoords:
   format: "<yellow>{player}</yellow> shared their death location: <red>{x}, {y}, {z}</red> in <yellow>{world}</yellow>"
   no-death: "You don't have a death location to share."
+  no-death-location: "No recorded death location. You haven't died yet!"
   usage: "Usage: /sharedeathcoords [all|team]"
 
 # === Chat Mode ===
@@ -67,6 +88,9 @@ chat:
   switched-team: "Switched to <yellow>team</yellow> chat."
   not-in-team: "You are not in a team!"
   usage: "Usage: /chat <all|team>"
+  current-mode: "Current chat mode: <yellow>{mode}</yellow>"
+  invalid-mode: "Invalid chat mode! Use: all, team"
+  mode-set: "Chat mode set to <yellow>{mode}</yellow>."
 
 # === Team Message ===
 teammsg:
@@ -95,4 +119,6 @@ clearchat:
   cleared: "Chat has been cleared by <yellow>{player}</yellow>."
   cleared-reason: "Chat has been cleared by <yellow>{player}</yellow>. <gray>Reason: {reason}"
   usage: "Usage: /clearchat [reason]"
+  # Shown to the person who cleared the chat
+  success: "Chat has been cleared."
 

@@ -30,7 +30,7 @@ public class NearCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
@@ -42,15 +42,15 @@ public class NearCommand implements TabExecutor {
             try {
                 radius = Integer.parseInt(args[0]);
             } catch (NumberFormatException e) {
-                player.sendMessage(CC.error("Invalid radius. Please enter a number."));
+                player.sendMessage(plugin.getMessageManager().error("player.near.invalid-radius"));
                 return true;
             }
             if (radius < 1) {
-                player.sendMessage(CC.error("Radius must be at least 1."));
+                player.sendMessage(plugin.getMessageManager().error("player.near.min-radius"));
                 return true;
             }
             if (radius > maxRadius) {
-                player.sendMessage(CC.error("Maximum radius is <yellow>" + maxRadius + "</yellow> blocks."));
+                player.sendMessage(plugin.getMessageManager().error("player.near.max-radius", "{max}", String.valueOf(maxRadius)));
                 return true;
             }
         }
@@ -73,11 +73,11 @@ public class NearCommand implements TabExecutor {
         nearbyPlayers.sort(Comparator.comparingDouble(np -> np.distance));
 
         if (nearbyPlayers.isEmpty()) {
-            player.sendMessage(CC.info("No players found within <yellow>" + radius + "</yellow> blocks."));
+            player.sendMessage(plugin.getMessageManager().info("player.near.no-players", "{radius}", String.valueOf(radius)));
             return true;
         }
 
-        player.sendMessage(CC.info("<gold>Players within " + radius + " blocks: <yellow>(" + nearbyPlayers.size() + ")"));
+        player.sendMessage(plugin.getMessageManager().info("player.near.header", "{radius}", String.valueOf(radius), "{count}", String.valueOf(nearbyPlayers.size())));
 
         for (NearbyPlayer np : nearbyPlayers) {
             Location loc = np.player.getLocation();

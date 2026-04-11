@@ -23,17 +23,17 @@ public class SkinUnbanCommand implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(CC.error("Usage: <yellow>/skinunban <name>"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.skinunban.usage"));
             return true;
         }
 
         String name = args[0].toLowerCase();
         if (plugin.getSkinManager().unbanSkin(name)) {
-            sender.sendMessage(CC.success("Unbanned skin name <yellow>" + name + "</yellow>. Players can now use this skin."));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.skinunban.success", "{name}", name));
             plugin.getLogManager().log("admin",
                     "<yellow>" + sender.getName() + "</yellow> <gray>unbanned skin name <white>" + name + "</white>.");
         } else {
-            sender.sendMessage(CC.error("Skin name <yellow>" + name + "</yellow> is not banned."));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.skinunban.not-banned", "{name}", name));
         }
         return true;
     }

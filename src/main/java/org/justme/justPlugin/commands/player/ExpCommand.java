@@ -25,21 +25,21 @@ public class ExpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.info("Your XP: <yellow>Level " + player.getLevel() + "</yellow> (<gray>" + player.getTotalExperience() + " total XP</gray>)"));
+            player.sendMessage(plugin.getMessageManager().info("player.exp.show-self", "{level}", String.valueOf(player.getLevel()), "{total}", String.valueOf(player.getTotalExperience())));
             return true;
         }
         if (args.length < 3) {
-            player.sendMessage(CC.error("Usage: /exp <set | give> <levels | orbs> <amount> [player]"));
+            player.sendMessage(plugin.getMessageManager().error("player.exp.usage"));
             return true;
         }
         String action = args[0].toLowerCase();
         String type = args[1].toLowerCase();
         if (!type.equals("levels") && !type.equals("orbs") && !type.equals("level") && !type.equals("orb") && !type.equals("l") && !type.equals("o")) {
-            player.sendMessage(CC.error("Type must be <yellow>levels</yellow> or <yellow>orbs</yellow>."));
+            player.sendMessage(plugin.getMessageManager().error("player.exp.invalid-type"));
             return true;
         }
         boolean isLevels = type.startsWith("l");
@@ -48,12 +48,12 @@ public class ExpCommand implements TabExecutor {
             Player target = player;
             if (args.length >= 4) {
                 if (!player.hasPermission("justplugin.exp.others")) {
-                    player.sendMessage(CC.error("You don't have permission to modify other players' experience."));
+                    player.sendMessage(plugin.getMessageManager().error("general.no-permission"));
                     return true;
                 }
                 target = Bukkit.getPlayer(args[3]);
                 if (target == null) {
-                    player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+                    player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                     return true;
                 }
             }
@@ -62,32 +62,32 @@ public class ExpCommand implements TabExecutor {
                     if (isLevels) {
                         target.setLevel(amount);
                         target.setExp(0);
-                        player.sendMessage(CC.success("Set <yellow>" + target.getName() + "</yellow>'s level to <yellow>" + amount + "</yellow>."));
+                        player.sendMessage(plugin.getMessageManager().success("player.exp.set-levels", "{player}", target.getName(), "{amount}", String.valueOf(amount)));
                         plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set <yellow>" + target.getName() + "</yellow>'s level to <yellow>" + amount + "</yellow>");
                     } else {
                         target.setTotalExperience(0);
                         target.setLevel(0);
                         target.setExp(0);
                         target.giveExp(amount);
-                        player.sendMessage(CC.success("Set <yellow>" + target.getName() + "</yellow>'s XP to <yellow>" + amount + "</yellow> orbs."));
+                        player.sendMessage(plugin.getMessageManager().success("player.exp.set-orbs", "{player}", target.getName(), "{amount}", String.valueOf(amount)));
                         plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set <yellow>" + target.getName() + "</yellow>'s XP to <yellow>" + amount + "</yellow> orbs");
                     }
                 }
                 case "give", "add" -> {
                     if (isLevels) {
                         target.setLevel(target.getLevel() + amount);
-                        player.sendMessage(CC.success("Gave <yellow>" + amount + "</yellow> levels to <yellow>" + target.getName() + "</yellow>. (Now level " + target.getLevel() + ")"));
+                        player.sendMessage(plugin.getMessageManager().success("player.exp.give-levels", "{amount}", String.valueOf(amount), "{player}", target.getName(), "{current}", String.valueOf(target.getLevel())));
                         plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> gave <yellow>" + amount + "</yellow> levels to <yellow>" + target.getName() + "</yellow>");
                     } else {
                         target.giveExp(amount);
-                        player.sendMessage(CC.success("Gave <yellow>" + amount + "</yellow> XP orbs to <yellow>" + target.getName() + "</yellow>."));
+                        player.sendMessage(plugin.getMessageManager().success("player.exp.give-orbs", "{amount}", String.valueOf(amount), "{player}", target.getName()));
                         plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> gave <yellow>" + amount + "</yellow> XP orbs to <yellow>" + target.getName() + "</yellow>");
                     }
                 }
-                default -> player.sendMessage(CC.error("Usage: /exp <set | give> <levels | orbs> <amount> [player]"));
+                default -> player.sendMessage(plugin.getMessageManager().error("player.exp.usage"));
             }
         } catch (NumberFormatException e) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-number")));
+            player.sendMessage(plugin.getMessageManager().error("general.invalid-number"));
         }
         return true;
     }

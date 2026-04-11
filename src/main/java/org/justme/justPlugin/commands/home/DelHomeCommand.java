@@ -6,7 +6,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 import java.util.Set;
@@ -24,17 +23,17 @@ public class DelHomeCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("home.delhome.usage")));
+            player.sendMessage(plugin.getMessageManager().error("home.delhome.usage"));
             return true;
         }
         if (plugin.getHomeManager().deleteHome(player.getUniqueId(), args[0])) {
-            player.sendMessage(CC.success("Home <yellow>" + args[0] + "</yellow> has been deleted."));
+            player.sendMessage(plugin.getMessageManager().success("home.delhome.success", "{home}", args[0]));
         } else {
-            player.sendMessage(CC.error("Home <yellow>" + args[0] + "</yellow> not found!"));
+            player.sendMessage(plugin.getMessageManager().error("home.delhome.not-found", "{home}", args[0]));
         }
         return true;
     }

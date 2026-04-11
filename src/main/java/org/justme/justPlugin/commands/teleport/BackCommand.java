@@ -37,7 +37,7 @@ public class BackCommand implements TabExecutor {
         if (!player.hasPermission("justplugin.back.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "back")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "back");
-            player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
+            player.sendMessage(plugin.getMessageManager().error("general.cooldown-wait", "{time}", CooldownManager.formatTime(remaining)));
             return true;
         }
 

@@ -28,29 +28,32 @@ public class WeatherCommand implements TabExecutor {
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /weather <sun | rain | thunder>"));
+            player.sendMessage(plugin.getMessageManager().error("world.weather.usage"));
             return true;
         }
         switch (args[0].toLowerCase()) {
             case "sun", "clear" -> {
                 player.getWorld().setStorm(false);
                 player.getWorld().setThundering(false);
-                player.sendMessage(CC.success("Weather set to <yellow>clear</yellow>."));
+                player.sendMessage(plugin.getMessageManager().success("world.weather.set",
+                        "{weather}", "clear"));
                 plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set weather to <yellow>clear</yellow>");
             }
             case "rain", "storm" -> {
                 player.getWorld().setStorm(true);
                 player.getWorld().setThundering(false);
-                player.sendMessage(CC.success("Weather set to <yellow>rain</yellow>."));
+                player.sendMessage(plugin.getMessageManager().success("world.weather.set",
+                        "{weather}", "rain"));
                 plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set weather to <yellow>rain</yellow>");
             }
             case "thunder", "thunderstorm" -> {
                 player.getWorld().setStorm(true);
                 player.getWorld().setThundering(true);
-                player.sendMessage(CC.success("Weather set to <yellow>thunder</yellow>."));
+                player.sendMessage(plugin.getMessageManager().success("world.weather.set",
+                        "{weather}", "thunder"));
                 plugin.getLogManager().log("admin", "<yellow>" + player.getName() + "</yellow> set weather to <yellow>thunder</yellow>");
             }
-            default -> player.sendMessage(CC.error("Usage: /weather <sun | rain | thunder>"));
+            default -> player.sendMessage(plugin.getMessageManager().error("world.weather.usage"));
         }
         return true;
     }

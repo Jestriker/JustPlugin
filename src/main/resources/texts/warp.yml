@@ -23,7 +23,7 @@ warps:
 
 # === Set Warp ===
 setwarp:
-  success: "Warp <yellow>{warp}</yellow> created!"
+  success: "Warp <yellow>{warp}</yellow> set!"
   already-exists: "A warp named <yellow>{warp}</yellow> already exists!"
   usage: "Usage: /setwarp <name>"
 

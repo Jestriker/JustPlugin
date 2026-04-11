@@ -26,24 +26,24 @@ public class SkinBanCommand implements TabExecutor {
         if (args.length == 0 || "list".equalsIgnoreCase(args[0])) {
             var banned = plugin.getSkinManager().getBannedSkins();
             if (banned.isEmpty()) {
-                sender.sendMessage(CC.info("No skin names are currently banned."));
+                sender.sendMessage(plugin.getMessageManager().info("moderation.skinban.list-empty"));
             } else {
-                sender.sendMessage(CC.prefixed("<gray>Banned skins <dark_gray>(" + banned.size() + "):"));
+                sender.sendMessage(plugin.getMessageManager().prefixed("moderation.skinban.list-header", "{count}", String.valueOf(banned.size())));
                 for (String name : banned) {
-                    sender.sendMessage(CC.line("<white>" + name));
+                    sender.sendMessage(plugin.getMessageManager().line("moderation.skinban.list-entry", "{name}", name));
                 }
             }
-            sender.sendMessage(CC.line("<dark_gray>Usage: <yellow>/skinban <name></yellow> to ban a skin."));
+            sender.sendMessage(plugin.getMessageManager().line("moderation.skinban.list-usage"));
             return true;
         }
 
         String name = args[0].toLowerCase();
         if (plugin.getSkinManager().banSkin(name)) {
-            sender.sendMessage(CC.success("Banned skin name <yellow>" + name + "</yellow>. Players can no longer use this skin."));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.skinban.success", "{name}", name));
             plugin.getLogManager().log("admin",
                     "<yellow>" + sender.getName() + "</yellow> <gray>banned skin name <white>" + name + "</white>.");
         } else {
-            sender.sendMessage(CC.warning("Skin name <yellow>" + name + "</yellow> is already banned."));
+            sender.sendMessage(plugin.getMessageManager().warning("moderation.skinban.already-banned", "{name}", name));
         }
         return true;
     }

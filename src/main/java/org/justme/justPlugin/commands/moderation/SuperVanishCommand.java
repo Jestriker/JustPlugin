@@ -31,7 +31,7 @@ public class SuperVanishCommand implements TabExecutor {
         Player target = player;
         if (args.length >= 1) {
             if (!player.hasPermission("justplugin.supervanish.others")) {
-                player.sendMessage(CC.error("You don't have permission to super-vanish other players."));
+                player.sendMessage(plugin.getMessageManager().error("moderation.supervanish.no-permission-others"));
                 return true;
             }
             target = Bukkit.getPlayer(args[0]);
@@ -57,7 +57,8 @@ public class SuperVanishCommand implements TabExecutor {
 
         if (!target.equals(player)) {
             String status = wasSuperVanished ? "<green>un-super-vanished" : "<red>super-vanished";
-            player.sendMessage(CC.success("<yellow>" + target.getName() + "</yellow> has been " + status + "."));
+            player.sendMessage(plugin.getMessageManager().success("moderation.supervanish.toggled-other",
+                    "{player}", target.getName(), "{status}", status));
         }
         return true;
     }

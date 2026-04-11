@@ -30,7 +30,7 @@ public class VanishCommand implements TabExecutor {
         Player target = player;
         if (args.length >= 1) {
             if (!player.hasPermission("justplugin.vanish.others")) {
-                player.sendMessage(CC.error("You don't have permission to vanish other players."));
+                player.sendMessage(plugin.getMessageManager().error("moderation.vanish.no-permission-others"));
                 return true;
             }
             target = Bukkit.getPlayer(args[0]);
@@ -56,7 +56,8 @@ public class VanishCommand implements TabExecutor {
 
         if (!target.equals(player)) {
             String status = wasVanished ? "<green>unvanished" : "<red>vanished";
-            player.sendMessage(CC.success("<yellow>" + target.getName() + "</yellow> has been " + status + "."));
+            player.sendMessage(plugin.getMessageManager().success("moderation.vanish.toggled-other",
+                    "{player}", target.getName(), "{status}", status));
         }
         return true;
     }

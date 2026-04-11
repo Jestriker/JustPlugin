@@ -34,7 +34,7 @@ public class SpawnCommand implements TabExecutor {
         if (!player.hasPermission("justplugin.spawn.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "spawn")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "spawn");
-            player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
+            player.sendMessage(plugin.getMessageManager().error("general.cooldown-wait", "{time}", CooldownManager.formatTime(remaining)));
             return true;
         }
 

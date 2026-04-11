@@ -25,28 +25,28 @@ public class AddCashCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /addcash <amount> or /addcash <player> <amount>"));
+            sender.sendMessage(plugin.getMessageManager().error("economy.addcash.usage"));
             return true;
         }
 
         // /addcash <amount> - self
         if (args.length == 1) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(CC.error("Console must specify a player: /addcash <player> <amount>"));
+                sender.sendMessage(plugin.getMessageManager().error("economy.addcash.console-usage"));
                 return true;
             }
             if (!player.hasPermission("justplugin.addcash")) {
-                player.sendMessage(CC.error("You don't have permission to add cash to yourself."));
+                player.sendMessage(plugin.getMessageManager().error("economy.addcash.no-permission-self"));
                 return true;
             }
             try {
                 double amount = Double.parseDouble(args[0]);
                 if (amount <= 0) {
-                    player.sendMessage(CC.error("Amount must be positive!"));
+                    player.sendMessage(plugin.getMessageManager().error("economy.addcash.amount-positive"));
                     return true;
                 }
                 plugin.getEconomyManager().addBalance(player.getUniqueId(), amount);
-                player.sendMessage(CC.success("Added <green>" + plugin.getEconomyManager().format(amount) + "</green> to your balance. New balance: <green>" + plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(player.getUniqueId())) + "</green>"));
+                player.sendMessage(plugin.getMessageManager().success("economy.addcash.success-self", "{amount}", plugin.getEconomyManager().format(amount), "{balance}", plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(player.getUniqueId()))));
                 plugin.getLogManager().log("economy", "<yellow>" + player.getName() + "</yellow> added <green>" + plugin.getEconomyManager().format(amount) + "</green> to their own balance");
             } catch (NumberFormatException e) {
                 player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-number")));
@@ -56,14 +56,14 @@ public class AddCashCommand implements TabExecutor {
 
         // /addcash <player> <amount> - others
         if (sender instanceof Player p && !p.hasPermission("justplugin.addcash.others")) {
-            sender.sendMessage(CC.error("You don't have permission to add cash to other players."));
+            sender.sendMessage(plugin.getMessageManager().error("economy.addcash.no-permission-others"));
             return true;
         }
 
         try {
             double amount = Double.parseDouble(args[1]);
             if (amount <= 0) {
-                sender.sendMessage(CC.error("Amount must be positive!"));
+                sender.sendMessage(plugin.getMessageManager().error("economy.addcash.amount-positive"));
                 return true;
             }
 
@@ -71,8 +71,8 @@ public class AddCashCommand implements TabExecutor {
             Player target = Bukkit.getPlayer(args[0]);
             if (target != null) {
                 plugin.getEconomyManager().addBalance(target.getUniqueId(), amount);
-                sender.sendMessage(CC.success("Added <green>" + plugin.getEconomyManager().format(amount) + "</green> to <yellow>" + target.getName() + "</yellow>'s balance."));
-                target.sendMessage(CC.success("<green>" + plugin.getEconomyManager().format(amount) + "</green> has been added to your balance."));
+                sender.sendMessage(plugin.getMessageManager().success("economy.addcash.success-other", "{amount}", plugin.getEconomyManager().format(amount), "{player}", target.getName()));
+                target.sendMessage(plugin.getMessageManager().success("economy.addcash.notify-target", "{amount}", plugin.getEconomyManager().format(amount)));
                 String senderName = sender instanceof Player ? sender.getName() : "Console";
                 plugin.getLogManager().log("economy", "<yellow>" + senderName + "</yellow> added <green>" + plugin.getEconomyManager().format(amount) + "</green> to <yellow>" + target.getName() + "</yellow>'s balance");
                 return true;
@@ -86,12 +86,12 @@ public class AddCashCommand implements TabExecutor {
 
             // Check if player has ever joined (has player data)
             if (!offP.hasPlayedBefore() && !offP.isOnline()) {
-                sender.sendMessage(CC.error("Player <yellow>" + args[0] + "</yellow> has never joined the server."));
+                sender.sendMessage(plugin.getMessageManager().error("general.never-joined", "{player}", args[0]));
                 return true;
             }
 
             plugin.getEconomyManager().addBalance(uuid, amount);
-            sender.sendMessage(CC.success("Added <green>" + plugin.getEconomyManager().format(amount) + "</green> to <yellow>" + name + "</yellow>'s balance (offline)."));
+            sender.sendMessage(plugin.getMessageManager().success("economy.addcash.success-other-offline", "{amount}", plugin.getEconomyManager().format(amount), "{player}", name));
             String senderNameOff = sender instanceof Player ? sender.getName() : "Console";
             plugin.getLogManager().log("economy", "<yellow>" + senderNameOff + "</yellow> added <green>" + plugin.getEconomyManager().format(amount) + "</green> to <yellow>" + name + "</yellow>'s balance (offline)");
         } catch (NumberFormatException e) {

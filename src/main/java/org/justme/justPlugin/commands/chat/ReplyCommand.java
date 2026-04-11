@@ -24,31 +24,31 @@ public class ReplyCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("chat.reply.usage")));
+            player.sendMessage(plugin.getMessageManager().error("chat.reply.usage"));
             return true;
         }
 
         // Mute check
         if (plugin.getMuteManager().isMuted(player.getUniqueId())) {
-            player.sendMessage(CC.error("You are muted and cannot send private messages."));
+            player.sendMessage(plugin.getMessageManager().error("chat.reply.muted"));
             return true;
         }
         UUID lastUuid = plugin.getChatManager().getLastMessaged(player.getUniqueId());
         if (lastUuid == null) {
-            player.sendMessage(CC.error("No one to reply to!"));
+            player.sendMessage(plugin.getMessageManager().error("chat.reply.no-target"));
             return true;
         }
         Player target = Bukkit.getPlayer(lastUuid);
         if (target == null) {
-            player.sendMessage(CC.error("That player is no longer online!"));
+            player.sendMessage(plugin.getMessageManager().error("chat.reply.target-offline"));
             return true;
         }
         if (plugin.getIgnoreManager().isIgnoring(target.getUniqueId(), player.getUniqueId())) {
-            player.sendMessage(CC.error("This player is ignoring you."));
+            player.sendMessage(plugin.getMessageManager().error("chat.reply.ignored"));
             return true;
         }
         String message = String.join(" ", args);

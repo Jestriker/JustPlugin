@@ -31,7 +31,8 @@ public class KickCommand implements TabExecutor {
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(CC.error("Player <yellow>" + args[0] + "</yellow> not found or not online!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.kick.player-not-found",
+                    "{player}", args[0]));
             return true;
         }
 
@@ -47,10 +48,12 @@ public class KickCommand implements TabExecutor {
         screen.append("<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>");
         target.kick(CC.translate(screen.toString()));
 
-        sender.sendMessage(CC.success("Kicked <yellow>" + target.getName() + "</yellow>. Reason: <gray>" + reason));
+        sender.sendMessage(plugin.getMessageManager().success("moderation.kick.success",
+                "{player}", target.getName(), "{reason}", reason));
 
         // Configurable announcement
-        net.kyori.adventure.text.Component announcement = CC.warning("<yellow>" + target.getName() + "</yellow> has been kicked by <yellow>" + kickedBy + "</yellow>. Reason: <gray>" + reason);
+        net.kyori.adventure.text.Component announcement = plugin.getMessageManager().warning("moderation.kick.announce",
+                "{player}", target.getName(), "{staff}", kickedBy, "{reason}", reason);
         if (plugin.getConfig().getBoolean("punishment-announcements.kick", false)) {
             Bukkit.broadcast(announcement);
         } else {

@@ -34,17 +34,17 @@ public class SkinCommand implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
         if (args.length == 0) {
-            player.sendMessage(CC.prefixed("<gray>Skin Commands:"));
-            player.sendMessage(CC.line("<yellow>/skin set <name> <gray>- Set your skin"));
-            player.sendMessage(CC.line("<yellow>/skin clear <gray>- Reset to default"));
+            player.sendMessage(plugin.getMessageManager().info("player.skin.help-header"));
+            player.sendMessage(plugin.getMessageManager().line("player.skin.help-set"));
+            player.sendMessage(plugin.getMessageManager().line("player.skin.help-clear"));
             if (player.hasPermission("justplugin.skin.others")) {
-                player.sendMessage(CC.line("<yellow>/skin set <name> <player> <gray>- Set another player's skin"));
-                player.sendMessage(CC.line("<yellow>/skin clear <player> <gray>- Reset another player's skin"));
+                player.sendMessage(plugin.getMessageManager().line("player.skin.help-set-other"));
+                player.sendMessage(plugin.getMessageManager().line("player.skin.help-clear-other"));
             }
             return true;
         }
@@ -55,33 +55,33 @@ public class SkinCommand implements TabExecutor {
         switch (sub) {
             case "set" -> {
                 if (args.length < 2) {
-                    player.sendMessage(CC.error("Usage: <yellow>/skin set <name> [player]"));
+                    player.sendMessage(plugin.getMessageManager().error("player.skin.usage-set"));
                     return true;
                 }
                 String skinName = args[1];
 
                 // Check if skin is banned
                 if (skinManager.isSkinBanned(skinName) && !player.hasPermission("justplugin.skin.bypassban")) {
-                    player.sendMessage(CC.error("The skin <yellow>" + skinName + "</yellow> is banned and cannot be used."));
+                    player.sendMessage(plugin.getMessageManager().error("player.skin.banned", "{skin}", skinName));
                     return true;
                 }
 
                 if (args.length >= 3) {
                     // Set for another player
                     if (!player.hasPermission("justplugin.skin.others")) {
-                        player.sendMessage(CC.error("You don't have permission to change other players' skins."));
+                        player.sendMessage(plugin.getMessageManager().error("general.no-permission"));
                         return true;
                     }
                     Player target = Bukkit.getPlayer(args[2]);
                     if (target == null) {
-                        player.sendMessage(CC.error("Player <yellow>" + args[2] + "</yellow> is not online."));
+                        player.sendMessage(plugin.getMessageManager().error("player.skin.not-online", "{player}", args[2]));
                         return true;
                     }
-                    player.sendMessage(CC.info("Fetching skin for <yellow>" + skinName + "</yellow>..."));
+                    player.sendMessage(plugin.getMessageManager().info("player.skin.fetching", "{skin}", skinName));
                     skinManager.setSkin(target, skinName, player);
                 } else {
                     // Set for self
-                    player.sendMessage(CC.info("Fetching skin for <yellow>" + skinName + "</yellow>..."));
+                    player.sendMessage(plugin.getMessageManager().info("player.skin.fetching", "{skin}", skinName));
                     skinManager.setSkin(player, skinName, player);
                 }
             }
@@ -90,24 +90,24 @@ public class SkinCommand implements TabExecutor {
                 if (args.length >= 2) {
                     // Clear for another player
                     if (!player.hasPermission("justplugin.skin.others")) {
-                        player.sendMessage(CC.error("You don't have permission to reset other players' skins."));
+                        player.sendMessage(plugin.getMessageManager().error("general.no-permission"));
                         return true;
                     }
                     Player target = Bukkit.getPlayer(args[1]);
                     if (target == null) {
-                        player.sendMessage(CC.error("Player <yellow>" + args[1] + "</yellow> is not online."));
+                        player.sendMessage(plugin.getMessageManager().error("player.skin.not-online", "{player}", args[1]));
                         return true;
                     }
-                    player.sendMessage(CC.info("Resetting <yellow>" + target.getName() + "</yellow>'s skin..."));
+                    player.sendMessage(plugin.getMessageManager().info("player.skin.resetting-other", "{player}", target.getName()));
                     skinManager.clearSkin(target, player);
                 } else {
-                    player.sendMessage(CC.info("Resetting your skin..."));
+                    player.sendMessage(plugin.getMessageManager().info("player.skin.resetting"));
                     skinManager.clearSkin(player, player);
                 }
             }
 
             default -> {
-                player.sendMessage(CC.error("Unknown subcommand. Use <yellow>set</yellow> or <yellow>clear</yellow>."));
+                player.sendMessage(plugin.getMessageManager().error("player.skin.unknown-subcommand"));
             }
         }
 

@@ -47,7 +47,7 @@ public class TpPosCommand implements TabExecutor {
             }
             Location loc = new Location(world, x, y, z, player.getLocation().getYaw(), player.getLocation().getPitch());
             plugin.getTeleportManager().teleport(player, loc);
-            player.sendMessage(CC.success("Teleporting to <yellow>" + x + ", " + y + ", " + z + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().success("teleport.tppos.teleporting", "{x}", String.valueOf(x), "{y}", String.valueOf(y), "{z}", String.valueOf(z)));
         } catch (NumberFormatException e) {
             player.sendMessage(CC.error(plugin.getMessageManager().raw("teleport.tppos.invalid-coords")));
         }

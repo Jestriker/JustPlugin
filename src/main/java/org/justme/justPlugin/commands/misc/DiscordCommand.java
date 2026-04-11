@@ -9,7 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 
@@ -30,11 +29,11 @@ public class DiscordCommand implements TabExecutor {
             String newLink = args[1];
             plugin.getConfig().set("discord-link", newLink);
             plugin.saveConfig();
-            sender.sendMessage(CC.success("Discord link updated to: <yellow>" + newLink));
+            sender.sendMessage(plugin.getMessageManager().success("misc.discord.set-success", "{link}", newLink));
             return true;
         }
 
-        sender.sendMessage(CC.info("<gold><bold>Join our Discord!</bold></gold>"));
+        sender.sendMessage(plugin.getMessageManager().info("misc.discord.header"));
         Component linkComponent = Component.text(link)
                 .color(NamedTextColor.AQUA)
                 .decorate(TextDecoration.UNDERLINED)

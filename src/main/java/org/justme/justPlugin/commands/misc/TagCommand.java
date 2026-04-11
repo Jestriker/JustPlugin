@@ -25,7 +25,7 @@ public class TagCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(plugin.getMessageManager().error("general.players-only"));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 

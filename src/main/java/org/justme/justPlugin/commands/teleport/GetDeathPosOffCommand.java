@@ -26,18 +26,18 @@ public class GetDeathPosOffCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /getdeathposoff <player>"));
+            player.sendMessage(plugin.getMessageManager().error("moderation.offline.getdeathposoff-usage"));
             return true;
         }
 
         @SuppressWarnings("deprecation")
         OfflinePlayer offline = Bukkit.getOfflinePlayer(args[0]);
         if (!offline.hasPlayedBefore() && !offline.isOnline()) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+            player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
             return true;
         }
 

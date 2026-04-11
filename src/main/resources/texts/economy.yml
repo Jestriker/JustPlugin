@@ -15,6 +15,9 @@
 balance:
   self: "Your balance: <green>{balance}"
   other: "<yellow>{player}</yellow>'s balance: <green>{balance}"
+  other-offline: "<yellow>{player}</yellow>'s balance: <green>{balance} <dark_gray>(offline)"
+  no-permission-others: "You don't have permission to check other players' balances."
+  console-usage: "Console must specify a player: /balance <player>"
   usage: "Usage: /balance [player]"
 
 # === Pay ===
@@ -29,6 +32,10 @@ pay:
   target-disabled: "<yellow>{player}</yellow> is not accepting payments."
   # Minimum pay amount
   minimum-amount: "Minimum payment amount is <yellow>{amount}</yellow>."
+  # Shown when paying an offline player (appended suffix)
+  success-offline: "You paid <yellow>{player}</yellow> <green>{amount}</green>. <dark_gray>(offline)"
+  # Shown when payment fails unexpectedly
+  payment-failed: "Payment failed!"
 
 # === Pay Toggle ===
 paytoggle:
@@ -37,18 +44,27 @@ paytoggle:
 
 # === PayNote ===
 paynote:
-  created: "Created a PayNote worth <green>{amount}</green>."
+  created: "Created a balance note worth <yellow>{amount}</yellow>. Right-click to redeem!"
   redeemed: "Redeemed PayNote worth <green>{amount}</green>!"
-  invalid-amount: "Invalid amount! Must be a positive number."
-  insufficient-funds: "You don't have enough money! Balance: <red>{balance}"
+  invalid-amount: "Invalid amount! Use a number."
+  amount-positive: "Amount must be greater than zero."
+  insufficient-funds: "You don't have enough balance! Your balance: <yellow>{balance}"
+  hold-paper: "You must be holding exactly <yellow>1 paper</yellow> (no more, no less)."
+  already-note: "This paper is already a balance note!"
   no-paper: "You need to hold paper to create a PayNote!"
   usage: "Usage: /paynote <amount>"
+  usage-hint: "Hold exactly <yellow>1 paper</yellow> to create a balance note."
 
 # === Add Cash ===
 addcash:
   success-self: "Added <green>{amount}</green> to your balance. New balance: <green>{balance}"
   success-other: "Added <green>{amount}</green> to <yellow>{player}</yellow>'s balance."
-  notify-target: "<yellow>{player}</yellow> added <green>{amount}</green> to your balance."
+  success-other-offline: "Added <green>{amount}</green> to <yellow>{player}</yellow>'s balance (offline)."
+  notify-target: "<green>{amount}</green> has been added to your balance."
+  no-permission-self: "You don't have permission to add cash to yourself."
+  no-permission-others: "You don't have permission to add cash to other players."
+  amount-positive: "Amount must be positive!"
+  console-usage: "Console must specify a player: /addcash <player> <amount>"
   usage: "Usage: /addcash [player] <amount>"
   invalid-amount: "Invalid amount!"
 
@@ -64,5 +80,18 @@ baltophide:
   visible-self: "You are now <green>visible</green> on the balance leaderboard."
   hidden-other: "<yellow>{player}</yellow> is now <red>hidden</red> from the balance leaderboard."
   visible-other: "<yellow>{player}</yellow> is now <green>visible</green> on the balance leaderboard."
+  no-permission-others: "You don't have permission to hide other players from the balance leaderboard."
+  console-usage: "Console must specify a player: /baltophide <player>"
+  # Shown to the target player when someone else changes their visibility
+  notify-target-hidden: "You have been <red>hidden from</red> the balance leaderboard by <yellow>{player}</yellow>."
+  notify-target-visible: "You have been <green>made visible on</green> the balance leaderboard by <yellow>{player}</yellow>."
+  # Shown to staff with justplugin.baltophide.notify
+  notify-staff-hidden: "<yellow>{player}</yellow> hid <yellow>{target}</yellow> from the balance leaderboard."
+  notify-staff-visible: "<yellow>{player}</yellow> unhid <yellow>{target}</yellow> from the balance leaderboard."
   usage: "Usage: /baltophide [player]"
+
+# === Transactions ===
+transaction:
+  disabled: "Transaction history is disabled."
+  no-permission-others: "You don't have permission to view other players' transactions."
 

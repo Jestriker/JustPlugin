@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.CooldownManager;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 import java.util.Set;
@@ -26,7 +25,7 @@ public class HomeCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
@@ -41,7 +40,7 @@ public class HomeCommand implements TabExecutor {
         Location loc = plugin.getHomeManager().getHome(player.getUniqueId(), name);
         if (loc == null) {
             // Home not found - open GUI instead
-            player.sendMessage(CC.error("Home <yellow>" + name + "</yellow> not found! Opening homes menu..."));
+            player.sendMessage(plugin.getMessageManager().error("home.home.not-found", "{home}", name));
             plugin.getHomeGui().open(player);
             return true;
         }
@@ -50,14 +49,14 @@ public class HomeCommand implements TabExecutor {
         if (!player.hasPermission("justplugin.home.delaybypass")
                 && plugin.getCooldownManager().isOnDelay(player.getUniqueId(), "home")) {
             int remaining = plugin.getCooldownManager().getRemainingDelaySeconds(player.getUniqueId(), "home");
-            player.sendMessage(CC.error("You must wait <yellow>" + CooldownManager.formatTime(remaining) + "</yellow> before using this command again."));
+            player.sendMessage(plugin.getMessageManager().error("general.cooldown-wait", "{time}", CooldownManager.formatTime(remaining)));
             return true;
         }
 
         boolean teleported = plugin.getTeleportManager().teleportWithSafety(player, loc, "justplugin.home.cooldownbypass", "home", "justplugin.home.unsafetp");
         if (teleported) {
             plugin.getCooldownManager().setDelayStart(player.getUniqueId(), "home");
-            player.sendMessage(CC.success("Teleporting to home <yellow>" + name + "</yellow>."));
+            player.sendMessage(plugin.getMessageManager().success("home.home.teleporting", "{home}", name));
         }
         return true;
     }

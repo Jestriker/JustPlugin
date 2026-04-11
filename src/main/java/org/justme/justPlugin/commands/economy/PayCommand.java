@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
 import org.justme.justPlugin.managers.CooldownManager;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +25,7 @@ public class PayCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
@@ -40,7 +39,7 @@ public class PayCommand implements TabExecutor {
         }
 
         if (args.length < 2) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("economy.pay.usage")));
+            player.sendMessage(plugin.getMessageManager().error("economy.pay.usage"));
             return true;
         }
 
@@ -52,7 +51,7 @@ public class PayCommand implements TabExecutor {
         Player onlineTarget = Bukkit.getPlayer(args[0]);
         if (onlineTarget != null) {
             if (onlineTarget.equals(player)) {
-                player.sendMessage(CC.error(plugin.getMessageManager().raw("economy.pay.cannot-self")));
+                player.sendMessage(plugin.getMessageManager().error("economy.pay.cannot-self"));
                 return true;
             }
             targetUuid = onlineTarget.getUniqueId();
@@ -63,13 +62,13 @@ public class PayCommand implements TabExecutor {
             @SuppressWarnings("deprecation")
             OfflinePlayer offP = Bukkit.getOfflinePlayer(args[0]);
             if (!offP.hasPlayedBefore() && !offP.isOnline()) {
-                player.sendMessage(CC.error("Player <yellow>" + args[0] + "</yellow> has never joined the server."));
+                player.sendMessage(plugin.getMessageManager().error("general.never-joined", "{player}", args[0]));
                 return true;
             }
             targetUuid = offP.getUniqueId();
             targetName = offP.getName() != null ? offP.getName() : args[0];
             if (targetUuid.equals(player.getUniqueId())) {
-                player.sendMessage(CC.error(plugin.getMessageManager().raw("economy.pay.cannot-self")));
+                player.sendMessage(plugin.getMessageManager().error("economy.pay.cannot-self"));
                 return true;
             }
         }
@@ -77,38 +76,39 @@ public class PayCommand implements TabExecutor {
         try {
             double amount = Double.parseDouble(args[1]);
             if (amount <= 0) {
-                player.sendMessage(CC.error("Amount must be positive!"));
+                player.sendMessage(plugin.getMessageManager().error("economy.pay.invalid-amount"));
                 return true;
             }
 
             // Check pay toggle
             if (plugin.getEconomyManager().isPayToggleOff(targetUuid)) {
-                player.sendMessage(CC.error("<yellow>" + targetName + "</yellow> has payments disabled."));
+                player.sendMessage(plugin.getMessageManager().error("economy.pay.target-disabled", "{player}", targetName));
                 return true;
             }
 
             // Check sufficient funds
             double currentBalance = plugin.getEconomyManager().getBalance(player.getUniqueId());
             if (currentBalance < amount) {
-                player.sendMessage(CC.error("Insufficient funds! Your balance: <green>" + plugin.getEconomyManager().format(currentBalance) + "</green>"));
+                player.sendMessage(plugin.getMessageManager().error("economy.pay.insufficient-funds", "{balance}", plugin.getEconomyManager().format(currentBalance)));
                 return true;
             }
 
             if (plugin.getEconomyManager().pay(player.getUniqueId(), targetUuid, amount)) {
                 String formatted = plugin.getEconomyManager().format(amount);
-                String suffix = targetOnline ? "" : " <dark_gray>(offline)";
-                player.sendMessage(CC.success("You paid <yellow>" + targetName + "</yellow> <green>" + formatted + "</green>." + suffix));
                 if (targetOnline) {
-                    onlineTarget.sendMessage(CC.success("<yellow>" + player.getName() + "</yellow> paid you <green>" + formatted + "</green>."));
+                    player.sendMessage(plugin.getMessageManager().success("economy.pay.success", "{player}", targetName, "{amount}", formatted));
+                    onlineTarget.sendMessage(plugin.getMessageManager().success("economy.pay.received", "{player}", player.getName(), "{amount}", formatted));
+                } else {
+                    player.sendMessage(plugin.getMessageManager().success("economy.pay.success-offline", "{player}", targetName, "{amount}", formatted));
                 }
                 plugin.getLogManager().log("economy", "<yellow>" + player.getName() + "</yellow> paid <yellow>" + targetName + "</yellow> <green>" + formatted + "</green>");
                 // Set cooldown after successful pay
                 cm.setDelayStart(player.getUniqueId(), "pay");
             } else {
-                player.sendMessage(CC.error("Payment failed!"));
+                player.sendMessage(plugin.getMessageManager().error("economy.pay.payment-failed"));
             }
         } catch (NumberFormatException e) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-number")));
+            player.sendMessage(plugin.getMessageManager().error("general.invalid-number"));
         }
         return true;
     }

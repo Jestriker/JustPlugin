@@ -30,18 +30,19 @@ public class ItemNameCommand implements TabExecutor {
         }
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType() == Material.AIR) {
-            player.sendMessage(CC.error("You must hold an item!"));
+            player.sendMessage(plugin.getMessageManager().error("misc.itemname.empty-hand"));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error("Usage: /itemname <name>"));
+            player.sendMessage(plugin.getMessageManager().error("misc.itemname.usage"));
             return true;
         }
         String name = String.join(" ", args);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(CC.colorize(name));
         item.setItemMeta(meta);
-        player.sendMessage(CC.success("Item renamed to: " + name));
+        player.sendMessage(plugin.getMessageManager().success("misc.itemname.success",
+                "{name}", name));
         plugin.getLogManager().log("item", "<yellow>" + player.getName() + "</yellow> renamed <yellow>" + item.getType().name().toLowerCase().replace("_", " ") + "</yellow> to <gray>" + name + "</gray>");
         return true;
     }

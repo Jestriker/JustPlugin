@@ -55,7 +55,8 @@ public class UnbanCommand implements TabExecutor {
         }
 
         if (success) {
-            sender.sendMessage(CC.success("<yellow>" + displayName + "</yellow> has been unbanned."));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.unban.success",
+                    "{player}", displayName));
             String unbannedBy = sender instanceof org.bukkit.entity.Player ? sender.getName() : "Console";
             plugin.getLogManager().log("moderation", "<yellow>" + unbannedBy + "</yellow> unbanned <yellow>" + displayName + "</yellow>");
 
@@ -66,12 +67,16 @@ public class UnbanCommand implements TabExecutor {
                 @SuppressWarnings("unchecked")
                 List<String> names = (List<String>) ipInfo.get("associatedNames");
                 String nameList = names.isEmpty() ? "none" : String.join(", ", names);
-                sender.sendMessage(CC.warning("This player also has an <red>IP ban</red> on <yellow>" + ip + "</yellow>."));
-                sender.sendMessage(CC.warning("Associated accounts: <yellow>" + nameList + "</yellow>"));
-                sender.sendMessage(CC.warning("Use <yellow>/unbanip " + ip + "</yellow> to fully remove the IP ban."));
+                sender.sendMessage(plugin.getMessageManager().warning("moderation.unban.ip-ban-warning",
+                        "{ip}", ip));
+                sender.sendMessage(plugin.getMessageManager().warning("moderation.unban.ip-ban-accounts",
+                        "{names}", nameList));
+                sender.sendMessage(plugin.getMessageManager().warning("moderation.unban.ip-ban-hint",
+                        "{ip}", ip));
             }
         } else {
-            sender.sendMessage(CC.error("<yellow>" + displayName + "</yellow> is not banned!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.unban.not-banned",
+                    "{player}", displayName));
         }
         return true;
     }

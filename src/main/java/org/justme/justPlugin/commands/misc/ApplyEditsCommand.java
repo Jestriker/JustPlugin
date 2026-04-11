@@ -31,14 +31,14 @@ public class ApplyEditsCommand implements TabExecutor {
         WebEditorManager webEditor = plugin.getWebEditorManager();
 
         if (webEditor == null || !webEditor.isRunning()) {
-            sender.sendMessage(CC.error("The web editor is not running. Enable it in config.yml under <yellow>web-editor.enabled</yellow>."));
+            sender.sendMessage(plugin.getMessageManager().error("misc.applyedits.not-running"));
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /applyedits <code>"));
-            sender.sendMessage(CC.line("Open the web editor at <aqua>http://localhost:" + webEditor.getPort() + "</aqua>"));
-            sender.sendMessage(CC.line("Make your changes and use the generated code here."));
+            sender.sendMessage(plugin.getMessageManager().error("misc.applyedits.usage"));
+            sender.sendMessage(plugin.getMessageManager().info("misc.applyedits.open-hint", "{port}", String.valueOf(webEditor.getPort())));
+            sender.sendMessage(plugin.getMessageManager().info("misc.applyedits.make-changes-hint"));
             return true;
         }
 
@@ -46,8 +46,8 @@ public class ApplyEditsCommand implements TabExecutor {
         WebEditorManager.PendingSession session = webEditor.getSession(code);
 
         if (session == null) {
-            sender.sendMessage(CC.error("Invalid or expired session code: <yellow>" + code + "</yellow>"));
-            sender.sendMessage(CC.line("Session codes expire after <yellow>10 minutes</yellow>. Generate a new one from the web editor."));
+            sender.sendMessage(plugin.getMessageManager().error("misc.applyedits.invalid-session", "{code}", code));
+            sender.sendMessage(plugin.getMessageManager().info("misc.applyedits.session-expire-hint"));
             return true;
         }
 
@@ -57,13 +57,13 @@ public class ApplyEditsCommand implements TabExecutor {
 
         // Show summary
         String targetFile = WebEditorManager.getConfigFiles().getOrDefault(session.fileId, session.fileId);
-        sender.sendMessage(CC.success("Applied <yellow>" + applied + "</yellow> change" + (applied != 1 ? "s" : "") + " to <aqua>" + targetFile + "</aqua> from session <yellow>" + code + "</yellow>."));
+        sender.sendMessage(plugin.getMessageManager().success("misc.applyedits.applied", "{count}", String.valueOf(applied), "{file}", targetFile, "{code}", code));
 
         // List what changed
         int shown = 0;
         for (Map.Entry<String, Object> entry : session.changes.entrySet()) {
             if (shown >= 15) {
-                sender.sendMessage(CC.line("<dark_gray>... and " + (session.changes.size() - 15) + " more changes."));
+                sender.sendMessage(plugin.getMessageManager().info("misc.applyedits.more-changes", "{count}", String.valueOf(session.changes.size() - 15)));
                 break;
             }
             String val = String.valueOf(entry.getValue());
@@ -72,7 +72,7 @@ public class ApplyEditsCommand implements TabExecutor {
             shown++;
         }
 
-        sender.sendMessage(CC.info("Config saved. Some changes may require a server restart to take full effect."));
+        sender.sendMessage(plugin.getMessageManager().info("misc.applyedits.saved"));
 
         // Log it
         String executedBy = sender instanceof Player p ? p.getName() : "Console";

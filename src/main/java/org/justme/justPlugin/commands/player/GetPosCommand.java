@@ -28,19 +28,19 @@ public class GetPosCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
         // Targeting another player
         if (args.length >= 1) {
             if (!player.hasPermission("justplugin.getpos.others")) {
-                player.sendMessage(CC.error("You don't have permission to view other players' positions."));
+                player.sendMessage(plugin.getMessageManager().error("general.no-permission"));
                 return true;
             }
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null || (plugin.getVanishManager().isVanished(target.getUniqueId()) && !player.hasPermission("justplugin.vanish.see"))) {
-                player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+                player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                 return true;
             }
             showPosition(player, target, true);
@@ -60,16 +60,18 @@ public class GetPosCommand implements TabExecutor {
         int z = loc.getBlockZ();
 
         if (isOther) {
-            viewer.sendMessage(CC.info("<gold>" + target.getName() + "'s Position:"));
+            viewer.sendMessage(plugin.getMessageManager().info("player.getpos.header-other", "{player}", target.getName()));
         } else {
-            viewer.sendMessage(CC.info("<gold>Your Position:"));
+            viewer.sendMessage(plugin.getMessageManager().info("player.getpos.header-self"));
         }
-        viewer.sendMessage(CC.line("World: <yellow>" + world));
-        viewer.sendMessage(CC.line("X: <yellow>" + String.format("%.2f", loc.getX())
-                + " <dark_gray>| <gray>Y: <yellow>" + String.format("%.2f", loc.getY())
-                + " <dark_gray>| <gray>Z: <yellow>" + String.format("%.2f", loc.getZ())));
-        viewer.sendMessage(CC.line("Yaw: <yellow>" + String.format("%.1f", loc.getYaw())
-                + " <dark_gray>| <gray>Pitch: <yellow>" + String.format("%.1f", loc.getPitch())));
+        viewer.sendMessage(plugin.getMessageManager().line("player.getpos.world-line", "{world}", world));
+        viewer.sendMessage(plugin.getMessageManager().line("player.getpos.coords-line",
+                "{x}", String.format("%.2f", loc.getX()),
+                "{y}", String.format("%.2f", loc.getY()),
+                "{z}", String.format("%.2f", loc.getZ())));
+        viewer.sendMessage(plugin.getMessageManager().line("player.getpos.rotation-line",
+                "{yaw}", String.format("%.1f", loc.getYaw()),
+                "{pitch}", String.format("%.1f", loc.getPitch())));
 
         // If viewing another player, show clickable teleport options
         if (isOther && viewer.hasPermission("justplugin.tppos")) {

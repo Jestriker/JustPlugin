@@ -36,10 +36,10 @@ public class ListCommand implements TabExecutor {
         int count = visiblePlayers.size();
 
         sender.sendMessage(CC.translate(""));
-        sender.sendMessage(CC.info("<gold><bold>Online Players</bold></gold> <dark_gray>(<green>" + count + "<dark_gray>/<green>" + max + "<dark_gray>)"));
+        sender.sendMessage(plugin.getMessageManager().info("info.list.header", "{online}", String.valueOf(count), "{max}", String.valueOf(max)));
 
         if (visiblePlayers.isEmpty()) {
-            sender.sendMessage(CC.line("<gray>No players online."));
+            sender.sendMessage(plugin.getMessageManager().info("info.list.no-players"));
         } else {
             for (String name : visiblePlayers) {
                 Player p = Bukkit.getPlayerExact(name);

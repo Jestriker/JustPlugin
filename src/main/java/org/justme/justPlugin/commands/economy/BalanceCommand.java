@@ -8,7 +8,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,36 +25,36 @@ public class BalanceCommand implements TabExecutor {
         if (args.length >= 1) {
             // Checking another player's balance
             if (sender instanceof Player p && !p.hasPermission("justplugin.balance.others")) {
-                p.sendMessage(CC.error("You don't have permission to check other players' balances."));
+                p.sendMessage(plugin.getMessageManager().error("economy.balance.no-permission-others"));
                 return true;
             }
             // Try online player first
             Player target = Bukkit.getPlayer(args[0]);
             if (target != null) {
                 double bal = plugin.getEconomyManager().getBalance(target.getUniqueId());
-                sender.sendMessage(CC.info("<yellow>" + target.getName() + "</yellow>'s balance: <green>" + plugin.getEconomyManager().format(bal)));
+                sender.sendMessage(plugin.getMessageManager().info("economy.balance.other", "{player}", target.getName(), "{balance}", plugin.getEconomyManager().format(bal)));
                 return true;
             }
             // Try offline player
             @SuppressWarnings("deprecation")
             OfflinePlayer offP = Bukkit.getOfflinePlayer(args[0]);
             if (!offP.hasPlayedBefore() && !offP.isOnline()) {
-                sender.sendMessage(CC.error("Player <yellow>" + args[0] + "</yellow> has never joined the server."));
+                sender.sendMessage(plugin.getMessageManager().error("general.never-joined", "{player}", args[0]));
                 return true;
             }
             String name = offP.getName() != null ? offP.getName() : args[0];
             double bal = plugin.getEconomyManager().getBalance(offP.getUniqueId());
-            sender.sendMessage(CC.info("<yellow>" + name + "</yellow>'s balance: <green>" + plugin.getEconomyManager().format(bal) + " <dark_gray>(offline)"));
+            sender.sendMessage(plugin.getMessageManager().info("economy.balance.other-offline", "{player}", name, "{balance}", plugin.getEconomyManager().format(bal)));
             return true;
         }
 
         // Self balance
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error("Console must specify a player: /balance <player>"));
+            sender.sendMessage(plugin.getMessageManager().error("economy.balance.console-usage"));
             return true;
         }
         double bal = plugin.getEconomyManager().getBalance(player.getUniqueId());
-        player.sendMessage(CC.info("Your balance: <green>" + plugin.getEconomyManager().format(bal)));
+        player.sendMessage(plugin.getMessageManager().info("economy.balance.self", "{balance}", plugin.getEconomyManager().format(bal)));
         return true;
     }
 

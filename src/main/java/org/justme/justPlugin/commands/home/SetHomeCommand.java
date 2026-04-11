@@ -6,7 +6,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.justme.justPlugin.JustPlugin;
-import org.justme.justPlugin.util.CC;
+
 import org.justme.justPlugin.util.InputValidator;
 
 import java.util.List;
@@ -23,18 +23,18 @@ public class SetHomeCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         String name = args.length >= 1 ? args[0] : "home";
         if (!InputValidator.isValidName(name)) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("general.invalid-name")));
+            player.sendMessage(plugin.getMessageManager().error("general.invalid-name"));
             return true;
         }
         if (plugin.getHomeManager().setHome(player.getUniqueId(), name, player.getLocation())) {
-            player.sendMessage(CC.success("Home <yellow>" + name + "</yellow> has been set."));
+            player.sendMessage(plugin.getMessageManager().success("home.sethome.success", "{home}", name));
         } else {
-            player.sendMessage(CC.error("You have reached the maximum number of homes (" + plugin.getHomeManager().getMaxHomes() + ")!"));
+            player.sendMessage(plugin.getMessageManager().error("home.sethome.max-reached", "{max}", String.valueOf(plugin.getHomeManager().getMaxHomes())));
         }
         return true;
     }

@@ -24,56 +24,57 @@ public class SpeedCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
         if (args.length < 1) {
-            player.sendMessage(CC.error(plugin.getMessageManager().raw("player.speed.usage")));
+            player.sendMessage(plugin.getMessageManager().error("player.speed.usage"));
             return true;
         }
         try {
             float speed = Float.parseFloat(args[0]);
             if (speed < 0 || speed > 10) {
-                player.sendMessage(CC.error(plugin.getMessageManager().raw("player.speed.invalid-speed")));
+                player.sendMessage(plugin.getMessageManager().error("player.speed.invalid-speed"));
                 return true;
             }
             Player target = player;
             if (args.length >= 2 && player.hasPermission("justplugin.speed.others")) {
                 target = Bukkit.getPlayer(args[1]);
                 if (target == null) {
-                    player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+                    player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                     return true;
                 }
             }
             float normalized = speed / 10f;
             String lbl = label.toLowerCase();
+            String speedStr = String.valueOf(speed);
 
             // Determine which speed to set based on command label
             if (lbl.equals("flyspeed") || lbl.equals("fspeed")) {
                 target.setFlySpeed(normalized);
-                target.sendMessage(CC.success("Fly speed set to <yellow>" + speed + "</yellow>."));
+                target.sendMessage(plugin.getMessageManager().success("player.speed.set-fly-self", "{speed}", speedStr));
             } else if (lbl.equals("walkspeed") || lbl.equals("wspeed")) {
                 target.setWalkSpeed(normalized);
-                target.sendMessage(CC.success("Walk speed set to <yellow>" + speed + "</yellow>."));
+                target.sendMessage(plugin.getMessageManager().success("player.speed.set-walk-self", "{speed}", speedStr));
             } else {
                 // /speed - dynamic based on current state
                 if (target.isFlying()) {
                     target.setFlySpeed(normalized);
-                    target.sendMessage(CC.success("Fly speed set to <yellow>" + speed + "</yellow>."));
+                    target.sendMessage(plugin.getMessageManager().success("player.speed.set-fly-self", "{speed}", speedStr));
                 } else {
                     target.setWalkSpeed(normalized);
-                    target.sendMessage(CC.success("Walk speed set to <yellow>" + speed + "</yellow>."));
+                    target.sendMessage(plugin.getMessageManager().success("player.speed.set-walk-self", "{speed}", speedStr));
                 }
             }
             if (!target.equals(player)) {
-                player.sendMessage(CC.success("Speed set for <yellow>" + target.getName() + "</yellow>."));
+                player.sendMessage(plugin.getMessageManager().success("player.speed.set-other", "{player}", target.getName()));
                 plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> set <yellow>" + target.getName() + "</yellow>'s speed to <yellow>" + speed + "</yellow>");
             } else {
                 plugin.getLogManager().log("player", "<yellow>" + player.getName() + "</yellow> set their speed to <yellow>" + speed + "</yellow>");
             }
             plugin.getPlayerStateManager().saveState(target);
         } catch (NumberFormatException e) {
-            player.sendMessage(CC.error("Invalid speed value!"));
+            player.sendMessage(plugin.getMessageManager().error("player.speed.invalid-value"));
         }
         return true;
     }

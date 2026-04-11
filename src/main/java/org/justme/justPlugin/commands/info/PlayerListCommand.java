@@ -31,7 +31,7 @@ public class PlayerListCommand implements TabExecutor {
                 page = Integer.parseInt(args[0]);
                 if (page < 1) page = 1;
             } catch (NumberFormatException e) {
-                sender.sendMessage(CC.error("Invalid page number!"));
+                sender.sendMessage(plugin.getMessageManager().error("info.playerlist.invalid-page"));
                 return true;
             }
         }
@@ -70,10 +70,12 @@ public class PlayerListCommand implements TabExecutor {
         int count = allPlayers.size();
 
         sender.sendMessage(CC.translate(""));
-        sender.sendMessage(CC.info("<gold><bold>Player List</bold></gold> <dark_gray>(<green>" + count + "<dark_gray>/<green>" + max + "<dark_gray>) <gray>Page <yellow>" + page + "<gray>/<yellow>" + totalPages));
+        sender.sendMessage(plugin.getMessageManager().info("info.playerlist.header",
+                "{online}", String.valueOf(count), "{max}", String.valueOf(max),
+                "{page}", String.valueOf(page), "{max_page}", String.valueOf(totalPages)));
 
         if (allPlayers.isEmpty()) {
-            sender.sendMessage(CC.line("<gray>No players online."));
+            sender.sendMessage(plugin.getMessageManager().line("info.playerlist.no-players"));
         } else {
             for (int i = startIdx; i < endIdx; i++) {
                 Player p = allPlayers.get(i);

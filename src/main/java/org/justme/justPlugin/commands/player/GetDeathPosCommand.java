@@ -28,23 +28,23 @@ public class GetDeathPosCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(CC.error(plugin.getMessageManager().raw("general.only-players")));
+            sender.sendMessage(plugin.getMessageManager().error("general.only-players"));
             return true;
         }
 
         // Targeting another player
         if (args.length >= 1) {
             if (!player.hasPermission("justplugin.getdeathpos.others")) {
-                player.sendMessage(CC.error("You don't have permission to view other players' death locations."));
+                player.sendMessage(plugin.getMessageManager().error("general.no-permission"));
                 return true;
             }
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null) {
-                player.sendMessage(CC.error(plugin.getMessageManager().raw("general.player-not-found")));
+                player.sendMessage(plugin.getMessageManager().error("general.player-not-found"));
                 return true;
             }
             if (!plugin.getPlayerListener().hasDeathLocation(target.getUniqueId())) {
-                player.sendMessage(CC.error("<yellow>" + target.getName() + "</yellow> has no recorded death location."));
+                player.sendMessage(plugin.getMessageManager().error("player.getdeathpos.no-death-other", "{player}", target.getName()));
                 return true;
             }
             showDeathPos(player, target, true);
@@ -54,12 +54,12 @@ public class GetDeathPosCommand implements TabExecutor {
         // Self - check configurable permission
         boolean requirePermSelf = plugin.getConfig().getBoolean("commands.getdeathpos.require-permission-self", false);
         if (requirePermSelf && !player.hasPermission("justplugin.getdeathpos")) {
-            player.sendMessage(CC.error("You don't have permission to use this command."));
+            player.sendMessage(plugin.getMessageManager().error("general.no-permission"));
             return true;
         }
 
         if (!plugin.getPlayerListener().hasDeathLocation(player.getUniqueId())) {
-            player.sendMessage(CC.error("No recorded death location. You haven't died yet!"));
+            player.sendMessage(plugin.getMessageManager().error("player.getdeathpos.no-death"));
             return true;
         }
         showDeathPos(player, player, false);
@@ -74,12 +74,12 @@ public class GetDeathPosCommand implements TabExecutor {
         int z = (int) loc.getZ();
 
         if (isOther) {
-            viewer.sendMessage(CC.info("<gold>" + target.getName() + "'s Last Death Location:"));
+            viewer.sendMessage(plugin.getMessageManager().info("player.getdeathpos.header-other", "{player}", target.getName()));
         } else {
-            viewer.sendMessage(CC.info("<gold>Last Death Location:"));
+            viewer.sendMessage(plugin.getMessageManager().info("player.getdeathpos.header-self"));
         }
-        viewer.sendMessage(CC.line("World: <yellow>" + world));
-        viewer.sendMessage(CC.line("X: <yellow>" + x + " <dark_gray>| <gray>Y: <yellow>" + y + " <dark_gray>| <gray>Z: <yellow>" + z));
+        viewer.sendMessage(plugin.getMessageManager().line("player.getdeathpos.world-line", "{world}", world));
+        viewer.sendMessage(plugin.getMessageManager().line("player.getdeathpos.coords-line", "{x}", String.valueOf(x), "{y}", String.valueOf(y), "{z}", String.valueOf(z)));
 
         // Clickable teleport for viewing others (or self with tppos permission)
         if (viewer.hasPermission("justplugin.tppos")) {

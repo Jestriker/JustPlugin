@@ -25,7 +25,7 @@ public class BanIpCommand implements TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(CC.error("Usage: /banip <ip | player> [reason]"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.banip.usage"));
             return true;
         }
 
@@ -56,7 +56,7 @@ public class BanIpCommand implements TabExecutor {
                     associatedUuid = offP.getUniqueId();
                     associatedName = resolvedFrom;
                 } else {
-                    sender.sendMessage(CC.error("Could not find an IP for <yellow>" + args[0] + "</yellow>. They may have never joined."));
+                    sender.sendMessage(plugin.getMessageManager().error("moderation.banip.no-ip-found", "{player}", args[0]));
                     return true;
                 }
             }
@@ -64,17 +64,17 @@ public class BanIpCommand implements TabExecutor {
 
         // Check if already IP banned
         if (plugin.getBanManager().isIpBanned(ip)) {
-            sender.sendMessage(CC.error("IP <yellow>" + ip + "</yellow> is already IP banned!"));
+            sender.sendMessage(plugin.getMessageManager().error("moderation.banip.already-banned", "{ip}", ip));
             return true;
         }
 
         plugin.getBanManager().banIp(ip, reason, bannedBy, associatedUuid, associatedName);
         if (resolvedFrom != null) {
-            sender.sendMessage(CC.success("IP Banned <yellow>" + ip + "</yellow> (resolved from <yellow>" + resolvedFrom + "</yellow>). Reason: <gray>" + reason));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.banip.success-resolved", "{ip}", ip, "{player}", resolvedFrom, "{reason}", reason));
         } else {
-            sender.sendMessage(CC.success("IP Banned <yellow>" + ip + "</yellow>. Reason: <gray>" + reason));
+            sender.sendMessage(plugin.getMessageManager().success("moderation.banip.success", "{ip}", ip, "{reason}", reason));
         }
-        net.kyori.adventure.text.Component announcement = CC.warning("IP <yellow>" + ip + "</yellow> has been IP banned by <yellow>" + bannedBy + "</yellow>. Reason: <gray>" + reason);
+        net.kyori.adventure.text.Component announcement = plugin.getMessageManager().warning("moderation.banip.announce", "{ip}", ip, "{staff}", bannedBy, "{reason}", reason);
         if (plugin.getConfig().getBoolean("punishment-announcements.banip", false)) {
             Bukkit.broadcast(announcement);
         } else {
