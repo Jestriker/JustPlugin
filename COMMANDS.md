@@ -172,6 +172,7 @@
 | `/oplist` | `/oplist` | List all server operators | `justplugin.oplist` | `ops`, `operators` |
 | `/banlist` | `/banlist [page]` | View the ban list with pagination | `justplugin.banlist` | `bans` |
 | `/baniplist` | `/baniplist [page]` | View the IP ban list with pagination | `justplugin.banlist` | `ipbans`, `ipbanlist` |
+| `/permissions` | `/permissions <player> [filter] [page]` | View the effective permissions of an online player (10 per page, clickable prev/next, optional substring filter, hover reveals source) | `justplugin.permissions` | `perms`, `permslist`, `permissionlist` |
 
 ### Details
 

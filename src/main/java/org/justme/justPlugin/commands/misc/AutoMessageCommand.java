@@ -55,6 +55,8 @@ public class AutoMessageCommand implements TabExecutor {
         manager.reload();
         int count = manager.getMessageCount();
         sender.sendMessage(mm.success("misc.automessage.reloaded", "{count}", String.valueOf(count)));
+        plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                + "</yellow> reloaded automessages <gray>(" + count + " loaded)");
     }
 
     private void handleList(CommandSender sender) {
@@ -101,8 +103,12 @@ public class AutoMessageCommand implements TabExecutor {
             sender.sendMessage(mm.error("misc.automessage.not-found", "{id}", id));
         } else if (newState) {
             sender.sendMessage(mm.success("misc.automessage.toggled-on", "{id}", id));
+            plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                    + "</yellow> enabled automessage <yellow>" + id + "</yellow>");
         } else {
             sender.sendMessage(mm.success("misc.automessage.toggled-off", "{id}", id));
+            plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                    + "</yellow> disabled automessage <yellow>" + id + "</yellow>");
         }
     }
 
@@ -122,6 +128,8 @@ public class AutoMessageCommand implements TabExecutor {
 
         if (manager.forceSend(id)) {
             sender.sendMessage(mm.success("misc.automessage.sent", "{id}", id));
+            plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                    + "</yellow> manually sent automessage <yellow>" + id + "</yellow>");
         } else {
             sender.sendMessage(mm.error("misc.automessage.not-found", "{id}", id));
         }

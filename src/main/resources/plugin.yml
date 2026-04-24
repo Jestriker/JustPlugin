@@ -5,6 +5,7 @@ api-version: '1.21'
 folia-supported: true
 description: An EssentialsX-like plugin for your server.
 author: JustMe
+website: https://liam.plus/justplugin
 softdepend: [Vault, LuckPerms, PlaceholderAPI]
 
 commands:
@@ -260,6 +261,11 @@ commands:
     usage: /banlist [page]
     permission: justplugin.banlist
     aliases: [bans]
+  permissions:
+    description: View the effective permissions of an online player
+    usage: /permissions <player> [filter] [page]
+    permission: justplugin.permissions
+    aliases: [perms, permslist, permissionlist]
   baniplist:
     description: View the IP ban list with pagination
     usage: /baniplist [page]
@@ -1334,6 +1340,9 @@ permissions:
   justplugin.banlist:
     description: View ban and IP ban lists
     default: false
+  justplugin.permissions:
+    description: View effective permissions of other players
+    default: op
   justplugin.clearentities:
     description: Manually trigger entity clearing
     default: false
@@ -1349,30 +1358,102 @@ permissions:
 
   # --- Punishment Announcement Permissions ---
   # Staff with these permissions see punishment announcements even when public announcements are disabled.
+  # Default 'op' so server operators see all moderation activity out of the box;
+  # set to 'false' to require explicit grants via LuckPerms or similar.
   justplugin.announce.ban:
     description: See ban announcements (when public announcements are disabled)
-    default: false
+    default: op
   justplugin.announce.banip:
     description: See IP ban announcements
-    default: false
+    default: op
   justplugin.announce.tempban:
     description: See temp ban announcements
-    default: false
+    default: op
   justplugin.announce.tempbanip:
     description: See temp IP ban announcements
-    default: false
+    default: op
   justplugin.announce.mute:
     description: See mute announcements
-    default: false
+    default: op
   justplugin.announce.tempmute:
     description: See temp mute announcements
-    default: false
+    default: op
   justplugin.announce.warn:
     description: See warning announcements
-    default: false
+    default: op
   justplugin.announce.kick:
     description: See kick announcements
-    default: false
+    default: op
+
+  # --- Staff Log Permissions ---
+  # Each log category can be toggled individually, or granted in bulk via the justplugin.log parent.
+  # Default 'op' so operators see every staff command execution in chat by default.
+  justplugin.log:
+    description: See all JustPlugin staff action logs in chat (grants every justplugin.log.* child)
+    default: op
+    children:
+      justplugin.log.admin: true
+      justplugin.log.economy: true
+      justplugin.log.gamemode: true
+      justplugin.log.item: true
+      justplugin.log.jail: true
+      justplugin.log.moderation: true
+      justplugin.log.mute: true
+      justplugin.log.player: true
+      justplugin.log.security: true
+      justplugin.log.teleport: true
+      justplugin.log.unjail: true
+      justplugin.log.vanilla: true
+      justplugin.log.vanish: true
+      justplugin.log.warn: true
+  justplugin.log.admin:
+    description: See admin-category action logs
+    default: op
+  justplugin.log.economy:
+    description: See economy-category action logs
+    default: op
+  justplugin.log.gamemode:
+    description: See gamemode change logs
+    default: op
+  justplugin.log.item:
+    description: See item-related action logs
+    default: op
+  justplugin.log.jail:
+    description: See jail action logs
+    default: op
+  justplugin.log.moderation:
+    description: See moderation action logs (bans, kicks, etc)
+    default: op
+  justplugin.log.mute:
+    description: See mute action logs
+    default: op
+  justplugin.log.player:
+    description: See player action logs
+    default: op
+  justplugin.log.security:
+    description: See security event logs (seed protection, etc)
+    default: op
+  justplugin.log.teleport:
+    description: See teleport action logs
+    default: op
+  justplugin.log.unjail:
+    description: See unjail action logs
+    default: op
+  justplugin.log.vanilla:
+    description: See logged vanilla command usage
+    default: op
+  justplugin.log.vanish:
+    description: See vanish action logs
+    default: op
+  justplugin.log.warn:
+    description: See warning action logs
+    default: op
+
+  # --- AFK Notification Visibility ---
+  # Only consulted when afk.announce-mode is set to "staff" in config.yml.
+  justplugin.afk.see:
+    description: Receive AFK / return-from-AFK notifications when announce-mode is "staff"
+    default: op
 
   # --- RTP Dimension Permissions ---
   justplugin.wild.nether:

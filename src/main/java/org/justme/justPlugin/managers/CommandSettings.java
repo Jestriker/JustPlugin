@@ -88,6 +88,7 @@ public class CommandSettings {
         PERMISSIONS.put("oplist", "justplugin.oplist");
         PERMISSIONS.put("banlist", "justplugin.banlist");
         PERMISSIONS.put("baniplist", "justplugin.banlist");
+        PERMISSIONS.put("permissions", "justplugin.permissions");
 
         // Player
         PERMISSIONS.put("fly", "justplugin.fly");

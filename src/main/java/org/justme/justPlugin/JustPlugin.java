@@ -484,6 +484,7 @@ public final class JustPlugin extends JavaPlugin {
         registerCmd("oplist", new OpListCommand(this));
         registerCmd("banlist", new BanListCommand(this));
         registerCmd("baniplist", new BanListCommand(this));
+        registerCmd("permissions", new PermissionsCommand(this));
         registerCmd("jail", new JailCommand(this));
         registerCmd("unjail", new UnjailCommand(this));
         registerCmd("setjail", new SetJailCommand(this));

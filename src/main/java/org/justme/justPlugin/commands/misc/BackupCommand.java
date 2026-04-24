@@ -61,6 +61,9 @@ public class BackupCommand implements TabExecutor {
                 sender.sendMessage(mm.success("misc.backup.export-success",
                         "{filename}", result.filename(),
                         "{size}", result.size()));
+                plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                        + "</yellow> exported backup <yellow>" + result.filename()
+                        + "</yellow> <gray>(" + result.size() + ")");
             } else {
                 sender.sendMessage(mm.error("misc.backup.export-failed",
                         "{error}", result.error()));
@@ -88,6 +91,8 @@ public class BackupCommand implements TabExecutor {
             plugin.getBackupManager().importBackupAsync(pendingFile, result -> {
                 if (result.success()) {
                     sender.sendMessage(mm.success("misc.backup.import-success"));
+                    plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                            + "</yellow> imported backup <yellow>" + pendingFile + "</yellow>");
                 } else {
                     sender.sendMessage(mm.error("misc.backup.export-failed",
                             "{error}", result.error()));
@@ -147,6 +152,8 @@ public class BackupCommand implements TabExecutor {
         String filename = args[1];
         if (plugin.getBackupManager().deleteBackup(filename)) {
             sender.sendMessage(mm.success("misc.backup.deleted", "{filename}", filename));
+            plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                    + "</yellow> deleted backup <yellow>" + filename + "</yellow>");
         } else {
             sender.sendMessage(mm.error("misc.backup.not-found"));
         }

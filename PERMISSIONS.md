@@ -187,6 +187,7 @@ justplugin.*                          <- Grants EVERYTHING (must be explicitly a
 |   +-- justplugin.plugins            <- View installed plugins list (staff only)
 |   +-- justplugin.oplist             <- View server operators
 |   +-- justplugin.banlist            <- View ban/IP ban lists
+|   +-- justplugin.permissions        <- View another player's effective permissions
 |   +-- justplugin.stats              <- View own statistics GUI
 |   +-- justplugin.stats.others       <- View other players' statistics GUI
 |   +-- justplugin.maintenance        <- Manage maintenance mode
@@ -428,6 +429,7 @@ Includes all permissions listed in this document.
 | `justplugin.kick` | Kick a player from the server | `op` | `/kick` |
 | `justplugin.setlogswebhook` | Configure Discord webhook logging | `op` | `/setlogswebhook` |
 | `justplugin.applyedits` | Apply config changes from the web editor (**highest-level** admin permission) | `op` | `/applyedits` |
+| `justplugin.permissions` | View the effective permissions of an online player (staff debugging tool) | `op` | `/permissions` |
 
 ---
 
@@ -615,6 +617,23 @@ Includes all permissions listed in this document.
 | `justplugin.trade` | Trade items with other players | `true` (player) | `/trade` |
 | `justplugin.discord.set` | Change the Discord link | `op` | `/discord set <link>` |
 | `justplugin.applyedits` | Apply config changes from the web editor (**highest-level**) | `op` | `/applyedits` |
+| `justplugin.permissions` | View the effective permissions of an online player | `op` | `/permissions` |
+| `justplugin.afk.see` | Receive AFK / return-from-AFK notifications when `afk.announce-mode` is `staff` | `op` | - |
+| `justplugin.log` | See every JustPlugin staff-action log in chat (parent of all `justplugin.log.*`) | `op` | - |
+| `justplugin.log.admin` | See admin-category action logs | `op` | - |
+| `justplugin.log.economy` | See economy-category action logs | `op` | - |
+| `justplugin.log.gamemode` | See gamemode change logs | `op` | - |
+| `justplugin.log.item` | See item-related action logs | `op` | - |
+| `justplugin.log.jail` | See jail action logs | `op` | - |
+| `justplugin.log.moderation` | See moderation action logs (bans, kicks, etc.) | `op` | - |
+| `justplugin.log.mute` | See mute action logs | `op` | - |
+| `justplugin.log.player` | See player action logs | `op` | - |
+| `justplugin.log.security` | See security event logs (seed protection, etc.) | `op` | - |
+| `justplugin.log.teleport` | See teleport action logs | `op` | - |
+| `justplugin.log.unjail` | See unjail action logs | `op` | - |
+| `justplugin.log.vanilla` | See logged vanilla command usage | `op` | - |
+| `justplugin.log.vanish` | See vanish action logs | `op` | - |
+| `justplugin.log.warn` | See warning action logs | `op` | - |
 | `justplugin.tab` | Manually refresh the tab list | `true` (player) | `/tab` |
 | `justplugin.scoreboard.reload` | Reload the scoreboard config and refresh for all players (staff only) | `op` | `/reloadscoreboard` |
 | `justplugin.stats` | View your own statistics GUI | `op` | `/stats` |

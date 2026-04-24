@@ -90,7 +90,7 @@ playtime-format: "compact"
 # in any line to bypass this setting.
 default-playtime: "total"
 
-s# ==========================================
+# ==========================================
 # Text Animations
 # ==========================================
 # Define named animations usable in scoreboard lines and tab with {anim:name}.

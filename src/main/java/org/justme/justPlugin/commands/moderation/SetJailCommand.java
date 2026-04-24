@@ -42,6 +42,11 @@ public class SetJailCommand implements TabExecutor {
         sender.sendMessage(CC.success(plugin.getMessageManager().raw("moderation.setjail.success",
                 "{name}", name)));
 
+        org.bukkit.Location loc = player.getLocation();
+        plugin.getLogManager().log("jail", "<yellow>" + sender.getName() + "</yellow> created jail <yellow>"
+                + name + "</yellow> at <gray>" + loc.getWorld().getName() + " "
+                + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
+
         return true;
     }
 

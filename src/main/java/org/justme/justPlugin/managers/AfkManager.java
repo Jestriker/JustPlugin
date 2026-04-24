@@ -69,27 +69,52 @@ public class AfkManager {
 
         if (afk && !wasAfk) {
             // Player went AFK
-            boolean broadcast = plugin.getConfig().getBoolean("afk.broadcast", true);
             String tabPrefix = plugin.getConfig().getString("afk.tab-prefix", "<gray>[AFK] </gray>");
-
-            if (broadcast) {
-                Bukkit.broadcast(plugin.getMessageManager().info("player.afk.broadcast-afk", "{player}", player.getName()));
-            }
-            player.sendMessage(plugin.getMessageManager().info("player.afk.now-afk"));
+            dispatchAnnouncement(player, "player.afk.broadcast-afk", "player.afk.now-afk");
             player.playerListName(CC.translate(tabPrefix + player.getName()));
         } else if (!afk && wasAfk) {
             // Player returned from AFK
-            boolean broadcast = plugin.getConfig().getBoolean("afk.broadcast", true);
-
-            if (broadcast) {
-                Bukkit.broadcast(plugin.getMessageManager().info("player.afk.broadcast-return", "{player}", player.getName()));
-            }
-            player.sendMessage(plugin.getMessageManager().info("player.afk.no-longer-afk"));
+            dispatchAnnouncement(player, "player.afk.broadcast-return", "player.afk.no-longer-afk");
             player.playerListName(null); // reset to default
         }
 
         if (!afk) {
             lastActivity.put(uuid, System.currentTimeMillis());
+        }
+    }
+
+    /**
+     * Send the configured AFK announcement based on 'afk.announce-mode'.
+     * Modes: everyone | staff | self | none. Falls back to the legacy 'afk.broadcast' boolean
+     * when 'announce-mode' is not present in config.
+     */
+    private void dispatchAnnouncement(Player player, String broadcastKey, String selfKey) {
+        String mode = plugin.getConfig().getString("afk.announce-mode");
+        if (mode == null || mode.isBlank()) {
+            mode = plugin.getConfig().getBoolean("afk.broadcast", true) ? "everyone" : "self";
+        }
+        mode = mode.toLowerCase(java.util.Locale.ROOT);
+        switch (mode) {
+            case "none" -> {
+                // Suppress everything
+            }
+            case "self" -> player.sendMessage(plugin.getMessageManager().info(selfKey));
+            case "staff" -> {
+                net.kyori.adventure.text.Component msg = plugin.getMessageManager().info(
+                        broadcastKey, "{player}", player.getName());
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (p.hasPermission("justplugin.afk.see")) {
+                        p.sendMessage(msg);
+                    }
+                }
+                player.sendMessage(plugin.getMessageManager().info(selfKey));
+            }
+            default -> {
+                // "everyone" and any unrecognised value fall back to broadcast
+                Bukkit.broadcast(plugin.getMessageManager().info(
+                        broadcastKey, "{player}", player.getName()));
+                player.sendMessage(plugin.getMessageManager().info(selfKey));
+            }
         }
     }
 

@@ -36,6 +36,9 @@ public class DelJailCommand implements TabExecutor {
         sender.sendMessage(CC.success(plugin.getMessageManager().raw("moderation.deljail.success",
                 "{name}", name)));
 
+        plugin.getLogManager().log("jail", "<yellow>" + sender.getName()
+                + "</yellow> deleted jail <yellow>" + name + "</yellow>");
+
         return true;
     }
 

@@ -1,5 +1,24 @@
 # JustPlugin - Changelog
 
+## Unreleased
+
+### Added
++ `/permissions <player> [filter] [page]` — staff-only command to inspect an online player's effective permissions. 10 per page, clickable `← Prev` / `Next →` navigation, optional substring filter, and a hover tooltip showing which plugin or attachment granted each permission. Permission: `justplugin.permissions` (default `op`). Aliases: `perms`, `permslist`, `permissionlist`.
++ New `justplugin.log` parent permission (default `op`) — grants all `justplugin.log.*` children at once so operators see every staff action in chat out of the box.
++ 14 new top-level log permission definitions for fine-grained control: `justplugin.log.admin`, `.economy`, `.gamemode`, `.item`, `.jail`, `.moderation`, `.mute`, `.player`, `.security`, `.teleport`, `.unjail`, `.vanilla`, `.vanish`, `.warn`. Each defaults to `op` — set to `false` in LuckPerms/etc. to suppress specific categories.
++ Audit logging now covers previously silent admin commands: `/setjail`, `/deljail`, `/permissions`, `/jpbackup export|import|delete`, `/automessage reload|toggle|send`, `/tagcreate`, `/tagdelete`, `/kitrename`, `/kitdelete`, `/kitpublish`, `/kitdisable`, `/kitenable`, `/kitarchive restore|delete|deleteall`. Each log entry includes the executor, action, and full arguments.
+
+### Fixed
++ Fixed a stray character in the default `scoreboard.yml` that caused `InvalidConfigurationException: could not find expected ':'` on first startup.
+
+### Changed
++ `justplugin.announce.ban/banip/tempban/tempbanip/mute/tempmute/warn/kick` now default to `op` (previously `false`). Operators see punishment announcements by default — matches the existing `justplugin.announce.jail` behavior.
++ `plugin.yml` now declares `website: https://liam.plus/justplugin`, so the wiki URL is visible in `/plugins JustPlugin`.
++ `README.md`, `DESCRIPTION.md`, and `DESCRIPTION_PLAIN.txt` now link to the official wiki at https://liam.plus/justplugin.
++ AFK notifications are now configurable via `afk.announce-mode` in `config.yml` — `everyone` / `staff` / `self` / `none`. **Default changed to `self`** — AFK and return-from-AFK messages are now private to the player by default instead of broadcasting to the server. Set to `everyone` to restore the old behavior. New `justplugin.afk.see` permission (default `op`) controls who receives notifications under `staff` mode. The legacy `afk.broadcast` boolean is still honored when `announce-mode` is unset (true → everyone, false → self).
+
+---
+
 ## v1.0 - Player Vaults, Transaction History, Utilities & Events API
 **Released:** April 12, 2026
 

@@ -152,3 +152,13 @@ resetmotd:
   server-label: "<white><bold>Server List MOTD:</bold>"
   join-label: "<white><bold>Join MOTD:</bold>"
 
+# === Permissions Listing ===
+permissions:
+  usage: "Usage: /permissions <player> [filter] [page]"
+  no-permission: "You do not have permission to view player permissions."
+  not-online: "<yellow>{player}</yellow> is not online. Only online players can be inspected."
+  empty: "<yellow>{player}</yellow> has no effective permissions."
+  empty-filtered: "<yellow>{player}</yellow> has no permissions matching <yellow>{filter}</yellow>."
+  header: "<yellow>Permissions for {player} <gray>({count} total, page {page}/{max_page})"
+  header-filtered: "<yellow>Permissions for {player} <gray>(filter: <yellow>{filter}</yellow>, {count} matched, page {page}/{max_page})"
+

@@ -61,6 +61,9 @@ public class TagAdminCommand implements TabExecutor {
 
                 tm.createTag(id, display.toString(), type);
                 sender.sendMessage(mm.success("nick.tagcreate-success", "{tag}", id, "{display}", display.toString()));
+                plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                        + "</yellow> created tag <yellow>" + id + "</yellow> <gray>(" + type
+                        + ", display: " + display + ")");
                 return true;
             }
             case "tagdelete" -> {
@@ -78,6 +81,8 @@ public class TagAdminCommand implements TabExecutor {
 
                 tm.deleteTag(id);
                 sender.sendMessage(mm.success("nick.tagdelete-success", "{tag}", id));
+                plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                        + "</yellow> deleted tag <yellow>" + id + "</yellow>");
                 return true;
             }
             case "taglist" -> {

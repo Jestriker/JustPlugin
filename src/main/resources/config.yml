@@ -396,7 +396,15 @@ entity-clear:
 afk:
   # Seconds of inactivity before a player is automatically marked AFK. Set to 0 to disable.
   auto-afk-seconds: 300
-  # Whether to broadcast AFK status changes to all players.
+  # Who sees AFK / return-from-AFK notifications?
+  #   "everyone" - Broadcast to all online players.
+  #   "staff"    - Send only to players with the justplugin.afk.see permission.
+  #   "self"     - Send only to the player who changed AFK state (default).
+  #   "none"     - Suppress every AFK notification message (tab prefix still applies).
+  announce-mode: "self"
+  # Legacy boolean for backward compatibility. Only used if 'announce-mode' above is missing.
+  #   true  -> "everyone"
+  #   false -> "self"
   broadcast: true
   # Prefix added to the player's tab list name when AFK. Supports MiniMessage.
   tab-prefix: "<gray>[AFK] </gray>"

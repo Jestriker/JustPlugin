@@ -90,6 +90,9 @@ public class KitAdminCommand implements TabExecutor {
                 if (km.renameKit(oldName, newName)) {
                     sender.sendMessage(plugin.getMessageManager().success("kits.kit-renamed",
                             "{old}", oldName, "{new}", newName));
+                    plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                            + "</yellow> renamed kit <yellow>" + oldName + "</yellow> → <yellow>"
+                            + newName + "</yellow>");
                 } else {
                     sender.sendMessage(plugin.getMessageManager().error("kits.rename-failed"));
                 }
@@ -114,9 +117,13 @@ public class KitAdminCommand implements TabExecutor {
                     }
                     km.deleteKit(kitName);
                     sender.sendMessage(plugin.getMessageManager().success("kits.kit-deleted-permanent", "{kit}", kit.displayName));
+                    plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                            + "</yellow> permanently deleted kit <yellow>" + kitName + "</yellow>");
                 } else {
                     km.archiveKit(kitName);
                     sender.sendMessage(plugin.getMessageManager().success("kits.kit-archived", "{kit}", kit.displayName));
+                    plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                            + "</yellow> archived kit <yellow>" + kitName + "</yellow>");
                 }
                 return true;
             }
@@ -132,6 +139,8 @@ public class KitAdminCommand implements TabExecutor {
                 }
                 km.publishKit(args[0]);
                 sender.sendMessage(plugin.getMessageManager().success("kits.kit-published", "{kit}", kit.displayName));
+                plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                        + "</yellow> published kit <yellow>" + args[0] + "</yellow>");
                 return true;
             }
             case "kitdisable" -> {
@@ -146,6 +155,8 @@ public class KitAdminCommand implements TabExecutor {
                 }
                 km.disableKit(args[0]);
                 sender.sendMessage(plugin.getMessageManager().success("kits.kit-disabled-msg", "{kit}", kit.displayName));
+                plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                        + "</yellow> disabled kit <yellow>" + args[0] + "</yellow>");
                 return true;
             }
             case "kitenable" -> {
@@ -160,6 +171,8 @@ public class KitAdminCommand implements TabExecutor {
                 }
                 km.enableKit(args[0]);
                 sender.sendMessage(plugin.getMessageManager().success("kits.kit-enabled-msg", "{kit}", kit.displayName));
+                plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                        + "</yellow> enabled kit <yellow>" + args[0] + "</yellow>");
                 return true;
             }
             case "kitarchive" -> {
@@ -205,6 +218,8 @@ public class KitAdminCommand implements TabExecutor {
                 }
                 if (km.restoreKit(args[1])) {
                     sender.sendMessage(plugin.getMessageManager().success("kits.kit-restored", "{kit}", args[1]));
+                    plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                            + "</yellow> restored archived kit <yellow>" + args[1] + "</yellow>");
                 } else {
                     sender.sendMessage(plugin.getMessageManager().error("kits.kit-not-archived", "{kit}", args[1]));
                 }
@@ -225,6 +240,8 @@ public class KitAdminCommand implements TabExecutor {
                 }
                 km.deleteKit(args[1]);
                 sender.sendMessage(plugin.getMessageManager().success("kits.kit-deleted-permanent", "{kit}", args[1]));
+                plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                        + "</yellow> permanently deleted archived kit <yellow>" + args[1] + "</yellow>");
             }
             case "deleteall" -> {
                 if (!sender.hasPermission("justplugin.kit.archive.delete")) {
@@ -244,6 +261,9 @@ public class KitAdminCommand implements TabExecutor {
                 }
                 sender.sendMessage(plugin.getMessageManager().success("kits.all-archives-deleted",
                         "{count}", String.valueOf(toDelete.size())));
+                plugin.getLogManager().log("admin", "<yellow>" + sender.getName()
+                        + "</yellow> permanently deleted all archived kits <gray>("
+                        + toDelete.size() + " kits)");
             }
             default -> sender.sendMessage(plugin.getMessageManager().error("general.invalid-usage",
                     "{usage}", "/kitarchive [restore|delete|deleteall] [name]"));
