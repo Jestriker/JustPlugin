@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### License
++ **License changed from MIT to PolyForm Noncommercial 1.0.0.** JustPlugin remains free for personal, educational, community, and other non-commercial use. Commercial use (reselling, paid hosting, paid bundles, in-game perk sales, or any revenue-generating use) now requires written permission from the author. Credit is required for all uses.
++ Added `LICENSE` (full PolyForm Noncommercial 1.0.0 text) and `COMMERCIAL.md` (commercial-licensing FAQ + contact instructions) to the repo root.
+
 ### Added
 + `/permissions <player> [filter] [page]` — staff-only command to inspect an online player's effective permissions. 10 per page, clickable `← Prev` / `Next →` navigation, optional substring filter, and a hover tooltip showing which plugin or attachment granted each permission. Permission: `justplugin.permissions` (default `op`). Aliases: `perms`, `permslist`, `permissionlist`.
 + New `justplugin.log` parent permission (default `op`) — grants all `justplugin.log.*` children at once so operators see every staff action in chat out of the box.

@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Release%20Version-1.0-blue" alt="Release Version" />
-  <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
+  <img src="https://img.shields.io/badge/Release%20Version-1.3-blue" alt="Release Version" />
+  <img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange" alt="License: PolyForm Noncommercial 1.0.0" />
   <img src="https://img.shields.io/badge/Available%20on-Paper-blue?logo=paper" alt="Paper" />
   <img src="https://img.shields.io/badge/Available%20on-Purpur-purple" alt="Purpur" />
   <img src="https://img.shields.io/badge/Available%20on-Folia-green" alt="Folia" />
@@ -363,7 +363,14 @@ JustPlugin uses 40+ specialized manager classes for clean separation of concerns
 
 ## 📜 License
 
-This project is licensed under the [MIT License](LICENSE).
+JustPlugin is licensed under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**.
+
+- ✅ Free for personal, educational, charitable, and other non-commercial use.
+- ✅ Source-available — read, study, modify, and run it on your own community server without paying.
+- ❌ Commercial use, resale, paid hosting, paid bundles, or any revenue-generating use requires **prior written permission** from the author.
+- ✅ **Credit is always required** — preserve the copyright notice and link back to this repo.
+
+For commercial-use requests and contact details, see **[`COMMERCIAL.md`](COMMERCIAL.md)**.
 
 ---
 
