@@ -1,6 +1,6 @@
 # Commercial Licensing
 
-JustPlugin is published under the **PolyForm Noncommercial License 1.0.0** (see [`LICENSE`](LICENSE)).
+JustPlugin is published under the **PolyForm Noncommercial License 1.0.0** (see [`LICENSE.md`](LICENSE.md)).
 That means **non-commercial use is free**, but commercial use requires a separate license from the author.
 
 ## What's free under PolyForm Noncommercial

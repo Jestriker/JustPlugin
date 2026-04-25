@@ -375,7 +375,7 @@ For commercial-use licensing (different from sponsorship), see [`COMMERCIAL.md`]
 
 ## 📜 License
 
-JustPlugin is licensed under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**.
+JustPlugin is licensed under the **[PolyForm Noncommercial License 1.0.0](LICENSE.md)**.
 
 - ✅ Free for personal, educational, charitable, and other non-commercial use.
 - ✅ Source-available — read, study, modify, and run it on your own community server without paying.
