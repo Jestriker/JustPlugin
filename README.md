@@ -361,6 +361,18 @@ JustPlugin uses 40+ specialized manager classes for clean separation of concerns
 
 ---
 
+## ❤️ Support development
+
+If JustPlugin saves you time on your server and you'd like to chip in, GitHub Sponsors keeps the lights on:
+
+**→ [github.com/sponsors/Jestriker](https://github.com/sponsors/Jestriker)**
+
+Every sponsorship — one-time or monthly — funds ongoing development, bug fixes, new features, and free public support for everyone running the plugin. Sponsoring is **never required** to use the plugin under the terms below; it's just a way to say thanks.
+
+For commercial-use licensing (different from sponsorship), see [`COMMERCIAL.md`](COMMERCIAL.md).
+
+---
+
 ## 📜 License
 
 JustPlugin is licensed under the **[PolyForm Noncommercial License 1.0.0](LICENSE)**.

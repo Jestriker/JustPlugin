@@ -55,6 +55,16 @@ JustPlugin is open-source so that anyone can read, learn from, modify, and run i
 
 This split — free for the community, paid for commerce — keeps JustPlugin sustainable and fair.
 
+## Just want to support without a commercial license?
+
+If your use is non-commercial but you'd still like to back the project, GitHub Sponsors works:
+
+**→ [github.com/sponsors/Jestriker](https://github.com/sponsors/Jestriker)**
+
+Sponsorship is **optional** under the PolyForm Noncommercial License — you don't owe anything to run the plugin on a community server. But if the plugin saves your community time and you can spare a coffee a month, it's appreciated and it directly funds future work.
+
+Sponsorship does **not** grant a commercial license. If you need one, please follow the steps above instead.
+
 ## Questions?
 
 If anything in this document is unclear, open an issue on GitHub or message on Discord. Better to ask than guess.
