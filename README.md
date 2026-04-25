@@ -303,7 +303,7 @@ Every command can be individually enabled or disabled. Every permission is granu
 
 ## 📖 Documentation
 
-**Full wiki:** [liam.plus/justplugin](https://liam.plus/justplugin)
+**Full wiki:** [justplugin.liam.plus](https://justplugin.liam.plus)
 
 | File | Contents |
 |------|----------|

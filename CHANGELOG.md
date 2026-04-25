@@ -17,8 +17,8 @@
 
 ### Changed
 + `justplugin.announce.ban/banip/tempban/tempbanip/mute/tempmute/warn/kick` now default to `op` (previously `false`). Operators see punishment announcements by default — matches the existing `justplugin.announce.jail` behavior.
-+ `plugin.yml` now declares `website: https://liam.plus/justplugin`, so the wiki URL is visible in `/plugins JustPlugin`.
-+ `README.md`, `DESCRIPTION.md`, and `DESCRIPTION_PLAIN.txt` now link to the official wiki at https://liam.plus/justplugin.
++ `plugin.yml` now declares `website: https://justplugin.liam.plus`, so the wiki URL is visible in `/plugins JustPlugin`.
++ `README.md`, `DESCRIPTION.md`, and `DESCRIPTION_PLAIN.txt` now link to the official wiki at https://justplugin.liam.plus.
 + AFK notifications are now configurable via `afk.announce-mode` in `config.yml` — `everyone` / `staff` / `self` / `none`. **Default changed to `self`** — AFK and return-from-AFK messages are now private to the player by default instead of broadcasting to the server. Set to `everyone` to restore the old behavior. New `justplugin.afk.see` permission (default `op`) controls who receives notifications under `staff` mode. The legacy `afk.broadcast` boolean is still honored when `announce-mode` is unset (true → everyone, false → self).
 
 ---
